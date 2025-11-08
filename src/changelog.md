@@ -1,4 +1,4 @@
----
+﻿---
 title: "Changelog"
 layout: layouts/changelog.njk
 changelog:
@@ -20,3 +20,4 @@ changelog:
       items:
         - "Initial release"
 ---
+
