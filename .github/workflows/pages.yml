@@ -1,20 +1,28 @@
-﻿name: Pages
+name: Pages
 on:
   push:
     branches: [main]
+  workflow_dispatch: {}
+
 permissions:
   contents: read
   pages: write
   id-token: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Write last updated
+        run: |
+          mkdir -p docs
+          date -u +"%Y-%m-%d %H:%M UTC (commit $GITHUB_SHA)" > docs/_last_updated.txt
       - name: Upload static
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -24,3 +32,4 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
