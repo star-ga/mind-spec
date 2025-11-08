@@ -1,3 +1,5 @@
-﻿# MIND Spec (WIP)
+﻿# MIND Specification
 
-This site will host the rendered specification and RFCs for MIND.
+Source of truth for language spec, RFCs, and design docs.
+
+Rendered docs via GitHub Pages (branch: main, folder: /docs).
