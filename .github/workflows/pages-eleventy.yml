@@ -1,8 +1,8 @@
-﻿name: Pages (Eleventy)
+name: Pages (Eleventy)
 on:
   push:
-    branches: [ main, spruce-migration ]
-  workflow_dispatch:
+    branches: [ spruce-codex-fix ]
+  workflow_dispatch: {}
 permissions:
   contents: read
   pages: write
@@ -21,13 +21,11 @@ jobs:
           cache: npm
       - name: Install deps
         run: |
-          npm ci || npm i
-      - name: Build Eleventy to dist/
+          if [ -f package-lock.json ]; then npm ci; else npm i; fi
+      - name: Build Eleventy to dist
         env:
-          PAGEFIND_SKIP_DOWNLOAD: true
-        run: |
-          npm run build
-          test -d dist && echo "OK: dist exists" || (echo "ERR: dist missing" && exit 2)
+          PAGEFIND_SKIP_DOWNLOAD: "true"
+        run: npm run build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
