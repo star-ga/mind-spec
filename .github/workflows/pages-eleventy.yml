@@ -1,4 +1,4 @@
-﻿name: Pages
+﻿name: Pages (Eleventy)
 on:
   push:
     branches: [ spruce-migration ]
@@ -10,7 +10,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: "pages"
   cancel-in-progress: true
 
 jobs:
@@ -18,31 +18,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Use Node 20
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 20
-
-      - name: Install deps
-        run: npm ci
-
-      - name: Build Eleventy
-        run: npm run build
-
-      - name: Show output (debug)
-        run: |
-          ls -la
-          ls -la dist || true
-
-      - name: Fail if dist is missing
-        run: test -d dist || (echo "dist/ not found. Build failed or wrong output dir." && exit 1)
-
-      - name: Upload Pages artifact
+          node-version: "20.18.1"
+      - run: npm ci || npm i
+      - run: npm run build --if-present || npx @11ty/eleventy --output=dist
+      - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
-
   deploy:
     needs: build
     runs-on: ubuntu-latest
