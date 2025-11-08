@@ -1,4 +1,4 @@
-﻿---
+---
 title: "Structure"
 summary: "The structure is a generic Eleventy theme with the standard folder and file names."
 eleventyNavigation:
@@ -13,27 +13,27 @@ The structure is a generic Eleventy theme with the standard folder and file name
 
 ```html
 spruecss-eleventy-documentation-template/
-â”œâ”€ node_modules/
-â”œâ”€ dist/
-â”œâ”€ src/
-â”‚  â”œâ”€ _data/
-â”‚  â”œâ”€ _includes/
-â”‚  â”œâ”€ css/
-â”‚  â”œâ”€ filters/
-â”‚  â”œâ”€ font/
-â”‚  â”œâ”€ img/
-â”‚  â”œâ”€ js/
-â”‚  â”œâ”€ posts/
-â”‚  â”œâ”€ scss/
-â”‚  â”œâ”€ shortcodes/
-â”‚  â”œâ”€ transforms/
-â”‚  â”œâ”€ changelog.md
-â”‚  â”œâ”€ faq.md
-â”‚  â”œâ”€ index.md
-â”œâ”€ .eleventy.js
-â”œâ”€ package.json
-â”œâ”€ README.md
-â”œâ”€ ...
+├─ node_modules/
+├─ dist/
+├─ src/
+│  ├─ _data/
+│  ├─ _includes/
+│  ├─ css/
+│  ├─ filters/
+│  ├─ font/
+│  ├─ img/
+│  ├─ js/
+│  ├─ posts/
+│  ├─ scss/
+│  ├─ shortcodes/
+│  ├─ transforms/
+│  ├─ changelog.md
+│  ├─ faq.md
+│  ├─ index.md
+├─ .eleventy.js
+├─ package.json
+├─ README.md
+├─ ...
 
 ```
 
@@ -76,6 +76,3 @@ The available shortcodes.
 ## transforms
 
 The transformations.
-
-
-

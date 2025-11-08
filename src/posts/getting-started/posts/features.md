@@ -1,4 +1,4 @@
-﻿---
+---
 title: "Features"
 summary: "We tried to make a simple but well-structured theme. Managing the content is straightforward but still comes with some helpful features."
 eleventyNavigation:
@@ -28,6 +28,3 @@ The template utilizes Spruce CSS and some of its components. You can learn more 
 
 - RTL support.
 - Dark mode.
-
-
-

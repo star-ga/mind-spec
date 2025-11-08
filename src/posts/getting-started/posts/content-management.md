@@ -1,4 +1,4 @@
-﻿---
+---
 title: "Content Management"
 summary: "Today more people and experts write about accessibility. For the better progression it is a good idea to read them."
 eleventyNavigation:
@@ -20,6 +20,3 @@ The theme utilizes the [Eleventy Navigation plugin](https://www.11ty.dev/docs/pl
 ## Other Pages
 
 To create simple pages, make a file directly under the `src` folder and configure it with the available front matter.
-
-
-

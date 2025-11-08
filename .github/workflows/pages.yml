@@ -1,7 +1,7 @@
-﻿name: Pages
+name: Pages (Eleventy)
 on:
   push:
-    branches: [ spruce-migration ]
+    branches: [ main, spruce-migration ]
   workflow_dispatch:
 
 permissions:
@@ -18,48 +18,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Use Node 20
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: Install deps (CI)
-        run: npm ci
-
-      - name: Build Eleventy (explicit)
-        run: |
-          npx @11ty/eleventy --input=src --output=dist || true
-
-      - name: Normalize output -> dist
-        run: |
-          set -eux
-          if [ -d dist ] && [ "$(ls -A dist)" ]; then
-            echo "dist exists"
-          elif [ -d _site ]; then
-            echo "using _site -> dist"
-            mv _site dist
-          elif [ -d build ]; then
-            echo "using build -> dist"
-            mv build dist
-          else
-            echo "No output dir found (dist/_site/build)."
-            echo "Tree for debugging:"; ls -la
-            exit 1
-          fi
-          echo "Final dist tree:"; ls -la dist
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+          cache: npm
+      - run: npm ci || npm i
+      - run: npm run build
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
-
   deploy:
-    needs: build
-    runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4

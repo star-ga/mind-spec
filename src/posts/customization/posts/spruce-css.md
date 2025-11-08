@@ -1,4 +1,4 @@
-﻿---
+---
 title: "Spruce CSS"
 eleventyNavigation:
   key: "Spruce CSS"
@@ -19,8 +19,5 @@ eleventyNavigation:
 - It is themeable. You can create different themes using CSS custom properties like a dark one.
 - The generated CSS code is separated from the framework. You can use only the tools (variables, mixins, functions) in your project [without the generated styles](https://sprucecss.com/docs/elements/generators).
 - Include just a few components. For UI, we have a separate project named [Spruce UI](/ui/getting-started/introduction), where you can find drop-in components.
-- [It comes with dark-mode](https://sprucecss.com/docs/customization/themes) (or any theme mode) support. It uses CSS custom properties, so it isnâ€™t that hard to create a new color theme.
-- It doesnâ€™t come with a classical grid system.
-
-
-
+- [It comes with dark-mode](https://sprucecss.com/docs/customization/themes) (or any theme mode) support. It uses CSS custom properties, so it isn’t that hard to create a new color theme.
+- It doesn’t come with a classical grid system.

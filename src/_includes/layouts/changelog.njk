@@ -1,0 +1,5 @@
+{% extends "layouts/base.njk" %}
+{% block content %}
+<h1>{{ title or "Changelog" }}</h1>
+<div class="prose">{% if content %}{{ content | safe }}{% endif %}</div>
+{% endblock %}

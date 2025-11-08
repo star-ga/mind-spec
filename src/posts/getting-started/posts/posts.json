@@ -1,5 +1,4 @@
-﻿{
-  "layout": "layouts/post.njk",
+{
+  "layout": \1layouts/\2.njk",
   "permalink": "/getting-started/{{ title | slug }}/index.html"
 }
-

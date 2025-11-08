@@ -1,4 +1,4 @@
-﻿---
+---
 title: "Setup"
 summary: "We use eleventy --serve and compile Sass with sass-cli with npm scripts."
 eleventyNavigation:
@@ -38,6 +38,3 @@ npm run prod
 ## Additional Scripts
 
 You can find some more npm scripts in the [package.json](https://github.com/conedevelopment/sprucecss-eleventy-documentation-template/blob/main/package.json) that can be helpful.
-
-
-

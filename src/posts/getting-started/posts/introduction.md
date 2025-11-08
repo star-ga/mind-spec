@@ -1,4 +1,4 @@
-﻿---
+---
 title: "Introduction"
 summary: "Welcome to the official documentation of Spruce Docs Elventy theme. A small template that you can use to document any of your projects."
 eleventyNavigation:
@@ -26,6 +26,3 @@ The template is built on [Spruce CSS](https://sprucecss.com/), a small and custo
   data-light-asset="/img/cover/sprucecss.png"
   data-dark-asset="/img/cover/sprucecss-light.png"
 />
-
-
-
