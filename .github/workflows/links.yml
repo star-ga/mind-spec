@@ -1,0 +1,25 @@
+name: link-check
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  lychee:
+    name: Check external links with lychee
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run lychee on docs
+        uses: lycheeverse/lychee-action@v1
+        with:
+          args: >
+            --verbose
+            --no-progress
+            --max-redirects 5
+            --accept 200,206,429
+            --exclude-mail
+            docs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
