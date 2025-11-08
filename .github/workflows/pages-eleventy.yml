@@ -1,18 +1,15 @@
-﻿name: Pages (Eleventy)
+name: Pages (Eleventy)
 on:
   push:
-    branches: [ spruce-migration ]
-  workflow_dispatch:
-
+    branches: [ spruce-codex-fix ]
+  workflow_dispatch: {}
 permissions:
   contents: read
   pages: write
   id-token: write
-
 concurrency:
   group: "pages"
   cancel-in-progress: true
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -20,9 +17,15 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "20.18.1"
-      - run: npm ci || npm i
-      - run: npm run build --if-present || npx @11ty/eleventy --output=dist
+          node-version: 20
+          cache: npm
+      - name: Install deps
+        run: |
+          if [ -f package-lock.json ]; then npm ci; else npm i; fi
+      - name: Build Eleventy to dist
+        env:
+          PAGEFIND_SKIP_DOWNLOAD: "true"
+        run: npm run build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
