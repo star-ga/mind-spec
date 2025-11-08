@@ -1,0 +1,32 @@
+/* Subtle max width for readability */
+.markdown-section {
+  max-width: 900px;
+}
+
+/* Nicer tables */
+.markdown-section table {
+  display: table;
+  width: 100%;
+}
+.markdown-section table th,
+.markdown-section table td {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--borderColor, #e5e7eb);
+}
+
+/* Code blocks */
+.markdown-section pre code {
+  font-size: 0.95rem;
+}
+
+/* Sidebar width tweak (optional) */
+.sidebar {
+  width: 265px;
+}
+.content {
+  left: 265px;
+}
+@media (max-width: 1300px) {
+  .sidebar { width: 240px; }
+  .content { left: 240px; }
+}
