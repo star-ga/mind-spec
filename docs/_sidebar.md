@@ -3,6 +3,7 @@
 
 - **Language**
   - [Spec Index](spec/index.md)
+  - [Standard Library](spec/stdlib.md)
   - [RFCs](rfcs/index.md)
   - [Design Notes](design/index.md)
 

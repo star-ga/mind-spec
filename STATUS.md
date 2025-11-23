@@ -5,7 +5,7 @@ This status page provides a quick view of the readiness of key documentation are
 | Area | Scope | Status | Notes |
 | ---- | ----- | ------ | ----- |
 | Core language spec | `docs/spec/` | ✅ Stable | Content mirrors the latest compiler implementation. Minor clarifications welcome. |
-| Standard library | `docs/spec/stdlib.md` | ⚠️ Needs updates | Several APIs are still in flux; cross-check with `cputer/mind-runtime`. |
+| Standard library | `docs/spec/stdlib.md` | 📝 Draft available | Core API coverage added; align with `cputer/mind-runtime` before marking stable. |
 | RFCs | `docs/rfcs/` | 📝 Drafts in progress | New proposals accepted via pull requests. Older RFCs may need modernization. |
 | Design notes | `docs/design/` | 🚧 Under active development | Requires more diagrams and examples to aid new contributors. |
 | Changelog | `docs/changelog.md` | ✅ Up to date | Released alongside each tagged compiler/runtime version. |
