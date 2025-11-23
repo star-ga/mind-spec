@@ -46,7 +46,7 @@ def add_header_to_file(path: Path) -> None:
     """Add the spec header to a single markdown file, if not already present."""
     try:
         text = path.read_text(encoding="utf-8")
-    except (OSError, IOError, UnicodeDecodeError) as e:
+    except (OSError, UnicodeDecodeError) as e:
         print(f"Error reading {path}: {e}")
         return
 
@@ -58,7 +58,7 @@ def add_header_to_file(path: Path) -> None:
     try:
         path.write_text(new_text, encoding="utf-8")
         print(f"Updated: {path}")
-    except (OSError, IOError) as e:
+    except OSError as e:
         print(f"Error writing {path}: {e}")
 
 def main() -> None:
