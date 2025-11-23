@@ -1,3 +1,9 @@
+<!--
+Copyright (c) 2025 STARGA Inc.
+MIND Language Specification — Community Edition
+Licensed under the MIT License. See LICENSE-MIT.
+-->
+
 # Intermediate Representation (Normative)
 
 This chapter defines the canonical compiler intermediate representation (IR) for MIND. The IR serves

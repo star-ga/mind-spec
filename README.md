@@ -36,3 +36,22 @@ examples it is explicitly marked as informative.
 
 Security disclosures should follow [`SECURITY.md`](./SECURITY.md). Project status tracking lives in
 [`STATUS.md`](./STATUS.md).
+
+## Licensing
+
+The MIND Specification is maintained by STARGA Inc. and follows an open-core
+dual licensing model.
+
+- **Community Edition (this repository)**  \
+  The language and runtime specification texts in this repository are made
+  available under the MIT License. See [`LICENSE-MIT`](./LICENSE-MIT).
+
+- **Enterprise & Commercial Use**  \
+  Certain proprietary extensions, compliance documents, and non-public
+  materials may be offered under separate commercial terms. These are not
+  covered by the MIT License and may not be present in this repository.
+  See [`LICENSE-COMMERCIAL`](./LICENSE-COMMERCIAL) for the commercial license
+  notice.
+
+For commercial licensing, OEM use, or enterprise support, please contact  \
+**legal@star.ga**.

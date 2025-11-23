@@ -1,3 +1,9 @@
+<!--
+Copyright (c) 2025 STARGA Inc.
+MIND Language Specification — Community Edition
+Licensed under the MIT License. See LICENSE-MIT.
+-->
+
 # Lexical Structure (Normative)
 
 This chapter defines how a sequence of Unicode scalar values is transformed into a stream of

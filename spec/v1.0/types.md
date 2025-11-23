@@ -1,3 +1,9 @@
+<!--
+Copyright (c) 2025 STARGA Inc.
+MIND Language Specification — Community Edition
+Licensed under the MIT License. See LICENSE-MIT.
+-->
+
 # Type System (Normative)
 
 The MIND type system enforces static correctness and enables efficient differentiation. This chapter

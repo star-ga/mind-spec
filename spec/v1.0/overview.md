@@ -1,3 +1,9 @@
+<!--
+Copyright (c) 2025 STARGA Inc.
+MIND Language Specification — Community Edition
+Licensed under the MIT License. See LICENSE-MIT.
+-->
+
 # Mind Specification v1.0 Overview
 
 This document describes the scope and organisation of the normative MIND language specification.

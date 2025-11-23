@@ -1,0 +1,33 @@
+MIND Specification — Licensing Overview
+======================================
+
+This repository contains the language and runtime specification for the MIND
+(Machine Intelligence Native Design) project, maintained by STARGA Inc.
+
+The project follows an open-core dual licensing model:
+
+1. Community Edition (this repository)
+   The specification texts, reference descriptions, and non-confidential
+   materials in this repository are made available under the MIT License.
+   See LICENSE-MIT for the full terms.
+
+2. Commercial / Enterprise Use
+   Any proprietary extensions, internal compliance documentation, integration
+   guides, or non-public specification artifacts provided under separate
+   agreement with STARGA Inc. are covered by a commercial license and are NOT
+   governed by the MIT License. See LICENSE-COMMERCIAL for the notice.
+
+Unless otherwise stated in individual files, the contents of this repository
+are considered part of the Community Edition and subject to LICENSE-MIT.
+
+Files and directories explicitly labeled as proprietary, confidential, or
+"Enterprise-only" are NOT covered by the MIT License and may only be used
+under a separate written agreement with STARGA Inc.
+
+Files referenced in this overview:
+- LICENSE-MIT         — MIT License text for the Community Edition.
+- LICENSE-COMMERCIAL  — Notice regarding commercial / enterprise licensing.
+
+For commercial licensing, OEM, or enterprise questions, please contact:
+legal@star.ga
+
