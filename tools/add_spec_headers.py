@@ -16,13 +16,11 @@ Licensed under the MIT License. See LICENSE-MIT.
 
 """
 
-SKIP_NAMES = {
-    "README.md",
-    "LICENSE.md",
+SKIP_FILES = {
     "LICENSE",
     "LICENSE-MIT",
     "LICENSE-COMMERCIAL",
-    "CONTRIBUTING.md",
+    "README.md",
     "SECURITY.md",
     "CODE_OF_CONDUCT.md",
     "STATUS.md",
@@ -37,25 +35,31 @@ SKIP_DIRS = {
 }
 
 def should_skip(path: Path) -> bool:
-    name = path.name
-    if any(part in SKIP_DIRS for part in path.parts):
+    # Exact path-part matches, not substrings
+    if any(skip_dir in path.parts for skip_dir in SKIP_DIRS):
         return True
-    if name in SKIP_NAMES:
-        return True
-    # Skip any license-like file in markdown form
-    lower = name.lower()
-    if "license" in lower or "licence" in lower:
+    if path.name in SKIP_FILES:
         return True
     return False
 
 def add_header_to_file(path: Path) -> None:
-    text = path.read_text(encoding="utf-8")
+    """Add the spec header to a single markdown file, if not already present."""
+    try:
+        text = path.read_text(encoding="utf-8")
+    except (OSError, IOError, UnicodeDecodeError) as e:
+        print(f"Error reading {path}: {e}")
+        return
+
+    # Already marked—nothing to do
     if "MIND Language Specification — Community Edition" in text:
         return
 
     new_text = HEADER + text
-    path.write_text(new_text, encoding="utf-8")
-    print(f"Updated: {path}")
+    try:
+        path.write_text(new_text, encoding="utf-8")
+        print(f"Updated: {path}")
+    except (OSError, IOError) as e:
+        print(f"Error writing {path}: {e}")
 
 def main() -> None:
     root = Path(".").resolve()
