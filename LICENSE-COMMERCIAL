@@ -9,11 +9,11 @@ This includes, for example (without limitation):
 - Proprietary extensions or variants of the MIND specification.
 - Internal compliance documentation and non-public integration guides.
 - Paid support, certification programs, or long-term maintenance obligations.
-- Bundled use in closed-source products where the MIT License is not sufficient.
+- Bundled use in closed-source products where the Apache License is not sufficient.
 
 Unless explicitly granted in a separate written agreement, no rights are
 conveyed to use such commercial or enterprise-only materials, and they are not
-licensed under the MIT terms provided in LICENSE-MIT.
+licensed under the Apache terms provided in LICENSE.
 
 If you are interested in:
 
