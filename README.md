@@ -44,12 +44,12 @@ dual licensing model.
 
 - **Community Edition (this repository)**  \
   The language and runtime specification texts in this repository are made
-  available under the MIT License. See [`LICENSE-MIT`](./LICENSE-MIT).
+  available under the Apache License 2.0. See [`LICENSE`](./LICENSE).
 
 - **Enterprise & Commercial Use**  \
   Certain proprietary extensions, compliance documents, and non-public
   materials may be offered under separate commercial terms. These are not
-  covered by the MIT License and may not be present in this repository.
+  covered by the Apache License and may not be present in this repository.
   See [`LICENSE-COMMERCIAL`](./LICENSE-COMMERCIAL) for the commercial license
   notice.
 
