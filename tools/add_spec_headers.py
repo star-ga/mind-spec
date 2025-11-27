@@ -9,12 +9,24 @@ Add a standard HTML comment header to MIND specification markdown files.
 from pathlib import Path
 
 HEADER = """<!--
-Copyright (c) 2025 STARGA Inc.
+Copyright 2025 STARGA Inc.
+Licensed under the Apache License, Version 2.0 (the “License”);
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at:
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an “AS IS” BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
 MIND Language Specification — Community Edition
-Licensed under the Apache License, Version 2.0. See LICENSE.
 -->
 
 """
+
+HEADER_MARKER = "Licensed under the Apache License, Version 2.0"
 
 SKIP_FILES = {
     "LICENSE",
@@ -50,7 +62,7 @@ def add_header_to_file(path: Path) -> None:
         return
 
     # Already marked—nothing to do
-    if "MIND Language Specification — Community Edition" in text:
+    if HEADER_MARKER in text:
         return
 
     new_text = HEADER + text
