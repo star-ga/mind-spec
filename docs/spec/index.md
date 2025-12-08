@@ -14,25 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-                                                                                                                                ﻿
 # Spec Index
 
-> **Status:** Draft
-> **Last updated:** 2025-11-07
-> **MIND Spec Section:** Landing page
-
-Use this index to navigate the community edition of the MIND language specification. Each entry
-links to the corresponding high-level overview within this `docs/spec/` tree. Normative details are
-anchored in [`spec/v1.0`](../../spec/v1.0/overview.md) unless otherwise noted.
+Use this index to navigate the community edition of the MIND language specification. Normative Core
+v1 content is located in [`spec/v1.0`](../../spec/v1.0/overview.md) and mirrors the public Phase-2
+implementation in [`cputer/mind`](https://github.com/cputer/mind).
 
 | Topic | Overview | Normative reference |
 | ----- | -------- | ------------------- |
-| Language syntax | [Syntax](syntax.md) | [Lexical structure](../../spec/v1.0/lexical.md) |
-| Type system | [Types](types.md) | [Type system](../../spec/v1.0/types.md) |
-| Scoping rules | [Scopes](scopes.md) | [Overview](../../spec/v1.0/overview.md) |
-| Evaluation model | [Evaluation](eval.md) | [Automatic differentiation](../../spec/v1.0/autodiff.md) |
-| Errors & diagnostics | [Errors](errors.md) | [Automatic differentiation](../../spec/v1.0/autodiff.md) (error handling) |
-| Standard library | [Core APIs](stdlib.md) | [Automatic differentiation](../../spec/v1.0/autodiff.md) (diff built-ins) |
+| Core overview | [Core v1](../../spec/v1.0/overview.md) | [Core v1 overview](../../spec/v1.0/overview.md) |
+| Surface language | [Syntax](../../spec/v1.0/language.md) | [Surface language](../../spec/v1.0/language.md) |
+| Core IR | [IR summary](../../spec/v1.0/ir.md) | [Core IR](../../spec/v1.0/ir.md) |
+| Autodiff | [Autodiff summary](../../spec/v1.0/autodiff.md) | [Static reverse-mode](../../spec/v1.0/autodiff.md) |
+| Shapes & tensors | [Shapes](../../spec/v1.0/shapes.md) | [Shapes & tensor semantics](../../spec/v1.0/shapes.md) |
+| MLIR lowering | [Lowering](../../spec/v1.0/mlir-lowering.md) | [MLIR lowering](../../spec/v1.0/mlir-lowering.md) |
+| Runtime interface | [Runtime](../../spec/v1.0/runtime.md) | [Runtime interface](../../spec/v1.0/runtime.md) |
 
 Additional design context and RFCs live under [`docs/design`](../design/index.md) and
-[`docs/rfcs`](../rfcs/index.md) respectively.
+[`docs/rfcs`](../rfcs/index.md) respectively. Legacy language chapters remain available for broader
+context but are not part of Core v1 conformance.

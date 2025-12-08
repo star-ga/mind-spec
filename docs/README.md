@@ -2,7 +2,8 @@
 
 Welcome to the **MIND Specification**, the authoritative reference for the MIND programming language and runtime model.
 
-This specification defines the core semantics, syntax, and typing rules for MIND, including its autodiff-enabled execution model and tensor algebra extensions.
+This specification defines the core semantics, syntax, and typing rules for MIND, including its
+autodiff-enabled execution model and tensor algebra extensions.
 
 ---
 
@@ -19,9 +20,9 @@ The goal of this specification is to provide a stable foundation for:
 
 | Section | Description |
 |----------|--------------|
-| **Language Core** | Syntax, type system, and evaluation semantics. |
-| **Semantics** | Runtime and compile-time behavior, diagnostics, and safety. |
-| **Design Docs** | Internal architecture, autodiff engine, and optimizer design. |
+| **Core v1** | Surface language, tensor semantics, Core IR, autodiff, MLIR lowering, runtime interface. |
+| **Legacy language** | Lexical structure and broader type system background. |
+| **Design Docs** | Architecture notes and design principles. |
 | **RFCs** | Proposed or implemented extensions to the language. |
 
 ---
@@ -38,8 +39,8 @@ The goal of this specification is to provide a stable foundation for:
 
 | Repo | Purpose |
 |------|----------|
-| [`cputer/mind`](https://github.com/cputer/mind) | Public compiler + CLI (front-end). |
-| [`cputer/mind-runtime`](https://github.com/cputer/mind-runtime) | Private runtime backend (MLIR, GPU, autodiff). |
+| [`cputer/mind`](https://github.com/cputer/mind) | Public compiler, IR, autodiff, and MLIR lowering. |
+| [`cputer/mind-runtime`](https://github.com/cputer/mind-runtime) | Reference runtime backend implementing the deterministic executor. |
 | [`cputer/mind-spec`](https://github.com/cputer/mind-spec) | This specification and design docs. |
 
 ---

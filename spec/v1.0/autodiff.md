@@ -14,64 +14,72 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Automatic Differentiation (Normative)
+# Static Reverse-Mode Autodiff (Normative)
 
-This chapter specifies the semantics for differentiable computation in MIND. Implementations that
-claim Differentiable or Full conformance (see [Overview](./overview.md)) MUST adhere to these rules.
-Background material and worked examples are recorded in
-[`cputer/mind/docs/autodiff`](https://github.com/cputer/mind/tree/main/docs/autodiff).
+This chapter specifies the **Phase-2 reverse-mode autodiff** pipeline that operates on canonical Core
+IR. The rules align with the implemented behaviour in the public compiler
+[`cputer/mind`](https://github.com/cputer/mind) and describe no additional proprietary features.
 
-## Differentiable values
+## Model
 
-A differentiable value is represented as a pair `(primal, tangent)` encapsulated by the `diff T`
-wrapper. Implementations MUST ensure:
+- Autodiff runs over verified **Core IR modules**, not over source syntax.
+- Gradient construction produces a **gradient module** containing primal and gradient instructions.
+  Gradients are mapped by a deterministic association: `gradients : ValueId → ValueId`.
+- The engine traverses the instruction list **in reverse order**, accumulating gradient contributions
+  per `ValueId`. Canonicalisation is applied to the resulting module to ensure determinism.
 
-- The primal component has type `T`.
-- The tangent component has type `T'` determined by the tangent functor defined in the reference
-  documentation.
-- Projecting a `diff T` to `T` drops the tangent component and is only permitted when the projection
-  is explicitly requested or implied by a rule in this chapter.
+A conceptual result container:
 
-## Differentiable functions
+- `gradient_module`: the IR module containing gradient-producing instructions (and optionally primal
+  copies where needed for data dependencies).
+- `gradients`: a map from each differentiated primal `ValueId` to its gradient `ValueId`.
 
-A function `f : (diff T1, ..., diff Tn) -> diff U` induces a derivative `Df` with the same arity.
-Implementations MUST produce derivatives using forward-mode automatic differentiation unless a
-future specification revision defines additional modes.
+## Error space (`AutodiffError`)
 
-- Function bodies execute on primal values while tangents are propagated alongside each operation.
-- Higher-order functions MUST propagate derivatives by differentiating the function arguments.
-- Closures capture tangents for captured differentiable variables.
+Autodiff MUST signal deterministic errors using the following categories:
 
-## Operator rules
+- **`UnsupportedOp { op }`**: an instruction lacks a derivative rule.
+- **`Verification`**: the produced gradient module fails IR verification.
+- **`InvalidAxis`**: reduction axes are out of range or inconsistent with shape semantics during
+  gradient construction.
+- **`UnsupportedShape`**: broadcasting or reduction shapes not supported by the current engine.
 
-The following rules are normative:
+Errors are surfaced per module; autodiff MUST NOT silently drop gradients.
 
-- **Arithmetic**: addition, subtraction, and multiplication propagate tangents using the standard
-  product rule. Division MUST signal a runtime error when the primal denominator is zero; tangent
-  propagation follows the quotient rule otherwise.
-- **Control flow**: differentiable branches are resolved on the primal value. Both branches MUST be
-  type-checked, and tangents follow the executed branch.
-- **Loops**: tangents accumulate per iteration. Implementations MUST guarantee convergence of the
-  tangent sequence for finite loops; divergent loops have undefined derivative.
-- **Trait methods**: when a trait specifies differentiable behaviour, implementations MUST provide
-  tangent propagation consistent with the trait law definitions.
+## Options and verification
 
-Informative derivations are available in the compiler documentation under
-[`cputer/mind/docs/autodiff`](https://github.com/cputer/mind/tree/main/docs/autodiff#rules).
+Conceptually, gradient generation accepts **GradientOptions**:
 
-## Differentiation built-ins
+- **Canonicalise**: ALWAYS enabled; gradients are canonicalised to a stable form.
+- **Verify**: enabled by default. When disabled, verification MAY be skipped for performance, but
+  canonicalisation still occurs and behaviour remains deterministic for well-formed inputs.
 
-The standard library exposes the following built-ins:
+Options are described here abstractly; concrete API surface is implementation-specific.
 
-- `diff::derivative(f, x)` computes the derivative of single-variable function `f` at `x`.
-- `diff::jacobian(f, x)` produces the Jacobian matrix for a multivariate function `f` at `x`.
+## Derivative rules
 
-Implementations MUST provide these built-ins for types that satisfy the differentiable trait bounds
-and MAY extend them to additional numeric types.
+Autodiff implements reverse-mode rules consistent with standard tensor calculus. Highlights include:
 
-## Error handling
+- **Addition/Subtraction (`BinOp(Add|Sub)`)**: gradient wrt each operand is the upstream gradient
+  broadcast to the operand shape.
+- **Multiplication (`BinOp(Mul)`)**: applies the product rule; gradient for `lhs` multiplies upstream
+  gradient by `rhs` (broadcast as needed) and vice versa.
+- **Unary elementwise ops** implemented in the compiler (e.g. `Neg`) follow the standard derivative
+  of the scalar function applied elementwise.
+- **`Dot` / `MatMul`**: gradients follow standard matrix calculus, using transposed operands as
+  required to match input shapes. Batch dimensions broadcast per the rules in [Shapes](./shapes.md).
+- **`Conv2d`**: gradients are computed for input and filter using the implemented convolution backward
+  rules with the same NHWC/HWCF layout assumptions.
+- **`Sum` / `Mean`**: reductions distribute upstream gradients back to the unreduced shape. `Mean`
+  divides the upstream gradient by the number of elements reduced.
+- **Other ops**: any instruction not covered by a derivative rule MUST trigger `UnsupportedOp`.
 
-If differentiation fails due to unsupported operations (such as non-differentiable primitives), the
-implementation MUST emit a diagnostic referencing both the primal expression and the unsupported
-operation. Implementations SHOULD suggest possible workarounds, such as inserting explicit
-`primal()` projections.
+Gradients for indexing/slicing operations propagate upstream gradients into the corresponding slices;
+behaviour for out-of-bounds indices is implementation-defined but MUST be deterministic.
+
+## Determinism
+
+- Input IR is canonicalised and verified before autodiff.
+- Generated gradient IR is canonicalised. For a fixed compiler version, identical input modules MUST
+  produce **bit-for-bit identical** gradient modules.
+- Error reporting is deterministic with stable categorisation as described above.
