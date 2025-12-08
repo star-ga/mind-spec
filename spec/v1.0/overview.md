@@ -14,58 +14,41 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Mind Specification v1.0 Overview
+# Core v1 Specification Overview
 
-This document describes the scope and organisation of the normative MIND language specification.
-It introduces the terminology used across the specification suite, outlines the available
-conformance levels, and records references to the reference implementation and design background.
+This overview enumerates the **Core v1** documents that together define the Phase-2 public behaviour
+implemented by [`cputer/mind`](https://github.com/cputer/mind) and its reference runtime. The scope is
+intentionally limited to public, deterministic semantics; private infrastructure and experimental
+features are out of scope.
 
-## Structure of the v1.0 specification
+## Structure
 
-The language specification is segmented to align with the major implementation guides in
-[`cputer/mind/docs`](https://github.com/cputer/mind/tree/main/docs):
+Core v1 is organised into the following pillars:
 
-- [Lexical structure](./lexical.md) — tokenisation, layout rules, and source text conventions.
-- [Type system](./types.md) — typing rules, inference constraints, and generics.
-- [Automatic differentiation](./autodiff.md) — operator semantics for differentiable programs.
-- [Intermediate representation](./ir.md) — the canonical compiler IR and verification invariants.
+1. **Surface Language** ([`language.md`](./language.md)) — syntax and tensor-centric constructs that
+   lower into the Core IR.
+2. **Core IR** ([`ir.md`](./ir.md)) — SSA-style tensor instruction set, canonicalisation, and
+   verification rules.
+3. **Static Autodiff** ([`autodiff.md`](./autodiff.md)) — reverse-mode differentiation on verified IR,
+   producing canonical gradient modules.
+4. **Shapes & Tensor Semantics** ([`shapes.md`](./shapes.md)) — broadcasting, reduction, indexing, and
+   convolution shape rules shared by IR and lowering pipelines.
+5. **MLIR Lowering** ([`mlir-lowering.md`](./mlir-lowering.md)) — deterministic lowering patterns for
+   the feature-gated MLIR backend.
+6. **Runtime Interface** ([`runtime.md`](./runtime.md)) — abstract contract for executing canonical IR
+   semantics.
 
-Each chapter is normative unless explicitly marked as informative. Informative callouts reference
-supporting materials or implementation notes in the compiler repository.
+Legacy chapters such as [`lexical.md`](./lexical.md) and [`types.md`](./types.md) remain available for
+background on the broader language but are not required for Core v1 conformance.
 
-## Conformance levels
+## Conformance and determinism
 
-The specification defines three conformance levels:
+Implementations claiming Core v1 compliance MUST:
 
-1. **Core**: Implementations MUST support programs that only depend on the core syntax and typing
-   rules defined in this specification. Behaviour outside the core is implementation-defined.
-2. **Differentiable**: Implementations claiming differentiable support MUST satisfy all Core
-   requirements and MUST implement the automatic differentiation semantics described in
-   [Automatic differentiation](./autodiff.md).
-3. **Full**: Implementations claiming full conformance MUST satisfy all Core and Differentiable
-   requirements, and MUST emit or consume the canonical IR defined in [Intermediate representation](./ir.md).
+- Accept only verified and canonicalised IR modules.
+- Emit deterministic results for IR transformation pipelines (autodiff, MLIR lowering, runtime
+  execution) given identical inputs.
+- Surface verification failures and unsupported features using deterministic diagnostics.
 
-Conformance claims are made per released compiler. Compilers MAY provide feature gates for
-experimental functionality provided that the default configuration remains conformant.
-
-## Notation and terminology
-
-The specification uses the following conventions:
-
-- **Grammar** fragments are described using extended Backus–Naur form (EBNF).
-- **Judgements** in the type system are written in natural deduction style, following the notation
-  used in [`cputer/mind/docs/type-system`](https://github.com/cputer/mind/tree/main/docs/type-system).
-- **Differentiation rules** reference implementation notes in
-  [`cputer/mind/docs/autodiff`](https://github.com/cputer/mind/tree/main/docs/autodiff) for worked
-  examples (informative).
-- **IR invariants** reuse the terminology defined in
-  [`cputer/mind/docs/ir`](https://github.com/cputer/mind/tree/main/docs/ir).
-
-RFC 2119 keywords such as MUST, SHOULD, and MAY are to be interpreted as described in
-[RFC 2119](https://www.rfc-editor.org/rfc/rfc2119).
-
-## Relationship to other documents
-
-The design documents under [`design/`](../../design/) record the principles that inform the
-normative requirements here. RFCs proposing changes to v1.0 MUST include an impact statement that
-links back to the relevant sections of this overview.
+Reference implementations in `cputer/mind` and `cputer/mind-runtime` are expected to follow these
+rules; this repository is the normative source of truth for the semantics above.
