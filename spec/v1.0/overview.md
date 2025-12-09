@@ -38,8 +38,7 @@ Core v1 is organised into the following pillars:
 5. **MLIR Lowering** ([`mlir-lowering.md`](./mlir-lowering.md)) — deterministic lowering patterns for
    the feature-gated MLIR backend.
 6. **Runtime Interface** ([`runtime.md`](./runtime.md)) — abstract contract for executing canonical IR
-   semantics. Core v1 assumes a normative CPU execution model; GPU and accelerator backends are
-   experimental extensions documented separately.
+   semantics across CPU and the optional GPU profile.
 
 Legacy chapters such as [`lexical.md`](./lexical.md) and [`types.md`](./types.md) remain available for
 background on the broader language but are not required for Core v1 conformance.
@@ -59,4 +58,15 @@ rules; this repository is the normative source of truth for the semantics above.
 ## Related documents
 
 - [Runtime: Devices and backends](./runtime.md#devices-and-backends) — device kinds, backend targets,
-  and experimental GPU notes.
+  and the CPU/GPU runtime profiles.
+
+Core v1 defines two runtime **profiles**:
+
+- **CPU profile**: requires the CPU runtime interface and execution model; this is the baseline
+  that every conforming implementation MUST support.
+- **GPU profile**: extends the CPU profile with device and backend semantics for GPUs as described
+  in `runtime.md`. Runtimes that implement this profile MUST expose `DeviceKind::Gpu` and
+  `BackendTarget::Gpu` together with well-defined backend-selection errors.
+
+Profiles allow the specification to keep the CPU pipeline minimal while still providing a stable
+contract for GPU-capable runtimes.

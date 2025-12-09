@@ -19,6 +19,13 @@ limitations under the License.
 This chapter defines the abstract runtime contract expected by Core v1. It mirrors the behaviour
 implemented by public runtimes without prescribing internal threading or device strategies.
 
+Core v1 defines a **CPU baseline profile** and a **GPU profile**:
+
+- The **CPU profile** is the minimum conformance level. It requires support for `DeviceKind::Cpu`
+  and `BackendTarget::Cpu`.
+- The **GPU profile** extends the CPU profile with `DeviceKind::Gpu` and `BackendTarget::Gpu`,
+  and a stable contract for how GPU backends are selected and reported as unavailable.
+
 ## Runtime model
 
 A conforming runtime provides an abstraction capable of:
@@ -33,31 +40,38 @@ but MUST provide equivalent capabilities.
 
 ## Devices and backends
 
-- A **device** is an abstract execution resource identified by a **device kind**:
-  - `Cpu`: normative Core v1 execution target. All conforming runtimes MUST support `Cpu`.
-  - `Gpu`: experimental accelerator target. Support for `Gpu` is OPTIONAL in Core v1 and MAY change
-    between versions.
-- A **backend target** represents the compilation + execution target used by the compiler/runtime
-  pipeline. The reference implementation exposes enums named `DeviceKind` and `BackendTarget` with
-  variants such as `Cpu` and `Gpu` to mirror this contract.
-- Normative requirements:
-  - All Core v1 semantics and conformance requirements are defined with respect to `Cpu` execution.
-  - Runtimes MUST execute verified Core IR deterministically on `Cpu` as described elsewhere in this
-    document.
+Core v1 assumes an abstract pair:
 
-### Experimental GPU backends (non-normative)
+- **Device kind** (e.g. `Cpu`, `Gpu`).
+- **Backend target** (e.g. `Cpu`, `Gpu`), which selects a concrete implementation.
 
-- Some implementations MAY provide GPU backends that map Core IR to accelerator-specific runtimes.
-- GPU backends are **experimental** in Core v1:
-  - Availability is implementation-defined.
-  - Supported device kinds, memory models, and kernel scheduling strategies MAY evolve without Core
-    v1 conformance impact.
-- Implementations SHOULD:
-  - Preserve Core IR semantics modulo floating-point and backend-specific numeric differences.
-  - Surface failures as structured runtime errors (e.g. “backend not available”, “device out of
-    memory”).
-- For an overview of the public runtime surface in the reference implementation, see the GPU backend
-  contract in [`cputer/mind`](https://github.com/cputer/mind/blob/main/docs/gpu.md).
+Runtimes that implement the **CPU profile** MUST:
+
+- Support at least one CPU device.
+- Expose a CPU backend target capable of executing canonical Core IR.
+
+Runtimes that implement the **GPU profile** MUST, in addition:
+
+- Support at least one GPU device (or device group) and expose a `Gpu` backend target.
+- Preserve Core v1 determinism guarantees for a given module and input set, modulo implementation
+  limits documented by the runtime.
+- Report unsupported or unavailable GPU backends via a **stable error surface**:
+  - If the selected GPU backend is not compiled in or not available at runtime, a
+    backend-selection error MUST be reported and execution MUST NOT proceed.
+  - Such errors MUST be distinguishable from CPU runtime errors and IR verification failures.
+
+Runtimes MAY support additional devices or backends (e.g. specialised accelerators). Behaviour
+of those non-Core backends is implementation-defined, provided it does not violate the Core v1
+IR semantics for the CPU and GPU profiles.
+
+### Backend selection errors
+
+If a caller selects a backend target that the runtime cannot execute (for example, `Gpu` in a
+CPU-only build), the runtime MUST:
+
+- Reject execution with a backend-selection error.
+- Avoid any partial execution side effects.
+- Provide a diagnostic that identifies the unsupported `BackendTarget` value.
 
 ## Responsibilities
 
@@ -76,5 +90,5 @@ this specification. Implementations MAY optimise freely provided they preserve t
 ## Error model
 
 - **Backend selection errors**: runtimes MUST surface structured errors when a requested backend
-  target (e.g. `BackendTarget::Gpu`) is unavailable or feature-gated, particularly for experimental
-  GPU backends.
+  target (e.g. `BackendTarget::Gpu`) is unavailable or feature-gated, and MUST apply the stable
+  error semantics described above for the GPU profile.
