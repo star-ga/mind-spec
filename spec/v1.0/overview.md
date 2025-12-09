@@ -70,3 +70,11 @@ Core v1 defines two runtime **profiles**:
 
 Profiles allow the specification to keep the CPU pipeline minimal while still providing a stable
 contract for GPU-capable runtimes.
+
+## Conformance levels
+
+Core v1 conformance is defined in [`conformance.md`](./conformance.md) and evaluated at the
+implementation level. Implementations MAY claim either the baseline CPU conformance or the optional
+GPU profile conformance (which inherits the CPU baseline). Conformance is validated against the
+public golden test corpus published with [`cputer/mind`](https://github.com/cputer/mind), which
+codifies the behaviours described across the Core v1 chapters.

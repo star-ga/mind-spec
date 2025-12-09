@@ -29,6 +29,7 @@ implementation in [`cputer/mind`](https://github.com/cputer/mind).
 | Shapes & tensors | [Shapes](../../spec/v1.0/shapes.md) | [Shapes & tensor semantics](../../spec/v1.0/shapes.md) |
 | MLIR lowering | [Lowering](../../spec/v1.0/mlir-lowering.md) | [MLIR lowering](../../spec/v1.0/mlir-lowering.md) |
 | Runtime interface | [Runtime](../../spec/v1.0/runtime.md) | [Runtime interface, devices and backends](../../spec/v1.0/runtime.md) |
+| Conformance | [Conformance overview](../../spec/v1.0/conformance.md) | [Core v1 conformance levels](../../spec/v1.0/conformance.md) |
 
 Additional design context and RFCs live under [`docs/design`](../design/index.md) and
 [`docs/rfcs`](../rfcs/index.md) respectively. GPU support is optional in Core v1; see
