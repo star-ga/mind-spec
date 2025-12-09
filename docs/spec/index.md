@@ -31,6 +31,6 @@ implementation in [`cputer/mind`](https://github.com/cputer/mind).
 | Runtime interface | [Runtime](../../spec/v1.0/runtime.md) | [Runtime interface, devices and backends](../../spec/v1.0/runtime.md) |
 
 Additional design context and RFCs live under [`docs/design`](../design/index.md) and
-[`docs/rfcs`](../rfcs/index.md) respectively. GPU support is experimental in Core v1; see
+[`docs/rfcs`](../rfcs/index.md) respectively. GPU support is optional in Core v1; see
 [Runtime](../../spec/v1.0/runtime.md#devices-and-backends) for devices and backends details. Legacy
 language chapters remain available for broader context but are not part of Core v1 conformance.
