@@ -14,78 +14,176 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Shapes and Tensor Semantics (Normative)
+# Shapes and dtypes
 
-This chapter captures the tensor shape, dtype, and broadcasting semantics used by the Core IR and
-its lowering pipelines. It mirrors the behaviour implemented in
-[`cputer/mind`](https://github.com/cputer/mind) and avoids prescribing runtime-specific layouts.
-Shape and dtype semantics are device-agnostic; they apply equally to CPU and experimental GPU
-implementations.
+This chapter describes the shape and dtype lattice for Core v1 programs and the
+rules used by the Core v1 shape engine for elementwise operations, reductions
+and matrix multiplication.
 
-## Tensor shapes and dtypes
+Shapes and dtypes are **device-agnostic**: the same rules apply to the CPU baseline and the optional GPU profile.
 
-- Tensors carry an explicit **shape** (ordered list of dimension sizes) and **dtype** (numeric element
-  type). Devices MAY be specified when required by the runtime, but device placement is otherwise
-  out of scope for the Core v1 spec.
-- Scalars are represented as rank-0 tensors.
+## Tensor ranks and shapes
+
+- A *tensor* has a **rank** (number of dimensions) and a **shape** (an ordered
+  list of extents, one per dimension).
+- Scalars are treated as **rank-0** tensors with an empty shape `[]`.
+- Vectors and matrices are rank-1 and rank-2 respectively.
+
+Formally, a shape is a finite sequence of non-negative integers:
+
+```text
+Shape = [d_0, d_1, ..., d_{n-1}]   where each d_i ∈ ℕ
+Rank(Shape) = n
+```
+
+Core v1 does not define symbolic or unknown dimensions in the base profile.
+Implementations may extend the shape system, but conformance is defined for
+fully-known shapes.
 
 ## Broadcasting
 
-Binary elementwise operations (e.g. `BinOp`, elementwise unary ops) use **right-aligned broadcasting**
-matching NumPy/PyTorch semantics:
+Many Core v1 operators are **elementwise** and support broadcasting of their
+inputs. Broadcasting follows the standard "numpy-style" rules.
 
-1. Shapes are aligned from the **trailing dimensions**.
-2. For each aligned axis, dimensions must be equal or one of them MUST be `1`.
-3. The resulting dimension is the maximum of the two aligned sizes.
-4. Leading unmatched dimensions are copied from the longer shape.
+Given two shapes `A` and `B`, broadcasting proceeds as:
 
-Broadcasting preserves dtype promotion rules from the implementation; unsupported promotions are
-implementation-defined and MUST be diagnosed.
+1. Align shapes from the **right** by inserting leading dimensions of size `1`
+   to the shorter shape as needed.
+2. For each dimension (from right to left):
+   - if the extents are equal (`a_i == b_i`), the result extent is that value;
+   - if one of the extents is `1`, the result extent is the other value;
+   - otherwise broadcasting fails.
+
+Formally, let `A'` and `B'` be the aligned shapes of the same rank `k`. Then
+for each `i ∈ {0, ..., k-1}`:
+
+```text
+if A'[i] == B'[i]      → C[i] = A'[i]
+else if A'[i] == 1     → C[i] = B'[i]
+else if B'[i] == 1     → C[i] = A'[i]
+else                   → error (incompatible shapes)
+```
+
+The broadcasted shape `C` is the elementwise result of this rule. If any
+dimension fails the rule, the operator is required to produce a **shape error**
+rather than silently proceeding.
+
+### Elementwise unary
+
+For **unary elementwise** operators (for example, `tensor.relu`, `tensor.neg`,
+`tensor.exp`, `tensor.log`) no broadcasting is required. The output shape is
+exactly the input shape:
+
+```text
+Shape_out = Shape_in
+```
+
+Shape errors occur only if the operator is applied to a rank or dtype outside
+its defined domain (for example, applying a floating-point-only op to an
+integer tensor where the implementation does not support it).
+
+### Elementwise binary
+
+For **binary elementwise** operators (for example, `tensor.add`, `tensor.sub`,
+`tensor.mul`, `tensor.div`) the output shape is the broadcasted shape of the
+two inputs:
+
+```text
+Shape_out = Broadcast(Shape_lhs, Shape_rhs)
+```
+
+If broadcasting fails (as defined above), the compiler or runtime must report a
+shape error. The Core v1 conformance suite is expected to include examples of
+both successful and failing broadcasts.
 
 ## Reductions
 
-`Sum` and `Mean` reduce explicit `axes: [i32]` with optional `keepdims: bool`:
+Core v1 distinguishes between:
 
-- **Axis handling**: axes refer to zero-based dimensions. Duplicate axes are invalid. Empty `axes`
-  denotes reduction across all dimensions.
-- **Output shape**:
-  - If `keepdims = true`, reduced axes become size `1`.
-  - If `keepdims = false`, reduced axes are removed.
-- **`Mean` scaling**: divides by the total element count of the reduced dimensions, not by the number
-  of axes listed.
+- **full reductions** that reduce all axes to a scalar (rank-0);
+- **axis-aware reductions** (future extension), which remain out of scope for
+  the Core v1 baseline.
 
-Axis values outside the rank are verification failures during IR validation. Behaviour for runtime
-out-of-bounds is implementation-defined.
+The operator `tensor.sum_all` is a **full reduction**:
 
-## Index, slice, and gather
+```text
+Input:  tensor<f32>[d_0, d_1, ..., d_{n-1}]
+Output: tensor<f32>[]    (rank-0 scalar)
+```
 
-- **`Index`**: consumes one index per dimension. If all dimensions are indexed, the result is a
-  scalar; if only some dimensions are indexed, the result is a tensor whose shape is the suffix of
-  the input shape after removing the indexed dimensions.
-- **`Slice`**: each dimension uses `(start, end, step)`. The resulting size per dimension is
-  `⌈(end-start)/step⌉` (i.e., the mathematical ceiling of `(end-start)/step`) for positive steps;
-  negative steps are implementation-defined. Start/end
-  pairs are verifier-checked for rank alignment; runtime bounds handling is implementation-defined.
-- **`Gather`**: for input shape `[D0, D1, ... Dn]` and indices shape `[I0, ... Ik]`, the result shape
-  is `[I0, ... Ik, D1, ... Dn]` when gathering along the leading dimension. Alternate axis selections
-  are implementation-defined in this version.
+If the input is already a scalar (`[]`), the output is also a scalar of the
+same shape. Implementations must not silently change the rank (for example, to
+`[1]`); the scalar representation is part of the contract.
 
-## Convolution shape inference
+Axis-parameterised reductions (for example, `sum` over a specific axis) are
+considered an extension and must follow the same error model:
 
-`Conv2d` uses NHWC input tensors and HWCF filters:
+- invalid or out-of-range axes must produce a shape error;
+- ambiguous axis specifications (duplicates, mismatched ranks) must not be
+  silently accepted.
 
-- **Input shape**: `[N, H, W, C_in]`.
-- **Filter shape**: `[H_k, W_k, C_in, C_out]`.
-- **Strides/Padding**: follow the implementation’s conventions (e.g. `SAME`/`VALID`). Unsupported
-  padding modes are implementation-defined and SHOULD be rejected during verification.
-- **Output shape**: `[N, H_out, W_out, C_out]` where `H_out` and `W_out` are derived from input size,
-  kernel, stride, and padding according to the chosen padding rule.
+Axis-aware reductions, when added, will extend this chapter with a dedicated
+subsection.
 
-Channel compatibility (`input.shape[3] == filter.shape[2]`) is mandatory; violations MUST fail
-verification.
+## Matrix multiplication
 
-## Relationship to Phase-1 semantics
+Core v1 defines a canonical **2D matrix multiplication** shape rule for
+`tensor.matmul`:
 
-These rules extend the Phase-1 tensor semantics already present in the public compiler. Any
-behaviour not explicitly captured here remains implementation-defined but MUST NOT contradict the
-Phase-1 behaviours shipped in current releases.
+- both inputs must be **rank-2** tensors;
+- the inner dimensions must match.
+
+Formally:
+
+```text
+A: tensor<T>[M, K]
+B: tensor<T>[K, N]
+----------------------------
+tensor.matmul(A, B): tensor<T>[M, N]
+```
+
+If either input has rank different from 2, or if `K` does not match between the
+inputs, the operator must produce a shape error.
+
+Higher-rank batched matrix multiplication and other generalisations are
+considered future extensions and will be specified separately. Implementations
+may support them as non-Core v1 extensions, but must not claim Core v1
+conformance based on those rules.
+
+## Relationship to dtypes
+
+This chapter focuses on shapes. Dtype rules (for example, which element types
+are accepted by each operator) are specified alongside the operator registry
+and runtime semantics. Implementations must ensure that shape and dtype checks
+are consistent:
+
+- an operator may reject an input for dtype reasons even when shapes are
+  compatible;
+- the resulting error must still be deterministic and follow the general error
+  model.
+
+## Reference shape engine
+
+The Core v1 shape rules in this chapter are intended to be straightforward to
+implement. The reference implementation in `cputer/mind` exposes a small shape
+engine (`mind::shapes::engine`) that:
+
+- encodes the high-level rule category for each Core v1 operator
+  (unary/binary elementwise, full reduction, 2D matmul);
+- implements broadcasting as defined above; and
+- provides helpers to infer output shapes or report structured shape errors.
+
+Other implementations are not required to use this engine, but they are
+expected to produce the same outcomes (shapes or shape errors) for the same
+operator and input shapes when claiming Core v1 conformance.
+
+## Device independence
+
+Core v1 defines:
+
+- a CPU baseline which provides a stable, device-agnostic Core v1 execution
+  environment; and
+- a GPU profile that extends the CPU baseline with device/backend semantics.
+
+Shape and dtype semantics are **device-agnostic**: a conforming implementation
+MUST apply the same rules regardless of the chosen device kind.
