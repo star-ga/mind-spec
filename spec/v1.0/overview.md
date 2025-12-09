@@ -38,7 +38,8 @@ Core v1 is organised into the following pillars:
 5. **MLIR Lowering** ([`mlir-lowering.md`](./mlir-lowering.md)) — deterministic lowering patterns for
    the feature-gated MLIR backend.
 6. **Runtime Interface** ([`runtime.md`](./runtime.md)) — abstract contract for executing canonical IR
-   semantics.
+   semantics. Core v1 assumes a normative CPU execution model; GPU and accelerator backends are
+   experimental extensions documented separately.
 
 Legacy chapters such as [`lexical.md`](./lexical.md) and [`types.md`](./types.md) remain available for
 background on the broader language but are not required for Core v1 conformance.
@@ -54,3 +55,8 @@ Implementations claiming Core v1 compliance MUST:
 
 Reference implementations in `cputer/mind` and `cputer/mind-runtime` are expected to follow these
 rules; this repository is the normative source of truth for the semantics above.
+
+## Related documents
+
+- [Runtime: Devices and backends](./runtime.md#devices-and-backends) — device kinds, backend targets,
+  and experimental GPU notes.

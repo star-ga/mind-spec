@@ -28,8 +28,9 @@ implementation in [`cputer/mind`](https://github.com/cputer/mind).
 | Autodiff | [Autodiff summary](../../spec/v1.0/autodiff.md) | [Static reverse-mode](../../spec/v1.0/autodiff.md) |
 | Shapes & tensors | [Shapes](../../spec/v1.0/shapes.md) | [Shapes & tensor semantics](../../spec/v1.0/shapes.md) |
 | MLIR lowering | [Lowering](../../spec/v1.0/mlir-lowering.md) | [MLIR lowering](../../spec/v1.0/mlir-lowering.md) |
-| Runtime interface | [Runtime](../../spec/v1.0/runtime.md) | [Runtime interface](../../spec/v1.0/runtime.md) |
+| Runtime interface | [Runtime](../../spec/v1.0/runtime.md) | [Runtime interface, devices and backends](../../spec/v1.0/runtime.md) |
 
 Additional design context and RFCs live under [`docs/design`](../design/index.md) and
-[`docs/rfcs`](../rfcs/index.md) respectively. Legacy language chapters remain available for broader
-context but are not part of Core v1 conformance.
+[`docs/rfcs`](../rfcs/index.md) respectively. GPU support is experimental in Core v1; see
+[Runtime](../../spec/v1.0/runtime.md#devices-and-backends) for device/backends details. Legacy
+language chapters remain available for broader context but are not part of Core v1 conformance.

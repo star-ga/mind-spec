@@ -19,6 +19,8 @@ limitations under the License.
 This chapter captures the tensor shape, dtype, and broadcasting semantics used by the Core IR and
 its lowering pipelines. It mirrors the behaviour implemented in
 [`cputer/mind`](https://github.com/cputer/mind) and avoids prescribing runtime-specific layouts.
+Shape and dtype semantics are device-agnostic; they apply equally to CPU and experimental GPU
+implementations.
 
 ## Tensor shapes and dtypes
 
