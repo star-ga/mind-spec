@@ -29,16 +29,20 @@ Shapes and dtypes are **device-agnostic**: the same rules apply to the CPU basel
 - Scalars are treated as **rank-0** tensors with an empty shape `[]`.
 - Vectors and matrices are rank-1 and rank-2 respectively.
 
-Formally, a shape is a finite sequence of non-negative integers:
+Formally, a shape is a finite sequence of positive integers:
 
 ```text
-Shape = [d_0, d_1, ..., d_{n-1}]   where each d_i ∈ ℕ (here, ℕ includes 0)
+Shape = [d_0, d_1, ..., d_{n-1}]   where each d_i ∈ ℕ⁺
 Rank(Shape) = n
 ```
 
 Core v1 does not define symbolic or unknown dimensions in the base profile.
 Implementations may extend the shape system, but conformance is defined for
 fully-known shapes.
+
+The verifier rejects tensors whose dimensions are zero or negative. Scalars
+remain rank-0 tensors with an empty `[]` shape and therefore bypass the
+positive-dimension rule.
 
 ## Broadcasting
 
@@ -127,10 +131,11 @@ subsection.
 
 ## Matrix multiplication
 
-Core v1 defines a canonical **2D matrix multiplication** shape rule for
+Core v1 defines a canonical **matrix multiplication** shape rule for
 `tensor.matmul`:
 
-- both inputs must be **rank-2** tensors;
+- inputs must be **rank-2 or greater** tensors;
+- the trailing two dimensions participate in the matrix multiply;
 - the inner dimensions must match.
 
 Formally:
@@ -142,13 +147,12 @@ B: tensor<T>[K, N]
 tensor.matmul(A, B): tensor<T>[M, N]
 ```
 
-If either input has rank different from 2, or if `K` does not match between the
+If either input has rank smaller than 2, or if `K` does not match between the
 inputs, the operator must produce a shape error.
 
-Higher-rank batched matrix multiplication and other generalisations are
-considered future extensions and will be specified separately. Implementations
-may support them as non-Core v1 extensions, but must not claim Core v1
-conformance based on those rules.
+For tensors with **batch dimensions**, leading dimensions follow the
+broadcasting rules described earlier. The resulting shape is therefore:
+`Broadcast(batch_lhs, batch_rhs) ++ [M, N]`.
 
 ## Relationship to dtypes
 

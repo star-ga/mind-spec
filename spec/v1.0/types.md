@@ -65,10 +65,13 @@ The type checker participates directly in Core IR construction:
 
 - **Symbol tables** feed module inputs. Each declared value is materialised as an `Input` instruction
   carrying its resolved tensor type so that the IR verifier can enforce the single-definition rule.
+- **Shape validation** rejects tensors with zero or negative extents. Scalars (rank-0) are exempt and
+  remain represented with an empty shape.
 - **Operation typing** mirrors the IR instruction set. For arithmetic operations the operands MUST
   share a dtype; shape compatibility follows the broadcasting rules in
   [Shapes](./shapes.md#broadcasting). Scalar operands implicitly broadcast to the non-scalar
-  operand's shape.
+  operand's shape. Batched `MatMul` operations additionally broadcast leading dimensions and enforce
+  that the contracting dimension matches.
 - **Verification before emission**: translators are expected to reject programs with unknown dtypes,
   incompatible shapes, or undeclared symbols before emitting IR. This aligns the surface-language
   diagnostics with the invariants described in [Core IR](./ir.md#verification).

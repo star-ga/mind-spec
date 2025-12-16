@@ -48,11 +48,14 @@ Surface syntax maps to the Core IR instruction set:
 - **Arithmetic**: `+`, `-`, `*` lower to `BinOp` with broadcasting semantics from
   [Shapes](./shapes.md#broadcasting). Division is not part of Core v1 (see
   [IR spec](./ir.md#arithmetic-operations)).
+- **Type checking for arithmetic**: operands MUST share a dtype; shape inference uses broadcasting
+  rules so scalars implicitly extend to the non-scalar operand's shape.
 - **Reductions**: `sum(x, axes, keepdims)` and `mean(x, axes, keepdims)` lower to `Sum`/`Mean`.
 - **Shape ops**: `reshape`, `transpose`, `expand_dims`, and `squeeze` mirror their IR counterparts.
 - **Indexing**: slicing/index expressions lower to `Index`, `Slice`, or `Gather` depending on syntax.
 - **Linear algebra**: `dot`, `matmul`, and `conv2d` are available as intrinsic functions mapping to the
-  IR operations described in [Core IR](./ir.md#linear-and-tensor-algebra).
+  IR operations described in [Core IR](./ir.md#linear-and-tensor-algebra). `matmul` requires rank-2 or
+  higher operands and validates contracting dimensions before emission.
 
 Implementations MUST reject programs that request unsupported operations or incompatible shapes
 according to the verification rules in [Core IR](./ir.md).

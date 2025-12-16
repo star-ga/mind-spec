@@ -24,8 +24,8 @@ class Literal(Expression):
     shape: tuple[int, ...] = ()
 
     def infer_type(self, type_system: TypeSystem) -> TensorType:
-        type_system.ensure_known_dtype(self.dtype)
-        return TensorType(self.dtype, self.shape)
+        tensor_type = TensorType(self.dtype, self.shape)
+        return type_system.validate_tensor(tensor_type)
 
     def emit(self, ir: CoreIR, type_system: TypeSystem) -> int:
         result_type = str(self.infer_type(type_system))
@@ -58,6 +58,8 @@ class BinaryOperation(Expression):
     def infer_type(self, type_system: TypeSystem) -> TensorType:
         lhs_type = self.lhs.infer_type(type_system)
         rhs_type = self.rhs.infer_type(type_system)
+        if self.op == "MatMul":
+            return type_system.validate_matmul(lhs_type, rhs_type)
         return type_system.validate_binop(self.op, lhs_type, rhs_type)
 
     def emit(self, ir: CoreIR, type_system: TypeSystem) -> int:
@@ -75,6 +77,8 @@ class LanguageConstruct:
         self.type_system = type_system or TypeSystem()
 
     def to_ir(self) -> CoreIR:
+        self.type_system.validate_program()
+
         ir = CoreIR()
         result_value = self.expression.emit(ir, self.type_system)
         ir.mark_output(result_value)

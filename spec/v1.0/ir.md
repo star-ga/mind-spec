@@ -49,6 +49,25 @@ A module declares:
 Modules MUST be serialisable to a stable textual form. Canonicalisation (below) establishes the
 canonical ordering expected by downstream pipelines.
 
+### `CoreOperation` structure
+
+The reference tooling models each instruction as a `CoreOperation` record:
+
+```text
+CoreOperation ::= {
+    value_id: int,
+    opcode: str,
+    operands: [int],
+    attributes: Dict[str, Any],
+    result_type: str
+}
+```
+
+`value_id`s follow the freshness rule described above to maintain SSA-style ordering. Attributes are
+kept generic so verifier-visible metadata (for example, tensor shape and dtype) can be attached
+deterministically. The textual encoding below renders this record in a stable order suitable for
+round-tripping in tests and debugging tools.
+
 ### Reference encoding
 
 The reference compiler exposes a minimal textual encoding to aid debugging and unit testing. The
@@ -65,6 +84,21 @@ encoding follows the ordered instruction list model described above:
 
 This encoding is intentionally small and lossless so that translators from the surface language can
 round-trip canonical modules during conformance testing.
+
+### Surface language lowering
+
+The reference translation pipeline from surface expressions to Core IR is deterministic:
+
+1. **Inputs**: free variables materialise as `Input` instructions with explicit tensor metadata.
+2. **Literals**: scalar and tensor literals emit `ConstTensor` instructions that embed dtype and shape
+   in attributes.
+3. **Operations**: language operators lower directly to the Core IR instruction set, applying
+   type-directed validation (broadcasting, dtype equality, matmul dimension checks) before emission.
+4. **Outputs**: the final produced `ValueId` is recorded as a module output to satisfy the
+   single-definition invariant.
+
+This lowering process reuses the type system rules in [Types](./types.md) so that invalid programs are
+rejected before IR is emitted.
 
 ## Instruction set and semantics
 
@@ -88,7 +122,8 @@ as implementation-defined.
 
 - **`BinOp(op: Add|Sub|Mul, lhs, rhs) -> ValueId`**
   - Inputs: two tensors broadcastable under the rules in [Shapes](./shapes.md#broadcasting).
-  - Output: tensor with broadcasted shape and dtype promotion defined by the implementation.
+  - Dtypes: operands MUST share a dtype; mixing dtypes is a verification failure.
+  - Output: tensor with broadcasted shape as defined in [Shapes](./shapes.md#broadcasting).
   - For canonicalisation ordering, operands of **commutative** `BinOp`s (such as `Add`, `Mul`) are
     ordered by ascending `ValueId`. Only `Add` (and other truly commutative operations) are treated
     as commutative; `Sub` and `Div` are **not** commutative, and their operand order MUST be
@@ -146,8 +181,8 @@ as implementation-defined.
   - Inputs: rank-1 or rank-2 tensors with compatible inner dimensions.
   - Output: tensor following standard dot-product broadcasting (implementation-aligned).
 - **`MatMul(lhs, rhs) -> ValueId`**
-  - Inputs: matrices (or batched matrices) with compatible inner dimensions. Broadcasting across
-    leading batch dimensions follows [broadcasting](./shapes.md#broadcasting).
+  - Inputs: matrices (or batched matrices) with compatible inner dimensions. Inputs MUST each have
+    rank ≥ 2; leading batch dimensions broadcast following [broadcasting](./shapes.md#broadcasting).
 - **`Conv2d(input, filter, strides: [i64], padding: Padding) -> ValueId`**
   - Input format: **NHWC**.
   - Filter format: `[H_k, W_k, C_in, C_out]` (HWCF).
@@ -178,7 +213,8 @@ A verifier MUST reject IR modules that violate the following rules:
    `ValueId` is defined exactly once.
 2. **Interface validity**: all declared outputs reference existing values.
 3. **Shape and dtype consistency**: instructions follow the constraints described above, including
-   reshape element-count preservation and transpose permutation length.
+   reshape element-count preservation, transpose permutation length, positive tensor dimensions, and
+   broadcast/matmul rules from [Shapes](./shapes.md).
 4. **Conv2d constraints**:
    - Input is NHWC; filter is `[H_k, W_k, C_in, C_out]`.
    - `input.shape[3] == filter.shape[2]`.
