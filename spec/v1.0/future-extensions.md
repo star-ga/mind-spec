@@ -51,7 +51,7 @@ MIND's combination of static shape inference, reverse-mode autodiff, ultra-low-l
 
 ```mind
 // Proposed syntax (not yet implemented)
-type NeuroSignal<T, C: i64, T: i64, B: i64> = tensor<T[C, T, B]>
+type NeuroSignal<Elem, C: i64, T: i64, B: i64> = tensor<Elem[C, T, B]>
   with layout = ChannelTimeBatch
   where C = channels, T = time_samples, B = trials/batches
 ```
