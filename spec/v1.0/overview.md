@@ -33,9 +33,11 @@ Core v1 is organised into the following pillars:
    producing canonical gradient modules.
 4. **Shapes & Tensor Semantics** ([`shapes.md`](./shapes.md)) — broadcasting, reduction, indexing, and
    convolution shape rules shared by IR and lowering pipelines.
-5. **MLIR Lowering** ([`mlir-lowering.md`](./mlir-lowering.md)) — deterministic lowering patterns for
+5. **Error Catalog** ([`errors.md`](./errors.md)) — comprehensive error codes (E1xxx–E6xxx), diagnostic
+   requirements, and error recovery semantics.
+6. **MLIR Lowering** ([`mlir-lowering.md`](./mlir-lowering.md)) — deterministic lowering patterns for
    the feature-gated MLIR backend.
-6. **Runtime Interface** ([`runtime.md`](./runtime.md)) — abstract contract for executing canonical IR
+7. **Runtime Interface** ([`runtime.md`](./runtime.md)) — abstract contract for executing canonical IR
    semantics across CPU and the optional GPU profile.
 
 Legacy chapters such as [`lexical.md`](./lexical.md) and [`types.md`](./types.md) remain available for
