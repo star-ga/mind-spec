@@ -16,12 +16,10 @@ limitations under the License.
 
 # Core v1 Specification Overview
 
-This overview enumerates the **Core v1** documents that together define the Phase-2 public behaviour
+This overview enumerates the **Core v1** documents that together define the public behaviour
 implemented by [`cputer/mind`](https://github.com/cputer/mind) and its reference runtime. The scope is
 intentionally limited to public, deterministic semantics; private infrastructure and experimental
 features are out of scope.
-(Phase-2 refers to the second major milestone in the MIND project, focusing on deterministic,
-public-facing semantics; see the project roadmap for more context.)
 
 ## Structure
 

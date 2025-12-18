@@ -16,10 +16,10 @@ limitations under the License.
 
 # Surface Language (Normative)
 
-This chapter summarises the Core v1 surface language constructs that compile down to the Phase-2 Core
-IR. Detailed lexical and type rules continue to live in the legacy chapters
-([`lexical.md`](./lexical.md), [`types.md`](./types.md)); this document consolidates the
-tensor-oriented subset implemented in [`cputer/mind`](https://github.com/cputer/mind).
+This chapter summarises the Core v1 surface language constructs that compile down to the Core IR.
+Detailed lexical and type rules continue to live in the legacy chapters ([`lexical.md`](./lexical.md),
+[`types.md`](./types.md)); this document consolidates the tensor-oriented subset implemented in
+[`cputer/mind`](https://github.com/cputer/mind).
 
 ## Syntax overview
 

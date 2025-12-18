@@ -22,9 +22,9 @@ the public reference implementation at [cputer/mind](https://github.com/cputer/m
 ## Reading the spec
 
 The specification is organised to mirror the reference compiler documentation in
-[`cputer/mind/docs/`](https://github.com/cputer/mind/tree/main/docs) and the Phase-2 runtime. Each
-chapter notes relationships to implementation details and links to the corresponding background
-materials when informative context is helpful.
+[`cputer/mind/docs/`](https://github.com/cputer/mind/tree/main/docs). Each chapter notes
+relationships to implementation details and links to the corresponding background materials
+when informative context is helpful.
 
 Normative sections use RFC 2119 terminology. When a document includes non-normative background or
 examples it is explicitly marked as informative.

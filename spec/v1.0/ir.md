@@ -16,9 +16,9 @@ limitations under the License.
 
 # Core Intermediate Representation (Normative)
 
-This document defines the Phase-2 **Core IR** used by the public MIND compiler and runtime
-implementations. The IR is the canonical interchange format between the surface language, the static
-autodiff engine, MLIR lowering, and backend runtimes.
+This document defines the **Core IR** used by the public MIND compiler and runtime implementations.
+The IR is the canonical interchange format between the surface language, the static autodiff engine,
+MLIR lowering, and backend runtimes.
 
 The specification describes only the deterministic, publicly implemented behaviour in
 [`cputer/mind`](https://github.com/cputer/mind). It does not reference private infrastructure or
@@ -27,7 +27,7 @@ undocumented extensions.
 ## IR module model
 
 A Core IR module is a **flat, ordered list of instructions**. Basic blocks and control-flow graphs
-are out of scope for Phase-2 and MUST NOT appear in canonical modules.
+are out of scope for Core v1 and MUST NOT appear in canonical modules.
 
 ### Values and `ValueId`
 
@@ -102,7 +102,7 @@ rejected before IR is emitted.
 
 ## Instruction set and semantics
 
-The following instructions constitute the Phase-2 surface of Core IR. Unless stated otherwise, all
+The following instructions constitute the Core v1 surface of Core IR. Unless stated otherwise, all
 instructions operate on tensors with explicit **dtype** and **shape** metadata. Dtypes and shape
 rules are defined in [Shapes and Tensor Semantics](./shapes.md).
 
