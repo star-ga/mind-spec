@@ -31,6 +31,136 @@ Detailed lexical and type rules continue to live in the legacy chapters ([`lexic
 - **Control flow**: the Core v1 spec models straight-line tensor programs; high-level control flow is
   lowered away before entering the Core IR described in [Core IR](./ir.md).
 
+## Operator precedence and associativity
+
+Operators are listed from highest precedence (evaluated first) to lowest precedence (evaluated last).
+Operators on the same level have equal precedence and are resolved by associativity.
+
+| Precedence | Operator | Description | Associativity | Example |
+|------------|----------|-------------|---------------|---------|
+| **1 (Highest)** | `()` `[]` `.` | Grouping, indexing, field access | Left-to-right | `f(x)`, `a[i]`, `x.field` |
+| **2** | Unary `-` `!` | Negation, logical NOT | Right-to-left | `-x`, `!flag` |
+| **3** | `*` | Multiplication (elementwise) | Left-to-right | `a * b` |
+| **4** | `+` `-` | Addition, subtraction (elementwise) | Left-to-right | `a + b`, `a - b` |
+| **5** | `==` `!=` `<` `>` `<=` `>=` | Comparison operators | Left-to-right | `a == b`, `x < y` |
+| **6** | `&&` | Logical AND | Left-to-right | `a && b` |
+| **7** | `||` | Logical OR | Left-to-right | `a || b` |
+| **8** | `=` `+=` `-=` `*=` `:=` | Assignment and compound assignment | Right-to-left | `x = y`, `x += 1` |
+| **9 (Lowest)** | `,` | Comma (sequence) | Left-to-right | `f(a, b, c)` |
+
+### Precedence rules
+
+1. **Higher precedence binds tighter**: `a + b * c` parses as `a + (b * c)`, not `(a + b) * c`
+2. **Same precedence uses associativity**: `a - b + c` parses as `(a - b) + c` (left-to-right)
+3. **Parentheses override precedence**: `(a + b) * c` forces addition before multiplication
+4. **Function calls have highest precedence**: `f(x) + g(y)` calls functions before addition
+
+### Examples
+
+**Example 1: Arithmetic precedence**
+```mind
+let result = a + b * c - d;
+// Parses as: a + (b * c) - d
+// Then: (a + (b * c)) - d
+```
+
+**Example 2: Unary operators**
+```mind
+let neg_sum = -a + b;
+// Parses as: (-a) + b
+
+let double_neg = - -x;
+// Parses as: -(- x)
+```
+
+**Example 3: Comparison and logical**
+```mind
+let cond = x < y && a == b;
+// Parses as: (x < y) && (a == b)
+
+let complex = a + b > c * d || flag;
+// Parses as: ((a + b) > (c * d)) || flag
+```
+
+**Example 4: Assignment and compound assignment**
+```mind
+x = y = z;
+// Parses as: x = (y = z)  (right-to-left)
+
+a += b * c;
+// Parses as: a = a + (b * c)  (compound assignment expands to assignment)
+```
+
+**Example 5: Function calls and indexing**
+```mind
+let value = f(x)[0] + g(y).field;
+// Parses as: (f(x)[0]) + (g(y).field)
+// Function calls f() and g() are evaluated first
+// Then indexing [0] and field access .field
+// Finally addition +
+```
+
+### Broadcasting and tensor operations
+
+Tensor operations follow the same precedence as scalar operations:
+
+- **Elementwise multiplication**: `A * B` where A, B are tensors uses same precedence as scalar `*`
+- **Broadcasting applies**: `scalar * tensor` broadcasts scalar to tensor shape
+- **Matrix multiplication**: Uses function call syntax `matmul(A, B)`, not infix operator
+  - This gives it highest precedence: `matmul(A, B) + C` performs matmul first
+
+**Example: Tensor arithmetic**
+```mind
+let result = alpha * X + beta * Y;
+// Parses as: (alpha * X) + (beta * Y)
+// Both multiplications happen before addition
+// Broadcasting applies within each multiplication
+```
+
+### Associativity edge cases
+
+**Left-associative subtraction**:
+```mind
+a - b - c  // Parses as (a - b) - c, NOT a - (b - c)
+// Important: these are different!
+// (5 - 3) - 2 = 0
+// 5 - (3 - 2) = 4
+```
+
+**Right-associative assignment**:
+```mind
+a = b = c = 0;  // Parses as a = (b = (c = 0))
+// All three variables assigned to 0
+```
+
+### Precedence vs type checking
+
+Precedence determines parse tree structure, not type validity:
+
+```mind
+let invalid = tensor + 5;  // Parses correctly as (tensor + 5)
+                           // But may fail type checking if dtypes incompatible
+```
+
+Type errors are caught AFTER parsing, during type checking phase.
+
+### Comparison with other languages
+
+| Language | Multiplication precedence | Assignment associativity |
+|----------|---------------------------|--------------------------|
+| MIND | Higher than addition | Right-to-left |
+| Python | Higher than addition | Right-to-left |
+| C/C++ | Higher than addition | Right-to-left |
+| Julia | Higher than addition | Right-to-left |
+
+MIND follows the **standard mathematical convention** used in most programming languages.
+
+### Grammar reference
+
+For the complete formal grammar including precedence, see:
+- **Lexical grammar**: [`grammar-lexical.ebnf`](./grammar-lexical.ebnf)
+- **Syntax grammar**: [`grammar-syntax.ebnf`](./grammar-syntax.ebnf) (expression precedence encoded in production rules)
+
 ## Types
 
 The type system relevant to Core v1 consists of:
