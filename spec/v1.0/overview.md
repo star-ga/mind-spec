@@ -39,10 +39,12 @@ Core v1 is organised into the following pillars:
    requirements, and error recovery semantics.
 7. **Conformance** ([`conformance.md`](./conformance.md)) — test corpus structure, coverage requirements,
    and compliance claim procedures for CPU and GPU profiles.
-8. **MLIR Lowering** ([`mlir-lowering.md`](./mlir-lowering.md)) — deterministic lowering patterns for
+8. **Versioning & Stability** ([`versioning.md`](./versioning.md)) — semantic versioning policy,
+   stability guarantees, breaking vs non-breaking changes, and deprecation procedures.
+9. **MLIR Lowering** ([`mlir-lowering.md`](./mlir-lowering.md)) — deterministic lowering patterns for
    the feature-gated MLIR backend.
-9. **Runtime Interface** ([`runtime.md`](./runtime.md)) — abstract contract for executing canonical IR
-   semantics across CPU and the optional GPU profile.
+10. **Runtime Interface** ([`runtime.md`](./runtime.md)) — abstract contract for executing canonical IR
+    semantics across CPU and the optional GPU profile.
 
 Legacy chapters such as [`lexical.md`](./lexical.md) and [`types.md`](./types.md) remain available for
 background on the broader language but are not required for Core v1 conformance.
