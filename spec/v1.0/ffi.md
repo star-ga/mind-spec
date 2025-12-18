@@ -94,9 +94,9 @@ typedef enum {
 MIND functions with `export` annotation generate C-compatible entry points:
 
 ```mind
-// MIND function
+// MIND function (exports wrapper around standard library)
 export fn matmul(a: tensor<f32[m, k]>, b: tensor<f32[k, n]>) -> tensor<f32[m, n]> {
-    return matmul(a, b);
+    return tensor::matmul(a, b);  // Calls standard library matmul
 }
 ```
 
