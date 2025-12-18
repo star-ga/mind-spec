@@ -161,8 +161,8 @@ Features marked for removal MUST follow a deprecation cycle:
 ```text
 v1.0 (Jan 2025):  Function `old_api()` stable
 v1.1 (Apr 2025):  `old_api()` marked deprecated, `new_api()` added
-v1.2 (Jul 2025):  `old_api()` still works with warning
-v2.0 (Oct 2025):  `old_api()` removed, only `new_api()` available
+v1.2 (Jul 2025):  `old_api()` still works with warning (2nd minor version)
+v2.0 (Jan 2026):  `old_api()` removed, only `new_api()` available
 ```
 
 ## Compatibility
@@ -263,7 +263,7 @@ Features: autodiff, mlir-lowering, gpu-cuda
 
 ### Clarifying ambiguity (patch version)
 
-**v1.0.0**: "Scalars have empty shape" (ambiguous: `[]` or`[1]`?)
+**v1.0.0**: "Scalars have empty shape" (ambiguous: `[]` or `[1]`?)
 **v1.0.1**: "Scalars have shape `[]` (rank-0)" (clarification)
 
 - No semantic change: behavior was already `[]` in reference implementation

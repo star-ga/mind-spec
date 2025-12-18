@@ -17,7 +17,8 @@ limitations under the License.
 # Static Reverse-Mode Autodiff (Normative)
 
 This chapter specifies the **Core v1 reverse-mode autodiff** pipeline that operates on canonical Core
-IR. The rules align with the implemented behaviour in the public compiler [`cputer/mind`](https://github.com/cputer/mind) and describe no additional proprietary features.
+IR. The rules align with the implemented behaviour in the public compiler
+[`cputer/mind`](https://github.com/cputer/mind) and describe no additional proprietary features.
 
 ## Model
 
