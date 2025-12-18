@@ -45,6 +45,12 @@ Core v1 is organised into the following pillars:
    the feature-gated MLIR backend.
 10. **Runtime Interface** ([`runtime.md`](./runtime.md)) — abstract contract for executing canonical IR
     semantics across CPU and the optional GPU profile.
+11. **Security & Safety** ([`security.md`](./security.md)) — memory safety guarantees, determinism
+    requirements, supply chain security, and threat model considerations.
+12. **Performance & Benchmarks** ([`performance.md`](./performance.md)) — performance targets, benchmark
+    methodology, optimization strategies, and profiling guidance (informative).
+13. **Foreign Function Interface** ([`ffi.md`](./ffi.md)) — C ABI, Python/C++/Rust bindings, memory
+    management, and cross-language interoperability.
 
 Legacy chapters such as [`lexical.md`](./lexical.md) and [`types.md`](./types.md) remain available for
 background on the broader language but are not required for Core v1 conformance.
