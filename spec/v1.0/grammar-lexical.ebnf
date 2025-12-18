@@ -1,0 +1,114 @@
+(*
+MIND Language Specification — Community Edition
+Lexical Grammar (EBNF)
+
+Copyright 2025 STARGA Inc.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at:
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+This grammar corresponds to the normative lexical rules in lexical.md.
+*)
+
+(* Source text structure *)
+SourceFile = [ ByteOrderMark ] , { Token | Whitespace | Comment } ;
+
+(* Tokens *)
+Token = Identifier
+      | Keyword
+      | Literal
+      | Operator
+      | Punctuation
+      ;
+
+(* Identifiers *)
+Identifier = IdentifierStart , { IdentifierContinue } ;
+IdentifierStart = Letter | "_" ;
+IdentifierContinue = Letter | Digit | "_" ;
+
+(* Unicode character classes *)
+Letter = ? Unicode XID_Start ? ;
+Digit = ? Unicode XID_Continue & Nd ? | "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+
+(* Keywords *)
+Keyword = "fn" | "let" | "type" | "struct" | "trait"
+        | "if" | "else" | "match" | "while" | "for"
+        | "return" | "defer" | "import" | "export" | "where"
+        ;
+
+(* Literals *)
+Literal = IntegerLiteral
+        | FloatingPointLiteral
+        | StringLiteral
+        | BooleanLiteral
+        | DifferentiableLiteral
+        ;
+
+(* Integer literals *)
+IntegerLiteral = [ Sign ] , ( DecimalInteger | BinaryInteger | OctalInteger | HexInteger ) ;
+Sign = "+" | "-" ;
+DecimalInteger = DecimalDigit , { DecimalDigit | "_" } ;
+BinaryInteger = "0b" , BinaryDigit , { BinaryDigit | "_" } ;
+OctalInteger = "0o" , OctalDigit , { OctalDigit | "_" } ;
+HexInteger = "0x" , HexDigit , { HexDigit | "_" } ;
+
+DecimalDigit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+BinaryDigit = "0" | "1" ;
+OctalDigit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" ;
+HexDigit = DecimalDigit | "a" | "b" | "c" | "d" | "e" | "f" | "A" | "B" | "C" | "D" | "E" | "F" ;
+
+(* Floating-point literals *)
+FloatingPointLiteral = [ Sign ] , DecimalDigits , "." , DecimalDigits , [ Exponent ] ;
+DecimalDigits = DecimalDigit , { DecimalDigit | "_" } ;
+Exponent = ( "e" | "E" ) , [ Sign ] , DecimalDigits ;
+
+(* String literals *)
+StringLiteral = '"' , { StringCharacter | EscapeSequence } , '"' ;
+StringCharacter = ? any Unicode scalar value except '"', '\', newline ? ;
+EscapeSequence = "\" , ( "n" | "r" | "t" | "\" | '"' | "0" | UnicodeEscape ) ;
+UnicodeEscape = "u" , "{" , HexDigit , { HexDigit } , "}" ;
+
+(* Boolean literals *)
+BooleanLiteral = "true" | "false" ;
+
+(* Differentiable literals *)
+DifferentiableLiteral = Literal , "^" ;
+
+(* Operators *)
+Operator = "+" | "-" | "*" | "/" | "%"
+         | "==" | "!=" | "<" | ">" | "<=" | ">="
+         | "&&" | "||" | "!"
+         | "=" | "+=" | "-=" | "*=" | "/="
+         | "->" | "=>" | ":="
+         | "." | "::" | "@"
+         | "^"
+         ;
+
+(* Punctuation *)
+Punctuation = "(" | ")" | "{" | "}" | "[" | "]"
+            | "," | ";" | ":"
+            ;
+
+(* Comments *)
+Comment = LineComment | BlockComment ;
+LineComment = "//" , { ? any character except newline ? } , LineTerminator ;
+BlockComment = "/*" , { ? any character ? | BlockComment } , "*/" ;
+
+(* Whitespace *)
+Whitespace = Space | Tab | LineTerminator ;
+Space = " " ;
+Tab = ? U+0009 ? ;
+LineTerminator = LineFeed | CarriageReturn | CarriageReturnLineFeed ;
+LineFeed = ? U+000A ? ;
+CarriageReturn = ? U+000D ? ;
+CarriageReturnLineFeed = CarriageReturn , LineFeed ;
+
+(* Byte order mark *)
+ByteOrderMark = ? U+FEFF ? ;
