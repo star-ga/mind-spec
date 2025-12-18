@@ -72,6 +72,123 @@ The broadcasted shape `C` is the dimension-by-dimension result of this rule.
 If any dimension fails the compatibility checks, the operator is required to
 produce a **shape error** rather than silently proceeding.
 
+### Formal broadcasting algorithm
+
+The following algorithm defines broadcasting semantically and MUST be followed by all conforming implementations:
+
+```
+Algorithm: Broadcast(ShapeA, ShapeB) → ShapeC or Error
+
+Inputs:
+  ShapeA = [a₀, a₁, ..., aₘ₋₁]  // Shape with rank m
+  ShapeB = [b₀, b₁, ..., bₙ₋₁]  // Shape with rank n
+
+Output:
+  ShapeC = [c₀, c₁, ..., cₖ₋₁]  // Broadcasted shape with rank k
+  or BroadcastError             // Incompatible shapes
+
+Procedure:
+  1. Determine target rank:
+       k ← max(m, n)
+
+  2. Align shapes from the right (prepend 1s to shorter shape):
+       If m < k:
+         ShapeA' ← [1, 1, ..., 1︸k-m times, a₀, a₁, ..., aₘ₋₁]
+       Else:
+         ShapeA' ← ShapeA
+
+       If n < k:
+         ShapeB' ← [1, 1, ..., 1︸k-n times, b₀, b₁, ..., bₙ₋₁]
+       Else:
+         ShapeB' ← ShapeB
+
+  3. Compute broadcasted dimensions:
+       For i from 0 to k-1:
+         aᵢ' ← ShapeA'[i]
+         bᵢ' ← ShapeB'[i]
+
+         If aᵢ' == bᵢ':
+           cᵢ ← aᵢ'
+         Else if aᵢ' == 1:
+           cᵢ ← bᵢ'
+         Else if bᵢ' == 1:
+           cᵢ ← aᵢ'
+         Else:
+           Return BroadcastError(
+             message: "Incompatible shapes for broadcasting",
+             dimension: i,
+             extent_a: aᵢ',
+             extent_b: bᵢ'
+           )
+
+  4. Return ShapeC ← [c₀, c₁, ..., cₖ₋₁]
+```
+
+### Broadcasting examples
+
+Implementations MUST produce the following results:
+
+**Example 1: Scalar broadcast**
+```
+A = []        (rank-0 scalar)
+B = [3, 4, 5]
+Result = [3, 4, 5]
+
+Aligned: A' = [1, 1, 1], B' = [3, 4, 5]
+Broadcast: [1→3, 1→4, 1→5] = [3, 4, 5]
+```
+
+**Example 2: Leading dimension broadcast**
+```
+A = [1, 5]
+B = [3, 5]
+Result = [3, 5]
+
+Aligned: A' = [1, 5], B' = [3, 5]
+Broadcast: [1→3, 5] = [3, 5]
+```
+
+**Example 3: Multi-dimensional broadcast**
+```
+A = [3, 1, 5]
+B = [1, 4, 5]
+Result = [3, 4, 5]
+
+Aligned: A' = [3, 1, 5], B' = [1, 4, 5]
+Broadcast: [3→3, 1→4, 5] = [3, 4, 5]
+```
+
+**Example 4: Broadcast error (incompatible)**
+```
+A = [3, 4]
+B = [3, 5]
+Result = BroadcastError
+
+Aligned: A' = [3, 4], B' = [3, 5]
+Dimension 1: 4 ≠ 5 and neither is 1 → Error
+```
+
+**Example 5: Rank mismatch with broadcast**
+```
+A = [5]
+B = [3, 4, 5]
+Result = [3, 4, 5]
+
+Aligned: A' = [1, 1, 5], B' = [3, 4, 5]
+Broadcast: [1→3, 1→4, 5] = [3, 4, 5]
+```
+
+### Broadcasting invariants
+
+Conforming implementations MUST maintain these invariants:
+
+1. **Commutativity**: `Broadcast(A, B) = Broadcast(B, A)` for all compatible shapes
+2. **Associativity**: `Broadcast(Broadcast(A, B), C) = Broadcast(A, Broadcast(B, C))` when defined
+3. **Identity with rank-0**: `Broadcast(A, []) = A` for any shape A
+4. **Identity with ones**: `Broadcast(A, [1, 1, ..., 1]) = A` when ranks match
+5. **Determinism**: Same input shapes MUST always produce the same output or error
+6. **Error precision**: Broadcast errors MUST identify the failing dimension index
+
 ### Elementwise unary
 
 For **unary elementwise** operators (for example, `tensor.relu`, `tensor.neg`,

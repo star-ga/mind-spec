@@ -114,9 +114,26 @@ as implementation-defined.
 
 - **`ConstI64(value: i64) -> ValueId`**
   - Produces a scalar `i64` tensor (rank-0) with the literal `value`.
-- **`ConstTensor(data: tensor literal) -> ValueId`**
+  - **Shape rules**: output shape is `[]` (rank-0 scalar)
+  - **Dtype rules**: output dtype is always `i64`
+  - **Semantics**: the output tensor contains exactly one element with value `value`
+- **`ConstF32(value: f32) -> ValueId`**
+  - Produces a scalar `f32` tensor (rank-0) with the literal `value`.
+  - **Shape rules**: output shape is `[]` (rank-0 scalar)
+  - **Dtype rules**: output dtype is always `f32`
+- **`ConstF64(value: f64) -> ValueId`**
+  - Produces a scalar `f64` tensor (rank-0) with the literal `value`.
+  - **Shape rules**: output shape is `[]` (rank-0 scalar)
+  - **Dtype rules**: output dtype is always `f64`
+- **`ConstTensor(data: tensor literal, dtype: DType, shape: Shape) -> ValueId`**
   - Produces a tensor with the literal `data`. The literal encodes shape and dtype explicitly.
-  - The literal MUST match the declared dtype and shape; mismatches are verification failures.
+  - **Shape rules**: output shape is the declared `shape` attribute
+  - **Dtype rules**: output dtype is the declared `dtype` attribute
+  - **Verification**:
+    - The literal data MUST match the declared dtype and shape
+    - Element count in data MUST equal the product of shape dimensions
+    - All elements MUST be valid values for the declared dtype
+    - Mismatches are verification failures
 
 ### Binary operations
 
@@ -134,61 +151,183 @@ as implementation-defined.
 ### Reductions
 
 - **`Sum(input, axes: [i32], keepdims: bool) -> ValueId`**
+  - Computes the sum of tensor elements along specified axes.
+  - **Shape rules**:
+    - If `keepdims = true`: output shape has `1` at each reduced axis position
+    - If `keepdims = false`: output shape removes all reduced axes
+    - Empty `axes` denotes full reduction to scalar `[]` (regardless of keepdims)
+    - Example: `Sum([3, 4, 5], axes=[1], keepdims=false) → [3, 5]`
+    - Example: `Sum([3, 4, 5], axes=[1], keepdims=true) → [3, 1, 5]`
+  - **Dtype rules**: output dtype equals input dtype; sum preserves dtype (may overflow for integers)
+  - **Verification**:
+    - All axis indices MUST be in range `[0, rank)`
+    - Duplicate axes are verification failures
+    - Negative axis indices MAY be supported but are implementation-defined
 - **`Mean(input, axes: [i32], keepdims: bool) -> ValueId`**
-  - Inputs: a tensor and explicit axes (may be empty). Axes semantics follow
-    [Reduction rules](./shapes.md#reductions) including `keepdims` behaviour.
-  - `Mean` divides by the number of elements reduced (product of reduced dimensions), not by the
-    count of axes.
-  - Empty `axes` denotes a full reduction consistent with the reference compiler behaviour.
-  - Specifically, passing `axes: []` reduces across **all** dimensions (a full reduction), not a
-    no-op.
+  - Computes the arithmetic mean of tensor elements along specified axes.
+  - **Shape rules**: same as `Sum` (see above)
+  - **Dtype rules**: output dtype equals input dtype
+  - **Semantics**:
+    - Divides by the number of elements reduced (product of reduced dimension extents)
+    - NOT by the count of axes
+    - Example: `Mean([2, 3, 4], axes=[1,2]) divides by 3*4=12`
+  - **Verification**: same as `Sum`
 
 ### Shape manipulation
 
 - **`Reshape(input, new_shape: [i64]) -> ValueId`**
-  - Preserves element count; rank may change. The verifier enforces that element counts match; if they
-    differ, verification fails.
+  - Reshapes a tensor to a new shape while preserving element count and order.
+  - **Shape rules**: output shape is `new_shape`
+  - **Dtype rules**: output dtype equals input dtype (reshape does not change dtype)
+  - **Verification**:
+    - Element count MUST be preserved: `product(input.shape) == product(new_shape)`
+    - All dimensions in `new_shape` MUST be positive integers
+    - Exactly one dimension MAY be `-1` (inferred from element count); if present, it is computed
+      as `product(input.shape) / product(other_dimensions)`
+    - Element count mismatch is a verification failure
 - **`Transpose(input, permutation: [i64]) -> ValueId`**
-  - Permutation length MUST equal input rank and contain each axis exactly once.
+  - Permutes the dimensions of a tensor according to the given permutation.
+  - **Shape rules**: `output.shape[i] = input.shape[permutation[i]]` for all i
+  - **Dtype rules**: output dtype equals input dtype
+  - **Verification**:
+    - Permutation length MUST equal input rank
+    - Permutation MUST contain each axis index in `[0, rank)` exactly once
+    - Duplicate or out-of-range indices are verification failures
+  - **Example**: `Transpose([2, 3, 4], perm=[2, 0, 1]) → [4, 2, 3]`
 - **`ExpandDims(input, axes: [i64]) -> ValueId`**
-  - Inserts singleton dimensions at the specified axes.
-  - When multiple axes are provided, insertions are performed sequentially in ascending order of axis
-    value; each insertion shifts the positions of subsequent axes.
-  - Each axis MUST be within `[0, rank]` at the time of its respective insertion.
+  - Inserts singleton dimensions (size `1`) at the specified axis positions.
+  - **Shape rules**: output rank is `input.rank + len(axes)`; new dimensions have size `1`
+  - **Dtype rules**: output dtype equals input dtype
+  - **Semantics**:
+    - Axes are inserted sequentially in ascending order of axis value
+    - Each insertion shifts subsequent axis positions
+    - After all insertions, output has size `1` at each specified axis
+  - **Verification**:
+    - Each axis MUST be in range `[0, current_rank]` at insertion time
+    - Duplicate axes MAY be allowed if they refer to different positions after prior insertions
+    - Out-of-range axes are verification failures
+  - **Example**: `ExpandDims([3, 4], axes=[0, 2]) → [1, 3, 1, 4]`
 - **`Squeeze(input, axes: [i64]) -> ValueId`**
-  - Removes dimensions of size `1` at the specified axes. Axes MUST reference dimensions that are
-    exactly `1`.
+  - Removes dimensions of size `1` at the specified axis positions.
+  - **Shape rules**: output rank is `input.rank - len(axes)`; specified dimensions are removed
+  - **Dtype rules**: output dtype equals input dtype
+  - **Verification**:
+    - All specified axes MUST reference dimensions with size exactly `1`
+    - Axis indices MUST be in range `[0, rank)`
+    - Duplicate axes are verification failures
+    - Squeezing a dimension with size ≠ 1 is a verification failure
+  - **Example**: `Squeeze([1, 3, 1, 4], axes=[0, 2]) → [3, 4]`
 
 ### Indexing and slicing
 
 - **`Index(input, indices: [i64]) -> ValueId`**
-  - Indexes into `input` with one index per dimension.
-  - The verifier enforces only that the index list length matches the tensor rank.
-  - Bounds checking of indices is a runtime responsibility. If any index is out of bounds, the
-    behaviour is implementation-defined (e.g. may result in an error, undefined value, or other
-    backend-specific handling).
+  - Extracts a single element from the input tensor at the specified multi-dimensional index.
+  - **Shape rules**: output is a rank-0 scalar `[]`
+  - **Dtype rules**: output dtype equals input dtype
+  - **Semantics**: `Index(input, [i₀, i₁, ..., iₙ₋₁])` returns `input[i₀, i₁, ..., iₙ₋₁]`
+  - **Verification**:
+    - Index list length MUST equal input rank
+    - Length mismatch is a verification failure
+  - **Runtime behaviour**: bounds checking is a runtime responsibility
+    - Out-of-bounds indices MAY produce an error, undefined value, or backend-specific handling
+    - Implementations SHOULD document their out-of-bounds behaviour
 - **`Slice(input, starts: [i64], ends: [i64], steps: [i64]) -> ValueId`**
-  - Produces a view with range semantics per dimension. Start/end/step lengths MUST match rank.
-    Negative steps and bounds that would create empty slices are implementation-defined.
-- **`Gather(input, indices: tensor) -> ValueId`**
-  - Gathers elements according to the leading dimensions of `indices`. Result shape follows the
-    [Gather shape rules](./shapes.md#index-slice-and-gather). Index validity is checked per backend
-    and may be implementation-defined for out-of-range indices.
+  - Extracts a sub-tensor using range-based slicing along each dimension.
+  - **Shape rules**: `output.shape[i] = ceil((ends[i] - starts[i]) / steps[i])` for each dimension i
+  - **Dtype rules**: output dtype equals input dtype
+  - **Semantics**: slices along dimension `i` from `starts[i]` (inclusive) to `ends[i]` (exclusive)
+    with stride `steps[i]`
+  - **Verification**:
+    - Lengths of `starts`, `ends`, and `steps` MUST all equal input rank
+    - All `steps[i]` MUST be non-zero
+    - Length mismatch or zero steps are verification failures
+  - **Runtime behaviour**:
+    - Negative `starts`/`ends` MAY be interpreted as offsets from the end (implementation-defined)
+    - Negative `steps` (reverse slicing) MAY be supported (implementation-defined)
+    - Empty slices (where `ends[i] ≤ starts[i]` for positive step) produce size-0 dimensions
+- **`Gather(input, indices: tensor<i32|i64>) -> ValueId`**
+  - Gathers elements from input using an index tensor.
+  - **Shape rules**:
+    - If `indices` has shape `[I₀, I₁, ..., Iₖ]` and `input` has shape `[D₀, D₁, ..., Dₘ]`
+    - Output shape is `[I₀, I₁, ..., Iₖ, D₁, D₂, ..., Dₘ]`
+    - Indices tensor indexes into the first dimension of input
+  - **Dtype rules**:
+    - Indices tensor MUST have dtype `i32` or `i64`
+    - Output tensor has the same dtype as input
+  - **Semantics**: `output[i₀, ..., iₖ, d₁, ..., dₘ] = input[indices[i₀, ..., iₖ], d₁, ..., dₘ]`
+  - **Verification**:
+    - Indices tensor MUST have integer dtype (i32 or i64)
+    - Non-integer indices dtype is a verification failure
+  - **Runtime behaviour**:
+    - Index validity is checked at runtime
+    - Out-of-range indices MAY produce an error or backend-specific handling
 
 ### Linear and tensor algebra
 
 - **`Dot(lhs, rhs) -> ValueId`**
   - Inputs: rank-1 or rank-2 tensors with compatible inner dimensions.
-  - Output: tensor following standard dot-product broadcasting (implementation-aligned).
+  - **Shape rules**:
+    - Rank-1 × Rank-1: `[n] · [n] → []` (scalar inner product)
+    - Rank-2 × Rank-1: `[m, n] · [n] → [m]` (matrix-vector product)
+    - Rank-1 × Rank-2: `[m] · [m, n] → [n]` (vector-matrix product)
+    - Rank-2 × Rank-2: delegates to MatMul
+  - **Dtype rules**: both operands MUST have the same dtype; output has the same dtype.
+  - **Verification**: inner dimensions MUST match; mismatches are verification failures.
 - **`MatMul(lhs, rhs) -> ValueId`**
   - Inputs: matrices (or batched matrices) with compatible inner dimensions. Inputs MUST each have
     rank ≥ 2; leading batch dimensions broadcast following [broadcasting](./shapes.md#broadcasting).
+  - **Shape rules**:
+    - `lhs: [...batch_lhs, M, K]`
+    - `rhs: [...batch_rhs, K, N]`
+    - `output: [...Broadcast(batch_lhs, batch_rhs), M, N]`
+  - **Dtype rules**: both operands MUST have the same dtype; output has the same dtype.
+  - **Verification**:
+    - Both inputs MUST have rank ≥ 2
+    - Contracting dimension K MUST match: `lhs.shape[-1] == rhs.shape[-2]`
+    - Batch dimensions MUST be broadcast-compatible
+    - Rank < 2 or K mismatch are verification failures
 - **`Conv2d(input, filter, strides: [i64], padding: Padding) -> ValueId`**
-  - Input format: **NHWC**.
-  - Filter format: `[H_k, W_k, C_in, C_out]` (HWCF).
-  - Channels MUST satisfy `input.shape[3] == filter.shape[2]`.
-  - Stride and padding semantics MUST match the reference implementation; unsupported padding modes
-    are implementation-defined.
+  - Input format: **NHWC** `[batch, height, width, channels_in]`
+  - Filter format: **HWCF** `[kernel_height, kernel_width, channels_in, channels_out]`
+  - **Shape rules**:
+    - Input: `[N, H_in, W_in, C_in]`
+    - Filter: `[H_k, W_k, C_in, C_out]`
+    - Output: `[N, H_out, W_out, C_out]`
+    - `H_out = floor((H_in + 2*pad_h - H_k) / stride_h) + 1`
+    - `W_out = floor((W_in + 2*pad_w - W_k) / stride_w) + 1`
+  - **Dtype rules**: input and filter MUST have the same dtype; output has the same dtype.
+  - **Verification**:
+    - Input MUST have rank 4
+    - Filter MUST have rank 4
+    - Channels MUST match: `input.shape[3] == filter.shape[2]`
+    - Strides MUST have length 2 with positive values
+    - Padding MUST be Valid, Same, or Custom with 2 pairs of non-negative integers
+    - Channel mismatch or invalid strides/padding are verification failures
+
+### Activation and elementwise unary operations
+
+- **`Relu(input) -> ValueId`**
+  - Computes rectified linear unit: `max(0, x)` elementwise
+  - **Shape rules**: output shape equals input shape (no broadcasting)
+  - **Dtype rules**: input MUST be a floating-point dtype (f32 or f64); output has the same dtype.
+    Integer dtypes MAY be supported as an extension but are not required for Core v1 conformance.
+  - **Semantics**: `Relu(x)[i] = x[i] if x[i] > 0 else 0` for all indices i
+- **`Neg(input) -> ValueId`**
+  - Computes elementwise negation: `-x`
+  - **Shape rules**: output shape equals input shape
+  - **Dtype rules**: input MUST be a numeric dtype; output has the same dtype
+  - **Semantics**: `Neg(x)[i] = -x[i]` for all indices i
+- **`Exp(input) -> ValueId`**
+  - Computes elementwise exponential: `e^x`
+  - **Shape rules**: output shape equals input shape
+  - **Dtype rules**: input MUST be a floating-point dtype; output has the same dtype
+  - **Semantics**: `Exp(x)[i] = e^(x[i])` for all indices i
+- **`Log(input) -> ValueId`**
+  - Computes elementwise natural logarithm: `ln(x)`
+  - **Shape rules**: output shape equals input shape
+  - **Dtype rules**: input MUST be a floating-point dtype; output has the same dtype
+  - **Semantics**: `Log(x)[i] = ln(x[i])` for all indices i
+  - **Runtime behaviour**: `Log(x)` where `x ≤ 0` is implementation-defined (may produce NaN or error)
 
 ## Canonicalisation
 
