@@ -215,9 +215,16 @@ provide complete mathematical formulations for each Core v1 operation.
 
 ### Unsupported operations
 
-Any instruction not listed above MUST trigger `AutodiffError::UnsupportedOp`. Implementations extending
-Core v1 with additional operations MUST document their derivative rules or explicitly mark them as
-non-differentiable.
+The following operations trigger `AutodiffError::UnsupportedOp` (E5001):
+
+- **`Div`**: Division autodiff is NOT implemented. Use `Mul` with reciprocal if differentiable division
+  is required.
+- **`Conv2d`**: Convolution backward passes are NOT implemented in Core v1. Forward-only Conv2d is
+  supported; attempting autodiff through Conv2d returns `UnsupportedOp`.
+
+Any other instruction not listed above MUST also trigger `AutodiffError::UnsupportedOp`. Implementations
+extending Core v1 with additional operations MUST document their derivative rules or explicitly mark
+them as non-differentiable.
 
 ## Determinism
 

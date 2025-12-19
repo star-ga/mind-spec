@@ -137,7 +137,7 @@ as implementation-defined.
 
 ### Binary operations
 
-- **`BinOp(op: Add|Sub|Mul, lhs, rhs) -> ValueId`**
+- **`BinOp(op: Add|Sub|Mul|Div, lhs, rhs) -> ValueId`**
   - Inputs: two tensors broadcastable under the rules in [Shapes](./shapes.md#broadcasting).
   - Dtypes: operands MUST share a dtype; mixing dtypes is a verification failure.
   - Output: tensor with broadcasted shape as defined in [Shapes](./shapes.md#broadcasting).
@@ -145,8 +145,8 @@ as implementation-defined.
     ordered by ascending `ValueId`. Only `Add` (and other truly commutative operations) are treated
     as commutative; `Sub` and `Div` are **not** commutative, and their operand order MUST be
     preserved.
-  - `Div` is currently **not part of Core v1**; attempts to encode division are implementation-defined
-    and SHOULD be rejected during verification.
+  - `Div` is supported in IR and MLIR lowering but **autodiff is NOT supported** for division;
+    attempting to differentiate through Div returns an `UnsupportedOp` error (E5001).
 
 ### Reductions
 
@@ -160,9 +160,10 @@ as implementation-defined.
     - Example: `Sum([3, 4, 5], axes=[1], keepdims=true) → [3, 1, 5]`
   - **Dtype rules**: output dtype equals input dtype; sum preserves dtype (may overflow for integers)
   - **Verification**:
-    - All axis indices MUST be in range `[0, rank)`
+    - All axis indices MUST be in range `[-rank, rank)`
     - Duplicate axes are verification failures
-    - Negative axis indices MAY be supported but are implementation-defined
+    - Negative axis indices are supported: `-1` refers to the last axis, `-2` to second-to-last, etc.
+      Internally normalized via `axis = axis + rank` when `axis < 0`
 - **`Mean(input, axes: [i32], keepdims: bool) -> ValueId`**
   - Computes the arithmetic mean of tensor elements along specified axes.
   - **Shape rules**: same as `Sum` (see above)
@@ -242,8 +243,8 @@ as implementation-defined.
     - All `steps[i]` MUST be non-zero
     - Length mismatch or zero steps are verification failures
   - **Runtime behaviour**:
-    - Negative `starts`/`ends` MAY be interpreted as offsets from the end (implementation-defined)
-    - Negative `steps` (reverse slicing) MAY be supported (implementation-defined)
+    - Negative `starts`/`ends` are clamped to 0 (NOT interpreted as offsets from end)
+    - Negative `steps` (reverse slicing) are NOT supported; steps MUST be positive
     - Empty slices (where `ends[i] ≤ starts[i]` for positive step) produce size-0 dimensions
 - **`Gather(input, indices: tensor<i32|i64>) -> ValueId`**
   - Gathers elements from input using an index tensor.

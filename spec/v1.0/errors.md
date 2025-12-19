@@ -355,3 +355,24 @@ Error codes in this catalog are **stable across Core v1 versions**:
 - Changing error messages is permitted (messages are not part of stability guarantee)
 - Renumbering or removing error codes is NOT permitted without major version change
 - Context requirements MAY be expanded but MUST NOT be reduced
+
+## Reference implementation (`cputer/mind`)
+
+The reference compiler implements the following error codes:
+
+| Code  | Phase       | Description                              |
+|-------|-------------|------------------------------------------|
+| E1001 | Parse       | Unexpected token / parsing error         |
+| E2001 | Type-check  | General type error                       |
+| E2101 | Type-check  | Broadcast compatibility failure          |
+| E2102 | Type-check  | Rank/shape mismatch, invalid reductions  |
+| E2103 | Type-check  | MatMul inner-dimension mismatch          |
+| E3001 | IR Verify   | IR verification error                    |
+| E4001 | Autodiff    | Autodiff operation failure               |
+| E4002 | Autodiff    | Autodiff requires --func argument        |
+| E4003 | Autodiff    | Autodiff feature not enabled             |
+| E5001 | Backend     | No backend available for target          |
+
+**Note**: The reference implementation uses E2xxx for both type AND shape errors (combining
+the spec's E2xxx and E3xxx categories). Most error codes in the spec are reserved for future
+expansion.

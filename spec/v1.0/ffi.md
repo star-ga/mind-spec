@@ -501,6 +501,103 @@ Planned FFI improvements:
 - **Go bindings**: Via CGo for Go-based services
 - **Async API**: Non-blocking execution with callbacks/futures
 
+## Reference implementation C API (`mind-runtime`)
+
+The `cputer/mind-runtime` provides the following C API (feature flag: `--features ffi`):
+
+### Enumerations
+
+```c
+typedef enum {
+    MIND_STATUS_OK = 0,
+    MIND_STATUS_INVALID_ARG = 1,
+    MIND_STATUS_UNSUPPORTED = 2,
+    MIND_STATUS_RUNTIME_ERROR = 3,
+    MIND_STATUS_INTERNAL_ERROR = 4,
+} mind_status_t;
+
+typedef enum {
+    MIND_DTYPE_F32 = 0,
+    MIND_DTYPE_U8 = 1,
+    MIND_DTYPE_F16 = 2,
+    MIND_DTYPE_I32 = 3,
+} mind_dtype_t;
+
+typedef enum {
+    MIND_DEVICE_CPU = 0,
+    MIND_DEVICE_GPU = 1,
+} mind_device_t;
+```
+
+### Opaque types
+
+```c
+typedef struct mind_runtime_s mind_runtime_t;
+typedef struct mind_tensor_s mind_tensor_t;
+```
+
+### Function signatures
+
+```c
+// Runtime lifecycle
+mind_status_t mind_runtime_new(
+    mind_device_t device,
+    mind_runtime_t **out_rt
+);
+
+void mind_runtime_free(mind_runtime_t *rt);
+
+// Tensor memory management
+mind_status_t mind_tensor_alloc(
+    mind_runtime_t *rt,
+    mind_dtype_t dtype,
+    const int64_t *shape,
+    size_t rank,
+    mind_tensor_t **out_tensor
+);
+
+void mind_tensor_free(mind_runtime_t *rt, mind_tensor_t *tensor);
+
+// Tensor I/O
+mind_status_t mind_tensor_write_f32(
+    mind_runtime_t *rt,
+    mind_tensor_t *tensor,
+    const float *data,
+    size_t len
+);
+
+mind_status_t mind_tensor_read_f32(
+    mind_runtime_t *rt,
+    mind_tensor_t *tensor,
+    float *data,
+    size_t len
+);
+
+// Operator execution
+mind_status_t mind_runtime_run_op(
+    mind_runtime_t *rt,
+    const char *op_name,
+    mind_tensor_t *const *inputs,
+    size_t num_inputs,
+    mind_tensor_t *const *outputs,
+    size_t num_outputs
+);
+```
+
+**Total**: 7 exported functions, 3 enums, 2 opaque types.
+
+### Memory semantics
+
+- **Tensor storage**: `Vec<f32>` backed (standard Rust heap allocation)
+- **Allocation**: Zero-initialized with validated shapes
+- **Deallocation**: RAII via `mind_runtime_free()` / `mind_tensor_free()`
+- **Memory layout**: Row-major (C-style)
+- **GPU alignment**: 4-byte alignment required (`numel % 4 == 0`)
+
+### Numerical tolerances
+
+Conformance tests use `1e-5` tolerance for floating-point comparisons in autodiff gradient validation.
+
 ## References
 
 - [Rust FFI Guide](https://doc.rust-lang.org/nomicon/ffi.html)

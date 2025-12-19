@@ -19,7 +19,7 @@ limitations under the License.
 The MIND type system enforces static correctness and enables efficient differentiation. This chapter
 formalises type formation, typing judgements, inference constraints, and trait coherence. It aligns
 with the reference notes in
-[`cputer/mind/docs/type-system`](https://github.com/cputer/mind/tree/main/docs/type-system).
+[`cputer/mind/docs/type-system.md`](https://github.com/cputer/mind/blob/main/docs/type-system.md).
 
 ## Type formation
 
@@ -45,7 +45,7 @@ applicable rule. Selected core rules include:
 - **Function abstraction**: if `Γ, x1 : T1, ..., xn : Tn ⊢ e : U` then `Γ ⊢ fn(x1 : T1, ..., xn : Tn) -> U { e } : (T1, ..., Tn) -> U`.
 
 A comprehensive derivation catalogue is maintained in the implementation notes
-([informative](https://github.com/cputer/mind/tree/main/docs/type-system#derivations)).
+([informative](https://github.com/cputer/mind/blob/main/docs/type-system.md)).
 
 ## Type inference
 
@@ -84,8 +84,8 @@ The type checker participates directly in Core IR construction:
   implementation in scope.
 - Generic type parameters use an explicit `where` clause to declare trait bounds.
 
-Trait resolution strategies are implementation-defined but MUST respect lexical scoping. Additional
-background is recorded in [`cputer/mind/docs/traits`](https://github.com/cputer/mind/tree/main/docs/traits).
+Trait resolution strategies are implementation-defined but MUST respect lexical scoping. The reference
+implementation uses a runtime trait-based plugin architecture for backend selection.
 
 ## Differentiable types
 
@@ -96,7 +96,6 @@ available; otherwise an explicit conversion is required.
 
 ## Type soundness
 
-The canonical proof of progress and preservation is maintained alongside the reference compiler in
-[`cputer/mind/docs/type-soundness`](https://github.com/cputer/mind/tree/main/docs/type-soundness)
+The canonical proof of progress and preservation is maintained alongside the reference compiler
 (informative). Implementations SHOULD aim to keep diagnostic examples synced with the canonical
 proof obligations.

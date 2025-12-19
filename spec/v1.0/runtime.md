@@ -92,3 +92,37 @@ this specification. Implementations MAY optimise freely provided they preserve t
 - **Backend selection errors**: runtimes MUST surface structured errors when a requested backend
   target (e.g. `BackendTarget::Gpu`) is unavailable or feature-gated, and MUST apply the stable
   error semantics described above for the GPU profile.
+
+## Reference implementation status (`cputer/mind-runtime`)
+
+### GPU profile operations
+
+The reference runtime (`cputer/mind-runtime`) currently implements a **MockGpuBackend** for testing.
+Production CUDA/ROCm backends are planned for future releases.
+
+**GPU-supported operations (3)**:
+- `add` — Element-wise addition
+- `copy` — Tensor copy
+- `fill` — Fill with constant value
+
+**CPU-only operations (15)**:
+- Reductions: `sum_all`, `mean_all`, `sum`, `mean`
+- Elementwise: `mul`, `relu`
+- Linear algebra: `matmul`, `dot`, `conv2d`
+- Shape ops: `reshape`, `expand_dims`, `squeeze`, `transpose`
+- Indexing: `index`, `slice`, `gather`
+
+### Target hardware
+
+- **CUDA version**: 12 (planned)
+- **ROCm/HIP**: Planned (not yet implemented)
+- **LLVM version**: 16 (for JIT adapter)
+- **Rust version**: 1.73+ (minimum)
+
+### Integer overflow handling
+
+The runtime uses different strategies based on context:
+
+- **Checked arithmetic**: Used for user-controlled inputs (shapes, axes); returns `ExecError::InvalidArg` on overflow
+- **Saturating arithmetic**: Used for stride calculations; saturates to `usize::MAX`
+- **Wrapping arithmetic**: Used for safe reverse-indexing in `broadcast_shape()`
