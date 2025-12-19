@@ -30,18 +30,18 @@ examples/
 │   └── reductions.mind       # Sum, mean, and other reductions
 ├── autodiff/                 # Automatic differentiation
 │   ├── simple_grad.mind      # Basic gradient computation
-│   ├── mlp_backward.mind     # MLP backpropagation
-│   └── custom_vjp.mind       # Custom vector-Jacobian products
+│   └── mlp_backward.mind     # MLP backpropagation
 ├── linear_algebra/           # Linear algebra operations
 │   ├── matmul.mind           # Matrix multiplication
-│   ├── dot_product.mind      # Dot products
 │   └── conv2d.mind           # 2D convolution
 ├── ffi/                      # Foreign function interface
 │   ├── c_bindings.mind       # C interop example
 │   └── python_embed.py       # Python embedding example
 └── ir/                       # Core IR examples
     ├── simple_module.ir      # Basic IR module
-    └── autodiff_output.ir    # Autodiff-generated IR
+    ├── autodiff_output.ir    # Autodiff-generated IR
+    ├── matmul_module.ir      # Matrix multiplication IR
+    └── reduction_module.ir   # Reduction operations IR
 ```
 
 ## Running Examples
