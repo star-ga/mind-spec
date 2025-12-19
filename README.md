@@ -1,5 +1,9 @@
 # Mind Language Specification
 
+[![Spec Status](https://img.shields.io/badge/spec-v1.0%20stable-brightgreen)](./STATUS.md)
+[![Compiler](https://img.shields.io/badge/compiler-100%25-brightgreen)](https://github.com/cputer/mind)
+[![Runtime](https://img.shields.io/badge/runtime-100%25-brightgreen)](https://github.com/cputer/mind-runtime)
+
 The **MIND** language evolves through an open specification process. This repository is the
 authoritative source for the normative language specification (`spec/`) and the guiding design
 principles (`design/`). Content here is versioned, reviewed in the open, and kept in lockstep with

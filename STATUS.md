@@ -35,6 +35,13 @@ The formal Core v1 specification documents are located in `spec/v1.0/`. See [`ov
 | Conformance tests | `tests/` | ✅ Stable | Sample test corpus with YAML format per conformance.md. |
 | Changelog | `docs/changelog.md` | ✅ Up to date | Released alongside each tagged compiler/runtime version. |
 
+## Reference Implementations
+
+| Implementation | Repo | Status | Notes |
+| -------------- | ---- | ------ | ----- |
+| MIND Compiler | [`cputer/mind`](https://github.com/cputer/mind) | ✅ Complete | 69 tests passing, LLVM 18, 0 Clippy warnings, FFI safety docs. |
+| MIND Runtime | [`cputer/mind-runtime`](https://github.com/cputer/mind-runtime) | ✅ Complete | 33+ tests, GPU docs, release workflow, self-contained. |
+
 _Status legend_: ✅ Stable • ⚠️ Needs updates • 🚧 Under active development • 📝 Drafts in progress.
 
 If you are planning a contribution, please update this table as part of your pull request so downstream readers know what to expect from each section.

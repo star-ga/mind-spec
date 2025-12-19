@@ -29,19 +29,19 @@ The goal of this specification is to provide a stable foundation for:
 
 ## 🚀 Status
 
-**Spec version:** `v1.0-draft`  
-**Language tag:** `mind-2025a`  
+**Spec version:** `v1.0` (stable)
+**Language tag:** `mind-2025a`
 **Last update:** _Auto-populated from CI build timestamp_
 
 ---
 
 ## 📚 Related Projects
 
-| Repo | Purpose |
-|------|----------|
-| [`cputer/mind`](https://github.com/cputer/mind) | Public compiler, IR, autodiff, and MLIR lowering. |
-| [`cputer/mind-runtime`](https://github.com/cputer/mind-runtime) | Reference runtime backend implementing the deterministic executor. |
-| [`cputer/mind-spec`](https://github.com/cputer/mind-spec) | This specification and design docs. |
+| Repo | Purpose | Status |
+|------|----------|--------|
+| [`cputer/mind`](https://github.com/cputer/mind) | Public compiler, IR, autodiff, and MLIR lowering. | ✅ 100% (69 tests, LLVM 18) |
+| [`cputer/mind-runtime`](https://github.com/cputer/mind-runtime) | Reference runtime backend implementing the deterministic executor. | ✅ 100% (33+ tests, GPU docs) |
+| [`cputer/mind-spec`](https://github.com/cputer/mind-spec) | This specification and design docs. | ✅ 100% (14 chapters stable) |
 
 ---
 
