@@ -371,7 +371,7 @@ The reference compiler implements the following error codes:
 | E4001 | Autodiff    | Autodiff operation failure               |
 | E4002 | Autodiff    | Autodiff requires --func argument        |
 | E4003 | Autodiff    | Autodiff feature not enabled             |
-| E5001 | Backend     | No backend available for target          |
+| E5001 | Autodiff    | Unsupported operation for autodiff       |
 
 **Note**: The reference implementation uses E2xxx for both type AND shape errors (combining
 the spec's E2xxx and E3xxx categories). Most error codes in the spec are reserved for future

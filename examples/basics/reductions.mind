@@ -56,7 +56,7 @@ fn sum_axis_keepdims() -> Tensor<f32, [2, 1]> {
 
 // Example 4: Mean reduction
 // Reference: spec/v1.0/ir.md#reductions (Mean)
-// Divides by number of elements reduced, not number of axes
+// Divides by the total number of elements reduced, not the number of axes
 //
 // Expected: 3.5 (mean of 1,2,3,4,5,6)
 fn full_mean() -> f32 {
@@ -73,7 +73,7 @@ fn full_mean() -> f32 {
 // Reference: spec/v1.0/ir.md#reductions
 // Reduce along multiple axes simultaneously
 //
-// Expected: [5.0, 7.0, 9.0] (shape [3])
+// Expected: [16.0, 20.0, 24.0] (shape [3])
 fn multi_axis_sum() -> Tensor<f32, [3]> {
     let tensor: Tensor<f32, [2, 2, 3]> = [[[1.0, 2.0, 3.0],
                                             [4.0, 5.0, 6.0]],

@@ -3,7 +3,7 @@
 # Category: autodiff
 # Profile: cpu
 
-description: "Gradient of sum function is all-ones tensor"
+description: "Gradient of full-tensor sum is an all-ones tensor with the same shape as the input"
 category: autodiff
 profile: cpu
 
