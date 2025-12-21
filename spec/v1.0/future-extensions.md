@@ -279,6 +279,7 @@ fn load_training_data(query: String) -> Dataset {
 // Spark integration for large-scale data processing
 @spark(cluster = "analytics")
 fn batch_inference(data: SparkDataFrame) -> SparkDataFrame {
+    // Note: Closure syntax |row| is a proposed extension (not in Core v1)
     data.map(|row| model.predict(row.features))
 }
 ```
@@ -288,6 +289,7 @@ fn batch_inference(data: SparkDataFrame) -> SparkDataFrame {
 | Connector | Type | Use Case |
 |-----------|------|----------|
 | Apache Kafka | Streaming | Real-time event processing, streaming inference |
+| AWS Kinesis | Streaming | Cloud-native event streaming, real-time analytics |
 | Apache Spark | Batch/Stream | Large-scale batch processing, ETL pipelines |
 | PostgreSQL/MySQL | Database | Training data storage, feature stores |
 | Redis | Cache | Model caching, feature caching |
@@ -305,8 +307,8 @@ mind::data::
 
   batch::          # Batch data sources
     spark_context(config) -> SparkContext
-    read_parquet(path) -> DataFrame
-    read_csv(path, schema) -> DataFrame
+    read_parquet(path) -> DataFrame      # Generic MIND tabular type
+    read_csv(path, schema) -> DataFrame  # SparkDataFrame is Spark-specific wrapper
 
   connectors::     # Database connectors
     postgres_pool(config) -> ConnectionPool
