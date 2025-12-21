@@ -152,6 +152,209 @@ Neural signal processing leverages MIND's existing strengths:
 
 ---
 
+## Full-Stack Development Support
+
+### Motivation
+
+To align **MIND** with a full-stack development vision, the language must evolve to support seamless integration across the entire application stack—from frontend model inference to backend services and data infrastructure. Modern AI applications require:
+
+- **Service interoperability**: MIND models need to communicate with backend services, middleware layers, and external APIs
+- **Scalable computation**: Distributed training and inference across multiple nodes and devices
+- **Data pipeline integration**: Direct connectivity to data sources and streaming platforms for real-time AI applications
+- **Deployment flexibility**: Support for cloud-based, on-premises, and hybrid deployment environments
+
+### Proposed Extensions
+
+#### 1. Extended Model and API Interoperability (Informative)
+
+**Concept**: New syntax constructs for interfacing MIND models with backend services and middleware layers:
+
+```mind
+// Proposed syntax (not yet implemented)
+@api(protocol = "rest", endpoint = "/v1/inference")
+fn serve_model(input: tensor<f32[B, 784]>) -> tensor<f32[B, 10]> {
+    model.forward(input)
+}
+
+// gRPC service definition
+@grpc(service = "InferenceService")
+fn predict(request: InferenceRequest) -> InferenceResponse {
+    // Model inference with automatic serialization
+}
+
+// Middleware integration
+@middleware(layer = "auth", priority = 1)
+fn authenticated_inference(ctx: Context, input: Tensor) -> Result<Tensor, Error> {
+    // Inference with middleware pipeline
+}
+```
+
+**Supported protocols**:
+
+| Protocol | Use Case | Latency Profile |
+|----------|----------|-----------------|
+| REST/HTTP | General API access, web integration | Medium (1-100ms) |
+| gRPC | High-performance inter-service communication | Low (<10ms) |
+| WebSocket | Real-time streaming inference | Continuous |
+| GraphQL | Flexible data queries with model outputs | Medium |
+
+**Implementation considerations**:
+- Protocol handlers implemented as standard library modules (`mind::api::rest`, `mind::api::grpc`)
+- Automatic serialization/deserialization for common formats (JSON, Protocol Buffers, MessagePack)
+- Compatible with Core v1 type system (tensors serialize to nested arrays)
+- Async execution model for non-blocking I/O operations
+
+#### 2. Distributed Execution and Scalability (Informative)
+
+**Concept**: New constructs for parallel computation and distributed training across multiple nodes:
+
+```mind
+// Proposed syntax (not yet implemented)
+@distributed(strategy = "data_parallel", nodes = 8)
+fn train_distributed(data: Dataset, model: Model) -> Model {
+    // Automatic gradient synchronization across nodes
+}
+
+// Pipeline parallelism for large models
+@pipeline(stages = 4, micro_batches = 8)
+fn forward_pipeline(input: tensor<f32[B, D]>) -> tensor<f32[B, C]> {
+    // Model split across pipeline stages
+}
+
+// Tensor parallelism for matrix operations
+@tensor_parallel(dim = 1, shards = 4)
+fn large_matmul(a: tensor<f32[M, K]>, b: tensor<f32[K, N]>) -> tensor<f32[M, N]> {
+    matmul(a, b)
+}
+```
+
+**Parallelism strategies**:
+
+| Strategy | Description | Best For |
+|----------|-------------|----------|
+| Data Parallel | Replicate model, partition data | Large datasets, small-medium models |
+| Pipeline Parallel | Partition model across stages | Large models that don't fit on single device |
+| Tensor Parallel | Shard tensors across devices | Very large matrix operations |
+| Hybrid | Combine multiple strategies | Large models with large datasets |
+
+**Proposed standard library module**: `mind::distributed::`
+
+```
+mind::distributed::
+  collectives::    # Communication primitives
+    allreduce(tensor, op) -> tensor
+    allgather(tensor) -> tensor
+    reduce_scatter(tensor, op) -> tensor
+    broadcast(tensor, root) -> tensor
+
+  strategies::     # Parallelism strategies
+    data_parallel(model, devices) -> DistributedModel
+    pipeline_parallel(model, stages) -> PipelineModel
+    tensor_parallel(model, shards) -> ShardedModel
+
+  sync::           # Synchronization utilities
+    barrier() -> ()
+    checkpoint(model, path) -> ()
+    load_checkpoint(path) -> Model
+```
+
+#### 3. Data Pipeline Integration (Informative)
+
+**Concept**: Specific syntax and API constructs for reading from and writing to data sources:
+
+```mind
+// Proposed syntax (not yet implemented)
+// Kafka streaming integration
+@stream(source = "kafka", topic = "events", group = "inference")
+fn process_stream(event: Event) -> Prediction {
+    model.predict(event.features)
+}
+
+// Database connectors
+@datasource(type = "postgres", connection = "main_db")
+fn load_training_data(query: String) -> Dataset {
+    // Execute query and return as typed dataset
+}
+
+// Spark integration for large-scale data processing
+@spark(cluster = "analytics")
+fn batch_inference(data: SparkDataFrame) -> SparkDataFrame {
+    data.map(|row| model.predict(row.features))
+}
+```
+
+**Supported data connectors**:
+
+| Connector | Type | Use Case |
+|-----------|------|----------|
+| Apache Kafka | Streaming | Real-time event processing, streaming inference |
+| Apache Spark | Batch/Stream | Large-scale batch processing, ETL pipelines |
+| PostgreSQL/MySQL | Database | Training data storage, feature stores |
+| Redis | Cache | Model caching, feature caching |
+| S3/GCS/Azure Blob | Object Storage | Model artifacts, dataset storage |
+| Parquet/Arrow | File Format | Efficient columnar data exchange |
+
+**Proposed standard library module**: `mind::data::`
+
+```
+mind::data::
+  streaming::      # Streaming data sources
+    kafka_consumer(config) -> Stream<Message>
+    kafka_producer(config) -> Producer
+    kinesis_stream(config) -> Stream<Record>
+
+  batch::          # Batch data sources
+    spark_context(config) -> SparkContext
+    read_parquet(path) -> DataFrame
+    read_csv(path, schema) -> DataFrame
+
+  connectors::     # Database connectors
+    postgres_pool(config) -> ConnectionPool
+    mysql_pool(config) -> ConnectionPool
+    redis_client(config) -> RedisClient
+
+  formats::        # Serialization formats
+    to_arrow(tensor) -> ArrowArray
+    from_arrow(array) -> tensor
+    to_parquet(dataset, path) -> ()
+```
+
+### Deployment Environment Support
+
+MIND full-stack extensions support multiple deployment environments:
+
+| Environment | Description | Key Features |
+|-------------|-------------|--------------|
+| Cloud-native | Kubernetes, serverless | Auto-scaling, container orchestration |
+| On-premises | Enterprise data centers | Data sovereignty, custom hardware |
+| Hybrid | Mixed cloud/on-prem | Workload portability, burst capacity |
+| Edge | IoT devices, mobile | Low latency, offline capability |
+
+**Configuration example**:
+
+```mind
+// Proposed syntax (not yet implemented)
+@deploy(environment = "kubernetes", replicas = 3, autoscale = true)
+@resources(cpu = "2", memory = "4Gi", gpu = "nvidia-t4")
+fn inference_service(config: ServiceConfig) -> Service {
+    // Model serving with auto-scaling
+}
+```
+
+### Integration with Existing Features
+
+Full-stack extensions leverage MIND's existing strengths:
+
+| MIND Feature | Full-Stack Application |
+|--------------|------------------------|
+| **Static shapes** | API schema generation, protocol buffer compatibility |
+| **Type safety** | End-to-end type checking from data source to model output |
+| **Autodiff** | Online learning with streaming data |
+| **MLIR lowering** | Optimized execution across heterogeneous backends |
+| **FFI** | Integration with existing service frameworks (Python FastAPI, Rust Actix) |
+
+---
+
 ## Other Domain Extensions (Placeholder)
 
 This section reserves space for future domain-specific extensions:

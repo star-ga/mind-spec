@@ -52,7 +52,8 @@ Core v1 is organised into the following pillars:
 13. **Foreign Function Interface** ([`ffi.md`](./ffi.md)) — C ABI, Python/C++/Rust bindings, memory
     management, and cross-language interoperability.
 14. **Future Extensions** ([`future-extensions.md`](./future-extensions.md)) — forward-looking
-    considerations for domain-specific extensions including neuroscience/BCI, embedded AI, and
+    considerations for domain-specific extensions including neuroscience/BCI, full-stack development
+    support (API interoperability, distributed execution, data pipelines), embedded AI, and
     safety-critical systems (informative).
 
 Legacy chapters such as [`lexical.md`](./lexical.md) and [`types.md`](./types.md) remain available for
