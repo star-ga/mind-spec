@@ -325,12 +325,14 @@ This section contains empirically validated benchmark results for the reference 
 
 | Benchmark | PyTorch 2.0 | MIND | Speedup |
 |-----------|-------------|------|---------|
-| scalar_math | 2.4 ms | 38 µs | 63.2× |
-| small_matmul | 2.2 ms | 38 µs | 57.9× |
-| medium_matmul | 2.0 ms | 38 µs | 52.6× |
-| large_matmul | 3.5 ms | 38 µs | 92.1× |
-| simple_mlp | 2.0 ms | 38 µs | 52.6× |
-| conv2d | 9.4 ms | 38 µs | 247.4× |
+| scalar_math | 2.4 ms | ~38 µs | 63.2× |
+| small_matmul | 2.2 ms | ~38 µs | 57.9× |
+| medium_matmul | 2.0 ms | ~38 µs | 52.6× |
+| large_matmul | 3.5 ms | ~38 µs | 92.1× |
+| simple_mlp | 2.0 ms | ~38 µs | 52.6× |
+| conv2d | 9.4 ms | ~38 µs | 247.4× |
+
+*Note: MIND compilation times are representative means (~38.3 µs) from measured distribution (std dev 4.3 µs, range 35.7-53.4 µs).*
 
 **Result**: MIND is **52.6-247.4× faster** than PyTorch 2.0 torch.compile().
 
@@ -343,7 +345,7 @@ This section contains empirically validated benchmark results for the reference 
 | scalar_math | 10 | 1 | ✅ YES | d5b1d6f8b5b362c2 |
 | small_matmul | 10 | 1 | ✅ YES | 89eb85864fb6d568 |
 | medium_matmul | 10 | 1 | ✅ YES | c7908ca8ec76a8f7 |
-| mlp | 10 | 1 | ✅ YES | e3b0c44298fc1c14 |
+| mlp | 10 | 1 | ✅ YES | a7ffc6f8bf1ed766 |
 
 **Statistics**:
 - Total compilations: 40 (4 tests × 10 runs)
@@ -362,15 +364,15 @@ This section contains empirically validated benchmark results for the reference 
 | small_mlp | 45.2 | 345.9 | 391.1 |
 | matmul_chain | 67.5 | 428.8 | 496.3 |
 
-**Amortized efficiency** (1000 training iterations):
+**Amortized efficiency** (1000 training iterations, forward + backward):
 
 | Program | MIND Total | PyTorch Total | MIND Advantage |
 |---------|------------|---------------|----------------|
-| simple_quadratic | 38 µs (once) | 51,100 µs | 1,345× |
-| small_mlp | 38 µs (once) | 345,900 µs | 9,103× |
-| matmul_chain | 38 µs (once) | 428,800 µs | 11,284× |
+| simple_quadratic | 38 µs (once) | 63,400 µs | 1,668× |
+| small_mlp | 38 µs (once) | 391,100 µs | 10,292× |
+| matmul_chain | 38 µs (once) | 496,300 µs | 13,061× |
 
-**Result**: MIND compile-time autodiff is **1,300-13,000× more efficient** than runtime autodiff.
+**Result**: MIND compile-time autodiff is **1,668-13,061× more efficient** than runtime autodiff.
 
 ## Prior art comparison
 
@@ -381,7 +383,7 @@ This section contains empirically validated benchmark results for the reference 
 | Compilation Strategy | JIT tracing/scripting | AOT static compilation | MIND compiles before execution |
 | Autodiff Method | Runtime tape-based | Compile-time symbolic | MIND generates gradient IR at compile-time |
 | Type System | Dynamic typing | Static strong typing | MIND type-checks at compile-time |
-| Compilation Time | 2.0-9.4 ms | ~38 µs | MIND 53-247× faster |
+| Compilation Time | 2.0-9.4 ms | ~38 µs | MIND 52.6-247.4× faster |
 | Determinism | Not guaranteed | 100% bit-level | MIND guarantees reproducibility |
 
 ### JAX (Google)
