@@ -368,9 +368,9 @@ This section contains empirically validated benchmark results for the reference 
 
 | Program | MIND Total | PyTorch Total | MIND Advantage |
 |---------|------------|---------------|----------------|
-| simple_quadratic | 38 µs (once) | 63,400 µs | 1,668× |
-| small_mlp | 38 µs (once) | 391,100 µs | 10,292× |
-| matmul_chain | 38 µs (once) | 496,300 µs | 13,061× |
+| simple_quadratic | ~38 µs (once) | 63,400 µs | 1,668× |
+| small_mlp | ~38 µs (once) | 391,100 µs | 10,292× |
+| matmul_chain | ~38 µs (once) | 496,300 µs | 13,061× |
 
 **Result**: MIND compile-time autodiff is **1,668-13,061× more efficient** than runtime autodiff.
 
