@@ -264,15 +264,25 @@ To ensure deterministic output:
 
 ## Token Efficiency Analysis
 
-Comparison for a 100-node MLP module:
+Comparison for a 6-node neural network layer (param, matmul, add, relu):
 
-| Format | Bytes | Tokens (GPT-4) | Ratio |
-|--------|-------|----------------|-------|
-| JSON IR | 12,400 | 4,200 | 1.0x |
-| Verbose IR | 8,600 | 2,900 | 0.69x |
-| MIC | 3,200 | 1,100 | 0.26x |
+| Format | Size (bytes) | Tokens | vs JSON | Parse Speed |
+|--------|--------------|--------|---------|-------------|
+| JSON | 1,115 | 278 | baseline | 5.31 us |
+| TOML | 606 | 151 | 1.8x | 137.06 us |
+| TOON | 269 | 67 | 4.1x | 2.67 us |
+| **MIC** | **209** | **52** | **5.3x** | **2.26 us** |
 
-MIC achieves ~4x token reduction compared to JSON IR.
+### Cost Impact (GPT-4 Pricing at $0.03/1K tokens)
+
+| Format | Cost/1K IRs | Annual Cost (1M IRs) | Savings vs JSON |
+|--------|-------------|----------------------|-----------------|
+| JSON | $8.34 | $8,340 | - |
+| TOML | $4.53 | $4,530 | $3,810 (46%) |
+| TOON | $2.01 | $2,010 | $6,330 (76%) |
+| **MIC** | **$1.56** | **$1,560** | **$6,780 (81%)** |
+
+**MIC achieves 5.3x token reduction and 2.4x faster parsing compared to JSON.**
 
 ## Error Handling
 

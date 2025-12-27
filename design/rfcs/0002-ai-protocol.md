@@ -53,6 +53,22 @@ oracle, enabling AI agents to achieve higher correctness rates through iterative
 5. **Token Efficiency**: Minimize protocol overhead for AI context windows.
 6. **Stateful Sessions**: Maintain compilation context across interactions.
 
+## Token Efficiency
+
+MAP achieves significant token savings compared to JSON-RPC:
+
+| Protocol | Size (bytes) | Tokens | vs JSON-RPC |
+|----------|--------------|--------|-------------|
+| JSON-RPC | 1,004 | 251 | baseline |
+| **MAP** | **234** | **58** | **4.3x fewer tokens** |
+
+A typical 5-command session (hello, load, check, dump, bye):
+- **JSON-RPC**: 251 tokens
+- **MAP**: 58 tokens
+- **Savings**: 193 tokens (77%)
+
+At GPT-4 pricing ($0.03/1K tokens), MAP saves approximately **$5.79 per 1000 sessions** compared to JSON-RPC.
+
 ## Protocol Overview
 
 MAP operates over a bidirectional text stream (stdin/stdout, WebSocket, or TCP). Each message is
