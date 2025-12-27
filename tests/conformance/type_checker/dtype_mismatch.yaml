@@ -1,0 +1,25 @@
+# MIND Conformance Test: Dtype Mismatch
+# Specification reference: spec/v1.0/errors.md#e2004-dtype-mismatch-in-binary-operation
+# Category: type_checker
+# Profile: cpu
+
+description: "Binary operation with mismatched dtypes produces E2004"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    fn dtype_error() -> Tensor<f32, [2]> {
+        let a: Tensor<f32, [2]> = [1.0, 2.0];
+        let b: Tensor<i32, [2]> = [1, 2];
+        a + b  // f32 + i32 is not allowed
+    }
+
+expected:
+  status: error
+  error:
+    code: E2004
+    message_contains: "Dtype mismatch"
+    location:
+      line: 5
+      column: 9

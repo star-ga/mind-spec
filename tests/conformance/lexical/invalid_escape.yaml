@@ -1,0 +1,23 @@
+# MIND Conformance Test: Invalid Escape Sequence
+# Specification reference: spec/v1.0/errors.md#e1004-invalid-escape-sequence
+# Category: lexical
+# Profile: cpu
+
+description: "Invalid escape sequence in string literal produces E1004"
+category: lexical
+profile: cpu
+
+input:
+  source: |
+    fn test() -> unit {
+        let s = "hello\qworld";  // \q is not valid
+    }
+
+expected:
+  status: error
+  error:
+    code: E1004
+    message_contains: "Invalid escape sequence"
+    location:
+      line: 2
+      column: 19

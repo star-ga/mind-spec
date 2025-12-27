@@ -1,0 +1,32 @@
+# MIND Core IR Example: Reduction Operations
+# Specification reference: spec/v1.0/ir.md#reductions
+# Grammar reference: spec/v1.0/grammar-ir.ebnf
+#
+# This example demonstrates Sum and Mean reduction operations
+# with various keepdims configurations.
+
+# Input tensor
+%0 = Input() {name: "x"} : Tensor<f32, [4, 5, 6]>
+
+# Full reduction to scalar (empty axes)
+# Reference: spec/v1.0/ir.md#reductions
+# sum(x, axes=[], keepdims=false) -> scalar
+%1 = Sum(%0, [], false) : Tensor<f32, []>
+
+# Axis reduction without keepdims
+# sum(x, axes=[1], keepdims=false) -> [4, 6]
+%2 = Sum(%0, [1], false) : Tensor<f32, [4, 6]>
+
+# Axis reduction with keepdims
+# sum(x, axes=[1], keepdims=true) -> [4, 1, 6]
+%3 = Sum(%0, [1], true) : Tensor<f32, [4, 1, 6]>
+
+# Mean reduction
+# mean(x, axes=[0, 2], keepdims=false) -> [5]
+%4 = Mean(%0, [0, 2], false) : Tensor<f32, [5]>
+
+# Multi-axis reduction with keepdims
+# sum(x, axes=[0, 1], keepdims=true) -> [1, 1, 6]
+%5 = Sum(%0, [0, 1], true) : Tensor<f32, [1, 1, 6]>
+
+outputs: %1, %2, %3, %4, %5

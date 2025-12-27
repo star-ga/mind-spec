@@ -1,0 +1,62 @@
+// MIND Language Example: Hello Tensor
+// Specification reference: spec/v1.0/language.md
+//
+// This example demonstrates basic tensor creation and arithmetic operations.
+// It covers:
+//   - Tensor literals and type annotations
+//   - Binary operations (Add, Sub, Mul)
+//   - Broadcasting semantics
+//
+// Expected output:
+//   result = [[5.0, 7.0, 9.0], [9.0, 11.0, 13.0]]
+
+// Import tensor operations from standard library
+// Reference: spec/v1.0/stdlib.md#tensor-module
+import tensor::zeros;
+import tensor::ones;
+
+// Main function demonstrating tensor operations
+fn main() -> Tensor<f32, [2, 3]> {
+    // Create tensors with explicit shape and dtype
+    // Reference: spec/v1.0/language.md#types
+    let a: Tensor<f32, [2, 3]> = [[1.0, 2.0, 3.0],
+                                   [4.0, 5.0, 6.0]];
+
+    let b: Tensor<f32, [2, 3]> = [[4.0, 5.0, 6.0],
+                                   [5.0, 6.0, 7.0]];
+
+    // Elementwise addition
+    // Reference: spec/v1.0/ir.md#binary-operations
+    // Lowers to: BinOp(Add, %a, %b)
+    let result = a + b;
+
+    result
+}
+
+// Example: Scalar broadcasting
+// Reference: spec/v1.0/shapes.md#broadcasting
+fn scalar_broadcast() -> Tensor<f32, [2, 3]> {
+    let matrix: Tensor<f32, [2, 3]> = [[1.0, 2.0, 3.0],
+                                        [4.0, 5.0, 6.0]];
+    let scalar: f32 = 2.0;
+
+    // Scalar broadcasts to matrix shape
+    // Broadcasting rule: scalar [] extends to [2, 3]
+    let scaled = matrix * scalar;
+
+    scaled
+}
+
+// Example: Arithmetic precedence
+// Reference: spec/v1.0/language.md#operator-precedence-and-associativity
+fn precedence_demo() -> Tensor<f32, [2, 2]> {
+    let a: Tensor<f32, [2, 2]> = [[1.0, 2.0], [3.0, 4.0]];
+    let b: Tensor<f32, [2, 2]> = [[2.0, 2.0], [2.0, 2.0]];
+    let c: Tensor<f32, [2, 2]> = [[1.0, 1.0], [1.0, 1.0]];
+
+    // Parses as: a + (b * c) due to precedence
+    // Multiplication binds tighter than addition
+    let result = a + b * c;
+
+    result
+}

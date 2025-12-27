@@ -1,0 +1,112 @@
+// MIND Language Example: C FFI Bindings
+// Specification reference: spec/v1.0/ffi.md
+//
+// This example demonstrates calling C functions from MIND
+// and exposing MIND functions to C code.
+
+// ============================================
+// Importing C functions
+// Reference: spec/v1.0/ffi.md#c-abi
+// ============================================
+
+// External C function declaration
+// Maps to: double c_math_sqrt(double x);
+#[extern("C")]
+fn c_math_sqrt(x: f64) -> f64;
+
+// External C function with pointer argument
+// Maps to: void c_print_array(float* data, size_t len);
+#[extern("C")]
+fn c_print_array(data: *f32, len: usize) -> unit;
+
+// External C struct
+// Reference: spec/v1.0/ffi.md#memory-management
+#[repr(C)]
+struct CMatrix {
+    data: *f32,
+    rows: usize,
+    cols: usize,
+}
+
+// External C function operating on struct
+#[extern("C")]
+fn c_matrix_multiply(a: *CMatrix, b: *CMatrix, out: *CMatrix) -> i32;
+
+// ============================================
+// Using C functions in MIND code
+// ============================================
+
+fn compute_with_c_sqrt() -> f64 {
+    let value: f64 = 16.0;
+
+    // Call external C function
+    let result = c_math_sqrt(value);
+
+    result  // Returns 4.0
+}
+
+fn print_tensor_via_c() {
+    let tensor: Tensor<f32, [4]> = [1.0, 2.0, 3.0, 4.0];
+
+    // Get raw pointer to tensor data
+    // Reference: spec/v1.0/ffi.md#memory-management
+    let ptr = tensor.as_ptr();
+    let len = tensor.len();
+
+    // Call C function with pointer
+    c_print_array(ptr, len);
+}
+
+// ============================================
+// Exporting MIND functions to C
+// Reference: spec/v1.0/ffi.md#c-abi
+// ============================================
+
+// Export function with C ABI
+// Can be called from C as: float mind_sum_array(float* data, size_t len);
+#[export("C")]
+fn mind_sum_array(data: *f32, len: usize) -> f32 {
+    // Create tensor view from pointer (no copy)
+    let tensor = Tensor::from_ptr(data, shape=[len]);
+
+    // Use MIND sum operation
+    sum(tensor, axes=[], keepdims=false)
+}
+
+// Export function that returns tensor via output parameter
+// C signature: void mind_compute(float* input, size_t len, float* output);
+#[export("C")]
+fn mind_compute(input: *f32, len: usize, output: *f32) -> unit {
+    // View input as tensor
+    let x = Tensor::from_ptr(input, shape=[len]);
+
+    // Compute
+    let result = x * x + x;
+
+    // Copy result to output buffer
+    result.copy_to_ptr(output);
+}
+
+// ============================================
+// Memory safety considerations
+// Reference: spec/v1.0/ffi.md#memory-management
+// Reference: spec/v1.0/security.md
+// ============================================
+
+// MIND tensors own their memory by default
+// When interfacing with C:
+//   - from_ptr creates a non-owning view (borrowed)
+//   - as_ptr returns pointer valid for tensor lifetime
+//   - copy_to_ptr copies data to external buffer
+
+// Unsafe pointer operations require explicit marker
+#[unsafe]
+fn raw_pointer_ops() {
+    let tensor: Tensor<f32, [4]> = [1.0, 2.0, 3.0, 4.0];
+
+    // Get mutable pointer (unsafe: caller ensures no aliasing)
+    let ptr = tensor.as_mut_ptr();
+
+    // Manual memory operations
+    // Reference: spec/v1.0/ffi.md#memory-management
+}

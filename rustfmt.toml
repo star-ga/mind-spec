@@ -1,0 +1,11 @@
+# Rustfmt configuration aligned with cputer/mind repository
+# See: https://rust-lang.github.io/rustfmt/
+
+edition = "2021"
+max_width = 100
+newline_style = "Unix"
+tab_spaces = 4
+use_small_heuristics = "Default"
+
+# Note: wrap_comments was intentionally removed as it is unstable
+# and causes CI failures on stable Rust toolchains.

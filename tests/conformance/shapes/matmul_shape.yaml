@@ -1,0 +1,26 @@
+# MIND Conformance Test: MatMul Shape Inference
+# Specification reference: spec/v1.0/ir.md#linear-and-tensor-algebra
+# Category: shapes
+# Profile: cpu
+
+description: "MatMul computes correct output shape with batch broadcasting"
+category: shapes
+profile: cpu
+
+input:
+  source: |
+    fn batched_matmul() -> Tensor<f32, [2, 3, 5]> {
+        let a: Tensor<f32, [2, 3, 4]> = zeros([2, 3, 4]);
+        let b: Tensor<f32, [4, 5]> = ones([4, 5]);
+        matmul(a, b)  // [2, 3, 4] @ [4, 5] -> [2, 3, 5]
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: f32
+      shape: [2, 3, 5]
+      # All zeros since a is zeros
+      values_pattern: "all_zeros"
+      tolerance: 1e-6

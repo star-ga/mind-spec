@@ -1,0 +1,143 @@
+// MIND Language Example: Matrix Multiplication
+// Specification reference: spec/v1.0/ir.md#linear-and-tensor-algebra
+//
+// This example demonstrates MatMul operations including
+// batched matrix multiplication with broadcasting.
+
+import tensor::zeros;
+import tensor::ones;
+import tensor::eye;
+
+// Example 1: Basic 2D matrix multiplication
+// Reference: spec/v1.0/ir.md#linear-and-tensor-algebra (MatMul)
+// Shape: [M, K] @ [K, N] -> [M, N]
+//
+// Expected: 2x2 result matrix
+fn basic_matmul() -> Tensor<f32, [2, 2]> {
+    let a: Tensor<f32, [2, 3]> = [[1.0, 2.0, 3.0],
+                                   [4.0, 5.0, 6.0]];
+
+    let b: Tensor<f32, [3, 2]> = [[1.0, 4.0],
+                                   [2.0, 5.0],
+                                   [3.0, 6.0]];
+
+    // MatMul: [2, 3] @ [3, 2] -> [2, 2]
+    // Contracting dimension K=3 must match
+    let c = matmul(a, b);
+
+    // c[0,0] = 1*1 + 2*2 + 3*3 = 14
+    // c[0,1] = 1*4 + 2*5 + 3*6 = 32
+    // c[1,0] = 4*1 + 5*2 + 6*3 = 32
+    // c[1,1] = 4*4 + 5*5 + 6*6 = 77
+
+    c  // [[14.0, 32.0], [32.0, 77.0]]
+}
+
+// Example 2: Batched matrix multiplication
+// Reference: spec/v1.0/ir.md#linear-and-tensor-algebra
+// Shape: [batch, M, K] @ [batch, K, N] -> [batch, M, N]
+//
+// Expected shape: [2, 3, 4]
+fn batched_matmul() -> Tensor<f32, [2, 3, 4]> {
+    // Batch of 2 matrices, each 3x5
+    let a: Tensor<f32, [2, 3, 5]> = zeros([2, 3, 5]);
+
+    // Batch of 2 matrices, each 5x4
+    let b: Tensor<f32, [2, 5, 4]> = ones([2, 5, 4]);
+
+    // Batched matmul: [2, 3, 5] @ [2, 5, 4] -> [2, 3, 4]
+    // Each batch element is multiplied independently
+    let c = matmul(a, b);
+
+    c
+}
+
+// Example 3: Batch broadcasting in matmul
+// Reference: spec/v1.0/ir.md#linear-and-tensor-algebra
+// Single matrix broadcasts across batch
+//
+// Expected shape: [batch=4, M=3, N=2]
+fn broadcast_matmul() -> Tensor<f32, [4, 3, 2]> {
+    // Batch of 4 matrices
+    let a: Tensor<f32, [4, 3, 5]> = ones([4, 3, 5]);
+
+    // Single matrix (no batch dimension)
+    // Will broadcast to match batch size
+    let b: Tensor<f32, [5, 2]> = ones([5, 2]);
+
+    // Broadcasting: [4, 3, 5] @ [5, 2]
+    // b treated as [1, 5, 2] -> broadcasts to [4, 5, 2]
+    let c = matmul(a, b);
+
+    c  // Shape [4, 3, 2], each element = 5.0 (sum of 5 ones)
+}
+
+// Example 4: Multi-level batch broadcasting
+// Reference: spec/v1.0/shapes.md#broadcasting
+// Shapes [2, 1, 3, 4] and [1, 5, 4, 6] broadcast to [2, 5, 3, 6]
+fn multi_batch_broadcast() -> Tensor<f32, [2, 5, 3, 6]> {
+    let a: Tensor<f32, [2, 1, 3, 4]> = zeros([2, 1, 3, 4]);
+    let b: Tensor<f32, [1, 5, 4, 6]> = ones([1, 5, 4, 6]);
+
+    // Batch dimensions [2, 1] and [1, 5] broadcast to [2, 5]
+    // Matrix dimensions: [3, 4] @ [4, 6] -> [3, 6]
+    let c = matmul(a, b);
+
+    c
+}
+
+// Example 5: Identity matrix multiplication
+// Reference: spec/v1.0/stdlib.md#tensor-module (eye)
+// A @ I = A for identity matrix I
+fn identity_matmul() -> Tensor<f32, [3, 3]> {
+    let a: Tensor<f32, [3, 3]> = [[1.0, 2.0, 3.0],
+                                   [4.0, 5.0, 6.0],
+                                   [7.0, 8.0, 9.0]];
+
+    let identity = eye(3);  // 3x3 identity matrix
+
+    // A @ I = A
+    let result = matmul(a, identity);
+
+    result  // Same as a
+}
+
+// Example 6: Matrix-vector product via matmul
+// Reference: spec/v1.0/ir.md#linear-and-tensor-algebra
+// Vector treated as column matrix [K, 1]
+fn matrix_vector() -> Tensor<f32, [3]> {
+    let matrix: Tensor<f32, [3, 4]> = [[1.0, 2.0, 3.0, 4.0],
+                                        [5.0, 6.0, 7.0, 8.0],
+                                        [9.0, 10.0, 11.0, 12.0]];
+
+    let vector: Tensor<f32, [4]> = [1.0, 1.0, 1.0, 1.0];
+
+    // Reshape vector to [4, 1] for matmul
+    let v_col = reshape(vector, [4, 1]);
+
+    // [3, 4] @ [4, 1] -> [3, 1]
+    let result_col = matmul(matrix, v_col);
+
+    // Squeeze back to vector [3]
+    let result = squeeze(result_col, axes=[1]);
+
+    result  // [10.0, 26.0, 42.0]
+}
+
+// Example 7: Transpose and matmul (A @ B^T)
+// Reference: spec/v1.0/ir.md#shape-manipulation (Transpose)
+fn matmul_transpose() -> Tensor<f32, [2, 2]> {
+    let a: Tensor<f32, [2, 3]> = [[1.0, 2.0, 3.0],
+                                   [4.0, 5.0, 6.0]];
+
+    let b: Tensor<f32, [2, 3]> = [[1.0, 0.0, 1.0],
+                                   [0.0, 1.0, 1.0]];
+
+    // Transpose b: [2, 3] -> [3, 2]
+    let b_t = transpose(b, permutation=[1, 0]);
+
+    // A @ B^T: [2, 3] @ [3, 2] -> [2, 2]
+    let result = matmul(a, b_t);
+
+    result
+}

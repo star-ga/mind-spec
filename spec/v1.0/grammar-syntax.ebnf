@@ -1,0 +1,207 @@
+(*
+MIND Language Specification — Community Edition
+Surface Language Syntax Grammar (EBNF)
+
+Copyright 2025 STARGA Inc.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at:
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+This grammar corresponds to the normative syntax rules in language.md.
+Core v1 focuses on the tensor-oriented subset described in that chapter.
+*)
+
+(* Module structure *)
+Module = { ModuleItem } ;
+
+ModuleItem = FunctionDeclaration
+           | TypeDeclaration
+           | StructDeclaration
+           | TraitDeclaration
+           | ImportDeclaration
+           | ExportDeclaration
+           ;
+
+(* Function declarations *)
+FunctionDeclaration = "fn" , Identifier , "(" , [ ParameterList ] , ")" , [ "->" , Type ] , Block ;
+
+ParameterList = Parameter , { "," , Parameter } , [ "," ] ;
+Parameter = Identifier , ":" , Type ;
+
+(* Type declarations *)
+TypeDeclaration = "type" , Identifier , [ TypeParameters ] , "=" , Type , ";" ;
+
+TypeParameters = "<" , TypeParameter , { "," , TypeParameter } , [ "," ] , ">" ;
+TypeParameter = Identifier , [ ":" , TraitBounds ] ;
+
+TraitBounds = TraitBound , { "+" , TraitBound } ;
+TraitBound = Identifier ;
+
+(* Struct declarations *)
+StructDeclaration = "struct" , Identifier , [ TypeParameters ] , "{" , [ FieldList ] , "}" ;
+
+FieldList = Field , { "," , Field } , [ "," ] ;
+Field = Identifier , ":" , Type ;
+
+(* Trait declarations *)
+TraitDeclaration = "trait" , Identifier , [ TypeParameters ] , [ ":" , TraitBounds ] , "{" , { TraitItem } , "}" ;
+
+TraitItem = FunctionSignature ;
+FunctionSignature = "fn" , Identifier , "(" , [ ParameterList ] , ")" , [ "->" , Type ] , ";" ;
+
+(* Import/Export *)
+ImportDeclaration = "import" , ImportPath , ";" ;
+ExportDeclaration = "export" , Identifier , ";" ;
+ImportPath = Identifier , { "::" , Identifier } ;
+
+(* Types *)
+Type = PrimitiveType
+     | TensorType
+     | TupleType
+     | ArrayType
+     | FunctionType
+     | DifferentiableType
+     | TraitObjectType
+     | IdentifierType
+     ;
+
+PrimitiveType = "i32" | "i64" | "f32" | "f64" | "bool" | "unit" ;
+
+TensorType = "Tensor" , "<" , DType , "," , Shape , ">" ;
+DType = "i32" | "i64" | "f32" | "f64" ;
+Shape = "[" , [ DimensionList ] , "]" ;
+DimensionList = Dimension , { "," , Dimension } , [ "," ] ;
+Dimension = IntegerLiteral | Identifier ;
+
+TupleType = "(" , [ TypeList ] , ")" ;
+TypeList = Type , { "," , Type } , [ "," ] ;
+
+ArrayType = "[" , Type , ";" , IntegerLiteral , "]" ;
+
+FunctionType = "(" , [ TypeList ] , ")" , "->" , Type ;
+
+DifferentiableType = "diff" , Type ;
+
+TraitObjectType = "dyn" , Identifier ;
+
+IdentifierType = Identifier , [ "<" , TypeList , ">" ] ;
+
+(* Statements and blocks *)
+Block = "{" , { Statement } , [ Expression ] , "}" ;
+
+Statement = LetStatement
+          | ExpressionStatement
+          | ReturnStatement
+          | DeferStatement
+          ;
+
+LetStatement = "let" , Pattern , [ ":" , Type ] , "=" , Expression , ";" ;
+
+Pattern = IdentifierPattern
+        | TuplePattern
+        | WildcardPattern
+        ;
+
+IdentifierPattern = Identifier ;
+TuplePattern = "(" , [ PatternList ] , ")" ;
+PatternList = Pattern , { "," , Pattern } , [ "," ] ;
+WildcardPattern = "_" ;
+
+ExpressionStatement = Expression , ";" ;
+
+ReturnStatement = "return" , [ Expression ] , ";" ;
+
+DeferStatement = "defer" , Block ;
+
+(* Expressions *)
+Expression = AssignmentExpression ;
+
+AssignmentExpression = LogicalOrExpression , [ AssignmentOperator , AssignmentExpression ] ;
+AssignmentOperator = "=" | "+=" | "-=" | "*=" | "/=" | ":=" ;
+
+LogicalOrExpression = LogicalAndExpression , { "||" , LogicalAndExpression } ;
+
+LogicalAndExpression = ComparisonExpression , { "&&" , ComparisonExpression } ;
+
+ComparisonExpression = AdditiveExpression , { ComparisonOperator , AdditiveExpression } ;
+ComparisonOperator = "==" | "!=" | "<" | ">" | "<=" | ">=" ;
+
+AdditiveExpression = MultiplicativeExpression , { AdditiveOperator , MultiplicativeExpression } ;
+AdditiveOperator = "+" | "-" ;
+
+MultiplicativeExpression = UnaryExpression , { MultiplicativeOperator , UnaryExpression } ;
+MultiplicativeOperator = "*" | "/" | "%" ;
+
+UnaryExpression = [ UnaryOperator ] , PostfixExpression ;
+UnaryOperator = "-" | "!" ;
+
+PostfixExpression = PrimaryExpression , { PostfixOperator } ;
+
+PostfixOperator = CallOperator
+                | IndexOperator
+                | FieldAccessOperator
+                | MethodCallOperator
+                ;
+
+CallOperator = "(" , [ ArgumentList ] , ")" ;
+ArgumentList = Expression , { "," , Expression } , [ "," ] ;
+
+IndexOperator = "[" , IndexExpression , "]" ;
+IndexExpression = Expression
+                | SliceExpression
+                ;
+
+SliceExpression = [ Expression ] , ":" , [ Expression ] , [ ":" , [ Expression ] ] ;
+
+FieldAccessOperator = "." , Identifier ;
+
+MethodCallOperator = "." , Identifier , "(" , [ ArgumentList ] , ")" ;
+
+(* Primary expressions *)
+PrimaryExpression = Literal
+                  | Identifier
+                  | ParenthesizedExpression
+                  | TupleExpression
+                  | ArrayExpression
+                  | TensorConstructor
+                  | BlockExpression
+                  | IfExpression
+                  | MatchExpression
+                  | WhileExpression
+                  | ForExpression
+                  | FunctionExpression
+                  ;
+
+ParenthesizedExpression = "(" , Expression , ")" ;
+
+TupleExpression = "(" , Expression , "," , [ ExpressionList ] , ")" ;
+ExpressionList = Expression , { "," , Expression } , [ "," ] ;
+
+ArrayExpression = "[" , [ ArrayElements ] , "]" ;
+ArrayElements = Expression , { "," , Expression } , [ "," ] ;
+
+TensorConstructor = "tensor" , "(" , Expression , [ "," , "dtype" , ":" , DType ] , ")" ;
+
+BlockExpression = Block ;
+
+IfExpression = "if" , Expression , Block , [ "else" , ( IfExpression | Block ) ] ;
+
+MatchExpression = "match" , Expression , "{" , { MatchArm } , "}" ;
+MatchArm = Pattern , "=>" , ( Expression , "," | Block ) ;
+
+WhileExpression = "while" , Expression , Block ;
+
+ForExpression = "for" , Pattern , "in" , Expression , Block ;
+
+FunctionExpression = "fn" , "(" , [ ParameterList ] , ")" , [ "->" , Type ] , Block ;
+
+(* Tensor operations (Core v1 intrinsics) *)
+(* These are typically called as functions: sum(x, axes, keepdims) *)
+(* The function call syntax is covered by CallOperator above *)

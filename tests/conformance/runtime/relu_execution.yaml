@@ -1,0 +1,25 @@
+# MIND Conformance Test: ReLU Execution
+# Specification reference: spec/v1.0/ir.md#activation-and-elementwise-unary-operations
+# Category: runtime
+# Profile: cpu
+
+description: "ReLU correctly applies max(0, x) elementwise"
+category: runtime
+profile: cpu
+
+input:
+  source: |
+    fn test_relu() -> Tensor<f32, [2, 3]> {
+        let x: Tensor<f32, [2, 3]> = [[-1.0, 0.0, 1.0],
+                                       [-2.0, 3.0, -0.5]];
+        relu(x)
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: f32
+      shape: [2, 3]
+      values: [[0.0, 0.0, 1.0], [0.0, 3.0, 0.0]]
+      tolerance: 1e-6

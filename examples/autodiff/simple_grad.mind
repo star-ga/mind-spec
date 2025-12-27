@@ -1,0 +1,146 @@
+// MIND Language Example: Simple Gradient Computation
+// Specification reference: spec/v1.0/autodiff.md
+//
+// This example demonstrates basic automatic differentiation
+// using reverse-mode (backpropagation) as specified in the autodiff chapter.
+
+import diff::grad;
+import diff::vjp;
+
+// Example 1: Gradient of scalar function
+// Reference: spec/v1.0/autodiff.md
+// f(x) = x^2, df/dx = 2x
+//
+// Expected: grad_x = 6.0 when x = 3.0
+fn square_grad() -> f32 {
+    let x: f32 = 3.0;
+
+    // Define function to differentiate
+    fn square(x: f32) -> f32 {
+        x * x
+    }
+
+    // Compute gradient
+    // grad(f)(x) returns df/dx evaluated at x
+    let grad_x = grad(square)(x);
+
+    grad_x  // Returns 2 * 3.0 = 6.0
+}
+
+// Example 2: Gradient of tensor function
+// Reference: spec/v1.0/autodiff.md
+// f(x) = sum(x * x), df/dx = 2x (elementwise)
+//
+// Expected: [[2.0, 4.0], [6.0, 8.0]] for input [[1.0, 2.0], [3.0, 4.0]]
+fn tensor_grad() -> Tensor<f32, [2, 2]> {
+    let x: Tensor<f32, [2, 2]> = [[1.0, 2.0],
+                                   [3.0, 4.0]];
+
+    fn sum_of_squares(x: Tensor<f32, [2, 2]>) -> f32 {
+        sum(x * x, axes=[], keepdims=false)
+    }
+
+    // Gradient has same shape as input
+    let grad_x = grad(sum_of_squares)(x);
+
+    grad_x
+}
+
+// Example 3: Gradient through binary operations
+// Reference: spec/v1.0/autodiff.md#binary-operation-gradients
+// f(x, y) = x * y + x, df/dx = y + 1, df/dy = x
+fn binary_op_grad() -> (f32, f32) {
+    let x: f32 = 2.0;
+    let y: f32 = 3.0;
+
+    fn f(x: f32, y: f32) -> f32 {
+        x * y + x
+    }
+
+    // Gradient with respect to first argument
+    let grad_x = grad(|a| f(a, y))(x);  // = y + 1 = 4.0
+
+    // Gradient with respect to second argument
+    let grad_y = grad(|b| f(x, b))(y);  // = x = 2.0
+
+    (grad_x, grad_y)
+}
+
+// Example 4: Gradient through reductions
+// Reference: spec/v1.0/autodiff.md#reduction-gradients
+// f(x) = mean(x), df/dx = 1/n for each element
+fn reduction_grad() -> Tensor<f32, [4]> {
+    let x: Tensor<f32, [4]> = [1.0, 2.0, 3.0, 4.0];
+
+    fn mean_fn(x: Tensor<f32, [4]>) -> f32 {
+        mean(x, axes=[], keepdims=false)
+    }
+
+    // Each element contributes equally to mean
+    // Gradient is 1/4 = 0.25 for each element
+    let grad_x = grad(mean_fn)(x);
+
+    grad_x  // [0.25, 0.25, 0.25, 0.25]
+}
+
+// Example 5: Vector-Jacobian Product (VJP)
+// Reference: spec/v1.0/autodiff.md#vjp
+// VJP computes v^T @ J where J is the Jacobian
+fn vjp_example() -> Tensor<f32, [3]> {
+    let x: Tensor<f32, [3]> = [1.0, 2.0, 3.0];
+    let v: Tensor<f32, [2]> = [1.0, 0.5];  // Cotangent vector
+
+    // Function from R^3 -> R^2
+    fn f(x: Tensor<f32, [3]>) -> Tensor<f32, [2]> {
+        let y0 = sum(x, axes=[], keepdims=false);
+        let y1 = x[0] * x[1];
+        [y0, y1]
+    }
+
+    // VJP returns (f(x), pullback)
+    // pullback(v) computes v^T @ J
+    let (y, pullback) = vjp(f)(x);
+    let grad_x = pullback(v);
+
+    grad_x
+}
+
+// Example 6: Chain rule demonstration
+// Reference: spec/v1.0/autodiff.md
+// f(g(x)) where f(u) = exp(u), g(x) = sum(x)
+// df/dx = exp(sum(x)) * 1 (for each element)
+fn chain_rule_demo() -> Tensor<f32, [3]> {
+    let x: Tensor<f32, [3]> = [0.0, 0.0, 0.0];
+
+    fn composed(x: Tensor<f32, [3]>) -> f32 {
+        exp(sum(x, axes=[], keepdims=false))
+    }
+
+    // At x = [0, 0, 0]:
+    // sum(x) = 0, exp(0) = 1
+    // grad = [1.0, 1.0, 1.0]
+    let grad_x = grad(composed)(x);
+
+    grad_x
+}
+
+// Example 7: Gradient of matrix multiplication
+// Reference: spec/v1.0/autodiff.md#matmul-gradient
+// d(A @ B)/dA = grad_out @ B^T
+// d(A @ B)/dB = A^T @ grad_out
+fn matmul_grad() -> Tensor<f32, [2, 3]> {
+    let a: Tensor<f32, [2, 3]> = [[1.0, 2.0, 3.0],
+                                   [4.0, 5.0, 6.0]];
+    let b: Tensor<f32, [3, 2]> = [[1.0, 0.0],
+                                   [0.0, 1.0],
+                                   [1.0, 1.0]];
+
+    fn matmul_sum(a: Tensor<f32, [2, 3]>) -> f32 {
+        let c = matmul(a, b);
+        sum(c, axes=[], keepdims=false)
+    }
+
+    let grad_a = grad(matmul_sum)(a);
+
+    grad_a
+}

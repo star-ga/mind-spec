@@ -1,0 +1,128 @@
+// MIND Language Example: Reduction Operations
+// Specification reference: spec/v1.0/ir.md#reductions
+//
+// This example demonstrates Sum and Mean reduction operations
+// with various axis and keepdims configurations.
+
+import tensor::zeros;
+import tensor::ones;
+
+// Example 1: Full reduction to scalar
+// Reference: spec/v1.0/ir.md#reductions
+// Empty axes = reduce all dimensions
+//
+// Expected: 21.0 (sum of 1+2+3+4+5+6)
+fn full_sum() -> f32 {
+    let matrix: Tensor<f32, [2, 3]> = [[1.0, 2.0, 3.0],
+                                        [4.0, 5.0, 6.0]];
+
+    // Sum all elements -> scalar []
+    let total = sum(matrix, axes=[], keepdims=false);
+
+    total
+}
+
+// Example 2: Axis reduction without keepdims
+// Reference: spec/v1.0/ir.md#reductions
+// Sum along axis 1 (columns), remove that dimension
+//
+// Expected: [6.0, 15.0] (shape [2])
+fn sum_axis_no_keepdims() -> Tensor<f32, [2]> {
+    let matrix: Tensor<f32, [2, 3]> = [[1.0, 2.0, 3.0],
+                                        [4.0, 5.0, 6.0]];
+
+    // Sum along axis 1: [2, 3] -> [2]
+    // Row 0: 1+2+3 = 6
+    // Row 1: 4+5+6 = 15
+    let row_sums = sum(matrix, axes=[1], keepdims=false);
+
+    row_sums
+}
+
+// Example 3: Axis reduction with keepdims=true
+// Reference: spec/v1.0/ir.md#reductions
+// Sum along axis 1, keep dimension as size 1
+//
+// Expected: [[6.0], [15.0]] (shape [2, 1])
+fn sum_axis_keepdims() -> Tensor<f32, [2, 1]> {
+    let matrix: Tensor<f32, [2, 3]> = [[1.0, 2.0, 3.0],
+                                        [4.0, 5.0, 6.0]];
+
+    // Sum along axis 1 with keepdims: [2, 3] -> [2, 1]
+    let row_sums = sum(matrix, axes=[1], keepdims=true);
+
+    row_sums
+}
+
+// Example 4: Mean reduction
+// Reference: spec/v1.0/ir.md#reductions (Mean)
+// Divides by the total number of elements reduced, not the number of axes
+//
+// Expected: 3.5 (mean of 1,2,3,4,5,6)
+fn full_mean() -> f32 {
+    let matrix: Tensor<f32, [2, 3]> = [[1.0, 2.0, 3.0],
+                                        [4.0, 5.0, 6.0]];
+
+    // Mean of all elements: 21/6 = 3.5
+    let avg = mean(matrix, axes=[], keepdims=false);
+
+    avg
+}
+
+// Example 5: Multi-axis reduction
+// Reference: spec/v1.0/ir.md#reductions
+// Reduce along multiple axes simultaneously
+//
+// Expected: [16.0, 20.0, 24.0] (shape [3])
+fn multi_axis_sum() -> Tensor<f32, [3]> {
+    let tensor: Tensor<f32, [2, 2, 3]> = [[[1.0, 2.0, 3.0],
+                                            [4.0, 5.0, 6.0]],
+                                           [[4.0, 5.0, 6.0],
+                                            [7.0, 8.0, 9.0]]];
+
+    // Sum along axes 0 and 1: [2, 2, 3] -> [3]
+    // Reduces 2*2=4 elements per output position
+    let result = sum(tensor, axes=[0, 1], keepdims=false);
+
+    result
+}
+
+// Example 6: Softmax using reductions (common pattern)
+// Reference: spec/v1.0/stdlib.md (exp, sum)
+// softmax(x) = exp(x) / sum(exp(x))
+//
+// Expected: probabilities summing to 1.0
+fn softmax(x: Tensor<f32, [3]>) -> Tensor<f32, [3]> {
+    // Compute exp of each element
+    let exp_x = exp(x);
+
+    // Sum all exp values
+    let sum_exp = sum(exp_x, axes=[], keepdims=false);
+
+    // Divide each by sum (scalar broadcasts)
+    let probs = exp_x / sum_exp;
+
+    probs
+}
+
+// Example 7: Batch normalization pattern
+// Reference: spec/v1.0/shapes.md#broadcasting
+// Normalize along batch dimension, keep spatial dims
+fn batch_norm(x: Tensor<f32, [batch, height, width, channels]>)
+    -> Tensor<f32, [batch, height, width, channels]> {
+
+    // Mean along batch dimension
+    let mu = mean(x, axes=[0], keepdims=true);  // [1, H, W, C]
+
+    // Center the data
+    let centered = x - mu;  // Broadcasting: [B, H, W, C] - [1, H, W, C]
+
+    // Variance (simplified, uses mean of squares)
+    let var = mean(centered * centered, axes=[0], keepdims=true);
+
+    // Normalize
+    let epsilon: f32 = 1e-5;
+    let normalized = centered / sqrt(var + epsilon);
+
+    normalized
+}

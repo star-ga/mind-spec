@@ -1,0 +1,38 @@
+# MIND Core IR Example: Matrix Operations
+# Specification reference: spec/v1.0/ir.md#linear-and-tensor-algebra
+# Grammar reference: spec/v1.0/grammar-ir.ebnf
+#
+# This example demonstrates Dot, MatMul, and shape manipulation operations.
+
+# Input matrices
+%0 = Input() {name: "a"} : Tensor<f32, [3, 4]>
+%1 = Input() {name: "b"} : Tensor<f32, [4, 5]>
+
+# Basic matrix multiplication
+# Reference: spec/v1.0/ir.md#linear-and-tensor-algebra
+# [3, 4] @ [4, 5] -> [3, 5]
+%2 = MatMul(%0, %1) : Tensor<f32, [3, 5]>
+
+# Transpose for A @ A^T pattern
+# Reference: spec/v1.0/ir.md#shape-manipulation
+# Transpose [3, 4] with perm=[1, 0] -> [4, 3]
+%3 = Transpose(%0, [1, 0]) : Tensor<f32, [4, 3]>
+
+# A^T @ A: [4, 3] @ [3, 4] -> [4, 4]
+%4 = MatMul(%3, %0) : Tensor<f32, [4, 4]>
+
+# Batched matrix input
+%5 = Input() {name: "batch_a"} : Tensor<f32, [2, 3, 4]>
+%6 = Input() {name: "batch_b"} : Tensor<f32, [2, 4, 5]>
+
+# Batched matmul: [2, 3, 4] @ [2, 4, 5] -> [2, 3, 5]
+%7 = MatMul(%5, %6) : Tensor<f32, [2, 3, 5]>
+
+# Vector inputs for dot product
+%8 = Input() {name: "vec_a"} : Tensor<f32, [4]>
+%9 = Input() {name: "vec_b"} : Tensor<f32, [4]>
+
+# Dot product: [4] · [4] -> []
+%10 = Dot(%8, %9) : Tensor<f32, []>
+
+outputs: %2, %4, %7, %10

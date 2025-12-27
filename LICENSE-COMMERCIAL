@@ -1,0 +1,33 @@
+Commercial License Notice — MIND Language Specification — Community Edition
+===========================================================================
+
+Certain enterprise, OEM, or proprietary uses of the MIND language and runtime
+specification may require a separate commercial license from STARGA Inc.,
+particularly when using STARGA trademarks or enterprise-only materials.
+
+This includes, for example (without limitation):
+
+- Proprietary extensions or variants of the MIND specification.
+- Internal compliance documentation and non-public integration guides.
+- Paid support, certification programs, or long-term maintenance obligations.
+- Bundled use in closed-source products where the Apache License is not sufficient.
+- Commercial use of STARGA trademarks, branding, or enterprise collateral.
+
+Unless explicitly granted in a separate written agreement, no rights are
+conveyed to use such commercial or enterprise-only materials, and they are not
+licensed under the Apache terms provided in LICENSE.
+
+If you are interested in:
+
+- Enterprise licensing,
+- OEM / embedded use,
+- Long-term support or commercial SLAs,
+- Trademark usage approvals,
+
+please contact:
+
+  STARGA Inc.
+  Email: legal@star.ga
+
+This notice is informational only and does not itself grant any license.
+All rights not expressly granted are reserved by STARGA Inc.

@@ -1,0 +1,30 @@
+# MIND Conformance Test: Broadcasting Failure
+# Specification reference: spec/v1.0/shapes.md#broadcasting
+# Specification reference: spec/v1.0/errors.md#e3001-broadcasting-failure
+# Category: shapes
+# Profile: cpu
+
+description: "Incompatible shapes produce E3001 error"
+category: shapes
+profile: cpu
+
+input:
+  source: |
+    fn broadcast_fail() -> Tensor<f32, [3, 4]> {
+        let a: Tensor<f32, [3, 4]> = [[1.0, 2.0, 3.0, 4.0],
+                                       [5.0, 6.0, 7.0, 8.0],
+                                       [9.0, 10.0, 11.0, 12.0]];
+        let b: Tensor<f32, [3, 5]> = [[1.0, 2.0, 3.0, 4.0, 5.0],
+                                       [1.0, 2.0, 3.0, 4.0, 5.0],
+                                       [1.0, 2.0, 3.0, 4.0, 5.0]];
+        a + b  // Dimension 1: 4 vs 5
+    }
+
+expected:
+  status: error
+  error:
+    code: E3001
+    message_contains: "Broadcasting failed"
+    location:
+      line: 8
+      column: 9

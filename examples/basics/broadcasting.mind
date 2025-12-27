@@ -1,0 +1,107 @@
+// MIND Language Example: Broadcasting Semantics
+// Specification reference: spec/v1.0/shapes.md#broadcasting
+//
+// This example demonstrates broadcasting rules for tensor operations.
+// Broadcasting aligns shapes from the right and extends dimensions of size 1.
+//
+// Expected outputs documented per function.
+
+import tensor::zeros;
+import tensor::ones;
+
+// Example 1: Scalar-tensor broadcasting
+// Reference: spec/v1.0/shapes.md#broadcasting
+// Shape alignment: [] broadcasts to [3, 4]
+//
+// Expected: 2x3 tensor with all elements = 5.0
+fn scalar_to_matrix() -> Tensor<f32, [2, 3]> {
+    let matrix: Tensor<f32, [2, 3]> = ones([2, 3]);  // All 1.0
+    let scalar: f32 = 4.0;
+
+    // Scalar extends to match matrix shape
+    let result = matrix + scalar;  // [[5.0, 5.0, 5.0], [5.0, 5.0, 5.0]]
+
+    result
+}
+
+// Example 2: Vector-matrix broadcasting (row broadcast)
+// Reference: spec/v1.0/shapes.md#broadcasting
+// Shape alignment: [3] aligns with [2, 3] -> [[1.0, 2.0, 3.0], [1.0, 2.0, 3.0]]
+//
+// Expected: [[2.0, 4.0, 6.0], [5.0, 7.0, 9.0]]
+fn row_broadcast() -> Tensor<f32, [2, 3]> {
+    let matrix: Tensor<f32, [2, 3]> = [[1.0, 2.0, 3.0],
+                                        [4.0, 5.0, 6.0]];
+    let row: Tensor<f32, [3]> = [1.0, 2.0, 3.0];
+
+    // Row [3] broadcasts to [2, 3] by prepending dimension
+    // Effective row shape: [1, 3] -> [2, 3]
+    let result = matrix + row;
+
+    result
+}
+
+// Example 3: Column broadcast (requires explicit expansion)
+// Reference: spec/v1.0/ir.md#shape-manipulation (ExpandDims)
+//
+// Expected: [[2.0, 3.0, 4.0], [6.0, 7.0, 8.0]]
+fn column_broadcast() -> Tensor<f32, [2, 3]> {
+    let matrix: Tensor<f32, [2, 3]> = [[1.0, 2.0, 3.0],
+                                        [4.0, 5.0, 6.0]];
+    let col: Tensor<f32, [2]> = [1.0, 2.0];
+
+    // Column [2] needs reshape to [2, 1] for column broadcast
+    let col_2d = expand_dims(col, axes=[1]);  // [2] -> [2, 1]
+
+    // Now [2, 1] broadcasts with [2, 3] -> [2, 3]
+    let result = matrix + col_2d;
+
+    result
+}
+
+// Example 4: Multi-dimensional broadcasting
+// Reference: spec/v1.0/shapes.md#broadcasting
+// Shapes [4, 1, 3] and [1, 5, 3] broadcast to [4, 5, 3]
+//
+// Expected shape: [4, 5, 3]
+fn multidim_broadcast() -> Tensor<f32, [4, 5, 3]> {
+    let a: Tensor<f32, [4, 1, 3]> = zeros([4, 1, 3]);
+    let b: Tensor<f32, [1, 5, 3]> = ones([1, 5, 3]);
+
+    // Dimension-by-dimension:
+    //   dim 0: 4 vs 1 -> 4
+    //   dim 1: 1 vs 5 -> 5
+    //   dim 2: 3 vs 3 -> 3
+    let result = a + b;
+
+    result
+}
+
+// Example 5: Broadcasting failure (incompatible shapes)
+// Reference: spec/v1.0/errors.md#e3001-broadcasting-failure
+// This would produce error E3001 at compile time:
+//   "Broadcasting failed at dimension 1: shape [3, 4] incompatible with [3, 5]"
+//
+// fn broadcast_error() {
+//     let a: Tensor<f32, [3, 4]> = zeros([3, 4]);
+//     let b: Tensor<f32, [3, 5]> = zeros([3, 5]);
+//     let c = a + b;  // E3001: dimension 1 has extents 4 and 5
+// }
+
+// Example 6: Batched matrix operations with broadcasting
+// Reference: spec/v1.0/ir.md#linear-and-tensor-algebra (MatMul)
+//
+// Expected shape: [batch=2, M=3, N=5]
+fn batched_matmul_broadcast() -> Tensor<f32, [2, 3, 5]> {
+    // Batched matrix: [batch, M, K]
+    let a: Tensor<f32, [2, 3, 4]> = zeros([2, 3, 4]);
+
+    // Single matrix broadcasts across batch: [K, N]
+    // Effective shape for matmul: [1, 4, 5] -> [2, 4, 5]
+    let b: Tensor<f32, [4, 5]> = ones([4, 5]);
+
+    // MatMul broadcasts batch dimensions
+    let result = matmul(a, b);  // [2, 3, 5]
+
+    result
+}

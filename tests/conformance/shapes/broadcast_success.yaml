@@ -1,0 +1,26 @@
+# MIND Conformance Test: Broadcasting Success
+# Specification reference: spec/v1.0/shapes.md#broadcasting
+# Category: shapes
+# Profile: cpu
+
+description: "Scalar broadcasts to matrix shape in binary addition"
+category: shapes
+profile: cpu
+
+input:
+  source: |
+    fn broadcast_add() -> Tensor<f32, [2, 3]> {
+        let matrix: Tensor<f32, [2, 3]> = [[1.0, 2.0, 3.0],
+                                            [4.0, 5.0, 6.0]];
+        let scalar: f32 = 10.0;
+        matrix + scalar
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: f32
+      shape: [2, 3]
+      values: [[11.0, 12.0, 13.0], [14.0, 15.0, 16.0]]
+      tolerance: 1e-6

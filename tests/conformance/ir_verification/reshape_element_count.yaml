@@ -1,0 +1,22 @@
+# MIND Conformance Test: Reshape Element Count
+# Specification reference: spec/v1.0/ir.md#shape-manipulation
+# Specification reference: spec/v1.0/errors.md#e4003-element-count-mismatch
+# Category: ir_verification
+# Profile: cpu
+
+description: "Reshape with mismatched element count produces E4003"
+category: ir_verification
+profile: cpu
+
+input:
+  ir_module: |
+    %0 = Input() {name: "x"} : Tensor<f32, [2, 3]>
+    # Element count: 2*3=6, but target is 2*4=8
+    %1 = Reshape(%0, [2, 4]) : Tensor<f32, [2, 4]>
+    outputs: %1
+
+expected:
+  status: error
+  error:
+    code: E4003
+    message_contains: "Element count mismatch"

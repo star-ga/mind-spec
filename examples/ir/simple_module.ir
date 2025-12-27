@@ -1,0 +1,25 @@
+# MIND Core IR Example: Simple Module
+# Specification reference: spec/v1.0/ir.md
+# Grammar reference: spec/v1.0/grammar-ir.ebnf
+#
+# This example demonstrates the textual IR encoding format.
+# It shows a simple computation: output = (a + b) * c
+
+# Module inputs (external interface)
+# Reference: spec/v1.0/ir.md#ir-module-model
+%0 = Input() {name: "a"} : Tensor<f32, [2, 3]>
+%1 = Input() {name: "b"} : Tensor<f32, [2, 3]>
+%2 = Input() {name: "c"} : Tensor<f32, [2, 3]>
+
+# Binary addition: a + b
+# Reference: spec/v1.0/ir.md#binary-operations
+# Operands ordered by ascending ValueId for canonicalization
+%3 = BinOp(Add, %0, %1) : Tensor<f32, [2, 3]>
+
+# Binary multiplication: (a + b) * c
+# Reference: spec/v1.0/ir.md#binary-operations
+%4 = BinOp(Mul, %2, %3) : Tensor<f32, [2, 3]>
+
+# Module outputs
+# Reference: spec/v1.0/ir.md#module-contents
+outputs: %4
