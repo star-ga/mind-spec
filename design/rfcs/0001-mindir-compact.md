@@ -273,14 +273,14 @@ Comparison for a 6-node neural network layer (param, matmul, add, relu):
 | TOON | 269 | 67 | 4.1x | 2.67 us |
 | **MIC** | **209** | **52** | **5.3x** | **2.26 us** |
 
-### Cost Impact (GPT-4 Pricing at $0.03/1K tokens)
+### Cost Impact (GPT-5.2 Pricing at $0.00175/1K tokens)
 
 | Format | Cost/1K IRs | Annual Cost (1M IRs) | Savings vs JSON |
 |--------|-------------|----------------------|-----------------|
-| JSON | $8.34 | $8,340 | - |
-| TOML | $4.53 | $4,530 | $3,810 (46%) |
-| TOON | $2.01 | $2,010 | $6,330 (76%) |
-| **MIC** | **$1.56** | **$1,560** | **$6,780 (81%)** |
+| JSON | $0.49 | $487 | - |
+| TOML | $0.26 | $264 | $223 (46%) |
+| TOON | $0.12 | $117 | $370 (76%) |
+| **MIC** | **$0.09** | **$91** | **$396 (81%)** |
 
 **MIC achieves 5.3x token reduction and 2.4x faster parsing compared to JSON.**
 
