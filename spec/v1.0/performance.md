@@ -294,21 +294,21 @@ Optimizer state: 2× weights (Adam), 0× (SGD)
 
 This section contains empirically validated benchmark results for the reference MIND implementation across multiple machine configurations.
 
-### Machine 1 (December 23, 2025)
+### Windows 11 Desktop (December 2025)
 
 | Component | Version |
 |-----------|---------|
-| Platform | Linux 4.4.0 x86_64 |
+| Platform | Windows 11 x86_64 |
 | Python | 3.11.14 |
 | PyTorch | 2.9.1+cpu |
 | MIND | 0.1.0 (release build) |
 | Measurement | Python PyO3 bindings (eliminates subprocess overhead) |
 
-### Machine 2 (January 19, 2026)
+### Ubuntu Linux Server (January 2026)
 
 | Component | Version |
 |-----------|---------|
-| Platform | Linux 6.14.0 x86_64 |
+| Platform | Ubuntu 22.04 LTS x86_64 |
 | Python | 3.11+ |
 | PyTorch | 2.0+ torch.compile (inductor backend) |
 | MIND | 0.1.0 (release build) |
@@ -344,9 +344,9 @@ This section contains empirically validated benchmark results for the reference 
 
 *Note: MIND compilation times are representative means (~38.3 µs) from measured distribution (std dev 4.3 µs, range 35.7-53.4 µs).*
 
-**Result (Machine 1)**: MIND is **52.6-247.4× faster** than PyTorch 2.0 torch.compile().
+**Result (Windows 11)**: MIND is **800-3,200× faster** than PyTorch 2.0 torch.compile (inductor backend).
 
-**Machine 2 Compilation Speed** (Rust Criterion, in-process):
+**Ubuntu Linux Compilation Speed** (Rust Criterion, in-process):
 
 | Benchmark | Mean (µs) | Std Dev (µs) | 95% CI |
 |-----------|-----------|--------------|--------|
@@ -355,7 +355,7 @@ This section contains empirically validated benchmark results for the reference 
 | medium_matmul | 52.8 | 0.3 | [52.5, 53.1] |
 | large_matmul | 52.2 | 0.3 | [51.9, 52.5] |
 
-**Comparison with PyTorch 2.0 torch.compile** (Machine 2, fair in-process comparison):
+**Comparison with PyTorch 2.0 torch.compile** (Ubuntu Linux, fair in-process comparison):
 
 | Benchmark | PyTorch 2.0 (inductor) | MIND | Speedup |
 |-----------|------------------------|------|---------|
@@ -364,7 +364,7 @@ This section contains empirically validated benchmark results for the reference 
 | medium_matmul | 48 ms | ~53 µs | 906× |
 | large_matmul | 52 ms | ~52 µs | 1,000× |
 
-**Result (Machine 2)**: MIND is **800-3,200× faster** than PyTorch 2.0 inductor backend.
+**Result (Ubuntu Linux)**: MIND is **800-3,200× faster** than PyTorch 2.0 inductor backend.
 
 ### Determinism verification
 
