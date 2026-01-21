@@ -260,3 +260,106 @@ Pipeline execution overlaps forward and backward passes across micro-batches for
 - Failure detection and recovery coordination
 - Checkpoint management with `CheckpointInfo`
 - Builder pattern via `CoordinatorBuilder` for flexible initialization
+
+## Model serving
+
+The reference runtime provides production-grade model serving infrastructure:
+
+### Model export
+
+Deterministic model serialization with multiple format support:
+
+| Format | Extension | Description |
+|--------|-----------|-------------|
+| `MindBinary` | `.mind` | Native format with minimal overhead, deterministic serialization |
+| `Onnx` | `.onnx` | ONNX interoperability for cross-framework deployment |
+| `TorchScript` | `.pt` | PyTorch compatibility for existing infrastructure |
+| `SavedModel` | `.pb` | TensorFlow SavedModel for TF Serving integration |
+
+**Precision options:**
+
+| Precision | Description |
+|-----------|-------------|
+| `Fp32` | Full 32-bit floating point (default) |
+| `Fp16` | 16-bit floating point for reduced memory |
+| `Bf16` | Brain floating point for training-compatible inference |
+| `Int8` | 8-bit integer quantization for edge deployment |
+| `Int4` | 4-bit integer quantization for extreme compression |
+
+Export artifacts include:
+- Serialized weights with configurable precision
+- Model metadata (input/output specifications, tensor shapes)
+- Checksum for integrity verification
+- Runtime version tracking
+
+### Inference server
+
+Production HTTP/gRPC server with enterprise features:
+
+| Feature | Description |
+|---------|-------------|
+| Concurrent requests | Configurable limit (default: 1000) with backpressure |
+| Model versioning | Multiple versions loaded simultaneously, automatic latest resolution |
+| Hot-reload | Load/unload models without server restart |
+| Graceful shutdown | Drain in-flight requests before stopping |
+| TLS support | Optional HTTPS/gRPC-TLS for secure communication |
+
+**Server states:**
+- `Starting`: Server initializing
+- `Running`: Accepting and processing requests
+- `Draining`: Not accepting new requests, completing in-flight
+- `Stopped`: Server halted
+
+### Dynamic batching
+
+Intelligent request batching for throughput optimization:
+
+| Component | Description |
+|-----------|-------------|
+| `BatchQueue` | Priority queue (by request priority) or FIFO queue |
+| `DynamicBatcher` | Adaptive batch sizing based on observed latency |
+| Backpressure | Configurable max queue depth with rejection on overflow |
+| Timeout handling | Automatic expiration of stale requests |
+
+**Adaptive sizing algorithm:**
+- Target latency threshold (default: 50ms)
+- Batch size increases when latency < target/2
+- Batch size decreases when latency > target
+- Bounds: `min_batch_size` to `max_batch_size`
+
+### Metrics
+
+Prometheus-compatible observability:
+
+| Metric | Type | Description |
+|--------|------|-------------|
+| `mind_requests_total` | Counter | Total inference requests |
+| `mind_requests_success_total` | Counter | Successful requests |
+| `mind_requests_failed_total` | Counter | Failed requests |
+| `mind_requests_active` | Gauge | Currently processing requests |
+| `mind_request_latency_us` | Summary | Latency distribution (p50/p95/p99) |
+| `mind_uptime_seconds` | Gauge | Server uptime |
+| `mind_model_requests_total` | Counter | Per-model request counts |
+| `mind_model_latency_avg_us` | Gauge | Per-model average latency |
+
+Latency histograms use configurable bucket boundaries (default: 100µs to 10s).
+
+### Health checks
+
+Kubernetes-compatible health endpoints:
+
+**Liveness probe** (`/health/live`):
+- Indicates process is alive
+- Always passes if server process is running
+- Used by Kubernetes to detect stuck processes
+
+**Readiness probe** (`/health/ready`):
+- Indicates server can accept traffic
+- Checks: server state, required models loaded, component health
+- Returns `HealthStatus`: Healthy, Degraded, Unhealthy, Unknown
+
+**Component health tracking:**
+- Per-model health based on error rate thresholds
+- Degraded status at >10% error rate
+- Unhealthy status at >50% error rate
+- Required model validation for readiness
