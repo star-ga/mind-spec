@@ -55,6 +55,9 @@ Core v1 is organised into the following pillars:
     considerations for domain-specific extensions including neuroscience/BCI, full-stack development
     support (API interoperability, distributed execution, data pipelines), embedded AI, and
     safety-critical systems (informative).
+15. **Package Management** ([`package.md`](./package.md)) — dependency resolution with PubGrub CDCL,
+    lockfile format with integrity hashes, sparse registry protocol, SLSA provenance attestations,
+    SBOM generation (SPDX/CycloneDX), and policy enforcement.
 
 Legacy chapters such as [`lexical.md`](./lexical.md) and [`types.md`](./types.md) remain available for
 background on the broader language but are not required for Core v1 conformance.
