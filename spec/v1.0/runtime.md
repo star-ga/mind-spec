@@ -173,3 +173,90 @@ The runtime uses different strategies based on context:
 - **Checked arithmetic**: Used for user-controlled inputs (shapes, axes); returns `ExecError::InvalidArg` on overflow
 - **Saturating arithmetic**: Used for stride calculations; saturates to `usize::MAX`
 - **Wrapping arithmetic**: Used for safe reverse-indexing in `broadcast_shape()`
+
+## Distributed execution
+
+The reference runtime provides production-grade distributed training primitives:
+
+### Transport layer
+
+TCP-based transport with connection pooling, message serialization, and ring topology helpers:
+
+| Component | Description |
+|-----------|-------------|
+| `TcpTransport` | Connection management with configurable timeouts and buffer sizes |
+| `TransportConfig` | Bind address, connect timeout, buffer size configuration |
+| `Message` / `MessageType` | Serialization protocol for collective operations |
+| Ring topology | `left_neighbor()`, `right_neighbor()` helpers for ring-based collectives |
+
+### Communication backends
+
+Abstract `Backend` trait with concrete implementations:
+
+| Backend | Target | Features |
+|---------|--------|----------|
+| `NcclBackend` | NVIDIA GPU | FFI bindings to NCCL library, optimized for GPU clusters |
+| `GlooBackend` | CPU / cross-platform | Pure Rust implementation, TCP/IP transport |
+
+Both backends implement:
+- `all_reduce(tensor, op)` - Sum, Average, Max, Min, Product operations
+- `broadcast(tensor, root)` - Distribute from root to all workers
+- `all_gather(input, output)` - Gather tensors from all workers
+- `reduce_scatter(input, output, op)` - Reduce and scatter result
+- `barrier()` - Synchronization barrier
+
+### Collective operations
+
+Bandwidth-optimal `RingAllReduce` implementation:
+
+- **Phase 1 (Scatter-reduce)**: N-1 iterations, each worker sends chunk to right neighbor and reduces incoming chunk
+- **Phase 2 (All-gather)**: N-1 iterations, propagate final reduced chunks around the ring
+- **Efficiency**: Each worker sends/receives 2*(N-1)/N of total data
+
+Supported reduction operations:
+- `Sum` (default)
+- `Average`
+- `Max`
+- `Min`
+- `Product`
+
+### Fault tolerance
+
+Elastic training with automatic failure detection and recovery:
+
+| Component | Description |
+|-----------|-------------|
+| `FaultToleranceConfig` | min/max workers, elastic mode, checkpoint interval, heartbeat settings |
+| `WorkerFailure` | Tracks rank, detection time, failure reason, handled status |
+| `FailureReason` | HeartbeatTimeout, WorkerError, NetworkFailure, ProcessCrash, Unknown |
+| `ClusterHealth` | total/alive/ready workers, pending failures, cluster state, can_train flag |
+| `RecoveryAction` | Continue, WaitForReplacement, RestartFromCheckpoint, Abort |
+
+Recovery workflow:
+1. Heartbeat monitoring detects missed heartbeats
+2. Worker marked as failed after `max_heartbeat_misses` consecutive misses
+3. Recovery action determined based on cluster state and configuration
+4. Elastic mode allows training to continue with remaining workers
+5. Checkpoint-based recovery restores training state on failure
+
+### Pipeline parallelism
+
+`PipelineScheduler` for model partitioning across devices:
+
+| Component | Description |
+|-----------|-------------|
+| `PipelineStage` | Stage index, layer range, assigned device |
+| `MicroBatch` | Batch ID, stage, forward/backward data |
+| `ScheduleType` | GPipe (synchronous), PipeDream (asynchronous), Interleaved |
+
+Pipeline execution overlaps forward and backward passes across micro-batches for improved throughput.
+
+### Coordinator
+
+`DistributedCoordinator` manages cluster state:
+
+- Worker registration and heartbeat tracking
+- Cluster state machine (Initializing, Running, Paused, Failed, Shutdown)
+- Failure detection and recovery coordination
+- Checkpoint management with `CheckpointInfo`
+- Builder pattern via `CoordinatorBuilder` for flexible initialization
