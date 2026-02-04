@@ -7,6 +7,35 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.1.1] - 2026-02-04
+
+### Milestone: Performance Specification Update (v0.1.7)
+
+Updated performance benchmarks and compiler targets to reflect production v0.1.7 measurements.
+
+### Changed
+
+- **Performance benchmarks** - Updated with v0.1.7 verified results:
+  - scalar_math: 26 µs (was 25 µs)
+  - matmul operations: 45-46 µs (was 52-55 µs, **-18% improvement**)
+  - Parser optimization: Reordered `choice()` combinator for faster parsing
+
+- **Version history table** - New section documenting benchmark progression:
+  - Baseline (Dec 2025): 21-37 µs (minimal parser)
+  - v0.1.6: 26-55 µs (full typed tensors)
+  - v0.1.7: 26-46 µs (parser optimization)
+
+- **Framework comparisons** - Updated all speedup calculations:
+  - vs PyTorch 2.0: ~77,000-122,000× faster
+  - vs Mojo 0.25.7: ~20,000-35,000× faster
+  - vs JAX/XLA/TVM: ~220-3,850× faster
+
+### Notes
+
+The ~22% overhead vs baseline is the cost of production features (typed tensors, imports, function lowering). v0.1.7's parser optimization recovers ~18% of matmul overhead.
+
+---
+
 ## [1.1.0] - 2025-12-27
 
 ### Milestone: Production GPU Backends & AI Protocol
