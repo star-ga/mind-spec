@@ -7,6 +7,29 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.1.2] - 2026-02-07
+
+### Milestone: v0.2.0 Performance Specification Update (15× parser speedup)
+
+Updated performance benchmarks to reflect v0.2.0 hand-written recursive descent parser.
+
+### Changed
+
+- **Performance benchmarks** - Updated with v0.2.0 criterion results:
+  - scalar_math: 1.77 µs (was 26 µs, **14.7× faster**)
+  - matmul operations: 2.8-2.9 µs (was 45-46 µs, **15.6× faster**)
+  - New benchmarks: tensor_ops (4.75 µs), reductions (2.92 µs), reshape_ops (2.80 µs)
+  - Added compilations/sec column: 347,000+ compilations per second
+
+- **Version history table** - Added v0.2.0 entry:
+  - v0.2.0: 1.77-2.84 µs, 347,000 compilations/sec (hand-written recursive descent)
+
+- **Framework comparisons** - Updated all speedup calculations:
+  - vs PyTorch 2.0: ~1,200,000-1,800,000× faster
+  - vs Mojo 0.25.7: ~321,000-513,000× faster
+
+---
+
 ## [1.1.1] - 2026-02-04
 
 ### Milestone: Performance Specification Update (v0.1.7)

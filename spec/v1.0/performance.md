@@ -319,46 +319,51 @@ This section contains empirically validated benchmark results for the reference 
 
 ### Compilation speed
 
-**MIND v0.1.7 compilation performance** (Rust criterion benchmarks, February 2026):
+**MIND v0.2.0 compilation performance** (Rust criterion benchmarks, February 7, 2026):
 
-| Benchmark | Mean (µs) | Range (µs) | Description |
-|-----------|-----------|------------|-------------|
-| scalar_math | 26 | [25.7, 27.1] | Simple arithmetic |
-| small_matmul | 45 | [44.1, 46.8] | [10,20] × [20,30] |
-| medium_matmul | 46 | [45.0, 46.8] | [128,256] × [256,512] |
-| large_matmul | 45 | [44.4, 45.7] | [512,1024] × [1024,512] |
+| Benchmark | Mean (µs) | Range (µs) | Compilations/sec | Description |
+|-----------|-----------|------------|-----------------|-------------|
+| scalar_math | 1.77 | [1.73, 1.81] | 565,000/sec | Simple arithmetic |
+| small_matmul | 2.88 | [2.86, 2.91] | 347,000/sec | [10,20] × [20,30] |
+| medium_matmul | 2.82 | [2.81, 2.83] | 355,000/sec | [128,256] × [256,512] |
+| large_matmul | 2.84 | [2.81, 2.91] | 352,000/sec | [512,1024] × [1024,512] |
+| tensor_ops | 4.75 | [4.71, 4.81] | 210,500/sec | Add, multiply, ReLU chain |
+| reductions | 2.92 | [2.86, 2.99] | 342,500/sec | Sum + mean reduction |
+| reshape_ops | 2.80 | [2.78, 2.82] | 357,000/sec | Reshape + transpose |
 
 **Version History**:
 
-| Version | scalar_math | matmul ops | Key Change |
-|---------|-------------|------------|------------|
-| Baseline (Dec 2025) | 21 µs | 37 µs | Minimal parser |
-| v0.1.6 | 26 µs | ~55 µs | Full typed tensors |
-| **v0.1.7** | 26 µs | **45 µs** | Parser choice reordering (**-18%**) |
+| Version | scalar_math | matmul ops | Compilations/sec | Key Change |
+|---------|-------------|------------|-----------------|------------|
+| Baseline (Dec 2025) | 21 µs | 37 µs | ~27,000/sec | Minimal Chumsky parser |
+| v0.1.6 | 26 µs | ~55 µs | ~18,000/sec | Full typed tensors |
+| v0.1.7 | 26 µs | 45 µs | ~22,000/sec | Parser choice reordering (-18%) |
+| v0.1.9 | 26 µs | 45 µs | ~22,000/sec | Lib rename, Windows fixes |
+| **v0.2.0** | **1.77 µs** | **2.84 µs** | **347,000/sec** | **Hand-written recursive descent (15× faster)** |
 
-**Result**: MIND is **11,000-125,000× faster** than PyTorch 2.0 torch.compile (cold-start).
+**Result**: MIND is **280,000-1,900,000× faster** than PyTorch 2.0 torch.compile (cold-start).
 
 **Compilation Speed vs PyTorch** (February 2026, verified):
 
-| Benchmark | MIND v0.1.7 | PyTorch 2.0 | Speedup |
+| Benchmark | MIND v0.2.0 | PyTorch 2.0 | Speedup |
 |-----------|-------------|-------------|---------|
-| scalar_math | 26 µs | 3,172 ms | ~122,000× |
-| small_matmul | 45 µs | 3,467 ms | ~77,000× |
-| medium_matmul | 46 µs | 3,599 ms | ~78,000× |
-| large_matmul | 45 µs | 3,422 ms | ~76,000× |
+| scalar_math | 1.77 µs | 3,172 ms | ~1,792,000× |
+| small_matmul | 2.88 µs | 3,467 ms | ~1,204,000× |
+| medium_matmul | 2.82 µs | 3,599 ms | ~1,276,000× |
+| large_matmul | 2.84 µs | 3,422 ms | ~1,205,000× |
 
-**Compilation Speed vs Mojo** (January 2026, verified):
+**Compilation Speed vs Mojo** (February 2026, verified):
 
-| Benchmark | MIND v0.1.7 | Mojo 0.25.7 | Speedup |
+| Benchmark | MIND v0.2.0 | Mojo 0.25.7 | Speedup |
 |-----------|-------------|-------------|---------|
-| scalar_math | 26 µs | 908 ms | ~35,000× |
-| small_matmul | 45 µs | 928 ms | ~20,600× |
-| medium_matmul | 46 µs | 915 ms | ~19,900× |
-| large_matmul | 45 µs | 913 ms | ~20,300× |
+| scalar_math | 1.77 µs | 908 ms | ~513,000× |
+| small_matmul | 2.88 µs | 928 ms | ~322,000× |
+| medium_matmul | 2.82 µs | 915 ms | ~324,000× |
+| large_matmul | 2.84 µs | 913 ms | ~321,000× |
 
-*Environment: Ubuntu 22.04/24.04, PyTorch 2.0+, Mojo 0.25.7*
+*Environment: Ubuntu 24.04, Criterion.rs 0.5.1, PyTorch 2.0+, Mojo 0.25.7*
 
-**Key insight**: MIND compilation is O(1) with respect to tensor sizes — matmul operations compile in ~45 µs regardless of matrix dimensions (10×20 to 512×1024).
+**Key insight**: MIND compilation is O(1) with respect to tensor sizes — matmul operations compile in ~2.8 µs regardless of matrix dimensions (10×20 to 512×1024). v0.2.0's hand-written recursive descent parser delivers 347,000+ compilations per second.
 
 ### Determinism verification
 
