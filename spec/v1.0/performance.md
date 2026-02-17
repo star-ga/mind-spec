@@ -342,7 +342,7 @@ This section contains empirically validated benchmark results for the reference 
 | v0.2.0 | 1.77 µs | 2.84 µs | 347,000/sec | Hand-written recursive descent (15× faster) |
 | **v0.2.1** | **1.82 µs** | **2.96 µs** | **338,000/sec** | **Audit-hardened pipeline (C1-C7, -2.6%)** |
 
-**Result**: MIND frontend is **35,000-176,000× faster** than PyTorch 2.10 GPU torch.compile (full pipeline), and **135,000-458,000× faster** than Mojo 0.26.1 full compilation.
+**Result**: MIND frontend is **35,000-176,000× faster** than PyTorch 2.10 GPU torch.compile (full pipeline), **21,200-95,100× faster** than JAX 0.9 cold-start XLA compilation, and **135,000-458,000× faster** than Mojo 0.26.1 full compilation.
 
 **Compilation Speed vs PyTorch 2.10 GPU** (February 2026, verified):
 
@@ -366,6 +366,18 @@ This section contains empirically validated benchmark results for the reference 
 | mlp | 6.15 µs | 829 ms | ~135,000× |
 
 *Environment: Ubuntu 24.04, Mojo 0.26.1.0, pixi, `mojo build` (full LLVM compilation)*
+
+**Compilation Speed vs JAX 0.9** (February 2026, verified):
+
+| Benchmark | MIND v0.2.1 | JAX 0.9 Cold-Start | Ratio |
+|-----------|-------------|-------------------|-------|
+| scalar_math | 1.77 µs | 37.5 ms | ~21,200× |
+| small_matmul | 2.95 µs | 127.2 ms | ~43,100× |
+| medium_matmul | 2.95 µs | 139.7 ms | ~47,400× |
+| large_matmul | 2.95 µs | 280.6 ms | ~95,100× |
+| simple_mlp | 6.15 µs | 360.5 ms | ~58,600× |
+
+*Environment: Ubuntu 24.04, RTX 3080, CUDA 12.8, JAX 0.9.0.1, cold-start with compilation cache disabled*
 
 **Scope Note**: MIND measures **frontend only** (parse + typecheck + IR). PyTorch measures the full torch.compile() pipeline (FX graph + Inductor + Triton/cuBLAS). Mojo measures full LLVM compilation to native binary. Ratios reflect this scope difference.
 
@@ -423,10 +435,10 @@ This section contains empirically validated benchmark results for the reference 
 
 ### JAX (Google)
 
-| Feature | JAX | MIND v0.2.1 | Difference |
-|---------|-----|-------------|------------|
+| Feature | JAX 0.9 | MIND v0.2.1 | Difference |
+|---------|---------|-------------|------------|
 | Compilation Backend | XLA (C++) | Custom Rust | Specialized for tensor DSL |
-| Compilation Speed | ~10-50 ms | 1.8-15.5 µs | MIND ~2,100-27,800× faster |
+| Compilation Speed | 37.5-360.5 ms (cold-start) | 1.8-15.5 µs (frontend) | MIND 21,200-95,100× faster |
 | Autodiff | jax.grad() transforms | Compile-time IR | Zero runtime cost |
 | Determinism | Mostly deterministic | 100% guaranteed | Cryptographic proof |
 
