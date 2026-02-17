@@ -51,7 +51,7 @@ Updated performance benchmarks to reflect v0.2.0 hand-written recursive descent 
 
 - **Framework comparisons** - Updated all speedup calculations:
   - vs PyTorch 2.10 GPU (full pipeline): ~35,000-176,000× faster (frontend vs full pipeline)
-  - vs Mojo 0.25.7: ~321,000-513,000× faster
+  - vs Mojo 0.26.1: ~135,000-458,000× faster
 
 ---
 

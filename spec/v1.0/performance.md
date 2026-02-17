@@ -297,25 +297,19 @@ Optimizer state: 2× weights (Adam), 0× (SGD)
 
 This section contains empirically validated benchmark results for the reference MIND implementation across multiple machine configurations.
 
-### Windows 11 Desktop (December 2025)
+### Reference Platform (February 2026)
 
 | Component | Version |
 |-----------|---------|
-| Platform | Windows 11 x86_64 |
-| Python | 3.11.14 |
-| PyTorch | 2.9.1+cpu |
-| MIND | 0.1.0 (release build) |
-| Measurement | Python PyO3 bindings (eliminates subprocess overhead) |
-
-### Ubuntu Linux Server (January 2026)
-
-| Component | Version |
-|-----------|---------|
-| Platform | Ubuntu 22.04 LTS x86_64 |
-| Python | 3.11+ |
-| PyTorch | 2.0+ torch.compile (inductor backend) |
-| MIND | 0.1.0 (release build) |
-| Measurement | Rust Criterion benchmarks (in-process, fair comparison) |
+| Platform | Ubuntu 24.04 LTS x86_64 |
+| CPU | Intel Core i7-5930K @ 3.50GHz |
+| GPU | NVIDIA RTX 3080 10GB, CUDA 12.8 |
+| RAM | 64 GB DDR4 |
+| PyTorch | 2.10.0+cu128 |
+| JAX | 0.9.0.1 |
+| Mojo | 0.26.1.0 |
+| MIND | 0.2.1 (release build) |
+| Measurement | Rust Criterion benchmarks (in-process, 100 samples, 3-sec warmup, 95% CI) |
 
 ### Compilation speed
 
@@ -423,7 +417,7 @@ This section contains empirically validated benchmark results for the reference 
 
 ## Prior art comparison
 
-### PyTorch 2.0 (TorchInductor/TorchDynamo)
+### PyTorch 2.10 (TorchInductor/TorchDynamo)
 
 | Feature | PyTorch 2.0 | MIND v0.2.1 | Difference |
 |---------|-------------|-------------|------------|
