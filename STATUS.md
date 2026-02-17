@@ -40,8 +40,8 @@ The formal Core v1 specification documents are located in `spec/v1.0/`. See [`ov
 
 | Implementation | Repo | Status | Notes |
 | -------------- | ---- | ------ | ----- |
-| MIND Compiler | [`star-ga/mind`](https://github.com/star-ga/mind) | ✅ Complete | v0.1.8, 175+ tests passing, LLVM 21, 0 Clippy warnings, FFI safety docs. |
-| MIND Runtime | [`star-ga/mind-runtime`](https://github.com/star-ga/mind-runtime) | ✅ Complete | v0.1.8, 136 tests, GPU docs, package management, distributed training, model serving. |
+| MIND Compiler | [`star-ga/mind`](https://github.com/star-ga/mind) | ✅ Complete | v0.2.1, 220 tests passing, 338K compilations/sec, audit-hardened (C1-C7, A1), 0 Clippy warnings. |
+| MIND Runtime | [`star-ga/mind-runtime`](https://github.com/star-ga/mind-runtime) | ✅ Complete | v0.1.8, 53 tests, GPU docs, audit-hardened (R2-R6, S1-S6), cargo-deny supply chain audit. |
 
 _Status legend_: ✅ Stable • ⚠️ Needs updates • 🚧 Under active development • 📝 Drafts in progress.
 

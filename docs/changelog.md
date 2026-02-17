@@ -7,6 +7,31 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.1.3] - 2026-02-17
+
+### Milestone: v0.2.1 Audit Hardening & Security Specification Update
+
+Updated specification to reflect the deep research audit remediation across compiler and runtime.
+
+### Changed
+
+- **Security spec** - Added comprehensive audit hardening section:
+  - Compiler findings C1-C7: Conv2d verifier, string interning DoS, IR determinism, constant folding bounds, SSA scope enforcement
+  - Runtime findings R2-R6: Deallocate safety, stride validation, padding correctness, determinism verification
+  - Supply chain findings S1-S6, A1: cargo-deny CI enforcement with explicit license allowlist
+
+- **Performance spec** - Updated for v0.2.1:
+  - Added v0.2.1 to version history (338K compilations/sec, audit-hardened)
+  - Updated compilation table to reflect sub-5µs compilation
+  - Updated all framework comparisons from v0.1.7 to v0.2.1 numbers
+  - Documented -2.6% performance cost of audit hardening (347K → 338K)
+
+- **STATUS.md** - Updated reference implementations:
+  - Compiler: v0.1.8 → v0.2.1, 175+ → 220 tests, audit-hardened
+  - Runtime: 136 → 53 tests (corrected count for no-default-features), audit-hardened
+
+---
+
 ## [1.1.2] - 2026-02-07
 
 ### Milestone: v0.2.0 Performance Specification Update (15× parser speedup)

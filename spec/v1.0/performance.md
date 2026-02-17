@@ -97,16 +97,16 @@ Core v1.0 benchmarks fall into three categories:
 
 ### Compilation performance
 
-| Metric | Target | v0.1.7 Actual | Notes |
+| Metric | Target | v0.2.1 Actual | Notes |
 |--------|--------|---------------|-------|
-| Parse + typecheck (small) | <100µs | **26-46 µs** | Single tensor operations |
+| Parse + typecheck (small) | <100µs | **1.77-4.75 µs** | Single tensor operations |
 | Parse + typecheck (1K LOC) | <100ms | TBD | Incremental compilation amortizes cost |
 | IR generation | <50ms for 1K LOC | Included above | Single-pass lowering |
 | MLIR lowering | <500ms for medium model | TBD | Includes optimization passes |
 | End-to-end binary build | <5 sec for ResNet-50 | TBD | Cold build with LLVM backend |
 | Incremental rebuild | <1 sec | TBD | For single-function changes |
 
-**v0.1.7 Achievement**: Sub-50µs compilation for typical tensor programs, exceeding original targets by orders of magnitude.
+**v0.2.1 Achievement**: Sub-5µs compilation for typical tensor programs, exceeding original targets by orders of magnitude. v0.2.1 adds audit hardening (C1-C7) with negligible performance impact (338K vs 347K compilations/sec, -2.6%).
 
 ## Optimization strategies
 
@@ -339,7 +339,8 @@ This section contains empirically validated benchmark results for the reference 
 | v0.1.6 | 26 µs | ~55 µs | ~18,000/sec | Full typed tensors |
 | v0.1.7 | 26 µs | 45 µs | ~22,000/sec | Parser choice reordering (-18%) |
 | v0.1.9 | 26 µs | 45 µs | ~22,000/sec | Lib rename, Windows fixes |
-| **v0.2.0** | **1.77 µs** | **2.84 µs** | **347,000/sec** | **Hand-written recursive descent (15× faster)** |
+| v0.2.0 | 1.77 µs | 2.84 µs | 347,000/sec | Hand-written recursive descent (15× faster) |
+| **v0.2.1** | **1.82 µs** | **2.96 µs** | **338,000/sec** | **Audit-hardened pipeline (C1-C7, -2.6%)** |
 
 **Result**: MIND is **280,000-1,900,000× faster** than PyTorch 2.0 torch.compile (cold-start).
 
@@ -407,20 +408,20 @@ This section contains empirically validated benchmark results for the reference 
 
 ### PyTorch 2.0 (TorchInductor/TorchDynamo)
 
-| Feature | PyTorch 2.0 | MIND v0.1.7 | Difference |
+| Feature | PyTorch 2.0 | MIND v0.2.1 | Difference |
 |---------|-------------|-------------|------------|
 | Compilation Strategy | JIT tracing/scripting | AOT static compilation | MIND compiles before execution |
 | Autodiff Method | Runtime tape-based | Compile-time symbolic | MIND generates gradient IR at compile-time |
 | Type System | Dynamic typing | Static strong typing | MIND type-checks at compile-time |
-| Compilation Time | 2.0-79 ms | 26-46 µs | MIND ~77-125,000× faster |
+| Compilation Time | 2.0-79 ms | 1.8-4.8 µs | MIND ~420-44,000,000× faster |
 | Determinism | Not guaranteed | 100% bit-level | MIND guarantees reproducibility |
 
 ### JAX (Google)
 
-| Feature | JAX | MIND v0.1.7 | Difference |
+| Feature | JAX | MIND v0.2.1 | Difference |
 |---------|-----|-------------|------------|
 | Compilation Backend | XLA (C++) | Custom Rust | Specialized for tensor DSL |
-| Compilation Speed | ~10-50 ms | 26-46 µs | MIND ~220-1,900× faster |
+| Compilation Speed | ~10-50 ms | 1.8-4.8 µs | MIND ~2,100-27,800× faster |
 | Autodiff | jax.grad() transforms | Compile-time IR | Zero runtime cost |
 | Determinism | Mostly deterministic | 100% guaranteed | Cryptographic proof |
 
@@ -434,18 +435,18 @@ This section contains empirically validated benchmark results for the reference 
 
 ### Apache TVM
 
-| Feature | TVM | MIND v0.1.7 | Difference |
+| Feature | TVM | MIND v0.2.1 | Difference |
 |---------|-----|-------------|------------|
 | Focus | Deploy-time optimization | Compile-time correctness | Different priorities |
-| Compilation Speed | ~10-100 ms | 26-46 µs | MIND ~220-3,850× faster |
+| Compilation Speed | ~10-100 ms | 1.8-4.8 µs | MIND ~2,100-55,600× faster |
 | Autodiff | External (relay.gradient) | Built-in | Integrated solution |
 
 ### XLA (TensorFlow/JAX Backend)
 
-| Feature | XLA | MIND v0.1.7 | Difference |
+| Feature | XLA | MIND v0.2.1 | Difference |
 |---------|-----|-------------|------------|
 | Implementation | C++ (50k+ LOC) | Rust (compact) | Simpler architecture |
-| Compilation Speed | ~10-100 ms | 26-46 µs | MIND ~220-3,850× faster |
+| Compilation Speed | ~10-100 ms | 1.8-4.8 µs | MIND ~2,100-55,600× faster |
 | Determinism | Not guaranteed | 100% guaranteed | Production-ready |
 
 **Key differentiation**: No prior art achieves all three of:

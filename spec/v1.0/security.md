@@ -269,6 +269,48 @@ Security issues SHOULD be reported via:
 - [NIST AI Risk Management Framework](https://www.nist.gov/itl/ai-risk-management-framework)
 - [OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/)
 
+## Audit hardening (v0.2.1)
+
+As of v0.2.1, the reference implementations have undergone a deep research audit with the following findings addressed:
+
+### Compiler hardening (C1-C7)
+
+| Finding | Description | Remediation |
+|---------|-------------|-------------|
+| C1 | Conv2d IR verifier accepted zero strides and negative axes | Verifier rejects stride ≤ 0 and axis < 0 |
+| C2 | String interning had no DoS protection | Rate limit: MAX_INTERNED_STRINGS = 100,000 |
+| C3 | IR printer non-deterministic function iteration | Sorted iteration for deterministic output |
+| C4 | Constant folding lacked bounds checking | Rejects division-by-zero and integer overflow |
+| C5 | Type checker missing array bounds validation | Bounds checked at compile time |
+| C6 | FnDef body verifier did not enforce SSA scope | Use-before-def detection in body blocks |
+| C7 | Eval NaN/Inf propagation undefined | Explicit NaN/Inf handling with propagation rules |
+
+### Runtime hardening (R2-R6, S1-S6)
+
+| Finding | Description | Remediation |
+|---------|-------------|-------------|
+| R2 | Deallocate did not clear handle data | Handle data zeroed on deallocation |
+| R3 | Conv2d accepted stride=0 at runtime | Runtime validation rejects stride ≤ 0 |
+| R4 | Conv2d lacked padding correctness tests | Padding verified with expected output dimensions |
+| R5 | Conv2d kernel > input produced undefined results | Explicit validation and error return |
+| R6 | Conv2d determinism not verified | Bit-identical results confirmed across 5 runs |
+| S1-S6 | Supply chain audit configuration | cargo-deny with license, advisory, and ban checks |
+
+### Supply chain audit (A1)
+
+Both repositories now enforce `cargo-deny` in CI, covering:
+- **Advisories**: RustSec advisory database with 30-day SLA for high-severity CVEs
+- **Licenses**: Explicit allowlist (MIT, Apache-2.0, BSD-3-Clause, MPL-2.0, Unicode-3.0, CDLA-Permissive-2.0)
+- **Bans**: Duplicate crate detection (warn level)
+- **Sources**: Registry verification
+
+### Performance impact
+
+Audit hardening introduced negligible performance regression:
+- v0.2.0: 347,000 compilations/sec
+- v0.2.1: 338,000 compilations/sec (-2.6%)
+- 100% bit-level determinism preserved (4/4 tests, SHA256 verified)
+
 ## Future work
 
 Areas not covered in Core v1.0 but under consideration:
