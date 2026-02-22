@@ -423,59 +423,41 @@ ConstDeclaration = "const" , Identifier , ":" , Type , "=" , Expression ;
 - Supports integer and boolean types
 - No runtime cost
 
-#### 3. Byte Slice Type (Grammar Addition)
+#### 3. u32 Integer Type (Grammar Addition)
 
-**Concept**: Fat pointer type for zero-copy byte access:
+**Concept**: Unsigned 32-bit integer for packed codes and bitfields:
 
-```mind
-// Proposed syntax (targets Phase 10.5)
-fn starts_with(slice: &[u8], prefix: &[u8]) -> bool {
-  if prefix.len() > slice.len() { return false }
-  let mut i = 0
-  while i < prefix.len() {
-    if slice[i] != prefix[i] { return false }
-    i += 1
-  }
-  true
-}
+```ebnf
+PrimitiveType = "i32" | "i64" | "u32" | "f32" | "f64" | "bool" | "unit" ;
 ```
 
-**Grammar addition**:
+**Implementation considerations**:
+- `u32` for packed confirmation codes, bitfields, and enum discriminants
+- Bitwise operators: `|`, `&`, `<<`, `>>`, `^`
+- `as` casting between integer types (`enum_variant as u32`)
+- Zero-cost: same LLVM integer types, different type-checker constraints
+
+#### 4. Byte Slice Type (Deferred — Rust FFI Recommended)
+
+**Status**: Deferred. Byte-level operations are best handled via Rust FFI helpers rather than native MIND constructs. This avoids scope creep into general systems programming territory that would blur MIND's certified-AI identity.
+
+**Rationale**: MIND owns *governance logic* (typed decisions via enum/struct/if/else). Rust owns *byte-level implementation* (string matching, memory management) via FFI. Functions like `starts_with()` and `contains_ascii_ci()` in `policy.mind` would be implemented as Rust FFI exports callable from MIND.
+
+**If reconsidered in future versions**:
 
 ```ebnf
 ByteSliceType = "&" , "[" , "u8" , "]" ;
 ByteStringLiteral = "b" , '"' , { ByteChar } , '"' ;
 ```
 
-**Implementation considerations**:
-- Represented as (pointer, length) pair — no allocation
-- `.len()` intrinsic method
-- Indexed access with bounds checking
-- Byte string literals (`b"hello"`) compile to static data
-- Compatible with Core v1 memory safety model (no mutable aliasing)
-
-#### 4. Integer Types (Grammar Addition)
-
-**Concept**: Unsigned integer types for systems programming:
-
-```ebnf
-PrimitiveType = "i32" | "i64" | "u8" | "u32" | "f32" | "f64" | "bool" | "unit" ;
-```
-
-**Implementation considerations**:
-- `u8` for byte values, `u32` for packed codes and bitfields
-- Bitwise operators: `|`, `&`, `<<`, `>>`, `^`
-- `as` casting between integer types
-- Zero-cost: same LLVM integer types, different type-checker constraints
-
 ### Integration with Existing Features
 
-| MIND Feature | Systems Programming Application |
-|--------------|----------------------------------|
+| MIND Feature | Governance Logic Application |
+|--------------|------------------------------|
 | **Static types** | Enum and struct types checked at compile time |
 | **MLIR lowering** | Enum discriminants lower to LLVM integer operations |
-| **Determinism** | Zero-allocation byte matching — fully deterministic |
-| **Safety** | Bounds-checked slice access, no raw pointers |
+| **Determinism** | Typed governance decisions — fully deterministic |
+| **FFI** | Byte-level validation delegates to verified Rust helpers |
 | **Edge runtime** | Policy kernels compile to <1 KB binaries for embedded |
 
 ### Reference Implementation
