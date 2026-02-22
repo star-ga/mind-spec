@@ -204,12 +204,14 @@ fn authenticated_inference(ctx: Context, input: Tensor) -> Result<Tensor, Error>
 - Compatible with Core v1 type system (tensors serialize to nested arrays)
 - Async execution model for non-blocking I/O operations
 
-#### 2. Distributed Execution and Scalability (Informative)
+#### 2. Distributed Execution and Scalability (Implemented in Runtime)
+
+**Status**: The runtime backend (`mind-runtime`) implements distributed training with NCCL/Gloo collectives, RingAllReduce, and pipeline parallelism (3,268 LOC). The language-level syntax below is proposed for future surface-language integration.
 
 **Concept**: New constructs for parallel computation and distributed training across multiple nodes:
 
 ```mind
-// Proposed syntax (not yet implemented)
+// Proposed surface syntax (runtime backend implemented, language syntax pending)
 @distributed(strategy = "data_parallel", nodes = 8)
 fn train_distributed(data: Dataset, model: Model) -> Model {
     // Automatic gradient synchronization across nodes
@@ -480,10 +482,11 @@ This section reserves space for future domain-specific extensions:
 - Bounded arithmetic (saturation, overflow traps)
 - Worst-case execution time (WCET) analysis
 
-### Distributed Training
-- Multi-node collectives (allreduce, allgather, reduce_scatter)
-- Pipeline parallelism primitives
-- Data-parallel gradient synchronization
+### Distributed Training ✅ Implemented in Runtime
+- ~~Multi-node collectives (allreduce, allgather, reduce_scatter)~~ ✅
+- ~~Pipeline parallelism primitives~~ ✅
+- ~~Data-parallel gradient synchronization~~ ✅
+- Language-level syntax integration pending (runtime backend complete)
 
 ---
 
