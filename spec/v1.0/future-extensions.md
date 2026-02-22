@@ -357,6 +357,133 @@ Full-stack extensions leverage MIND's existing strengths:
 
 ---
 
+## Systems Programming Primitives
+
+### Motivation
+
+MIND's Core v1 focuses on tensor computation, but real-world deployment requires systems-level constructs for governance, access control, and deterministic policy enforcement. The `policy.mind` execution boundary kernel demonstrates this need: fail-closed access control using enums, structs, byte-level string matching, and bitwise operations — all without dynamic allocation.
+
+These primitives extend MIND from a tensor-only language into one capable of expressing complete, self-contained systems programs that compile alongside tensor workloads with the same safety guarantees.
+
+### Proposed Extensions
+
+#### 1. Enum Declarations (Grammar Addition)
+
+**Concept**: Algebraic data types with unit variants and optional discriminants:
+
+```mind
+// Proposed syntax (targets Phase 10.5)
+enum Action {
+  Read,
+  Write,
+  Delete,
+  Execute,
+}
+
+enum DenyCode {
+  InvalidInput = 1,
+  SensitivePath = 3,
+  DefaultDeny = 255,
+}
+```
+
+**Grammar addition** (not yet in `grammar-syntax.ebnf`):
+
+```ebnf
+EnumDeclaration = "enum" , Identifier , [ TypeParameters ] , "{" , [ VariantList ] , "}" ;
+VariantList = Variant , { "," , Variant } , [ "," ] ;
+Variant = Identifier , [ "=" , IntegerLiteral ] ;
+```
+
+**Implementation considerations**:
+- Unit variants with implicit sequential discriminants (0, 1, 2, ...)
+- Explicit discriminant overrides (`= 255`)
+- `as u32` casting for integer conversion
+- Enum comparison (`==`, `!=`) via discriminant comparison
+- Compatible with existing `match` expression (already in EBNF)
+
+#### 2. Const Declarations (Grammar Addition)
+
+**Concept**: Compile-time constant values:
+
+```mind
+// Proposed syntax (targets Phase 10.5)
+const TIMEOUT_SHIFT: u32 = 8
+const MAX_RETRIES: i32 = 3
+```
+
+**Grammar addition**:
+
+```ebnf
+ConstDeclaration = "const" , Identifier , ":" , Type , "=" , Expression ;
+```
+
+**Implementation considerations**:
+- Evaluated at compile time, inlined at use sites
+- Supports integer and boolean types
+- No runtime cost
+
+#### 3. Byte Slice Type (Grammar Addition)
+
+**Concept**: Fat pointer type for zero-copy byte access:
+
+```mind
+// Proposed syntax (targets Phase 10.5)
+fn starts_with(slice: &[u8], prefix: &[u8]) -> bool {
+  if prefix.len() > slice.len() { return false }
+  let mut i = 0
+  while i < prefix.len() {
+    if slice[i] != prefix[i] { return false }
+    i += 1
+  }
+  true
+}
+```
+
+**Grammar addition**:
+
+```ebnf
+ByteSliceType = "&" , "[" , "u8" , "]" ;
+ByteStringLiteral = "b" , '"' , { ByteChar } , '"' ;
+```
+
+**Implementation considerations**:
+- Represented as (pointer, length) pair — no allocation
+- `.len()` intrinsic method
+- Indexed access with bounds checking
+- Byte string literals (`b"hello"`) compile to static data
+- Compatible with Core v1 memory safety model (no mutable aliasing)
+
+#### 4. Integer Types (Grammar Addition)
+
+**Concept**: Unsigned integer types for systems programming:
+
+```ebnf
+PrimitiveType = "i32" | "i64" | "u8" | "u32" | "f32" | "f64" | "bool" | "unit" ;
+```
+
+**Implementation considerations**:
+- `u8` for byte values, `u32` for packed codes and bitfields
+- Bitwise operators: `|`, `&`, `<<`, `>>`, `^`
+- `as` casting between integer types
+- Zero-cost: same LLVM integer types, different type-checker constraints
+
+### Integration with Existing Features
+
+| MIND Feature | Systems Programming Application |
+|--------------|----------------------------------|
+| **Static types** | Enum and struct types checked at compile time |
+| **MLIR lowering** | Enum discriminants lower to LLVM integer operations |
+| **Determinism** | Zero-allocation byte matching — fully deterministic |
+| **Safety** | Bounds-checked slice access, no raw pointers |
+| **Edge runtime** | Policy kernels compile to <1 KB binaries for embedded |
+
+### Reference Implementation
+
+See [`examples/policy.mind`](https://github.com/star-ga/mind/blob/main/examples/policy.mind) for a complete execution boundary kernel using all proposed features.
+
+---
+
 ## Other Domain Extensions (Placeholder)
 
 This section reserves space for future domain-specific extensions:
