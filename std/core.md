@@ -20,12 +20,12 @@ Essential utilities included in every MIND program.
 
 ## IO
 ```
-macro print!(fmt: str, args...)
+macro print!(fmt: &[u8], args...)
 ```
 Prints to stdout.
 
 ## Panic
 ```
-macro panic!(msg: str) -> !
+macro panic!(msg: &[u8]) -> !
 ```
 Terminates the program immediately.

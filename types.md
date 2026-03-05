@@ -22,12 +22,11 @@ MIND is a statically typed language with a focus on tensor operations and safety
 - **i32 / i64**: Signed integers.
 - **f32 / f64**: IEEE 754 floating point numbers.
 - **bool**: Boolean (`true` / `false`).
-- **str**: UTF-8 string slices.
 
 ## Tensor Type
 Tensors are the core primitive, defined by a data type and a shape.
-```rust
-let image: Tensor<f32, [3, 224, 224]>;
+```mind
+let image: tensor<f32[3, 224, 224]>;
 ```
 
 ## Structs
