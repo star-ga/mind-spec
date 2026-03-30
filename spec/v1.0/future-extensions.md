@@ -644,6 +644,25 @@ Native optimization for 2026+ hardware:
 | Automotive NPUs (Mobileye, NVIDIA DRIVE) | Planned | 2026 |
 | Custom safety-rated ASICs | Research | 2027+ |
 
+#### 4.1.1 Full Accelerator Class Coverage
+
+MIND targets all 6 processor classes powering modern AI inference, plus FPGA:
+
+| Class | Hardware Examples | MIND Target | Use Case | Status |
+|-------|------------------|-------------|----------|--------|
+| **CPU** | x86, ARM, RISC-V | `--target cpu` | Orchestration, preprocessing | ✅ Stable |
+| **GPU** | NVIDIA CUDA, AMD ROCm, Apple Metal, WebGPU | `--target gpu` | Training, deep learning | ✅ Production |
+| **ASIC** | XRM-SSD xx1, xx1-XL, MatX One | `--target asic` | XRM-native inference | ✅ In compiler |
+| **TPU** | Google TPU v5e/v6, TPU pods (9,216 chips) | `--target tpu` | Google-scale tensor workloads | 🔜 Q3–Q4 2026 |
+| **NPU** | Apple ANE, Qualcomm Hexagon, Intel NPU | `--target npu` | Edge/mobile, on-device privacy | 🔜 Q3–Q4 2026 |
+| **LPU** | Groq GroqChip (230MB SRAM, 241 tok/s) | `--target lpu` | Real-time LLM serving | 🔜 Q3–Q4 2026 |
+| **DPU** | NVIDIA BlueField, AMD Pensando, Intel IPU | `--target dpu` | Data center infra, network governance | 🔜 Q3–Q4 2026 |
+| **FPGA** | Xilinx Alveo, Intel Agilex | `--target fpga` | Ultra-low-latency, HLS synthesis | 🔜 Q3–Q4 2026 |
+
+**Design principle**: Same `.mind` source compiles to any target. Governance enforcement is backend-agnostic — the 512 invariant check runs whether the execution substrate is a GPU, an SRAM-resident LPU, or a SmartNIC DPU.
+
+**Key differentiator vs HLS4ML**: HLS4ML compiles trained PyTorch/TF models → synthesizable C++ for FPGAs. MIND compiles the *entire inference stack* (model + attention + KV cache + speculative decoding + governance) to native code via MLIR/LLVM, with backend-specific dialects for each accelerator class.
+
 #### 4.2 Verification-as-a-Service (VaaS)
 
 Cloud-based verification for complex models:
