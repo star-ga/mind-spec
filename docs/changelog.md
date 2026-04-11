@@ -172,3 +172,30 @@ verified and passing.
 ---
 
 [Back to Spec Index](./spec/index.md)
+
+## [1.1.4] - 2026-04-10
+
+### Milestone: v0.2.3 Clean Core Release
+
+Aligned specification with compiler v0.2.3 and runtime v0.1.9 releases.
+
+### Changed
+
+- **Compiler v0.2.3** — Removed XRM/ASIC target dialect from compiler core
+  - ASIC backend moved to mind-runtime where all hardware backends belong
+  - Added `use` keyword parser support (alias for `import`)
+  - Clean separation: compiler generates IR, runtime executes on target hardware
+
+- **Runtime v0.1.9** — Added ASIC backend, struct/enum parser stripping
+  - `src/backend/asic/` — XRM-SSD ASIC target dialect (from compiler v0.2.2)
+  - `strip_mind_syntax` handles struct/enum blocks for multi-module programs
+  - `mind_main` symbol exported for compiled program entry
+
+### Architecture Clarification
+
+The MIND ecosystem has three layers:
+1. **mind** (compiler) — Parser, type checker, IR, autodiff, MLIR lowering. No hardware backends.
+2. **mind-runtime** — Hardware backends (cuda, metal, rocm, webgpu, webnn, asic), eval engine, FFI.
+3. **mind-spec** — Language specification, design documents, conformance tests.
+
+Backend code belongs in mind-runtime, not in the compiler.
