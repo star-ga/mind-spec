@@ -205,3 +205,56 @@ FunctionExpression = "fn" , "(" , [ ParameterList ] , ")" , [ "->" , Type ] , Bl
 (* Tensor operations (Core v1 intrinsics) *)
 (* These are typically called as functions: sum(x, axes, keepdims) *)
 (* The function call syntax is covered by CallOperator above *)
+
+(* ============================================================ *)
+(* v1.1 candidate additions (Phase 10.5 — Systems Programming   *)
+(* Foundation). Implemented in mindc 0.2.5+. Status: evolving — *)
+(* implementations claiming v1.0 conformance MAY parse these,   *)
+(* implementations claiming v1.1 MUST.                          *)
+(* ============================================================ *)
+
+(* Compile-time constant declaration.                           *)
+ConstDeclaration = "const" , Identifier , [ ":" , Type ] , "=" , Expression , [ ";" ] ;
+
+(* Algebraic enums.                                             *)
+EnumDeclaration = "enum" , Identifier , [ TypeParameters ] , "{" , [ EnumVariantList ] , "}" ;
+EnumVariantList = EnumVariant , { "," , EnumVariant } , [ "," ] ;
+EnumVariant     = Identifier , [ "(" , [ EnumPayloadList ] , ")" ] ;
+EnumPayloadList = Type , { "," , Type } ;
+
+(* Module block (compile-time grouping).                        *)
+ModuleBlock     = "module" , Identifier , "{" , { ModuleItem } , "}" ;
+
+(* Use-clause (lightweight import).                             *)
+UseDeclaration  = "use" , ImportPath , [ ";" ] ;
+
+(* Attribute on items (`[name]`, `[name(arg, ...)]`).           *)
+Attribute       = "[" , Identifier , [ "(" , [ AttributeArgList ] , ")" ] , "]" ;
+AttributeArgList = AttributeArg , { "," , AttributeArg } ;
+AttributeArg    = Identifier | Literal ;
+
+(* Runtime assertion (no return value).                         *)
+AssertStatement = "assert" , Expression , [ "," , StringLiteral ] , [ ";" ] ;
+
+(* Postfix cast.                                                *)
+AsCast          = Expression , "as" , Type ;
+
+(* Logical and bitwise binary operators (Phase 10.5 Tier-1).    *)
+LogicalOr       = Expression , "||" , Expression ;
+LogicalAnd      = Expression , "&&" , Expression ;
+BitwiseOr       = Expression , "|"  , Expression ;
+BitwiseAnd      = Expression , "&"  , Expression ;
+BitwiseXor      = Expression , "^"  , Expression ;
+ShiftLeft       = Expression , "<<" , Expression ;
+ShiftRight      = Expression , ">>" , Expression ;
+
+(* Operator precedence (highest binds tightest, all left-assoc): *)
+(*   1. *  /                                                     *)
+(*   2. |  &  ^  <<  >>                                          *)
+(*   3. +  -                                                     *)
+(*   4. as       (postfix cast)                                  *)
+(*   5. == != < <= > >=                                          *)
+(*   6. &&                                                       *)
+(*   7. ||                                                       *)
+(* Reference implementation: mindc 0.2.5+ Pratt parser           *)
+(* (src/parser/mod.rs::parse_pratt).                             *)
