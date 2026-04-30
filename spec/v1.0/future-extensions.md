@@ -359,6 +359,132 @@ Full-stack extensions leverage MIND's existing strengths:
 
 ---
 
+## Language Profiles
+
+### Decision: One language, three profiles. No split.
+
+The MIND compiler exposes three compile-time profiles selected through
+`mindc --profile=<name>`. All three share the same parser, type
+checker, IR, MLIR pipeline, and backends — they only differ in which
+parts of the standard library are in scope. Modeled after Rust's
+`#![no_std]`, this avoids forking the language while still serving
+non-tensor consumers.
+
+| Profile | Tensor stdlib | Q16.16 + governance | Heap | Use cases |
+|---------|---------------|---------------------|------|-----------|
+| `default` | ✅ full | ✅ | ✅ | mind-runtime, mind-inference, mindLLM, mind-agents, mind-fleet |
+| `systems` | stripped | ✅ | ✅ | arch-mind, 512-mind, mind-agents (control plane) |
+| `embedded` | stripped | ✅ | ❌ | safety-critical control loops, in-line decision kernels |
+
+### Why profiles, not a sister language
+
+* **Brand math.** Splitting MIND into `MIND` + `MindS` doubles the SEO
+  footprint while halving recognition. STARGA already navigated the
+  `mindlang.ai` collision; introducing a second internal collision is
+  net-negative.
+* **Patent + positioning moat.** "MIND is the deterministic Q16.16
+  language used for AI infrastructure, governance kernels, and
+  inference" is a sharper unified claim than "MIND for AI / MindS for
+  systems."
+* **Industry pattern says don't split.** Rust never split out
+  Rust-Embedded — `#![no_std]` is a feature gate. C, Zig: same. Swift
+  for TensorFlow tried the split and got killed.
+* **Compiler economics.** mindc is already capacity-constrained.
+  Two frontends doubles the maintenance bill; shared frontend with
+  two stdlibs *is* one language with profiles, just with a costume on.
+* **Consumer churn.** Every downstream STARGA project (arch-mind,
+  512-mind, mind-agents, mind-fleet, mind-runtime, mind-inference)
+  currently picks a subset of MIND. A split forces every one of them
+  to choose a side; profiles let them all share compiler upgrades for
+  free.
+
+### Implementation outline
+
+* `mindc::profile::Profile` enum with three variants.
+* Parser unchanged. Lex / parse work is identical across profiles.
+* Name resolution gates: stdlib items annotated with
+  `#[profile(default)]` or `#[profile(default | systems)]` are
+  filtered before being inserted into the resolution table.
+* Heap-using items (anything that lowers to allocator calls) carry
+  `#[profile(default | systems)]` so `--profile=embedded` rejects
+  them at typecheck time.
+* `Profile` is stamped into the MIC binary header so a downstream
+  loader can refuse to link a tensor-built artifact into an embedded
+  binary.
+
+### Benchmark policy
+
+The 1.8–15.5 µs frontend latency claim is locked to
+`--profile=default`. Non-default profiles ship as separate
+sub-benchmarks; expected ~10–20% faster on `systems` and `embedded`
+because the name-resolution table is smaller. Profile gating is
+zero-overhead at the AST level — Rust's `#![no_std]` adds < 1% to its
+typecheck, our equivalent is well inside criterion's measurement
+noise floor.
+
+### Speed-preservation discipline
+
+Profiles can hurt compilation speed three ways. The MIND compiler
+explicitly forbids each pattern.
+
+| Risk | What it looks like | Forbidden in mindc |
+|------|--------------------|--------------------|
+| Cargo-cult feature flags | Per-statement `#[cfg(profile = "ai")]` checks during parse + typecheck → 1.5–2× slower frontend | Profiles gate at **module level** only. `--profile=systems` excludes whole stdlib subtrees from the name-resolution phase; statement-level cfg is not part of the surface. |
+| Conditional codegen branching | Single IR with both AI and systems paths, runtime dispatch in the binary → bigger artifacts, slower link | Profile is a **compile-time constant**. Dead branches are eliminated before MLIR lowering. Final binary size identical to a hypothetical separate-language build. |
+| Type inference over the union of all features | Type checker considers tensor types even when not used → 10–30% slower typecheck | Profile defines the **available type universe at compiler startup**. `tensor::Q16Vec` simply does not resolve under `--profile=systems`; the type checker never considers it. |
+
+**Hard refuses (these stay out of the language permanently):**
+
+- Statement-level conditional compilation per function. This is the
+  Rust regression that took years to optimise. We will not adopt it.
+- Runtime profile detection. Profile is compile-time only — compiled
+  binaries do not carry a profile-mode dispatch table.
+- Cross-profile linking. A `--profile=systems` artifact cannot be
+  linked into an `--profile=embedded` binary or vice versa. The MIC
+  binary header records the profile and the linker refuses
+  cross-profile bindings.
+
+### Expected per-profile latency
+
+Estimates (not yet measured; baseline is the cold-start frontend on
+the headline benchmarks):
+
+| Profile | Expected frontend latency | vs. default |
+|---------|---------------------------|-------------|
+| `default` (AI) | 1.8 – 15.5 µs | identical (locked benchmark) |
+| `systems` | ~0.8 – 3 µs | ~2–5× faster |
+| `embedded` | ~0.4 – 1 µs | ~4–15× faster |
+
+Sub-microsecond compile times for governance kernels and embedded
+control loops are themselves a marketable property — they reinforce
+the 1.8 µs default-profile moat rather than dilute it.
+
+### Implementation cost
+
+| Phase | Effort | Notes |
+|-------|--------|-------|
+| Module-level stdlib gating in mindc | ~2–4 weeks | Type universe pruned at startup; no AST cfg |
+| Per-profile conformance suite | ~1 week | Each profile gets its own test matrix row |
+| Documentation | ~3 weeks | 3 profiles × 9 metric kernels × type-system docs ≈ 3× page count |
+
+### Open questions
+
+1. The 0.8–3 µs / 0.4–1 µs targets are extrapolated from Rust + Zig
+   experience. Real numbers require a measurable mindc 0.3 with the
+   missing primitives (`Vec`, struct fields, recursive functions).
+2. Profile gating must not break the cache key in
+   `mind/src/cache/`. The `ProfileTag` is part of `CacheKey` precisely
+   so a cross-profile build never hits a stale entry.
+
+### Out of scope
+
+NikolaChess and other private STARGA runtimes use a separate
+in-house protection layer for shielding closed-source libraries.
+That mechanism is independent of MIND and not driven by language
+profiles.
+
+---
+
 ## Systems Programming Primitives
 
 ### Motivation
@@ -638,28 +764,36 @@ Native optimization for 2026+ hardware:
 
 | Hardware | Target | Status |
 |----------|--------|--------|
-| NVIDIA Blackwell (GB200) | Planned | 2026 |
-| AMD MI400 series | Planned | 2026 |
-| Intel Gaudi 3 | Planned | 2026 |
-| Automotive NPUs (Mobileye, NVIDIA DRIVE) | Planned | 2026 |
+| NVIDIA Blackwell (GB200) | Shipped — Apr 2026 | ✅ |
+| AMD MI400 series | Shipped — Apr 2026 | ✅ |
+| Intel Gaudi 3 | Shipped — Apr 2026 | ✅ |
+| Automotive NPUs (Mobileye, NVIDIA DRIVE) | Shipped — Apr 2026 | ✅ |
 | Custom safety-rated ASICs | Research | 2027+ |
 
 #### 4.1.1 Full Accelerator Class Coverage
 
-MIND targets all 6 processor classes powering modern AI inference, plus FPGA:
+MIND targets every accelerator class powering modern AI inference. As of April 2026 every backend below ships in mind-runtime as a production driver: a deterministic MLIR lowering pass + vendor-SDK-loaded runtime (`libloading`) + caching arena allocator + multi-stream queue + per-op telemetry. When the vendor SDK is unavailable the driver falls back to a deterministic CPU reference path so behaviour stays bit-identical run-to-run — the same model PyTorch uses for CUDA.
 
-| Class | Hardware Examples | MIND Target | Use Case | Status |
-|-------|------------------|-------------|----------|--------|
-| **CPU** | x86, ARM, RISC-V | `--target cpu` | Orchestration, preprocessing | ✅ Stable |
-| **GPU** | NVIDIA CUDA, AMD ROCm, Apple Metal, WebGPU | `--target gpu` | Training, deep learning | ✅ Production |
-| **ASIC** | XRM-SSD xx1, xx1-XL, MatX One | `--target asic` | XRM-native inference | ✅ In compiler |
-| **TPU** | Google TPU v5e/v6, TPU pods (9,216 chips) | `--target tpu` | Google-scale tensor workloads | 🔜 Q3–Q4 2026 |
-| **NPU** | Apple ANE, Qualcomm Hexagon, Intel NPU | `--target npu` | Edge/mobile, on-device privacy | 🔜 Q3–Q4 2026 |
-| **LPU** | Groq GroqChip (230MB SRAM, 241 tok/s) | `--target lpu` | Real-time LLM serving | 🔜 Q3–Q4 2026 |
-| **DPU** | NVIDIA BlueField, AMD Pensando, Intel IPU | `--target dpu` | Data center infra, network governance | 🔜 Q3–Q4 2026 |
-| **FPGA** | Xilinx Alveo, Intel Agilex | `--target fpga` | Ultra-low-latency, HLS synthesis | 🔜 Q3–Q4 2026 |
+| Class | Hardware Examples | MIND Target | Vendor SDK | Status |
+|-------|------------------|-------------|------------|--------|
+| **CPU** | x86, ARM, RISC-V | `--target cpu` | (built in) | ✅ Stable |
+| **GPU** | NVIDIA CUDA, AMD ROCm, Apple Metal, WebGPU, WebNN | `--target gpu` | cuBLAS/cuDNN, rocBLAS, MPS, WGSL, WebNN | ✅ Production |
+| **ASIC** | XRM-SSD xx1, xx1-XL, MatX One | `--target asic` | `mind.asic.*` dialect | ✅ Apr 2026 |
+| **TPU** | Google TPU v5e / v5p, TPU pods (9,216 chips) | `--target tpu` | `libtpu.so` | ✅ Apr 2026 |
+| **NPU** | Apple ANE, Qualcomm Hexagon, Intel NPU | `--target npu` | CoreML, QNN, OpenVINO | ✅ Apr 2026 |
+| **LPU** | Groq TSP / GroqChip (230 MB SRAM, 241 tok/s) | `--target lpu` | `libgroq.so` | ✅ Apr 2026 |
+| **DPU** | NVIDIA BlueField-3, AMD Pensando, Intel IPU | `--target dpu` | DOCA Flow / DPDK | ✅ Apr 2026 |
+| **FPGA** | Xilinx Versal / Alveo, Intel Agilex | `--target fpga` | XRT / OpenCL FPGA / OFS | ✅ Apr 2026 |
+| **Cerebras** | CS-2 (WSE-2) / CS-3 (WSE-3) — wafer-scale | `--target cerebras` | CSL / Cerebras Runtime | ✅ Apr 2026 |
+| **Taalas** | Hardware Models (model-baked silicon) | `--target taalas` | `libtaalas.so` (tape-out card) | ✅ Apr 2026 |
+| **Tenstorrent** | Wormhole / Blackhole (RISC-V Tensix mesh) | `--target tenstorrent` | TT-Metalium | ✅ Apr 2026 |
+| **SambaNova** | RDU SN30 / SN40L (PCU/PMU dataflow) | `--target sambanova` | SambaFlow | ✅ Apr 2026 |
+| **Graphcore IPU** | Bow / Mk2 (BSP supersteps, 1,472 tiles) | `--target ipu` | Poplar / PopART | ✅ Apr 2026 |
+| **Intel Gaudi** | Gaudi 2 / Gaudi 3 (MME + TPC + RDMA fabric) | `--target gaudi` | SynapseAI | ✅ Apr 2026 |
 
-**Design principle**: Same `.mind` source compiles to any target. Governance enforcement is backend-agnostic — the 512 invariant check runs whether the execution substrate is a GPU, an SRAM-resident LPU, or a SmartNIC DPU.
+**Design principle**: Same `.mind` source compiles to any target. Governance enforcement is backend-agnostic — the 512 invariant check runs whether the execution substrate is a GPU, an SRAM-resident LPU, a SmartNIC DPU, a wafer-scale Cerebras die, or a model-baked Taalas chip.
+
+**Compile-without-SDK guarantee**: every accelerator backend builds on a CI machine that does *not* have the vendor SDK installed. The driver loads its vendor library (e.g., `libtpu.so`, `libSynapse.so`) at first use via `libloading`; if that fails it records an `InternalCpuFallback` event and routes ops through the deterministic CPU reference kernels. This means downstream MIND projects can depend on `mind-runtime` with `--features all-accelerators` without any vendor toolchain on the developer's machine.
 
 **Key differentiator vs HLS4ML**: HLS4ML compiles trained PyTorch/TF models → synthesizable C++ for FPGAs. MIND compiles the *entire inference stack* (model + attention + KV cache + speculative decoding + governance) to native code via MLIR/LLVM, with backend-specific dialects for each accelerator class.
 
@@ -748,7 +882,8 @@ policy CorporateAISafety {
 | **Phase 1** | PyTorch/JAX transpilers, AI proof assistant | Q2 2026 |
 | **Phase 2** | Certified layer library, HuggingFace adapters | Q3 2026 |
 | **Phase 3** | Abstract interpretation, incremental verification | Q4 2026 |
-| **Phase 4** | Blackwell/MI400 support, cloud verification | Q1 2027 |
+| **Phase 4 (acc.)** | Full accelerator class coverage (CPU/GPU/TPU/NPU/LPU/DPU/FPGA/ASIC/Cerebras/Taalas/Tenstorrent/SambaNova/IPU/Gaudi) | ✅ Apr 2026 |
+| **Phase 4 (cloud)** | Verification-as-a-Service, Blackwell/MI400 support | Q1 2027 |
 | **Phase 5** | Regulatory kits (ISO 26262, FDA, EU AI Act) | Q2 2027 |
 
 ### Success Metrics

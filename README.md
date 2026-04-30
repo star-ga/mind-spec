@@ -19,6 +19,7 @@ the public reference implementation at [star-ga/mind](https://github.com/star-ga
   - [Shapes & tensor semantics](./spec/v1.0/shapes.md)
   - [MLIR lowering](./spec/v1.0/mlir-lowering.md)
   - [Runtime interface](./spec/v1.0/runtime.md)
+  - [Future extensions](./spec/v1.0/future-extensions.md) — Language Profiles, full accelerator-class coverage (TPU, NPU, LPU, DPU, FPGA, ASIC, Cerebras, Taalas, Tenstorrent, SambaNova, Graphcore IPU, Gaudi), Verification-as-a-Service
 - [Examples](./examples/)
   - [Basic tensor operations](./examples/basics/)
   - [Autodiff](./examples/autodiff/)
