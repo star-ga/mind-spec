@@ -1,0 +1,7 @@
+# arch-mind session artifacts (not part of canonical fixture)
+_log_*.txt
+scan_before*.json
+store/
+store.lock
+key.local
+skill_proposals/

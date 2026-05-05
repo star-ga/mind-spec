@@ -1,0 +1,50 @@
+// mind-spec architectural-governance rules
+//
+// Enforced via:
+//   arch-mind check-rules --repo . --fixture .arch-mind/last_summary.json --rules .arch-mind/rules.mind --mode enforce
+//
+// Q16.16 fixed-point thresholds in [0, 10000]. mind-spec is the authoritative
+// MIND language specification — declaration-heavy, no execution surface, no
+// governance kernels. Floors anchor the "spec is structurally clean" signal:
+// if a future revision introduces cycles, drops module purity, or imports
+// foreign primitives, CI fails.
+//
+// Copyright 2026 STARGA, Inc.
+
+[protection]
+module mind_spec_rules {
+
+    // ─── locked-perfect (must not regress) ──────────────────────────────
+
+    [arch_rule(acyclicity_q16, eq)]
+    const NO_CYCLES: i32 = 10000
+
+    [arch_rule(modularity_q16, ge)]
+    const MODULARITY_FLOOR: i32 = 9500
+
+    [arch_rule(redundancy_q16, ge)]
+    const REDUNDANCY_FLOOR: i32 = 9500
+
+    [arch_rule(q16_determinism_purity, ge)]
+    const PURITY_FLOOR: i32 = 9500
+
+    [arch_rule(mcp_tool_isolation, ge)]
+    const MCP_ISOLATION_FLOOR: i32 = 9500
+
+    // ─── stage-appropriate floors ───────────────────────────────────────
+
+    [arch_rule(depth_q16, ge)]
+    const DEPTH_FLOOR: i32 = 8000
+
+    [arch_rule(equality_q16, ge)]
+    const EQUALITY_FLOOR: i32 = 6500
+
+    // mind-spec contains declarations of [protection]/[invariant], not
+    // applications. Coverage is intentionally 0; floor stays at 0.
+    [arch_rule(governance_kernel_coverage, ge)]
+    const GOVERNANCE_FLOOR: i32 = 0
+
+    // No serving / runtime layer in the spec; no evidence emit sites.
+    [arch_rule(evidence_chain_density, ge)]
+    const EVIDENCE_FLOOR: i32 = 0
+}
