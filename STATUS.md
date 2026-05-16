@@ -1,5 +1,7 @@
 # Documentation Status
 
+> **Last Updated:** 2026-05-16 · spec v1.0 · tracking compiler 0.2.5
+
 This status page provides a quick view of the readiness of key documentation areas within the MIND specification. Use it to coordinate work, plan reviews, and spot sections that still need expansion.
 
 ## Core v1 Specification
@@ -41,8 +43,8 @@ The formal Core v1 specification documents are located in `spec/v1.0/`. See [`ov
 
 | Implementation | Repo | Status | Notes |
 | -------------- | ---- | ------ | ----- |
-| MIND Compiler | [`star-ga/mind`](https://github.com/star-ga/mind) | ✅ Complete | v0.2.1, 220 tests passing, 338K compilations/sec, audit-hardened (C1-C7, A1), 0 Clippy warnings. |
-| MIND Runtime | [`star-ga/mind-runtime`](https://github.com/star-ga/mind-runtime) | ✅ Complete | v0.1.8, 53 tests, GPU docs, audit-hardened (R2-R6, S1-S6), cargo-deny supply chain audit. |
+| MIND Compiler | [`star-ga/mind`](https://github.com/star-ga/mind) | ✅ Complete | v0.2.5, Pratt parser + stable IR API, 1.8–15.5 µs frontend, audit-hardened, 0 Clippy warnings. |
+| MIND Runtime | [`star-ga/mind-runtime`](https://github.com/star-ga/mind-runtime) | ✅ Complete | v0.2.x, 17-symbol C ABI under `--features ffi,eval,serving`, GPU docs, audit-hardened, cargo-deny supply chain audit. |
 
 _Status legend_: ✅ Stable • ⚠️ Needs updates • 🚧 Under active development • 📝 Drafts in progress.
 
