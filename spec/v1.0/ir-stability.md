@@ -1,6 +1,7 @@
 # IR Stability — `mic@1` Textual Form
 
-> **Status:** stable (mind-spec v1.0, ratified by mindc 0.2.5).
+> **Status:** stable (mind-spec v1.0, ratified by mindc 0.2.5; extended with the
+> pure-MIND `__mind_*` intrinsic ABI in mindc 0.4.2, RFC 0005).
 > **Surface:** `mic@1` text format + `IRModule` data shape.
 > **Reference implementation:** `mind/src/ir/mod.rs` and `mind/src/ir/compact/`.
 

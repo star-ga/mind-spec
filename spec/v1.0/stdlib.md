@@ -392,6 +392,101 @@ Minimal console I/O for debugging.
   - Writes debug representation to stdout
   - Shows internal structure (tensors show shape, dtype, and values)
 
+## Pure-MIND standard surface (RFC 0005, normative)
+
+> **Status:** stable (mind-spec v1.0, ratified by mindc 0.4.2).
+>
+> The pure-MIND standard surface is an **additive** module layer that lives next to
+> the high-level modules above. The high-level modules (`core`, `math`, `tensor`,
+> `diff`, `io`) describe *what* a conforming implementation MUST provide. The
+> pure-MIND surface defines *how* the four most common dynamic collections and
+> POSIX-shaped I/O are themselves written **in MIND**, on top of a fixed set of
+> seven host-supplied intrinsics, so that a conforming implementation MAY ship
+> them as `.mind` source instead of as compiler-internal builtins.
+
+### The seven `__mind_*` intrinsics
+
+These are the **only** host-supplied primitives the pure-MIND modules rely on.
+Implementations MUST expose them with the signatures below. All addresses are
+opaque `i64` handles — there is no built-in pointer type, and MIND code MUST NOT
+make assumptions about address representation beyond opacity:
+
+| Intrinsic | Signature | Purpose |
+| --- | --- | --- |
+| `__mind_alloc` | `(size: i64) -> i64` | Allocate `size` bytes, return opaque base address (`0` on failure). |
+| `__mind_realloc` | `(addr: i64, new_size: i64) -> i64` | Resize the region at `addr`; returned address MAY differ. |
+| `__mind_free` | `(addr: i64) -> i64` | Release the region at `addr`; returns `0` on success. |
+| `__mind_load_i64` | `(addr: i64, offset: i64) -> i64` | Load an aligned 8-byte value at `addr + offset`. |
+| `__mind_store_i64` | `(addr: i64, offset: i64, value: i64) -> i64` | Store `value` as 8 bytes at `addr + offset`; returns `0`. |
+| `__mind_read` | `(fd: i64, buf: i64, count: i64) -> i64` | POSIX `read`-shaped; returns bytes read or `-errno`. |
+| `__mind_write` | `(fd: i64, buf: i64, count: i64) -> i64` | POSIX `write`-shaped; returns bytes written or `-errno`. |
+
+Determinism rule: an implementation MAY return different concrete addresses
+across runs, but any program written against these intrinsics MUST observe the
+same logical behaviour byte-for-byte given identical inputs.
+
+### Four pure-MIND modules
+
+The compiler MUST ship `std/vec.mind`, `std/string.mind`, `std/map.mind`, and
+`std/io.mind` as part of its own distribution (bundled into the binary, or
+discoverable on the canonical module path) and resolve `use std.<name>`
+imports to them automatically when the `std-surface` feature is enabled.
+
+- **`std.vec`** — Growable `Vec` over `i64`-shaped slots.
+  Eight public functions: `vec_new`, `vec_push`, `vec_pop`, `vec_get`,
+  `vec_set`, `vec_len`, `vec_capacity`, `vec_free`. Eight-byte stride,
+  doubling growth, 16-slot initial capacity. The `Vec` struct is an opaque
+  heap record (Option-C struct ABI) with three `i64` fields: `data_addr`,
+  `len`, `cap`.
+
+- **`std.string`** — UTF-8 `String` shaped as `Vec<u8>`.
+  Eight public functions: `string_new`, `string_push_byte`, `string_push_str`,
+  `string_get`, `string_set`, `string_len`, `string_capacity`, `string_free`.
+  The container stores raw bytes; UTF-8 well-formedness is a documented
+  invariant the producer MUST uphold, not an automatic property of the
+  module (no in-band validation).
+
+- **`std.map`** — Insertion-ordered map on parallel `i64`/`i64` arrays.
+  Eight public functions: `map_new`, `map_insert`, `map_get`, `map_remove`,
+  `map_contains`, `map_len`, `map_capacity`, `map_free`. The `Map` struct is
+  a four-field heap record: `keys_addr`, `vals_addr`, `len`, `cap`. Iteration
+  order MUST be insertion order — this is normative for determinism.
+
+- **`std.io`** — File handles + line I/O on the POSIX-shaped intrinsics.
+  Nine public functions: `stdin`, `stdout`, `stderr`, `print_bytes`,
+  `eprint_bytes`, `read_stdin_bytes`, `file_open`, `file_close`,
+  `file_read_all`. The `File` struct is a one-field record `{ fd: i64 }`.
+  All errors surface as a negative return value (negated `errno`); modules
+  MUST NOT silently swallow them.
+
+### `use std.<name>` resolution
+
+When the `cross-module-imports` feature is enabled, a `use std.<name>`
+declaration MUST resolve through the project module table. The resolver
+rules:
+
+1. **Bundled stdlib is registered first.** The compiler prepends the four
+   pure-MIND modules to the user's parsed module list before constructing
+   the module table.
+2. **Last-write-wins shadowing.** A user crate MAY define its own module at
+   path `std.<name>`; the user definition MUST win (Rust-style shadowing).
+3. **Per-arg signature matching (Phase B).** When a `use`-imported function
+   is invoked, the compiler matches arguments against the declared parameter
+   types of the imported `fn`, with `i32 ↔ i64` widening permitted for
+   integer literals.
+4. **Fall-through to loose typing.** If the imported declaration uses an
+   export-block without parameter types (Phase A donor form), the call
+   defaults to `ScalarI64` and MUST still resolve.
+
+### Compile-speed guarantee
+
+The pure-MIND modules and their resolver MUST be gated behind module-level
+feature flags (`std-surface`, `cross-module-imports`) so the default-build
+frontend remains byte-identical to the pre-RFC-0005 pipeline. A conforming
+implementation that exposes both features MUST publish a benchmark gate
+asserting that the headline `parse_typecheck_ir` workloads do not regress
+by more than 5% against a published baseline.
+
 ## Implementation requirements
 
 Conforming implementations MUST:

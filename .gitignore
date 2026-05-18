@@ -8,3 +8,8 @@ nul
 .arch-mind/store/
 .arch-mind/_log_*
 .arch-mind/scan_before.json
+
+# Private audit reports (Copilot CLI, internal review). Keep local —
+# those records quote the very strings they recommend scrubbing.
+audits/*-audit.md
+audits/*-review.md

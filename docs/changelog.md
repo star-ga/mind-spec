@@ -7,6 +7,40 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.2.0] - 2026-05-18
+
+### Milestone: RFC 0005 — Pure-MIND Standard Surface (ratified by mindc 0.4.2)
+
+The standard library chapter gains a normative "Pure-MIND standard surface"
+section formalising the four collection / I/O modules that mindc now ships
+as in-tree `.mind` source. The previous five high-level modules (`core`,
+`math`, `tensor`, `diff`, `io`) remain authoritative for the math+tensor
+surface; the new section sits next to them as additive surface area.
+
+### Added
+
+- **`spec/v1.0/stdlib.md`** — New normative section "Pure-MIND standard
+  surface (RFC 0005, normative)" documenting:
+  - The seven `__mind_*` intrinsics (`alloc`, `realloc`, `free`,
+    `load_i64`, `store_i64`, `read`, `write`) and their `i64` ABI.
+  - The four bundled modules: `std.vec`, `std.string`, `std.map`, `std.io`.
+  - `use std.<name>` resolution rules (bundled-first, last-write-wins
+    shadowing, per-arg signature matching, Phase-A fall-through).
+  - Compile-speed guarantee (module-level feature gates,
+    `parse_typecheck_ir` workloads must not regress by more than 5%).
+
+### Changed
+
+- **STATUS.md** — Now tracks compiler 0.4.2; Standard Library row notes
+  the pure-MIND surface; IR Stability row notes the `__mind_*` ABI
+  ratification; MIND Compiler reference entry bumped to v0.4.2 with the
+  RFC 0005 bench floor (2.80–17.10 µs).
+
+- **`spec/v1.0/ir-stability.md`** — Status preamble now records the
+  RFC 0005 extension to the runtime contract surface.
+
+---
+
 ## [1.1.3] - 2026-02-17
 
 ### Milestone: v0.2.1 Audit Hardening & Security Specification Update
