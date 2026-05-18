@@ -372,8 +372,8 @@ non-tensor consumers.
 
 | Profile | Tensor stdlib | Q16.16 + governance | Heap | Use cases |
 |---------|---------------|---------------------|------|-----------|
-| `default` | ✅ full | ✅ | ✅ | mind-runtime, mind-inference, mindLLM, mind-agents, mind-fleet |
-| `systems` | stripped | ✅ | ✅ | arch-mind, 512-mind, mind-agents (control plane) |
+| `default` | ✅ full | ✅ | ✅ | LLM training/inference runtimes, governed inference servers |
+| `systems` | stripped | ✅ | ✅ | governance frameworks, agent control planes, repo intelligence tools |
 | `embedded` | stripped | ✅ | ❌ | safety-critical control loops, in-line decision kernels |
 
 ### Why profiles, not a sister language
@@ -392,11 +392,11 @@ non-tensor consumers.
 * **Compiler economics.** mindc is already capacity-constrained.
   Two frontends doubles the maintenance bill; shared frontend with
   two stdlibs *is* one language with profiles, just with a costume on.
-* **Consumer churn.** Every downstream STARGA project (arch-mind,
-  512-mind, mind-agents, mind-fleet, mind-runtime, mind-inference)
-  currently picks a subset of MIND. A split forces every one of them
-  to choose a side; profiles let them all share compiler upgrades for
-  free.
+* **Consumer churn.** Every downstream consumer (LLM runtimes,
+  governance frameworks, agent control planes, repo intelligence
+  tools) currently picks a subset of MIND. A split would force each
+  one to choose a side; profiles let them all share compiler upgrades
+  for free.
 
 ### Implementation outline
 
