@@ -7,6 +7,44 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.2.3] - 2026-05-18
+
+### Milestone: mindc v0.5.0 — RFC 0005 Phase 6.2b (three compiler gaps closed)
+
+The compiler-side closure of Phase 6.2b lands at mindc v0.5.0. The
+informative "Self-host smoke" subsection in `spec/v1.0/stdlib.md` is
+updated to reflect that the surface-grammar growth ratified by
+mindc 0.5.0 unblocks Phase 6.5 (fixed-point bootstrap apex). No
+normative change — Phase 6.2b grammar growth lands under the
+`std-surface` feature gate so the default-build hot path stays
+byte-identical to v0.4.4. Bench-gate cap held (+7% vs
+`.bench-baseline-2026-05-18-rfc0005.txt`): small_matmul -0.7%,
+medium_mlp -1.5%, large_network +3.5%.
+
+### Changed
+
+- **`STATUS.md`** — Compiler entry bumped to v0.5.0; IR Stability row
+  notes the three Phase 6.2b grammar additions: `while` statement
+  form, `[T; N]` fixed-size array types + `[expr, …]` array literals,
+  and unsigned-i64 literal reinterpret-cast (range
+  `[i64::MAX+1, u64::MAX]` accepted via bit-pattern cast, preserving
+  the signed-i64 ABI surface).
+
+### Notes
+
+- Phase 6.5 (fixed-point bootstrap) is the only remaining sub-step of
+  the self-host ladder. The mindc surface grammar now expresses
+  everything the pure-MIND lexer + parser + type-checker + emitter
+  needs to compile mindc-in-MIND. The bootstrap exercise lifts a
+  `libmindc_mind.so` from mindc-Rust and verifies its IR output is
+  byte-identical to mindc-Rust's compilation of the same input.
+- The three closed gaps were each surfaced by real production work
+  (Phase 6.1 lexer surfaced Gap 1; Phase 6.3 type-checker surfaced
+  Gap 3; mind-nerve A1.1 LUT family surfaced Gap 2). All three closed
+  with sub-+7% bench-gate impact under module-level cfg gating.
+
+---
+
 ## [1.2.2] - 2026-05-18
 
 ### Milestone: RFC 0005 Phase 6.3 + 6.4 shipped (type-checker + MLIR emit in pure MIND)

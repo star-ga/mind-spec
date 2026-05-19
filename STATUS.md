@@ -1,6 +1,6 @@
 # Documentation Status
 
-> **Last Updated:** 2026-05-18 · spec v1.0 · tracking compiler 0.4.4 (RFC 0005 + Phase D₁ env-var override + Phase D₂a Named-struct diagnostics)
+> **Last Updated:** 2026-05-18 · spec v1.0 · tracking compiler 0.5.0 (RFC 0005 Phase 6.2b — `while` statement + array literals `[T; N]` + unsigned-i64 literal reinterpret-cast — self-host substrate complete)
 
 This status page provides a quick view of the readiness of key documentation areas within the MIND specification. Use it to coordinate work, plan reviews, and spot sections that still need expansion.
 
@@ -25,7 +25,7 @@ The formal Core v1 specification documents are located in `spec/v1.0/`. See [`ov
 | 13. Foreign Function Interface | `spec/v1.0/ffi.md` | ✅ Stable | C/C++/Python/Rust bindings. |
 | 14. Future Extensions | `spec/v1.0/future-extensions.md` | ✅ Stable | BCI/neuro, systems programming, embedded AI, safety-critical systems roadmap (informative). |
 | 15. Package Management | `spec/v1.0/package.md` | ✅ Stable | PubGrub resolver, lockfile format, SBOM, SLSA provenance, registry protocol. |
-| 16. IR Stability | `spec/v1.0/ir-stability.md` | ✅ Stable | `mic@1` textual form as the runtime contract. Ratified by mindc 0.2.5 (Pratt + stable IR API); pure-MIND `__mind_*` intrinsic ABI ratified by mindc 0.4.2 (RFC 0005). `MIND_STDLIB_PATH` env-var override added by mindc 0.4.3 (Phase D₁); Named-struct parameter names preserved in error diagnostics by mindc 0.4.4 (Phase D₂a). |
+| 16. IR Stability | `spec/v1.0/ir-stability.md` | ✅ Stable | `mic@1` textual form as the runtime contract. Ratified by mindc 0.2.5 (Pratt + stable IR API); pure-MIND `__mind_*` intrinsic ABI ratified by mindc 0.4.2 (RFC 0005). `MIND_STDLIB_PATH` env-var override added by mindc 0.4.3 (Phase D₁); Named-struct parameter names preserved in error diagnostics by mindc 0.4.4 (Phase D₂a). Phase 6.2b grammar growth ratified by mindc 0.5.0: `while` statement form, `[T; N]` fixed-size array types + `[expr, …]` array literals, and unsigned-i64 literal reinterpret-cast (range `[i64::MAX+1, u64::MAX]` accepted via bit-pattern cast). All gated under `std-surface`; default-build hot path byte-identical. |
 
 ## Documentation Areas
 
@@ -43,7 +43,7 @@ The formal Core v1 specification documents are located in `spec/v1.0/`. See [`ov
 
 | Implementation | Repo | Status | Notes |
 | -------------- | ---- | ------ | ----- |
-| MIND Compiler | [`star-ga/mind`](https://github.com/star-ga/mind) | ✅ Complete | v0.4.4 (RFC 0005 shipped — pure-MIND `std.vec`/`string`/`map`/`io` bundled, Phase A/B/C resolver, Phase D₁ `MIND_STDLIB_PATH` env-var fork-without-recompile, Phase D₂a Named-struct parameter names preserved in error diagnostics). Frontend floor 2.80–17.10 µs (post-RFC-0005 baseline, +7% gate — loosened from +5% to absorb GitHub-hosted-runner variance). |
+| MIND Compiler | [`star-ga/mind`](https://github.com/star-ga/mind) | ✅ Complete | v0.5.0 (RFC 0005 Phase 6.2b shipped — `while` statement + array literals + unsigned-i64 literal reinterpret-cast — self-host substrate complete). Frontend floor 2.80–17.10 µs (post-RFC-0005 baseline, +7% gate — loosened from +5% to absorb GitHub-hosted-runner variance; latest measurements after Phase 6.2b: small_matmul -0.7%, medium_mlp -1.5%, large_network +3.5%, all within cap). |
 | MIND Runtime | [`star-ga/mind-runtime`](https://github.com/star-ga/mind-runtime) | ✅ Complete | v0.2.x, 17-symbol C ABI under `--features ffi,eval,serving`, GPU docs, audit-hardened, cargo-deny supply chain audit. |
 
 _Status legend_: ✅ Stable • ⚠️ Needs updates • 🚧 Under active development • 📝 Drafts in progress.
