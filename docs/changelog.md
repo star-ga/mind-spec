@@ -7,6 +7,26 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.3.2] - 2026-05-19
+
+### Milestone: mindc v0.6.2 — negative-literal correctness fix (compiler bug #11)
+
+`mind@969c2da` + tag `v0.6.2`. The IR-lowering function `lower_expr` had no arm for the unary-minus AST node, so **every bare negative integer/float literal — and any unary-minus expression — fell through to the catch-all and was silently lowered to `const 0`**. `let a: i64 = -65536; return a;` emitted `0`; the binary form `(0 - 65536)` was always correct (separate `Sub` arm). The fix adds a `Node::Neg` arm: integer literal → `ConstI64(n.wrapping_neg())` (`-INT64_MIN` well-defined, matching two's-complement `0 - INT64_MIN`), float literal → `ConstF64(-f)`, any other operand → `0 - operand` via `Sub` (selecting `arith.subi`/`arith.subf` exactly as the hand-written subtraction form).
+
+Surfaced by the pure-MIND lookup-table work in the routing pipeline: generated tables with entries like `-524288` / `-65536` were silently zeroed at lowering time — invisible until the C shim that had masked the pure-MIND path was removed.
+
+### Notes
+
+- 519 reference-implementation tests pass (10 new negative-literal regression cases). Bench-gate **improved**, not merely held: small_matmul −1.2 %, medium_mlp −1.8 %, large_network −0.2 % vs the post-RFC-0005 baseline; the 2.80–17.10 µs frontend floor is preserved.
+- The v0.6.1 **bootstrap fixed-point is unchanged**: `libmindc_mind.so` still compiles its own source byte-identically (10,889 bytes / 206 SSA values). The oracle did not shift because the pure-MIND bootstrap sources contain zero negative literals — a `Node::Neg`-only change cannot affect them. Clean "no legitimate shift" case.
+- Cumulative compiler bugs surfaced + closed by the pure-MIND self-host / end-to-end discipline: **11** (0 lexer + 3 parser + 3 typecheck + 1 emit_ir + 0 apex + 3 fixed-point + 1 negative-literal). Each a true correctness fix the pure-MIND path forced into the open.
+
+### Changed
+
+- **`STATUS.md`** — Compiler entry bumped to v0.6.2; cumulative bug count 10 → 11.
+
+---
+
 ## [1.3.1] - 2026-05-18
 
 ### Milestone: mindc v0.6.1 — Bootstrap fixed-point REACHED
