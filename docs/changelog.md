@@ -7,6 +7,37 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.2.2] - 2026-05-18
+
+### Milestone: RFC 0005 Phase 6.3 + 6.4 shipped (type-checker + MLIR emit in pure MIND)
+
+Two further sub-steps of the self-host ladder land in the reference
+implementation. The spec's informative "Self-host smoke" subsection in
+`spec/v1.0/stdlib.md` is updated to reflect that **four of the six**
+Phase 6 sub-steps are now shipped (6.1 lexer, 6.2a parser, 6.3
+type-checker, 6.4 MLIR emit). No normative change — Phase 6 remains
+informative.
+
+### Changed
+
+- **`spec/v1.0/stdlib.md` §Self-host smoke** — 6.3 entry now records
+  shipped status with the frozen seven-tag type system
+  (`ty_unknown=0`, `ty_i64=1`, `ty_f64=2`, `ty_bool=3`, `ty_vec=4`,
+  `ty_string=5`, `ty_unit=6`) and the documented Phase-6.3b stub list
+  (call-site signature matching, `let`-init mismatch diagnostics,
+  cross-fn name hoisting, struct/enum type-name resolution,
+  `Result`-shaped diagnostic node). 6.4 entry now records shipped
+  status as `examples/emit_ir/` under STARGA/mind.
+
+### Notes
+
+- Phase 6.2b (mindc grammar growth — `while` statement, array literals,
+  unsigned-i64 literals + cdylib const-blob linkage) remains the only
+  open *optional ergonomic* path. Phase 6.5 (fixed-point bootstrap)
+  remains open and is the apex of the self-host thesis.
+
+---
+
 ## [1.2.1] - 2026-05-18
 
 ### Milestone: RFC 0005 Phase D — mindc 0.4.3 + 0.4.4 (env-var override + diagnostic fidelity)

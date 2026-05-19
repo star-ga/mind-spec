@@ -532,9 +532,17 @@ sub-steps:
   entry `__mind_store_i64` impose. Tracked at
   `mind/docs/rfcs/0005-phase-6-2-mindc-gaps.md`.
 - **6.3 (type-checker):** symbol table via `std.map`, type-check pass
-  in pure MIND.
+  in pure MIND. Seven type tags frozen (`ty_unknown=0`, `ty_i64=1`,
+  `ty_f64=2`, `ty_bool=3`, `ty_vec=4`, `ty_string=5`, `ty_unit=6`).
+  Shipped in mindc v0.4.4 as `examples/typecheck/` (734 LOC `main.mind`
+  + supporting files). Stubs documented for 6.3b: full call-site
+  signature matching (needs parser to stash return-type slot on
+  `ast_fn_def`), `let`-init mismatch diagnostics, cross-fn name
+  hoisting, struct/enum type-name resolution, `Result`-shaped
+  diagnostic node.
 - **6.4 (MLIR emit):** emit `module { func.func @... }` strings via
-  `std.string` + `__mind_write`.
+  `std.string` + `__mind_write`. Shipped in mindc v0.4.4 as
+  `examples/emit_ir/`.
 - **6.5 (fixed-point bootstrap):** the pure-MIND compiler compiles
   itself to a `.so` whose output is byte-identical to the reference
   implementation's output on the same input. **= apex of the
