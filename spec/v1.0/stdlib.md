@@ -478,6 +478,24 @@ rules:
    export-block without parameter types (Phase A donor form), the call
    defaults to `ScalarI64` and MUST still resolve.
 
+### Environment override
+
+Implementations MAY honour the `MIND_STDLIB_PATH` environment variable
+as an override for the bundled pure-MIND modules. When set, the
+variable MUST point at a directory containing all four `.mind` files
+(`vec.mind`, `string.mind`, `map.mind`, `io.mind`). If every file
+parses, the project loader uses them in place of the bundled blobs;
+otherwise the loader falls back to the bundled set.
+
+The override is informative — implementations that do not provide the
+pure-MIND surface at all (e.g. minimal embedded profiles) need not
+implement it. The reference implementation (mindc 0.4.2+) honours it
+behind the `cross-module-imports` feature.
+
+Use case: a regulated deployment that needs a stricter `std.string`
+(inline UTF-8 validation, length bound, etc.) can ship a forked
+stdlib without rebuilding `mindc`.
+
 ### Compile-speed guarantee
 
 The pure-MIND modules and their resolver MUST be gated behind module-level
