@@ -7,6 +7,26 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.3.3] - 2026-05-19
+
+### Milestone: mindc v0.6.3 — RFC 0006 mind-blas Track B increment 1 (native MLIR vector dialect)
+
+`mind@c130db3` + tag `v0.6.3`. Track A (runtime-support AVX2 C bridge, v0.6.x) is joined by **Track B increment 1**: a pure-mindc vectorisation path. New `std-surface`-gated IR primitives — `Instr::VecLoad`, `Instr::VecFma`, `Instr::VecReduceAdd` (+ a `VectorF32` value kind) — lower to the MLIR `vector` dialect (`vector.load`, `vector.fma`, `vector.reduction <add>`), legalised to target SIMD by LLVM. `dot_f32` now has a fused 8-lane FMA loop + horizontal reduction + scalar tail emitted by the compiler itself, with no C-shim / clang / `-fPIC` dependency (so no Windows-MSVC packaging problem). Track A's `__mind_blas_dot_f32` extern path is untouched and still registered — Track B is strictly additive.
+
+### Notes
+
+- **Bootstrap fixed-point unchanged**: `libmindc_mind.so` still compiles its own source byte-identically (10,889 bytes / 206 SSA). Bootstrap sources use no vector ops, so the oracle does not shift — clean no-shift case, same discipline as v0.6.2.
+- **Bench-gate ≤ +7%**: small_matmul −0.5%, medium_mlp +0.1%, large_network +3.0% (inside the documented large_network jitter band). Default-build hot path byte-identical — all Track B IR/lowering is `#[cfg(feature = "std-surface")]`-gated and absent from `parse_typecheck_ir`. The 2.80–17.10 µs frontend floor is preserved.
+- **Numerical equivalence**: emitted vector `dot_f32` is within 1e-4 relative of an f64 oracle at 1,024 and 1,000,000 elements (measured ~3e-7 and ~6e-6); byte-identical to the sequential scalar reference at sub-lane lengths; ragged lengths verified. Track A Q16.16 byte-identity gate (#57) still 12/12 green, unchanged.
+- 519 `std-surface` tests pass; clippy (both feature sets) + `cargo fmt --check` + rustdoc `-D warnings` clean; CI board green.
+- **Deferred to Track B increment 2** (honestly scoped in RFC 0006 §9): Q16.16 vector path + its cross-arch bit-identity gate, `VecStore`, vector lowering for `dot_l1`/`dot_linf`/`matmul_rmajor`, per-call `@target(...)` substrate annotation, cross-module std-wrapper inlining, dense-reduction-throughput bench sub-category.
+
+### Changed
+
+- **`STATUS.md`** — compiler entry bumped to v0.6.3 with RFC 0006 Track B increment 1 framing.
+
+---
+
 ## [1.3.2] - 2026-05-19
 
 ### Milestone: mindc v0.6.2 — negative-literal correctness fix (compiler bug #11)
