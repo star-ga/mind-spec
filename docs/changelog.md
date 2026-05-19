@@ -7,6 +7,27 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.3.6] - 2026-05-19
+
+### Milestone: mindc v0.6.5 — RFC 0006 Track B increment 3a; cross-arch bit-identity gate #57 closed for the vector L1 too
+
+`mind@38611f2` + tag `v0.6.5`, CI success. Track B increment 3a lands the **Q16.16 L1 vector path** `dot_l1_q16_v` — the compiler emits a native MLIR `vector<8xi64>` widen → signed-subtract → arith-only absolute value (`maxsi(d, 0 - d)`, mirroring the Track A C oracle's `if (d<0) d=-d`) → i64-lane accumulate → associative `vector.reduction <add>` → scalar tail → `trunci`/`extsi` pack. No new IR variants (the emitter writes MLIR text directly, exactly as `dot_q16_v` does), so the additive-only envelope holds; no C shim, no clang, no `-fPIC`.
+
+It is **byte-identical to the Track A scalar oracle `__mind_blas_dot_l1_q16`** at every RFC length {0,1,2,7,8,9,15,16,17,31,32,33,1024,4096,65537} — exact, not a tolerance (integer add is associative; per-element `|sext64(a) - sext64(b)|` is exact). This **closes the task #57 cross-arch bit-identity obligation for the full thesis-pure vector-path metric set**: both the vector dot (`dot_q16_v`, inc 2) and the vector L1 (`dot_l1_q16_v`, inc 3a) now hold the gate (single-x86-host scope, as Track A §5.2; the full Linux-x86 ↔ macOS-ARM ↔ CUDA-x86 ↔ photonic hardware contract remains the outstanding #57 portion).
+
+### Notes
+
+- **Bootstrap fixed-point unchanged**: `next_id = 206`, bootstrap IR byte-identical base-vs-inc-3a (the bootstrap source uses no vector ops). Same clean no-shift discipline as v0.6.2–v0.6.4.
+- **Bench-gate 0.0%**: the default-feature `mindc` **release** binary is byte-identical base-vs-increment-3a (verified with a reproducible release build; the debug binary is rustc-metadata-nondeterministic and is not a valid byte-identity oracle). All increment-3a code is `#[cfg(feature = "std-surface")]`-gated and absent from the binary the `compiler` bench measures.
+- 519 std-surface tests; `blas_vec_q16_smoke` 5/5 including the new `vec_dot_l1_q16_byte_identical_to_scalar_oracle_all_lengths`; `cargo fmt --check` clean. (One pre-existing clippy advisory at `src/project/mod.rs:303` predates this increment and is unrelated; CI remains green, as it was for v0.6.4.)
+- **Increment 3b honestly deferred** (RFC 0006 §9.3b): `@target("simd-x86"|"simd-arm"|…)` per-call substrate annotation (needs real MLIR target-attr plumbing parser→AST→type-checker→`Instr::Call`→lowering), a vectorised `matmul_rmajor_f32` inner loop, and cross-module `use std.blas` vector inlining.
+
+### Changed
+
+- **`STATUS.md`** — compiler tracking bumped to v0.6.5; #57 marked closed for both the vector dot and the vector L1.
+
+---
+
 ## [1.3.5] - 2026-05-19
 
 ### Milestone: RFC 0007 (Mindcraft) sequencing gate CLEARED — documentation/sequencing only, no compiler change
