@@ -522,9 +522,15 @@ sub-steps:
   stride-3 token stream byte-identical to the reference implementation's
   internal tokeniser on a documented fixture corpus. Shipped in
   mindc v0.4.4 as `examples/lexer/`.
-- **6.2 (parser):** Pratt parser on top of the lexer, producing AST
+- **6.2a (parser):** Pratt parser on top of the lexer, producing AST
   nodes as heap-record structs with i64-addr recursive fields under
-  Option-C ABI.
+  Option-C ABI. 12 AST node kinds + 7 operator tags. Shipped in
+  mindc v0.4.4 as `examples/parser/`.
+- **6.2b (mindc grammar growth — optional ergonomic):**
+  `while`-statement parsing + array literals + cdylib const-blob
+  linkage. Lifts the O(N) source-line tax that recursion-only + per-
+  entry `__mind_store_i64` impose. Tracked at
+  `mind/docs/rfcs/0005-phase-6-2-mindc-gaps.md`.
 - **6.3 (type-checker):** symbol table via `std.map`, type-check pass
   in pure MIND.
 - **6.4 (MLIR emit):** emit `module { func.func @... }` strings via
