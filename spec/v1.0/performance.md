@@ -29,6 +29,43 @@ MIND prioritizes **correctness and determinism** over raw performance. However, 
 3. **Transparent trade-offs**: Users control memory layout, fusion, and parallelism
 4. **Baseline efficiency**: Even unoptimized code should be within 2-5× of hand-tuned equivalents
 
+## Determinism tiers
+
+MIND defines **three independently verifiable determinism tiers**. Each tier addresses a different audit consumer; each is independently observable; an implementation may satisfy any subset, but conformance to a higher tier never weakens a lower tier.
+
+### Tier 1 — Build determinism (REQUIRED)
+
+Same MIND source bytes → byte-identical compiled artifact (MLIR IR text, `mic@1` textual form, and final cdylib/AOT object) across runs, machines, operating systems, and time. Verified by SHA-256 of the produced artifacts.
+
+A conforming compiler MUST satisfy Tier 1 unconditionally. The reference implementation closes this requirement at the **bootstrap fixed-point**: the pure-MIND mindc compiles its own source byte-identically to the bootstrap-Rust reference, demonstrably reproducible.
+
+### Tier 2 — Within-substrate runtime determinism (REQUIRED in `deterministic` mode)
+
+Same input bytes + same hardware + same selected code path → byte-identical output bytes, every invocation. IEEE 754-2008 strict for floating-point operations (including FMA). No threading non-determinism: deterministic mode disables work-stealing and ordered-reduction-violating optimizations. This is the `RuntimeConfig::deterministic = true` default mode.
+
+Within Tier 2, **opt-in SIMD fast paths** (e.g. mind-blas Track A) are within-substrate deterministic by construction: a fixed input on a fixed CPU evaluating a fixed code path produces a fixed output. SIMD reduction ordering may differ from sequential scalar reduction in floating-point, but the difference is bounded and itself deterministic given the same hardware.
+
+### Tier 3 — Cross-substrate Q16.16 bit-identity (OPTIONAL, substrate-thesis tier)
+
+Q16.16 fixed-point operations produce **byte-identical results** across the supported substrate set: x86 CPU, ARM CPU, NVIDIA GPU, and the photonic-substrate reference. Verified by SHA-256 over the concatenated `(operation_id, q16_output)` stream for a fixed conformance corpus.
+
+Tier 3 is observable only on the Q16.16 path because:
+- Integer-domain SIMD reduction is associative; SIMD fast paths produce identical byte sequences to scalar reference at every input length.
+- Floating-point SIMD reduction is **not** associative; cross-substrate f32 bit-identity is not claimed for any tier.
+- The Q16.16 path is the substrate-bridge between fixed-precision CPU / GPU / photonic backends.
+
+A conforming implementation MAY opt out of Tier 3 entirely (no Q16.16 path). An implementation that ships a Q16.16 path MUST satisfy Tier 3 across all advertised substrates, verified by the conformance corpus.
+
+### Tier interaction summary
+
+| Tier | Scope | Claim | Verification |
+|---|---|---|---|
+| 1 | Compilation | Same source → same artifact | SHA-256 of build output |
+| 2 | Runtime, within substrate | Same input + same code path → same output | Repeated-invocation hash match |
+| 3 | Runtime, across substrates | Q16.16 output byte-identical across CPU / GPU / photonic | SHA-256 of conformance corpus output |
+
+Tier 3 implies Tier 2 for the Q16.16 path; Tier 2 implies nothing about Tier 3; Tier 1 is orthogonal to both.
+
 ## Benchmark methodology
 
 ### Benchmark categories
