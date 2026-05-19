@@ -7,6 +7,23 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.3.8] - 2026-05-19
+
+### Milestone: mindc v0.6.7 — RFC 0006 mind-blas vector-load alignment hardening
+
+`mind@e921ed6` + tag `v0.6.7`. Every `llvm.load … -> vector<…>` the std-surface lowering emits now carries an explicit `{alignment = 4 : i64}`: `emit_vec_dot_f32`, `emit_vec_dot_q16`, `emit_vec_dot_l1_q16`, `emit_vec_dot_metric_f32` (f32 L1/L∞), and the `Instr::VecLoad` / `Instr::VecLoadI32` primitive lowerings (10 sites; the inc-3b matmul's 2 already had it). Without it MLIR defaults to the loaded type's natural 32-byte alignment, which the x86 backend lowers to `vmovaps` (alignment-required) — a GP-fault on any non-32-byte-aligned (interior) pointer, exactly the inc-3b matmul bug. These kernels are only ever called on allocation-base (over-aligned) pointers today so they did not fault, but the task #230 mind-nerve native-encode rewire will pass interior catalog-row pointers to `dot_q16_v` and would have hit the identical fault — this is pre-emptive hardening that de-risks #230.
+
+### Notes
+
+- **Contract-neutral**: an alignment attribute changes the emitted machine move (`vmovaps`→`vmovups`) but never the loaded bytes. Re-verified, not assumed: the cross-arch bit-identity gate **#57 still holds exactly** for `dot_q16_v` and `dot_l1_q16_v` (`blas_vec_q16_smoke` byte-identity tests pass unchanged, 6/6), and the `dot_f32_v` below-one-lane byte-identity + 1e-4 contracts are intact (`blas_vec_smoke` 3/3).
+- **Bench-gate 0.0%**: default-feature release `mindc` byte-identical base-vs-change; bootstrap fixed-point IR byte-identical (`next_id = 206`). All changes `#[cfg(feature = "std-surface")]`-gated. `cargo fmt --check` clean; only the pre-existing `src/project/mod.rs:303` clippy advisory.
+
+### Changed
+
+- **`STATUS.md`** — compiler tracking bumped to v0.6.7; alignment hardening noted on the reference-implementation entry.
+
+---
+
 ## [1.3.7] - 2026-05-19
 
 ### Milestone: mindc v0.6.6 — RFC 0006 Track B increment 3b; native vectorised `matmul_rmajor_f32_v`
