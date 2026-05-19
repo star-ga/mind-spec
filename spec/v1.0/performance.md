@@ -156,6 +156,44 @@ let result = mean(activated);
 - CPU: Powers of 2 or multiples of cache line (64 bytes / sizeof(dtype))
 - GPU: Multiples of warp size (32) or block size (128-256)
 
+### Metric selection (informative)
+
+When an operation's mathematical contract permits more than one
+distance or norm choice, the metric directly affects substrate cost
+and cross-substrate determinism. Implementations SHOULD apply the
+following preference order whenever the downstream task is not
+gradient-coupled to a specific norm:
+
+1. **L∞ (Chebyshev / `max |a_i|`)** — exact in every numeric type,
+   no reduction beyond a max-tree, aligns naturally to tile-shape
+   constraints. Preferred for ranking and gating where only the
+   dominant component matters.
+2. **L1 (Manhattan / `Σ |a_i|`)** — exact in every numeric type
+   including fixed-point. No `sqrt`, no transcendentals. Preferred
+   for similarity scoring, clustering inner loops, and any
+   reduction whose substrate dispatch must remain bit-identical
+   across CPU, GPU, and accelerator backends without an additional
+   approximation contract.
+3. **L2 (Euclidean / `sqrt(Σ a_i²)`)** — required when an upstream
+   operator (e.g. an L2-normalized embedding, an L2-regularized
+   loss, a rotation-invariant geometry) depends on Euclidean
+   geometry. Implementations using fixed-point arithmetic MUST then
+   specify the fixed-point `sqrt` approximation as part of the
+   conformance contract and exercise it under the cross-substrate
+   determinism harness.
+
+Rationale: in continuous space, L1, L2, and L∞ describe the same
+underlying notion at different roundings. On a substrate where
+memory is one-dimensional under strides, where threads access in
+coalesced groups, and where tile shapes are axis-aligned to cache
+lines, the cost metric the hardware exposes is L1 (memory
+transactions) and L∞ (tile alignment), not L2 (geometric distance).
+Selecting the metric that matches the substrate is a free
+performance and determinism win whenever the downstream task does
+not require otherwise. Operators whose mathematical definition fixes
+the metric (matmul, softmax denominator, layer-norm variance) are
+out of scope for this preference.
+
 ### Profiling and analysis
 
 **Compiler flags**:
