@@ -1,6 +1,6 @@
 # Documentation Status
 
-> **Last Updated:** 2026-05-18 · spec v1.0 · tracking compiler 0.5.3 (Phase 6.5 Stage 3 PASS — pure-MIND type-checker cdylib byte-identical; 127-byte type-check report matches spec)
+> **Last Updated:** 2026-05-18 · spec v1.0 · tracking compiler 0.5.4 (Phase 6.5 **Stages 1+2+3+4 ALL PASS** — all four pure-MIND mindc sub-components produce byte-identical output to spec; only Stage 5 apex combined `libmindc_mind.so` remains)
 
 This status page provides a quick view of the readiness of key documentation areas within the MIND specification. Use it to coordinate work, plan reviews, and spot sections that still need expansion.
 
@@ -43,7 +43,7 @@ The formal Core v1 specification documents are located in `spec/v1.0/`. See [`ov
 
 | Implementation | Repo | Status | Notes |
 | -------------- | ---- | ------ | ----- |
-| MIND Compiler | [`star-ga/mind`](https://github.com/star-ga/mind) | ✅ Complete | v0.5.3 (Phase 6.5 Stage 3 PASS — pure-MIND type-checker `examples/typecheck/main.mind` compiled via `mindc --emit-shared` to a 40,720-byte cdylib; Python ctypes harness chains `lex()` → `parse()` → `typecheck()` over the documented fixture and produces a 127-byte type-check report byte-identical to spec). **Three of four self-host sub-components now proven byte-identical to mindc-Rust.** v0.5.3 also closes three compiler bugs surfaced by the type-checker (`extern_calls` not bubbled up from `Instr::If`/`Instr::While` sub-contexts, `std.map` + `std.string` C runtime stubs missing from `mind_intrinsics.c`, stride-8 vs stride-1 mismatch in pure-MIND byte-store helpers). Frontend floor 2.80–17.10 µs (post-RFC-0005 baseline, +7% gate). |
+| MIND Compiler | [`star-ga/mind`](https://github.com/star-ga/mind) | ✅ Complete | v0.5.4 (Phase 6.5 Stage 4 PASS — pure-MIND emit_ir `examples/emit_ir/main.mind` compiled via `mindc --emit-shared` to a 31,000-byte cdylib; Python ctypes harness chains `lex()` → `parse()` → `typecheck()` → `emit_ir()` over the documented fixture and produces a 148-byte MLIR text output byte-identical to spec). **All four self-host sub-components now proven byte-identical to mindc-Rust as pure-MIND code.** v0.5.4 closes Gap S4-A (`print_bytes` C stub missing from `mind_intrinsics.c`; `__mind_read`/`__mind_write` corrected to POSIX 4-arg signature `(fd, buf_addr, count, offset)` matching `std/io.mind`). Cumulative compiler bugs surfaced + closed by the self-host ladder: 0 + 3 + 3 + 1 = 7. Frontend floor 2.80–17.10 µs (post-RFC-0005 baseline, +7% gate). Only Stage 5 apex (combined `libmindc_mind.so` with driver fn) remains. |
 | MIND Runtime | [`star-ga/mind-runtime`](https://github.com/star-ga/mind-runtime) | ✅ Complete | v0.2.x, 17-symbol C ABI under `--features ffi,eval,serving`, GPU docs, audit-hardened, cargo-deny supply chain audit. |
 
 _Status legend_: ✅ Stable • ⚠️ Needs updates • 🚧 Under active development • 📝 Drafts in progress.
