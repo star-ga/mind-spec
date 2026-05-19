@@ -1,0 +1,14 @@
+{
+  "_fixture": "/tmp/arch-mind-mind-spec-v0.4.4.json",
+  "acyclicity_q16": 655360000,
+  "depth_q16": 655360000,
+  "equality_q16": 351952593,
+  "evidence_chain_density": 0,
+  "governance_kernel_coverage": 327680000,
+  "mcp_tool_isolation": 655360000,
+  "modularity_q16": 655360000,
+  "q16_determinism_purity": 546133333,
+  "redundancy_q16": 649592832,
+  "_tag": "mindc-v0.4.4",
+  "_note": "Tracks mindc 0.4.4 (RFC 0005 Phase D2a Named-struct param-name diagnostics). Spec gained informative \"Diagnostic fidelity\" + \"Self-host smoke (Phase 6 ladder)\" subsections; STATUS.md row + changelog 1.2.1; performance.md metric-selection guidance. No normative ABI changes."
+}
