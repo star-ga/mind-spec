@@ -194,6 +194,16 @@ not require otherwise. Operators whose mathematical definition fixes
 the metric (matmul, softmax denominator, layer-norm variance) are
 out of scope for this preference.
 
+A secondary rationale applies on thermally-bound substrates: L1 and
+L∞ inner loops involve fewer irreversible bit transitions per output
+element than the squaring-and-sqrt chain required by L2. At the
+Landauer bound (`kT ln 2` per erased bit), this difference is small
+in absolute terms but becomes measurable on power-limited or
+high-throughput fabrics where cumulative heat — not gate count — is
+the binding constraint. Implementations targeting such substrates may
+treat L1/L∞ selection as a thermodynamic optimization in addition to
+a cycle-count optimization.
+
 ### Profiling and analysis
 
 **Compiler flags**:

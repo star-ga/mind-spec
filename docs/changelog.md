@@ -7,6 +7,36 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.3.1] - 2026-05-18
+
+### Milestone: mindc v0.6.1 — Bootstrap fixed-point REACHED
+
+`libmindc_mind.so` (the pure-MIND mindc, the 78,488-byte combined cdylib that shipped in v0.6.0) was fed its own 1,084-LOC `.mind` source as input. The returned MLIR text — **10,889 bytes, 206 SSA values** — is **byte-identical to mindc-Rust's `--emit-ir` output on the same source**. The bootstrap fixed-point is reached: the Rust implementation is now decorative, required only for the initial bootstrap.
+
+**Closure (`mind@e29b734` + tag `v0.6.1`):** the FIRST-DIVERGENCE diagnosis flagged 6 missing SSA values. Two narrow emitter gaps + one parser gap closed the loop:
+
+- `emit_program_items` skipped `UseDecl` items (kind 7) — fix: emit one `const.i64 0` / `output` stub per `ast_use()` item.
+- `emit_program_items` skipped `StructDef` items (kind 13) — but more importantly, the pure-MIND parser didn't recognize `struct` as an item-starting keyword, so each struct body token became a separate ident item. Fix required two parts: (a) add `parse_struct_def` to the parser so it consumes the whole `struct Name { ... }` and returns a single `ast_struct_def` (kind 13) leaf node; (b) emit one stub for `ast_struct_def()` items in `emit_program_items`.
+- `lower_program` had one spurious leading stub with no oracle counterpart — removed.
+
+Net: −1 + 4 (UseDecl) + 3 (StructDef parse + emit) = +6 — exactly the gap. Pre-closure: 195 SSA values, 97% byte-identical. Post-closure: 206 SSA values, **100% byte-identical**.
+
+### What this proves
+
+The self-host loop closes on its own source. The pure-MIND mindc can compile MIND programs — including its own implementation — and produce IR text the reference compiler would produce. From here, the Rust implementation can be retired from any new feature work; v0.6.1 and forward, all new compiler features can land in `examples/mindc_mind/main.mind` and round-trip through itself.
+
+### Changed
+
+- **`STATUS.md`** — Compiler entry bumped to v0.6.1 with "Bootstrap fixed-point REACHED" framing.
+
+### Notes
+
+- Cumulative compiler bugs surfaced + closed by the self-host ladder + fixed-point: 0 (lexer) + 3 (parser) + 3 (typecheck) + 1 (emit_ir) + 0 (apex) + 3 (fixed-point) = **10**. Each was a true correctness fix.
+- Default-build hot path remained byte-identical through the closure. Bench-gate +7% cap held: 2.80–17.10 µs frontend floor preserved across v0.4.4 → v0.6.1.
+- The mind-nerve A1.5 native-encoder p95 measurement against v0.6.1 surfaced a separate, expected substrate gap: pure-MIND tail-recursive scalar matmul on an 11,922-row catalog is 14.4 ms p50 vs 0.38 ms p50 for numpy+BLAS. mind-blas (a MIND-native SIMD/vector backend, two tracks: runtime-support C bridge + RFC 0006 native MLIR vector dialect) is queued as the follow-on substrate work.
+
+---
+
 ## [1.3.0] - 2026-05-18
 
 ### Milestone: mindc v0.6.0 — Phase 6.5 APEX REACHED (self-host thesis proven)
