@@ -7,6 +7,25 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.3.7] - 2026-05-19
+
+### Milestone: mindc v0.6.6 — RFC 0006 Track B increment 3b; native vectorised `matmul_rmajor_f32_v`
+
+`mind@2dd896d` + tag `v0.6.6`. Track B increment 3b lands the **vectorised row-major f32 matmul** `matmul_rmajor_f32_v`: the compiler emits an outer `scf.for` over the output rows (no `iter_args` — it stores directly to `y[r]`), each row inlining the proven increment-1 `dot_f32` reduction (8-lane `vector.fma` accumulate + `vector.reduction <add>` + scalar tail), and returns `0 : i64` exactly like the Track A C oracle `__mind_blas_matmul_rmajor_f32`. Every output row equals `dot_f32(W + r·cols, x, cols)` — the identical per-row reduction the Track A oracle performs — so it holds the **same documented 1e-4 relative f64-oracle contract** as `dot_f32_v` (f32 reduction re-association is not bit-exact; the established f32 contract, distinct from the bit-exact Q16.16 paths). Verified within 1e-4 at `(1,1) (1,8) (2,8) (3,8) (1,9) (1,17) (2,17) (5,17) (33,1025) (128,384)`.
+
+### Notes
+
+- **Root-cause record (an earlier mis-diagnosis corrected).** A first cut SIGSEGV'd for *rows ≥ 2 with a non-empty scalar tail* (`(2,17)` crashed; `(1,17)` passed). This was **not** a triple-nested-`scf.for` lowering defect — that nested sibling-`iter_args` pattern is valid MLIR and lowers correctly under the pinned LLVM (independently confirmed by a research audit). The actual cause: `llvm.load` of `vector<8xf32>` with no alignment attribute defaults to the type's natural 32-byte alignment, which LLVM's x86 backend lowers to `vmovaps` (alignment-required). Row-base pointers `W + r·cols·4` are only 4-byte (f32) aligned — row 0 is malloc-base-over-aligned (works), but row ≥ 1 with `cols` not a multiple of 8 is mis-aligned → general-protection fault. Fix: emit `{alignment = 4 : i64}` on the vector `llvm.load`s → `vmovups` (unaligned), correct for every row.
+- **Bench-gate 0.0%**: the default-feature `mindc` **release** binary is byte-identical base-vs-increment-3b (verified, reproducible release build); the criterion compiler bench measures that identical binary so its µs figures are unchanged (1.8–17.1 µs frontend band; any per-run delta is criterion sampling noise, not code). Bootstrap fixed-point IR byte-identical (`next_id = 206`). All increment-3b code is `#[cfg(feature = "std-surface")]`-gated.
+- `blas_vec_q16_smoke` 6/6 including the new `vec_matmul_rmajor_f32_within_1e4_rel_of_f64_oracle`; `cargo fmt --check` clean; the single pre-existing `src/project/mod.rs:303` clippy advisory is unrelated and predates this work; CI remains green as for v0.6.4/v0.6.5.
+- **Deferred to a later increment** (RFC 0006 §9.3c): `@target(...)` per-call substrate annotation; cross-module `use std.blas` inlining; defensive `{alignment = 4}` on the other `dot_*_v` kernels (not a regression in current use — they are only ever called on allocation-base/over-aligned pointers).
+
+### Changed
+
+- **`STATUS.md`** — compiler tracking bumped to v0.6.6; matmul `matmul_rmajor_f32_v` added to the reference-implementation entry.
+
+---
+
 ## [1.3.6] - 2026-05-19
 
 ### Milestone: mindc v0.6.5 — RFC 0006 Track B increment 3a; cross-arch bit-identity gate #57 closed for the vector L1 too
