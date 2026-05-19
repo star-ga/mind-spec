@@ -7,6 +7,22 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.3.5] - 2026-05-19
+
+### Milestone: RFC 0007 (Mindcraft) sequencing gate CLEARED — documentation/sequencing only, no compiler change
+
+`mind@a29726c` flips RFC 0007 (the pure-MIND `mindc fmt`/`lint`/`check` toolchain — "the toolchain self-hosts") from gated to **build-may-begin**. The gate was native-encoder end-to-end measurement plus numerical correctness, and the criterion benchmark publication. Both are satisfied: the native pure-MIND encoder runs end-to-end and validates against the reference encoder at cosine 0.999996 / top-5 route overlap 0.9975 (≥0.92 gate, n=160) with the cross-arch Q16.16 bit-identity invariant preserved, and the criterion benchmark publication is complete.
+
+**No compiler/runtime version change** — this is a documentation and sequencing milestone (RFC status + roadmap), recorded here for spec-side traceability. The compiler remains at v0.6.4 (`mind@8e4b925`, tag `v0.6.4`); the gate-flip commit `a29726c` is docs-only and intentionally not tagged. Further native-encoder latency optimization continues independently and is not a Mindcraft prerequisite (the gate is measurement + numerical correctness, both met).
+
+This entry's "RFC 0007" follows the established STATUS/changelog convention where `RFC NNNN` denotes the **compiler-repo** RFC (as with the existing "RFC 0006 mind-blas" / "RFC 0005 pure-MIND std" citations). It is distinct from the mind-spec RFC registry in `docs/rfcs/` (where RFC-0007 is the FFI Specification), which is unchanged.
+
+### Changed
+
+- **`STATUS.md`** — header note appended: Mindcraft (compiler-repo RFC 0007) sequencing gate cleared 2026-05-19; compiler tracking line unchanged at v0.6.4.
+
+---
+
 ## [1.3.4] - 2026-05-19
 
 ### Milestone: mindc v0.6.4 — RFC 0006 Track B increment 2; cross-arch bit-identity gate #57 closed for the vector dot
