@@ -7,6 +7,27 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.3.4] - 2026-05-19
+
+### Milestone: mindc v0.6.4 — RFC 0006 Track B increment 2; cross-arch bit-identity gate #57 closed for the vector dot
+
+`mind@8e4b925` + tag `v0.6.4`, CI 6/6 success. Track B increment 2 lands the **Q16.16 vector path** `dot_q16_v` — a `vector<8xi64>` widen-multiply-`shrsi 16`-accumulate `scf.for` loop + an associative `vector.reduction <add>` horizontal i64 sum + scalar tail + `trunc i64→i32`/`sext` pack. It is **byte-identical to the Track A scalar oracle `__mind_blas_dot_q16`** at every length {0,1,2,7,8,9,15,16,17,31,32,33,1024,4096,65537} — exact, not tolerance (Q16.16 integer reduction is associative, per-element arithmetic `>>16` replicated). This **closes the task #57 cross-arch bit-identity obligation for the thesis-pure vector dot-product** (single-x86-host scope, as Track A §5.2; the full Linux-x86 ↔ macOS-ARM ↔ CUDA-x86 ↔ photonic hardware contract remains the outstanding #57 portion, and `dot_l1_q16_v` is the remaining Q16.16-metric for full vector-path parity — deferred to increment 3).
+
+Also landed: `Instr::VecStore` (symmetric vector store), `VecLoadI32`/`VecMulAddQ16`/`VecReduceAddI64` IR primitives, f32 `dot_l1_f32_v`/`dot_linf_f32_v` (L∞ via `vector.reduction <maximumf>`), and a dense-reduction-throughput bench sub-category.
+
+### Notes
+
+- **Bootstrap fixed-point unchanged**: 10,889 bytes / 206 SSA (bootstrap sources use no vector ops). Same clean no-shift discipline as v0.6.2/v0.6.3.
+- **Bench-gate 0.0%**: the default-feature `mindc` binary built at clean `c130db3` vs increment-2 HEAD is **byte-identical** (sha256 `9a9edf429e8971a089f93dfe8725dc47d49527a7e3ca5b1bbf99b00ee8a16717` both) — all increment-2 code is `#[cfg(feature = "std-surface")]`-gated and absent from the binary the `compiler` bench measures. CI Bench gate: success.
+- 519 std-surface tests; clippy (both feature sets) + `cargo fmt --check` + rustdoc `-D warnings` clean. Track A `blas_smoke` 12/12 + inc-1 `blas_vec_smoke` 3/3 green. One pre-existing inc-1 test-harness temp-`.so` self-race fixed (OnceLock single-build); inc-1 code paths untouched.
+- **Increment 3 honestly deferred** (RFC 0006 §9.3): `dot_l1_q16_v`, real `@target("simd-x86"|"simd-arm")` per-call annotation (needs MLIR target-attr plumbing, explicitly not shipped as an inert token), vectorised `matmul_rmajor_f32` inner loop, cross-module `use std.blas` vector inlining.
+
+### Changed
+
+- **`STATUS.md`** — compiler entry bumped to v0.6.4; #57 marked closed for the vector dot.
+
+---
+
 ## [1.3.3] - 2026-05-19
 
 ### Milestone: mindc v0.6.3 — RFC 0006 mind-blas Track B increment 1 (native MLIR vector dialect)
