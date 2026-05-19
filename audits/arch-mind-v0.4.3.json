@@ -1,0 +1,12 @@
+{
+  "_fixture": "/tmp/arch-mind-spec-v0.4.3.json",
+  "acyclicity_q16": 655360000,
+  "depth_q16": 655360000,
+  "equality_q16": 351952593,
+  "evidence_chain_density": 0,
+  "governance_kernel_coverage": 327680000,
+  "mcp_tool_isolation": 655360000,
+  "modularity_q16": 655360000,
+  "q16_determinism_purity": 546133333,
+  "redundancy_q16": 649592832
+}
