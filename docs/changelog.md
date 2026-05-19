@@ -7,6 +7,23 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.2.4] - 2026-05-18
+
+### Milestone: mindc v0.5.1 — Phase 6.5 Stage 1 PASS (pure-MIND lexer cdylib byte-identical)
+
+The reference implementation ships **first concrete bootstrap evidence on the self-host ladder**. The pure-MIND lexer (`examples/lexer/main.mind`, ~290 LOC tail-recursive `.mind` source authored by humans) was compiled via mindc-Rust's `--emit-shared` to `libmindc_lexer.so` (25,704 bytes; std-surface symbols + a runtime-support archive statically bundled), `dlopen`'d via Python ctypes, and `lex()` ran to completion producing a `Vec<i64>` stride-3 token stream **byte-identical to the documented spec contract** (32 of 32 tokens). This is the first time MIND has produced observational evidence that its self-host design is correct, not just type-checkable.
+
+### Changed
+
+- **`STATUS.md`** — Compiler entry bumped to v0.5.1; IR Stability row records the new control-flow primitives ratified by v0.5.1: `Instr::If` with `scf.if`-style branch lowering, bitwise BinOps (`BitAnd`/`BitOr`/`BitXor`/`Shl`/`Shr` → `arith.andi`/`ori`/`xori`/`shli`/`shrsi`), branch-binding scope threading via `branch_bindings` field on `Instr::If`, and cdylib `--emit-shared` static-linking of std-surface modules + a tiny runtime-support archive so resulting `.so` files are self-contained at `dlopen` time. All gated under `std-surface`; default-build hot path byte-identical.
+
+### Notes
+
+- The cdylib linker bundling resolves the symbol resolution layer of self-host: each `.so` produced by mindc now ships with the seven `__mind_*` intrinsics (alloc/realloc/free/load_i64/store_i64/read/write) wired through a C runtime-support archive, plus statically-linked `std.vec` / `std.string` / `std.map` / `std.io` from the pure-MIND module tree.
+- Phase 6.5 sub-stages 2 (parser), 3 (typecheck), 4 (emit_ir) follow the same pattern proven by Stage 1. Stage 5 = APEX combines all four into `libmindc_mind.so` with a driver fn that takes source bytes and produces IR text byte-identical to mindc-Rust on the same input.
+
+---
+
 ## [1.2.3] - 2026-05-18
 
 ### Milestone: mindc v0.5.0 — RFC 0005 Phase 6.2b (three compiler gaps closed)

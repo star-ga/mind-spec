@@ -1,6 +1,6 @@
 # Documentation Status
 
-> **Last Updated:** 2026-05-18 · spec v1.0 · tracking compiler 0.5.0 (RFC 0005 Phase 6.2b — `while` statement + array literals `[T; N]` + unsigned-i64 literal reinterpret-cast — self-host substrate complete)
+> **Last Updated:** 2026-05-18 · spec v1.0 · tracking compiler 0.5.1 (Phase 6.5 Stage 1 PASS — pure-MIND lexer cdylib bootstrap byte-identical to spec)
 
 This status page provides a quick view of the readiness of key documentation areas within the MIND specification. Use it to coordinate work, plan reviews, and spot sections that still need expansion.
 
@@ -25,7 +25,7 @@ The formal Core v1 specification documents are located in `spec/v1.0/`. See [`ov
 | 13. Foreign Function Interface | `spec/v1.0/ffi.md` | ✅ Stable | C/C++/Python/Rust bindings. |
 | 14. Future Extensions | `spec/v1.0/future-extensions.md` | ✅ Stable | BCI/neuro, systems programming, embedded AI, safety-critical systems roadmap (informative). |
 | 15. Package Management | `spec/v1.0/package.md` | ✅ Stable | PubGrub resolver, lockfile format, SBOM, SLSA provenance, registry protocol. |
-| 16. IR Stability | `spec/v1.0/ir-stability.md` | ✅ Stable | `mic@1` textual form as the runtime contract. Ratified by mindc 0.2.5 (Pratt + stable IR API); pure-MIND `__mind_*` intrinsic ABI ratified by mindc 0.4.2 (RFC 0005). `MIND_STDLIB_PATH` env-var override added by mindc 0.4.3 (Phase D₁); Named-struct parameter names preserved in error diagnostics by mindc 0.4.4 (Phase D₂a). Phase 6.2b grammar growth ratified by mindc 0.5.0: `while` statement form, `[T; N]` fixed-size array types + `[expr, …]` array literals, and unsigned-i64 literal reinterpret-cast (range `[i64::MAX+1, u64::MAX]` accepted via bit-pattern cast). All gated under `std-surface`; default-build hot path byte-identical. |
+| 16. IR Stability | `spec/v1.0/ir-stability.md` | ✅ Stable | `mic@1` textual form as the runtime contract. Ratified by mindc 0.2.5 (Pratt + stable IR API); pure-MIND `__mind_*` intrinsic ABI ratified by mindc 0.4.2 (RFC 0005). `MIND_STDLIB_PATH` env-var override added by mindc 0.4.3 (Phase D₁); Named-struct parameter names preserved in error diagnostics by mindc 0.4.4 (Phase D₂a). Phase 6.2b grammar growth ratified by mindc 0.5.0: `while` statement form, `[T; N]` fixed-size array types + `[expr, …]` array literals, and unsigned-i64 literal reinterpret-cast. mindc 0.5.1 adds: `Instr::If` IR primitive with `scf.if`-style branch lowering, bitwise BinOps (`BitAnd`/`BitOr`/`BitXor`/`Shl`/`Shr` → `arith.andi`/`ori`/`xori`/`shli`/`shrsi`), branch-binding scope threading, and cdylib `--emit-shared` static-links the std-surface modules + a tiny runtime-support archive so the resulting `.so` is self-contained at `dlopen` time. All gated under `std-surface`; default-build hot path byte-identical. |
 
 ## Documentation Areas
 
@@ -43,7 +43,7 @@ The formal Core v1 specification documents are located in `spec/v1.0/`. See [`ov
 
 | Implementation | Repo | Status | Notes |
 | -------------- | ---- | ------ | ----- |
-| MIND Compiler | [`star-ga/mind`](https://github.com/star-ga/mind) | ✅ Complete | v0.5.0 (RFC 0005 Phase 6.2b shipped — `while` statement + array literals + unsigned-i64 literal reinterpret-cast — self-host substrate complete). Frontend floor 2.80–17.10 µs (post-RFC-0005 baseline, +7% gate — loosened from +5% to absorb GitHub-hosted-runner variance; latest measurements after Phase 6.2b: small_matmul -0.7%, medium_mlp -1.5%, large_network +3.5%, all within cap). |
+| MIND Compiler | [`star-ga/mind`](https://github.com/star-ga/mind) | ✅ Complete | v0.5.1 (Phase 6.5 Stage 1 PASS — pure-MIND lexer `examples/lexer/main.mind` compiled via `mindc --emit-shared` to a 25,704-byte cdylib, dlopen'd via ctypes, produces token stream byte-identical to spec for the documented fixture; first concrete bootstrap-loop closure). Frontend floor 2.80–17.10 µs (post-RFC-0005 baseline, +7% gate; latest measurements: small_matmul -1.1%, medium_mlp -1.0%, large_network +2.5%, all within cap). |
 | MIND Runtime | [`star-ga/mind-runtime`](https://github.com/star-ga/mind-runtime) | ✅ Complete | v0.2.x, 17-symbol C ABI under `--features ffi,eval,serving`, GPU docs, audit-hardened, cargo-deny supply chain audit. |
 
 _Status legend_: ✅ Stable • ⚠️ Needs updates • 🚧 Under active development • 📝 Drafts in progress.
