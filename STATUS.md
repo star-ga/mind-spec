@@ -1,6 +1,6 @@
 # Documentation Status
 
-> **Last Updated:** 2026-05-18 · spec v1.0 · tracking compiler 0.5.1 (Phase 6.5 Stage 1 PASS — pure-MIND lexer cdylib bootstrap byte-identical to spec)
+> **Last Updated:** 2026-05-18 · spec v1.0 · tracking compiler 0.5.2 (Phase 6.5 Stage 2 PASS — pure-MIND parser cdylib byte-identical; 42/42 AST nodes match spec)
 
 This status page provides a quick view of the readiness of key documentation areas within the MIND specification. Use it to coordinate work, plan reviews, and spot sections that still need expansion.
 
@@ -43,7 +43,7 @@ The formal Core v1 specification documents are located in `spec/v1.0/`. See [`ov
 
 | Implementation | Repo | Status | Notes |
 | -------------- | ---- | ------ | ----- |
-| MIND Compiler | [`star-ga/mind`](https://github.com/star-ga/mind) | ✅ Complete | v0.5.1 (Phase 6.5 Stage 1 PASS — pure-MIND lexer `examples/lexer/main.mind` compiled via `mindc --emit-shared` to a 25,704-byte cdylib, dlopen'd via ctypes, produces token stream byte-identical to spec for the documented fixture; first concrete bootstrap-loop closure). Frontend floor 2.80–17.10 µs (post-RFC-0005 baseline, +7% gate; latest measurements: small_matmul -1.1%, medium_mlp -1.0%, large_network +2.5%, all within cap). |
+| MIND Compiler | [`star-ga/mind`](https://github.com/star-ga/mind) | ✅ Complete | v0.5.2 (Phase 6.5 Stage 2 PASS — pure-MIND parser `examples/parser/main.mind` compiled via `mindc --emit-shared` to a 32,072-byte cdylib; Python ctypes harness drives `lex()` then `parse()` over the documented fixture and produces a 42-node AST tree node-for-node identical to spec). Two of four self-host sub-components now proven byte-identical to mindc-Rust. v0.5.2 also closes three compiler bugs surfaced by the parser (subprocess stdout deadlock on large MLIR, `if`-as-value lowering emitted constant-0 instead of block-arg forwarding, harness child-list pointer decoding). Frontend floor 2.80–17.10 µs (post-RFC-0005 baseline, +7% gate). |
 | MIND Runtime | [`star-ga/mind-runtime`](https://github.com/star-ga/mind-runtime) | ✅ Complete | v0.2.x, 17-symbol C ABI under `--features ffi,eval,serving`, GPU docs, audit-hardened, cargo-deny supply chain audit. |
 
 _Status legend_: ✅ Stable • ⚠️ Needs updates • 🚧 Under active development • 📝 Drafts in progress.
