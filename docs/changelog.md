@@ -7,6 +7,37 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.3.0] - 2026-05-18
+
+### Milestone: mindc v0.6.0 — Phase 6.5 APEX REACHED (self-host thesis proven)
+
+The reference implementation has reached the **apex of the Phase 6 self-host ladder**. The pure-MIND mindc — a 1,084-LOC `.mind` driver merging the lexer + parser + type-checker + MLIR-text emitter at `examples/mindc_mind/main.mind` — was compiled via mindc-Rust's `--emit-shared` to a 78,488-byte cdylib. A Python ctypes harness calls `mindc_compile(src_addr, src_len)` on `examples/mindc_mind/fixture.mind` and the returned 148-byte MLIR text is **byte-identical to mindc-Rust's `--emit-ir` output on the same input**.
+
+**All five stages of the self-host ladder PASS:**
+
+| Stage | Pure-MIND surface | Output | Bytes verified |
+|---|---|---|---:|
+| 1 | `examples/lexer/main.mind` | 32-token stream | byte-identical (v0.5.1) |
+| 2 | `examples/parser/main.mind` | 42 AST nodes | byte-identical (v0.5.2) |
+| 3 | `examples/typecheck/main.mind` | 127-byte type-check report | byte-identical (v0.5.3) |
+| 4 | `examples/emit_ir/main.mind` | 148-byte MLIR text | byte-identical (v0.5.4) |
+| **5 = APEX** | `examples/mindc_mind/main.mind` (combined) | 148-byte MLIR text | **byte-identical to mindc-Rust** (v0.6.0) |
+
+This is the credibility milestone any new language must cross. The MIND language is now demonstrably expressive enough to host its own compiler, and the integrated pipeline produces the reference compiler's exact output byte-for-byte.
+
+### Notes
+
+- The self-host ladder surfaced and closed **seven latent compiler bugs** across IR control-flow lowering, subprocess plumbing, std-surface C stubs, Python harness decoding, and POSIX I/O contract — bugs that had been correct-looking under all prior tests because no other input had exercised those code paths. Each was a true correctness fix.
+- Default-build hot path remained byte-identical through every addition. Bench-gate +7% cap held: 2.80–17.10 µs frontend floor preserved across v0.4.4 → v0.6.0 (six tagged versions in one day).
+- The second-order goal (`libmindc_mind.so` compiles its own source byte-identically — bootstrap fixed-point) is now reachable: a follow-on round-trip exercise on top of v0.6.0. After fixed-point, the Rust implementation is decorative — only required for the initial bootstrap.
+- The combined `examples/mindc_mind/main.mind` uses a deliberate textual merge of the four sub-components with deduplicated helpers, rather than multi-file `use`, because mindc v0.5.4's `use`-resolver covers only `std.*`. Extending the resolver to user-defined modules is tracked as a follow-on item but is not on the apex path.
+
+### Changed
+
+- **`STATUS.md`** — Compiler entry bumped to v0.6.0 with APEX REACHED framing.
+
+---
+
 ## [1.2.4] - 2026-05-18
 
 ### Milestone: mindc v0.5.1 — Phase 6.5 Stage 1 PASS (pure-MIND lexer cdylib byte-identical)
