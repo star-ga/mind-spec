@@ -511,6 +511,39 @@ ABI (i64 values still accept into Named struct params). The reference
 implementation ships this behaviour from mindc 0.4.4 onwards (RFC 0005
 Phase D₂a).
 
+### Self-host smoke (informative — Phase 6 ladder)
+
+A conforming implementation MAY ship a pure-MIND tokeniser built on
+top of the seven `__mind_*` intrinsics + the four pure-MIND modules.
+This is the first step of the Phase 6 self-host ladder. Phase 6
+sub-steps:
+
+- **6.1 (lexer):** a pure-MIND tokeniser that produces a `Vec<i64>`
+  stride-3 token stream byte-identical to the reference implementation's
+  internal tokeniser on a documented fixture corpus. Shipped in
+  mindc v0.4.4 as `examples/lexer/`.
+- **6.2 (parser):** Pratt parser on top of the lexer, producing AST
+  nodes as heap-record structs with i64-addr recursive fields under
+  Option-C ABI.
+- **6.3 (type-checker):** symbol table via `std.map`, type-check pass
+  in pure MIND.
+- **6.4 (MLIR emit):** emit `module { func.func @... }` strings via
+  `std.string` + `__mind_write`.
+- **6.5 (fixed-point bootstrap):** the pure-MIND compiler compiles
+  itself to a `.so` whose output is byte-identical to the reference
+  implementation's output on the same input. **= apex of the
+  self-host thesis.**
+
+Self-host is informative — not every conforming implementation has
+to ship a MIND-written compiler. The contract is only that the
+language is *expressive enough* to compile itself on top of the
+documented intrinsics + stdlib surface.
+
+Loop primitive caveat: mindc v0.4.4 expresses loops as tail
+recursion because `while` is not yet a statement-level construct.
+Phase 6.2 either adds `while`-statement parsing or keeps recursion
+as the canonical MIND loop primitive; either choice is conforming.
+
 ### Compile-speed guarantee
 
 The pure-MIND modules and their resolver MUST be gated behind module-level
