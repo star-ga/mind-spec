@@ -503,7 +503,10 @@ feature flags (`std-surface`, `cross-module-imports`) so the default-build
 frontend remains byte-identical to the pre-RFC-0005 pipeline. A conforming
 implementation that exposes both features MUST publish a benchmark gate
 asserting that the headline `parse_typecheck_ir` workloads do not regress
-by more than 5% against a published baseline.
+by more than 7% against a published baseline. (The reference
+implementation initially enforced +5% but loosened to +7% as of
+mindc 0.4.3 to absorb GitHub-hosted-runner variance on microbench
+suites; the bench-gate workflow comment records the rationale.)
 
 ## Implementation requirements
 
