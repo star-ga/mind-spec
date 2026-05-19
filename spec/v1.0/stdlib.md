@@ -489,12 +489,27 @@ otherwise the loader falls back to the bundled set.
 
 The override is informative — implementations that do not provide the
 pure-MIND surface at all (e.g. minimal embedded profiles) need not
-implement it. The reference implementation (mindc 0.4.2+) honours it
-behind the `cross-module-imports` feature.
+implement it. The reference implementation honours it from mindc 0.4.3
+onwards (RFC 0005 Phase D₁) behind the `cross-module-imports` feature.
 
 Use case: a regulated deployment that needs a stricter `std.string`
 (inline UTF-8 validation, length bound, etc.) can ship a forked
 stdlib without rebuilding `mindc`.
+
+### Diagnostic fidelity for imported `pub fn`s (informative)
+
+When a call to an imported `pub fn` mismatches the declared signature
+on a parameter whose type annotation is a Named struct, conforming
+implementations SHOULD preserve the struct's name in the resulting
+error message rather than collapsing it to the lowered ABI type. For
+example, given `pub fn vec_set(v: Vec, i: i64, x: i64) -> i64`, a call
+that passes a tensor where `Vec` was declared SHOULD produce a message
+of the shape "expects Vec (heap-record i64 addr), got
+tensor<f32[3]>". This is a diagnostic-only contract — the underlying
+compatibility check stays permissive under the Option-C heap-record
+ABI (i64 values still accept into Named struct params). The reference
+implementation ships this behaviour from mindc 0.4.4 onwards (RFC 0005
+Phase D₂a).
 
 ### Compile-speed guarantee
 

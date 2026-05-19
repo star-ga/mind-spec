@@ -7,6 +7,46 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.2.1] - 2026-05-18
+
+### Milestone: RFC 0005 Phase D — mindc 0.4.3 + 0.4.4 (env-var override + diagnostic fidelity)
+
+Two follow-on patch tags refine the RFC 0005 surface ratified in 1.2.0.
+The spec gains an informative override clause (Phase D₁) and a diagnostic
+fidelity clause (Phase D₂a). Both surface in `spec/v1.0/stdlib.md` only;
+no normative ABI or syntax change.
+
+### Added
+
+- **`spec/v1.0/stdlib.md`** — New "Environment override" subsection
+  formalising `MIND_STDLIB_PATH` as an informative override for the
+  bundled pure-MIND modules. Spec stays implementation-neutral
+  (implementations MAY honour it); reference impl ships it from
+  mindc 0.4.3 onwards (RFC 0005 Phase D₁) behind the
+  `cross-module-imports` feature.
+- **`spec/v1.0/stdlib.md`** — New "Diagnostic fidelity for imported
+  `pub fn`s" subsection (informative): SHOULD preserve Named struct
+  parameter names in error messages (e.g. "expects Vec (heap-record
+  i64 addr), got tensor&lt;f32[3]&gt;") rather than collapsing to the
+  lowered ABI surface. Diagnostic-only contract — the underlying
+  compatibility check stays permissive under the Option-C heap-record
+  ABI. Reference impl ships it from mindc 0.4.4 onwards (Phase D₂a).
+
+### Changed
+
+- **`spec/v1.0/stdlib.md` §Compile-speed guarantee** — Updated the
+  +5% → +7% regression cap notation to reflect the reference-impl
+  threshold loosening at mindc 0.4.3 (GitHub-hosted-runner variance
+  on microbenches); the bench-gate workflow comment records the
+  rationale.
+
+- **STATUS.md** — Now tracks compiler 0.4.4; IR Stability row
+  records the Phase D₁ env-var override and Phase D₂a diagnostic
+  ratifications; MIND Compiler reference entry bumped to v0.4.4
+  with the +7% bench-gate cap.
+
+---
+
 ## [1.2.0] - 2026-05-18
 
 ### Milestone: RFC 0005 — Pure-MIND Standard Surface (ratified by mindc 0.4.2)
