@@ -67,6 +67,7 @@ The formal Core v1 specification documents are located in `spec/v1.0/`. See [`ov
 | Incremental compilation cache | RFC 0008 Phase F | ✅ Shipped | v0.7.0 (`01fc039`) | [`docs/rfcs/0008-mindc-build.md`](https://github.com/star-ga/mind/blob/main/docs/rfcs/0008-mindc-build.md) |
 | Bootstrap `mind` with `mindc build` (KEYSTONE) | RFC 0008 Phase G | ✅ Shipped | v0.7.0 (`faa6027`) | [`docs/rfcs/0008-mindc-build.md`](https://github.com/star-ga/mind/blob/main/docs/rfcs/0008-mindc-build.md) |
 | extern "C" + SysV/Win64 ABI | RFC 0010 Phase A/B/C | ✅ Shipped | v0.7.0 | [`docs/rfcs/0010-memory-safety-and-c-abi.md`](https://github.com/star-ga/mind/blob/main/docs/rfcs/0010-memory-safety-and-c-abi.md) |
+| Three-tier memory model: `region { }` + `GenRef` | RFC 0010 Phase J-A/J-B | ✅ Shipped | v0.7.0 | [`docs/rfcs/0010-memory-safety-and-c-abi.md`](https://github.com/star-ga/mind/blob/main/docs/rfcs/0010-memory-safety-and-c-abi.md) |
 | std.mlir + std.llvm C API scaffolds | RFC 0010 Phase E/F | ✅ Scaffolded | v0.7.0 | [`docs/rfcs/0010-memory-safety-and-c-abi.md`](https://github.com/star-ga/mind/blob/main/docs/rfcs/0010-memory-safety-and-c-abi.md) |
 | 13 stdlib modules (vec/string/map/io/blas/toml/json/regex/net/fs/process/mlir/llvm) | RFC 0005 + RFC 0006 + v0.7.0 | ✅ Complete | v0.7.0 | `std/` in `star-ga/mind` |
 | `mindc doc` HTML documentation generator | — | ✅ Phase 1 shipped | v0.7.0 | `src/doc/` in `star-ga/mind` |
