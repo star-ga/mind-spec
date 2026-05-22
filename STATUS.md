@@ -70,7 +70,10 @@ The formal Core v1 specification documents are located in `spec/v1.0/`. See [`ov
 | std.mlir + std.llvm C API scaffolds | RFC 0010 Phase E/F | ✅ Scaffolded | v0.7.0 | [`docs/rfcs/0010-memory-safety-and-c-abi.md`](https://github.com/star-ga/mind/blob/main/docs/rfcs/0010-memory-safety-and-c-abi.md) |
 | 13 stdlib modules (vec/string/map/io/blas/toml/json/regex/net/fs/process/mlir/llvm) | RFC 0005 + RFC 0006 + v0.7.0 | ✅ Complete | v0.7.0 | `std/` in `star-ga/mind` |
 | `mindc doc` HTML documentation generator | — | ✅ Phase 1 shipped | v0.7.0 | `src/doc/` in `star-ga/mind` |
-| Standalone binary release (linux/macos/windows) | — | ✅ Complete | v0.7.0 | `.github/workflows/release-binary.yml` |
+| Standalone binary release (linux x64/arm64, macos x64/arm64, windows x64) | — | ✅ Complete | v0.7.0 | `.github/workflows/release.yml` + `scripts/install.sh` |
+| RFC 0009 federation-first package layer (spec) | RFC 0009 | ✅ Spec complete | v0.7.0 | [`docs/rfcs/0009-federation-package-layer.md`](https://github.com/star-ga/mind/blob/main/docs/rfcs/0009-federation-package-layer.md) |
+| RFC 0011 async + structured concurrency (spec) | RFC 0011 | ✅ Spec complete | v0.7.0 | [`docs/rfcs/0011-async-and-structured-concurrency.md`](https://github.com/star-ga/mind/blob/main/docs/rfcs/0011-async-and-structured-concurrency.md) |
+| RFC 0010 G1: drop vestigial melior/inkwell deps | RFC 0010 Phase G1 | ✅ Shipped | v0.7.0 | [`docs/mindcraft/rfc0010-phase-ghi-migration-plan.md`](https://github.com/star-ga/mind/blob/main/docs/mindcraft/rfc0010-phase-ghi-migration-plan.md) |
 | Rust edition | — | ✅ 2024 | v0.6.8 | `Cargo.toml` |
 
 ## Mindcraft (RFC 0007) — Fully Shipped
