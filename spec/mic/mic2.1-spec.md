@@ -56,10 +56,20 @@ mic@2.1 is a backward-compatible minor revision of mic@2:
    explicitly drops them. Strict consumers MAY reject unknown keys under known
    reserved namespaces (§4); they MUST NOT silently rewrite them.
 
-Rationale for not bumping to `mic@3`: the binary delta is one optional section,
-the text delta is one optional block, the canonicalisation delta is one
-ordering clause — all additive. A major bump would force every tool to update
-detection logic for no behavioural benefit.
+Rationale for the original 2.0 → 2.1 bump (NOT 3.0): the binary delta is one
+optional section, the text delta is one optional block, the canonicalisation
+delta is one ordering clause — all additive. A major bump would force every
+tool to update detection logic for no behavioural benefit.
+
+> **Note (post-RFC 0021, 2026-05-27).** The `mic@3` name was later allocated to
+> a different artifact — a canonical *binary serialisation of the `IRModule`
+> data shape* (the same shape `mic@1` text serialises), shipped in mindc 0.7.x
+> via `mind/src/ir/compact/v3/` and reachable through `mindc --emit-mic3`. The
+> evidence-chain MAP attaches to that `mic@3` form too, via the `0x4D`-sentinel
+> epilogue, with the same key/value vocabulary defined here. See
+> `mind/docs/rfcs/0021-canonical-ir-unification.md` for the unification plan
+> (steps 1–3 shipped, 4–6 in flight) and `spec/v1.0/ir-stability.md` for the
+> stability surface.
 
 ## 3. Wire format
 
@@ -291,9 +301,14 @@ value-tag space is small and any extension is a real change.
 - [mic2-spec.md](./mic2-spec.md) — parent text format
 - [micb-spec.md](./micb-spec.md) — parent binary format
 - `mind/src/ir/compact/v2/` — reference Rust impl (emit/parse/binary/types/varint)
+- `mind/src/ir/compact/v3/` — `mic@3` binary `IRModule` codec + MAP epilogue
+  (RFC 0021 steps 1–3)
 - RFC 0016 — evidence-chain emission (task #288, `evidence_chain.*`)
 - RFC 0014 — per-substrate lowering (`target.*`)
 - RFC 0017 — cross-substrate verify (`verify.*`)
+- RFC 0021 — canonical IR unification (the long-term home of the MAP carrier
+  on the `IRModule` data shape; `mic@3` binary + `mic@2.x` → `mind-model@2`
+  demotion)
 - RFC 0019 — deterministic agent substrate (task #294, `agent.*`)
 - `mind-mem/src/mind_mem/model_signing.py` — Ed25519 primitive reused by §6
 - RFC 8032 — EdDSA, §5.1 Ed25519 parameters
