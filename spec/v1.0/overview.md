@@ -28,7 +28,10 @@ Core v1 is organised into the following pillars:
 1. **Surface Language** ([`language.md`](./language.md)) — syntax and tensor-centric constructs that
    lower into the Core IR.
 2. **Core IR** ([`ir.md`](./ir.md)) — SSA-style tensor instruction set, canonicalisation, and
-   verification rules.
+   verification rules. **IR Stability** ([`ir-stability.md`](./ir-stability.md)) — the canonical
+   `IRModule` data shape is serialised as `mic@1` text and `mic@3` binary (RFC 0021); evidence-chain
+   attestation rides on a MAP epilogue (RFC 0014 + RFC 0016) with the load-bearing rule that
+   `trace_hash = SHA-256(canonical mic@1 text)` (RFC 0016 GAP-1).
 3. **Static Autodiff** ([`autodiff.md`](./autodiff.md)) — reverse-mode differentiation on verified IR,
    producing canonical gradient modules.
 4. **Shapes & Tensor Semantics** ([`shapes.md`](./shapes.md)) — broadcasting, reduction, indexing, and

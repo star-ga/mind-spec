@@ -60,6 +60,9 @@ Different parts of the specification have different stability guarantees:
 - Code written for Core v1.0 MUST compile and execute correctly on v1.x implementations
 - IR modules from v1.0 MUST verify and execute on v1.x runtimes
 - Error codes MUST NOT be renumbered or removed
+- **`mic@1` canonical text + `mic@3` canonical binary** (RFC 0021): both serialisations of the
+  `IRModule` data shape are stable; `mic@1` text is the load-bearing anchor for the
+  `trace_hash` field carried in evidence-chain MAP epilogues (RFC 0016 GAP-1).
 
 ### Evolving
 

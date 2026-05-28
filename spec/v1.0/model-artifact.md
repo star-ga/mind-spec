@@ -174,6 +174,24 @@ The `sha256` field enables integrity verification before inference.
 When `mind_governance` is set, the inference pipeline enforces all
 512-mind invariants on every forward pass.
 
+### Compile-time evidence chain (RFC 0016)
+
+When the model artifact is paired with compiled MIND code (i.e., a runtime that consumes
+`mic@1` text or `mic@3` binary IR artifacts produced by `mindc --emit-evidence`), the IR file
+carries a Metadata-Attachment-Pair (MAP) epilogue with the following normative keys:
+
+| Key | Meaning |
+|---|---|
+| `evidence_chain.determinism` | The determinism class the artifact was built under (e.g. `byte-identical-q16`) |
+| `evidence_chain.substrate` | The substrate the artifact targets (`x86_avx2`, `arm64_neon`, `cuda_sm89`, …) |
+| `evidence_chain.toolchain` | Compiler + flags identity (e.g. `mindc 0.7.1 --emit-shared`) |
+| `evidence_chain.trace_hash` | **SHA-256 of the canonical `mic@1` textual serialisation** of `IRModule.body` (RFC 0016 GAP-1). Hashing on `mic@2.x` or `mic@3` bytes is **non-conformant.** |
+| `evidence_chain.parent` (OPTIONAL) | Reference to the parent compilation in a chain |
+
+This provides cryptographic proof that the compiled IR was produced from a specific source by a
+specific toolchain on a specific substrate — without trusting the builder. See
+[`ir-stability.md`](./ir-stability.md) for the normative carrier contract.
+
 ## Loading Sequence
 
 1. Detect format (SafeTensors vs GGUF) from file extensions

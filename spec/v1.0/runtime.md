@@ -76,9 +76,14 @@ CPU-only build), the runtime MUST:
 ## Responsibilities
 
 - **Semantic fidelity**: runtime implementations MUST execute operations in accordance with the IR
-  semantics defined in [Core IR](./ir.md) and [Shapes](./shapes.md).
+  semantics defined in [Core IR](./ir.md) and [Shapes](./shapes.md). Runtimes consume canonical
+  IRModule artifacts in either of the two stable serialisations — `mic@1` text or `mic@3` binary
+  (RFC 0021) — both of which serialise the same `IRModule` data shape and round-trip equivalently.
 - **Determinism**: given canonical IR and identical inputs, runtimes MUST produce identical outputs
   within numeric precision guarantees of the dtype.
+- **Evidence-chain preservation (RFC 0016)**: when a runtime loads an `IRModule` carrying a MAP
+  epilogue, it MUST NOT silently strip the `evidence_chain.*` keys; downstream tooling depends on
+  the chain surviving the load → execute → re-emit cycle (see [`ir-stability.md`](./ir-stability.md)).
 - **Unsupported operations**: when an operation is not implemented, the runtime MUST return a
   well-defined error (e.g. “unsupported operation”) rather than exhibiting undefined behaviour.
 - **Resource management**: allocation and deallocation semantics are implementation-defined but MUST

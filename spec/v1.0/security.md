@@ -99,6 +99,15 @@ Implementations MUST produce **bit-exact identical** output values across:
 - MLIR lowering MUST produce deterministic output (instruction order, register allocation)
 - Binary builds MAY vary due to timestamps or debug info but MUST have identical runtime semantics
 
+**Compile-time evidence chains (RFC 0016)**:
+- Implementations MAY emit a signed evidence-chain MAP epilogue on the compiled IR carrying
+  `evidence_chain.{determinism, substrate, toolchain, trace_hash}` and an optional `parent`
+- The `trace_hash` MUST anchor on the canonical `mic@1` textual serialisation (RFC 0016 GAP-1);
+  hashing on `mic@2.x` binary or `mic@3` binary bytes is non-conformant
+- The chain is the load-bearing primitive for cryptographic proof that a compiled artifact was
+  produced from a specific source by a specific toolchain on a specific substrate — without
+  trusting the builder
+
 **Dependency pinning**:
 - Projects SHOULD use lock files (e.g., `Cargo.lock`) to pin exact dependency versions
 - Supply chain audits MUST verify cryptographic hashes of all dependencies
