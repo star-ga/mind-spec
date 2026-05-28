@@ -331,6 +331,28 @@ Conforming implementations MUST:
 - [Type System](../../spec/v1.0/types.md)
 - [Shape Semantics](../../spec/v1.0/shapes.md)
 
+## Subsequent RFCs (post-acceptance evolution)
+
+This RFC defined the `mic@1` text format as the IR stability contract.
+Subsequent RFCs extend the same `IRModule` data shape with additional
+serialisation and attestation surfaces — all of which preserve the `mic@1`
+text form as the load-bearing canonical anchor:
+
+- **RFC 0014** — `mic@2.1` MAP-extension carrier (Metadata-Attachment-Pair
+  epilogue on the `mic@2`/`MIC-B` compact and binary lineage; see
+  [`spec/mic/mic2.1-spec.md`](../../spec/mic/mic2.1-spec.md)).
+- **RFC 0016** — compile-time evidence-chain emission; the `trace_hash` is
+  anchored on the **canonical `mic@1` textual serialisation** (GAP-1, fixed
+  in `mind@db5cb76`). Implementations claiming evidence-chain emission MUST
+  honour the `mic@1` anchor; v2/v2.1-anchored hashing is non-conformant.
+- **RFC 0021** — canonical IR unification; allocates `mic@3` (magic `MIC3`)
+  as the canonical **binary** serialisation of the same `IRModule` data
+  shape that `mic@1` serialises as text. The evidence MAP epilogue attaches
+  via a `0x4D` sentinel, sharing the key vocabulary with the `mic@2.1`
+  carrier. Steps 1–3 shipped in mindc 0.7.x (codec + MAP + `mindc --emit-mic3`
+  / `--emit-evidence` CLI); steps 4–6 (`mindc verify`, `mic@2.x` →
+  `mind-model@2` demotion, oracle + CI gate) in flight.
+
 ## Appendix A: Grammar (EBNF)
 
 ```ebnf
