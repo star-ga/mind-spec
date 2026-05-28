@@ -7,6 +7,86 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.4.0] - 2026-05-28
+
+### Milestone: mindc v0.7.x — RFC 0007 / 0008 / 0010 / 0011 / 0012 / 0013 Tier 1 ship + IR-canon unification (RFC 0014 / 0016 / 0021)
+
+The credibility-ladder rung 3 graduation: Mindcraft (RFC 0007) and the
+cargo-retirement track (RFC 0008) shipped in mindc v0.6.8 and v0.7.0,
+followed by the post-tag IR-canon unification work in v0.7.x. Headline
+ratifications since `v0.6.7` (the v1.3.8 entry below):
+
+- **RFC 0007 Mindcraft — fully shipped (v0.6.8).** All six phases plus the
+  MINDCRAFT-001 keystone: `mindc fmt`, lint-rule infrastructure, 5 named
+  lint rules, `mindc check` project driver, `--fix` + CI workflow + LSP
+  reporter, and `pub` keyword AST + formatter round-trip preservation.
+- **RFC 0008 `mindc build` / `mindc test` — all 7 phases shipped (v0.6.8 →
+  v0.7.0), Phase G is the KEYSTONE.** `mindc build` produces
+  `libmindc_mind.so` byte-identical to the v0.6.1 fixed-point oracle, driven
+  entirely by the pure-MIND build orchestrator. Cargo is no longer
+  load-bearing for the pure-MIND compile loop.
+- **RFC 0010 memory safety + C ABI — Phases A/B/C + J-A/J-B shipped (v0.7.0).**
+  `extern "C"` + SysV/Win64 ABI; the three-tier memory model with
+  `region { }` (region-interior) and `GenRef` (region-exterior, generation-
+  checked references that return `None` on stale-handle deref instead of
+  use-after-free UB). Phase G1 dropped vestigial `melior`/`inkwell` deps.
+- **RFC 0011 async + structured concurrency — Phase A shipped (v0.7.0).**
+  `std.async` as the 12th gated stdlib module: explicit-Scheduler API,
+  Sender/Receiver composition, and a deterministic `ReplayScheduler` with a
+  byte-stable FNV-1a `trace_hash`. Phases B/C/D remain.
+- **RFC 0012 tensor-native surface syntax — Phases A + B + C shipped (post-tag).**
+  Shape-typed `Tensor<dtype,[dims]>` with compile-time diagnostics; the `@` /
+  `.+` / `.-` / `.*` / `./` / `.T` / reduction operator surface desugaring
+  to `std.blas` (byte-identity-gated); `#[deterministic]` / `#[target(...)]`
+  / `#[q16]` annotation checks. Attributes unified on `#[name]` (§5 hard-cut).
+- **RFC 0013 Tier 1 — agent-grade std surface (post-tag).** `std.cli`,
+  `std.io` ANSI/TTY, `std.string` helpers, `std.tui` (Box / Text /
+  terminal-size), and **`std.sha256`** (pure-MIND FIPS 180-4 — the hash
+  primitive the evidence chain anchors on). Tiers 2–6 remain.
+- **RFC 0014 `mic@2.1` MAP-extension carrier — shipped (post-tag).** The
+  Metadata-Attachment-Pair epilogue on `mic@2`/`MIC-B`. Documented in
+  `spec/mic/mic2.1-spec.md`. Back-compatible by omission.
+- **RFC 0016 evidence-chain emission — Phase A + Phase B shipped (post-tag).**
+  Compile-time provenance attestation. Phase A: inert MAP-epilogue emission
+  (`determinism / substrate / toolchain / trace_hash` + optional `parent`).
+  Phase B: `verify_evidence_chain` verifier core. **GAP-1 (closed,
+  `mind@db5cb76`)** anchors the `trace_hash` on the **canonical `mic@1`
+  textual serialisation** — implementations claiming evidence-chain emission
+  MUST honour the `mic@1` anchor.
+- **RFC 0021 canonical IR unification — steps 1–3 shipped (post-tag).**
+  Resolves the two-IR divergence. Step 1: `mic@3` binary `IRModule` codec
+  (`mind/src/ir/compact/v3/`, magic `MIC3`, additive). Step 2: evidence MAP
+  epilogue on `mic@3` via the `0x4D` sentinel. Step 3: `mindc --emit-mic3`
+  / `--emit-evidence` CLI flags. Steps 4–6 (`mindc verify`, `mic@2.x` →
+  `mind-model@2` demotion, oracle + CI gate) remain in flight. The earlier
+  `mic@1e` proposal was superseded by `mic@3` once `mic@2/2.1` shipped.
+
+### Spec changes in this 1.4.0 cut
+
+- **`spec/v1.0/ir-stability.md`** — Format-detection table covering `mic@1` /
+  `mic@2` / `mic@2.1` / `mic@3`; new "Evidence-chain attestation" section
+  documenting the MAP keys, both carriers, and the GAP-1 `mic@1` anchor rule.
+- **`spec/mic/mic2.1-spec.md`** — note that `mic@3` was later allocated to
+  RFC 0021's binary `IRModule` form; References section gains the RFC 0021 +
+  `mind/src/ir/compact/v3/` pointers.
+- **`design/rfcs/0001-mindir-compact.md`** — accepted RFC body unchanged;
+  adds a "Subsequent RFCs (post-acceptance evolution)" forward-reference to
+  RFC 0014 / RFC 0016 / RFC 0021.
+- **`STATUS.md`** — Last-Updated 2026-05-28; IR-Stability row gains the
+  mindc-0.7.x paragraph; 9 new toolchain-features rows.
+
+### Notes
+
+- The mind implementation-side docs (`mind/docs/ir-stability.md`,
+  `mind/docs/versioning.md`) and the public site (`mindlang.dev/docs/mic`,
+  `/docs/stability`, `/docs/ir`, `/roadmap`, `/docs/mic/v2`, `/docs/mic/binary`)
+  all rewrote the prior "`mic@1e` epilogue" framing to the actual shipped
+  `mic@3` design (steps 1–3) + steps 4–6 in flight.
+- The earlier `1.3.x` entries below remain authoritative for the mindc
+  v0.4.x – v0.6.7 surface; v1.4.0 covers the v0.6.8 → v0.7.x window.
+
+---
+
 ## [1.3.8] - 2026-05-19
 
 ### Milestone: mindc v0.6.7 — RFC 0006 mind-blas vector-load alignment hardening
