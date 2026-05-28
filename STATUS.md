@@ -116,7 +116,7 @@ library without Cargo on the critical path. Cargo remains in the repo only to ho
 the `mindc` binary itself until RFC 0010 delivers a pure-MIND libMLIR FFI (Phase G of
 RFC 0010).
 
-## Toolchain Features (mindc v0.6.8 compiler reference) — v0.7.0 baseline
+## Toolchain Features (mindc v0.7.0 compiler reference)
 
 See the `star-ga/mind` [Reference Implementations](#reference-implementations) row for
 the full feature delta.
