@@ -50,9 +50,13 @@ ratifications since `v0.6.7` (the v1.3.8 entry below):
   Compile-time provenance attestation. Phase A: inert MAP-epilogue emission
   (`determinism / substrate / toolchain / trace_hash` + optional `parent`).
   Phase B: `verify_evidence_chain` verifier core. **GAP-1 (closed,
-  `mind@db5cb76`)** anchors the `trace_hash` on the **canonical `mic@1`
-  textual serialisation** — implementations claiming evidence-chain emission
-  MUST honour the `mic@1` anchor.
+  `mind@db5cb76`)** originally anchored the `trace_hash` on the canonical
+  `mic@1` textual serialisation. **Re-anchored 2026-05-31** to
+  `SHA-256(canonical mic@3 bytes)` — the full-fidelity binary `IRModule` —
+  after a collision audit found `mic@1` text can drop function-body
+  semantics (two semantically-different programs could share a `mic@1`-text
+  hash); this supersedes the original GAP-1 `mic@1`-text rule. Implementations
+  claiming evidence-chain emission MUST honour the `mic@3` anchor.
 - **RFC 0021 canonical IR unification — steps 1–3 shipped (post-tag).**
   Resolves the two-IR divergence. Step 1: `mic@3` binary `IRModule` codec
   (`mind/src/ir/compact/v3/`, magic `MIC3`, additive). Step 2: evidence MAP
@@ -82,7 +86,9 @@ ratifications since `v0.6.7` (the v1.3.8 entry below):
 
 - **`spec/v1.0/ir-stability.md`** — Format-detection table covering `mic@1` /
   `mic@2` / `mic@2.1` / `mic@3`; new "Evidence-chain attestation" section
-  documenting the MAP keys, both carriers, and the GAP-1 `mic@1` anchor rule.
+  documenting the MAP keys, both carriers, and the GAP-1 anchor rule (the
+  rule was re-anchored 2026-05-31 to `SHA-256(canonical mic@3 bytes)`,
+  superseding the original `mic@1`-text form).
 - **`spec/mic/mic2.1-spec.md`** — note that `mic@3` was later allocated to
   RFC 0021's binary `IRModule` form; References section gains the RFC 0021 +
   `mind/src/ir/compact/v3/` pointers.

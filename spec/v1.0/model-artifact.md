@@ -185,7 +185,7 @@ carries a Metadata-Attachment-Pair (MAP) epilogue with the following normative k
 | `evidence_chain.determinism` | The determinism class the artifact was built under (e.g. `byte-identical-q16`) |
 | `evidence_chain.substrate` | The substrate the artifact targets (`x86_avx2`, `arm64_neon`, `cuda_sm89`, …) |
 | `evidence_chain.toolchain` | Compiler + flags identity (e.g. `mindc 0.7.1 --emit-shared`) |
-| `evidence_chain.trace_hash` | **SHA-256 of the canonical `mic@1` textual serialisation** of `IRModule.body` (RFC 0016 GAP-1). Hashing on `mic@2.x` or `mic@3` bytes is **non-conformant.** |
+| `evidence_chain.trace_hash` | **`SHA-256(canonical mic@3 bytes)`** — the full-fidelity binary `IRModule` (RFC 0016 GAP-1; re-anchored 2026-05-31 after a collision audit found `mic@1` text can drop function-body semantics, supersedes the original `mic@1`-text rule). Hashing on `mic@1` textual or `mic@2.x` bytes is **non-conformant.** |
 | `evidence_chain.parent` (OPTIONAL) | Reference to the parent compilation in a chain |
 
 This provides cryptographic proof that the compiled IR was produced from a specific source by a

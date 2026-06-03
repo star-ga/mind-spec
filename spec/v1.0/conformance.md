@@ -44,8 +44,10 @@ Implementations claiming **evidence-chain emission** (RFC 0016) MUST:
 
 - Emit the chain as a Metadata-Attachment-Pair (MAP) epilogue per RFC 0014 (`mic@2.1`) and/or via
   the `0x4D`-sentinel binary form (`mic@3`, RFC 0021 step 2).
-- Anchor `trace_hash` on the **canonical `mic@1` textual serialisation** of the `IRModule.body`
-  bytes per RFC 0016 GAP-1. Hashing on the `mic@2.x` binary form, on `mic@3` bytes, or on any
+- Anchor `trace_hash` on the **canonical `mic@3` bytes** — `trace_hash = SHA-256(canonical mic@3
+  bytes)`, the full-fidelity binary `IRModule` — per RFC 0016 GAP-1 (re-anchored 2026-05-31 after a
+  collision audit found `mic@1` text can drop function-body semantics; supersedes the original GAP-1
+  `mic@1`-text rule). Hashing on the `mic@1` textual form, on the `mic@2.x` binary form, or on any
   derivative serialisation is **non-conformant**.
 - Emit all five evidence-chain keys (`evidence_chain.determinism`, `.substrate`, `.toolchain`,
   `.trace_hash`; `.parent` is OPTIONAL) when the chain is present.

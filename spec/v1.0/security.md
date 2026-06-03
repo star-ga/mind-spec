@@ -102,8 +102,10 @@ Implementations MUST produce **bit-exact identical** output values across:
 **Compile-time evidence chains (RFC 0016)**:
 - Implementations MAY emit a signed evidence-chain MAP epilogue on the compiled IR carrying
   `evidence_chain.{determinism, substrate, toolchain, trace_hash}` and an optional `parent`
-- The `trace_hash` MUST anchor on the canonical `mic@1` textual serialisation (RFC 0016 GAP-1);
-  hashing on `mic@2.x` binary or `mic@3` binary bytes is non-conformant
+- The `trace_hash` MUST anchor on the canonical `mic@3` bytes — `trace_hash = SHA-256(canonical
+  mic@3 bytes)`, the full-fidelity binary `IRModule` (RFC 0016 GAP-1; re-anchored 2026-05-31 after a
+  collision audit found `mic@1` text can drop function-body semantics, supersedes the original GAP-1
+  `mic@1`-text rule); hashing on the `mic@1` textual or `mic@2.x` binary form is non-conformant
 - The chain is the load-bearing primitive for cryptographic proof that a compiled artifact was
   produced from a specific source by a specific toolchain on a specific substrate — without
   trusting the builder

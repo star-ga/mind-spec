@@ -61,8 +61,10 @@ Different parts of the specification have different stability guarantees:
 - IR modules from v1.0 MUST verify and execute on v1.x runtimes
 - Error codes MUST NOT be renumbered or removed
 - **`mic@1` canonical text + `mic@3` canonical binary** (RFC 0021): both serialisations of the
-  `IRModule` data shape are stable; `mic@1` text is the load-bearing anchor for the
-  `trace_hash` field carried in evidence-chain MAP epilogues (RFC 0016 GAP-1).
+  `IRModule` data shape are stable; `mic@3` bytes are the load-bearing anchor for the
+  `trace_hash` field carried in evidence-chain MAP epilogues — `trace_hash = SHA-256(canonical mic@3
+  bytes)` (RFC 0016 GAP-1; re-anchored 2026-05-31 after a collision audit, supersedes the original
+  `mic@1`-text rule).
 
 ### Evolving
 

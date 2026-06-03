@@ -60,11 +60,15 @@ and optionally `evidence_chain.parent`.  The MAP attaches to `mic@2.1`
 compact IR via the MAP-carrier extension (RFC 0014) and to `mic@3` binary
 IR via the trailing `0x4D` sentinel epilogue (RFC 0021 step 2).
 
-The `trace_hash` is the **SHA-256 of the canonical `mic@1` textual
-serialisation of the module's `IRModule.body`** (RFC 0016 GAP-1, mindc
-commit `db5cb76`), making `mic@1` the load-bearing anchor for the entire
-attestation surface.  Implementations claiming evidence-chain emission MUST
-honour this anchor — `mic@2.x`-anchored hashing is non-conformant.
+The `trace_hash` is `trace_hash = SHA-256(canonical mic@3 bytes)` — the
+**full-fidelity binary `IRModule`** (RFC 0016 GAP-1, mindc commit `db5cb76`;
+re-anchored 2026-05-31 after a collision audit found `mic@1` text can drop
+function-body semantics, two semantically-different programs could share a
+`mic@1`-text hash — `mic@3` binary commits the full `IRModule`; this
+supersedes the original GAP-1 `mic@1`-text rule).  This makes `mic@3` the
+load-bearing anchor for the entire attestation surface.  Implementations
+claiming evidence-chain emission MUST honour this `mic@3` anchor; hashing on
+the `mic@1` textual form or the `mic@2.x` binary form is non-conformant.
 
 ## Bench-gate discipline
 

@@ -336,15 +336,20 @@ Conforming implementations MUST:
 This RFC defined the `mic@1` text format as the IR stability contract.
 Subsequent RFCs extend the same `IRModule` data shape with additional
 serialisation and attestation surfaces — all of which preserve the `mic@1`
-text form as the load-bearing canonical anchor:
+text form as the canonical human-readable IR stability contract (the
+evidence-chain `trace_hash` was later re-anchored 2026-05-31 onto
+`SHA-256(canonical mic@3 bytes)`; see RFC 0016 GAP-1):
 
 - **RFC 0014** — `mic@2.1` MAP-extension carrier (Metadata-Attachment-Pair
   epilogue on the `mic@2`/`MIC-B` compact and binary lineage; see
   [`spec/mic/mic2.1-spec.md`](../../spec/mic/mic2.1-spec.md)).
 - **RFC 0016** — compile-time evidence-chain emission; the `trace_hash` is
-  anchored on the **canonical `mic@1` textual serialisation** (GAP-1, fixed
-  in `mind@db5cb76`). Implementations claiming evidence-chain emission MUST
-  honour the `mic@1` anchor; v2/v2.1-anchored hashing is non-conformant.
+  `SHA-256(canonical mic@3 bytes)` — the full-fidelity binary `IRModule`
+  (GAP-1, fixed in `mind@db5cb76`; re-anchored 2026-05-31 after a collision
+  audit found `mic@1` text can drop function-body semantics, supersedes the
+  original GAP-1 `mic@1`-text rule). Implementations claiming evidence-chain
+  emission MUST honour the `mic@3` anchor; `mic@1`/v2/v2.1-anchored hashing
+  is non-conformant.
 - **RFC 0021** — canonical IR unification; allocates `mic@3` (magic `MIC3`)
   as the canonical **binary** serialisation of the same `IRModule` data
   shape that `mic@1` serialises as text. The evidence MAP epilogue attaches

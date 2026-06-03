@@ -31,7 +31,8 @@ Core v1 is organised into the following pillars:
    verification rules. **IR Stability** ([`ir-stability.md`](./ir-stability.md)) — the canonical
    `IRModule` data shape is serialised as `mic@1` text and `mic@3` binary (RFC 0021); evidence-chain
    attestation rides on a MAP epilogue (RFC 0014 + RFC 0016) with the load-bearing rule that
-   `trace_hash = SHA-256(canonical mic@1 text)` (RFC 0016 GAP-1).
+   `trace_hash = SHA-256(canonical mic@3 bytes)` — the full-fidelity binary `IRModule` (RFC 0016
+   GAP-1; re-anchored 2026-05-31 after a collision audit, supersedes the original `mic@1`-text rule).
 3. **Static Autodiff** ([`autodiff.md`](./autodiff.md)) — reverse-mode differentiation on verified IR,
    producing canonical gradient modules.
 4. **Shapes & Tensor Semantics** ([`shapes.md`](./shapes.md)) — broadcasting, reduction, indexing, and
