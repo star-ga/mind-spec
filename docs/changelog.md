@@ -60,6 +60,23 @@ ratifications since `v0.6.7` (the v1.3.8 entry below):
   / `--emit-evidence` CLI flags. Steps 4–6 (`mindc verify`, `mic@2.x` →
   `mind-model@2` demotion, oracle + CI gate) remain in flight. The earlier
   `mic@1e` proposal was superseded by `mic@3` once `mic@2/2.1` shipped.
+- **mindc v0.7.1 — high-level execution surface now EXECUTES on the shipped
+  compiler; `std-surface` promoted to the shipped default.** Ten desugaring
+  "bricks" lower the high-level surface onto the existing low-level pipeline,
+  each keystone-verified 7/7 across substrates: integer/literal match,
+  enum-discriminant match, `Option`/payload match, string literals, struct
+  field-write, nested-struct + borrow field access, method-as-field accessors
+  (`s.len()`), and method-with-args UFCS (`v.push(x)` → `vec_push(v, x)`, with
+  unresolved methods failing loud). The reference implementation's Cargo
+  feature set now defaults to `["std-surface"]`, so the high-level surface
+  runs on every shipped binary; cross-substrate Q16.16 byte-identity is
+  preserved across the flip (keystone 7/7). Unpromoted constructs (by-value
+  tuple/aggregate returns, `region { }` interiors) are re-gated behind
+  `std-surface-experimental` and fail loud by default — never a silent
+  miscompile. Generics have no syntax yet (parser-rejected).
+  `--no-default-features` restores the low-level-only subset, byte-identical
+  to the pre-flip default build. Reflected in `STATUS.md` and the
+  Compile-speed guarantee note in `spec/v1.0/stdlib.md`.
 
 ### Spec changes in this 1.4.0 cut
 

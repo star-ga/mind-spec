@@ -430,7 +430,10 @@ same logical behaviour byte-for-byte given identical inputs.
 The compiler MUST ship `std/vec.mind`, `std/string.mind`, `std/map.mind`, and
 `std/io.mind` as part of its own distribution (bundled into the binary, or
 discoverable on the canonical module path) and resolve `use std.<name>`
-imports to them automatically when the `std-surface` feature is enabled.
+imports to them automatically when the `std-surface` feature is enabled. As of
+the reference implementation's v0.7.1 release `std-surface` is on by default,
+so this resolution is the default behaviour of a shipped `mindc`; building with
+`--no-default-features` opts back out to the low-level-only subset.
 
 - **`std.vec`** — Growable `Vec` over `i64`-shaped slots.
   Eight public functions: `vec_new`, `vec_push`, `vec_pop`, `vec_get`,
@@ -560,12 +563,27 @@ as the canonical MIND loop primitive; either choice is conforming.
 
 ### Compile-speed guarantee
 
-The pure-MIND modules and their resolver MUST be gated behind module-level
-feature flags (`std-surface`, `cross-module-imports`) so the default-build
-frontend remains byte-identical to the pre-RFC-0005 pipeline. A conforming
-implementation that exposes both features MUST publish a benchmark gate
-asserting that the headline `parse_typecheck_ir` workloads do not regress
-by more than 7% against a published baseline. (The reference
+The pure-MIND modules and their resolver MUST remain selectable through
+module-level feature flags (`std-surface`, `cross-module-imports`) so that an
+implementation can still produce the pre-RFC-0005 frontend on demand. The
+byte-identity invariant attaches to the **flags-off** build: with `std-surface`
+disabled (the reference implementation's `--no-default-features` subset), the
+frontend MUST be byte-identical to the pre-RFC-0005 pipeline.
+
+As of the reference implementation's v0.7.1 release, `std-surface` is the
+**shipped default** (`default = ["std-surface"]` in `Cargo.toml`), so the
+high-level surface executes on every shipped binary. Promoting it to the
+default does **not** weaken the determinism contract: cross-substrate Q16.16
+byte-identity is preserved across the flip (the reference implementation's
+keystone suite verifies 7/7 byte-identical lowering across substrates before
+and after). Constructs that have **not** been promoted (by-value
+tuple/aggregate returns, `region { }` interiors) remain behind a separate
+`std-surface-experimental` gate and MUST fail loud — never silently
+miscompile — under the default feature set.
+
+A conforming implementation that exposes both features MUST publish a
+benchmark gate asserting that the headline `parse_typecheck_ir` workloads do
+not regress by more than 7% against a published baseline. (The reference
 implementation initially enforced +5% but loosened to +7% as of
 mindc 0.4.3 to absorb GitHub-hosted-runner variance on microbench
 suites; the bench-gate workflow comment records the rationale.)
