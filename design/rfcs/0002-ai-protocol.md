@@ -67,7 +67,7 @@ A typical 5-command session (hello, load, check, dump, bye):
 - **MAP**: 58 tokens
 - **Savings**: 193 tokens (77%)
 
-At GPT-5.2 pricing ($0.00175/1K tokens), MAP saves approximately **$0.34 per 1000 sessions** compared to JSON-RPC.
+At $0.00175/1K-token pricing, MAP saves approximately **$0.34 per 1000 sessions** compared to JSON-RPC.
 
 ## Protocol Overview
 

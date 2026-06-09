@@ -273,7 +273,7 @@ Comparison for a 6-node neural network layer (param, matmul, add, relu):
 | TOON | 269 | 67 | 4.1x | 2.67 us |
 | **MIC** | **209** | **52** | **5.3x** | **2.26 us** |
 
-### Cost Impact (GPT-5.2 Pricing at $0.00175/1K tokens)
+### Cost Impact (at $0.00175/1K-token pricing)
 
 | Format | Cost/1K IRs | Annual Cost (1M IRs) | Savings vs JSON |
 |--------|-------------|----------------------|-----------------|
