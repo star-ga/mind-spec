@@ -143,7 +143,7 @@ Measured on commodity 2026 hardware:
 | Path | Shape / dtype | Result | Baseline | Conditions |
 |------|---------------|--------|----------|------------|
 | CPU (int8, x86 VNNI) | 1024³ int8 | ~135 GMAC/s | **~2.0× single-core OpenBLAS f32** (66.6 GMAC/s) | one core pinned, median of repeated runs |
-| GPU (int8 tensor core, Ampere) | 4096³ int8 | 37,407 GMAC/s | **1.36× cuBLAS int8** (27,549 GMAC/s) | RTX 3080, byte-exact vs reference |
+| GPU (int8 tensor core, Ampere) | 4096³ int8 | 37,407 GMAC/s | **1.36× cuBLAS int8** (27,549 GMAC/s) | Ampere-class GPU, byte-exact vs reference |
 
 Both paths are **deterministic by construction** — exact integer accumulation, fixed
 tiling, and no atomic reductions — so they reproduce bit-for-bit run-to-run and
@@ -411,8 +411,8 @@ This section contains empirically validated benchmark results for the reference 
 | Component | Version |
 |-----------|---------|
 | Platform | Ubuntu 24.04 LTS x86_64 |
-| CPU | Intel Core i7-5930K @ 3.50GHz |
-| GPU | NVIDIA RTX 3080 10GB, CUDA 12.8 |
+| CPU | a commodity x86 CPU |
+| GPU | NVIDIA Ampere-class GPU, CUDA 12.8 |
 | RAM | 64 GB DDR4 |
 | PyTorch | 2.10.0+cu128 |
 | JAX | 0.9.0.1 |
@@ -458,7 +458,7 @@ This section contains empirically validated benchmark results for the reference 
 | simple_mlp | 6.15 µs | 752 ms | ~122,000× |
 | conv2d | ~5 µs | 878 ms | ~176,000× |
 
-*Environment: Ubuntu 24.04, RTX 3080, CUDA 12.8, PyTorch 2.10.0+cu128, full cold-start (caches cleared)*
+*Environment: Ubuntu 24.04, Ampere-class GPU, CUDA 12.8, PyTorch 2.10.0+cu128, full cold-start (caches cleared)*
 
 **Compilation Speed vs Mojo 0.26.1** (February 2026, verified):
 
@@ -480,7 +480,7 @@ This section contains empirically validated benchmark results for the reference 
 | large_matmul | 2.95 µs | 280.6 ms | ~95,100× |
 | simple_mlp | 6.15 µs | 360.5 ms | ~58,600× |
 
-*Environment: Ubuntu 24.04, RTX 3080, CUDA 12.8, JAX 0.9.0.1, cold-start with compilation cache disabled*
+*Environment: Ubuntu 24.04, Ampere-class GPU, CUDA 12.8, JAX 0.9.0.1, cold-start with compilation cache disabled*
 
 **Scope Note**: MIND measures **frontend only** (parse + typecheck + IR). PyTorch measures the full torch.compile() pipeline (FX graph + Inductor + Triton/cuBLAS). Mojo measures full LLVM compilation to native binary. Ratios reflect this scope difference.
 

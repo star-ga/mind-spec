@@ -282,7 +282,7 @@ Comparison for a 6-node neural network layer (param, matmul, add, relu):
 | TOON | $0.12 | $117 | $370 (76%) |
 | **MIC** | **$0.09** | **$91** | **$396 (81%)** |
 
-**MIC achieves 5.3x token reduction and 2.4x faster parsing compared to JSON.**
+**MIC achieves 5.3x token reduction and 2.4x faster parsing compared to JSON.** (Superseded ratios: mic@2 reaches 10.3x fewer tokens; mic@3 binary is 12.4x fewer bytes — see star-ga/mind benchmarks/.)
 
 ## Error Handling
 
