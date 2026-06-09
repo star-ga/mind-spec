@@ -143,7 +143,7 @@ Measured on commodity 2026 hardware:
 | Path | Shape / dtype | Result | Baseline | Conditions |
 |------|---------------|--------|----------|------------|
 | CPU (int8, x86 VNNI) | 1024³ int8 | ~135 GMAC/s | **~2.0× single-core OpenBLAS f32** (66.6 GMAC/s) | one core pinned, median of repeated runs |
-| GPU (int8 tensor core, Ampere) | 4096³ int8 | 35,191 GMAC/s | **1.28× cuBLAS int8** (27,549 GMAC/s) | RTX 3080, byte-exact vs reference |
+| GPU (int8 tensor core, Ampere) | 4096³ int8 | 37,407 GMAC/s | **1.36× cuBLAS int8** (27,549 GMAC/s) | RTX 3080, byte-exact vs reference |
 
 Both paths are **deterministic by construction** — exact integer accumulation, fixed
 tiling, and no atomic reductions — so they reproduce bit-for-bit run-to-run and
