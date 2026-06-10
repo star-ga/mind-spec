@@ -790,6 +790,7 @@ MIND targets every accelerator class powering modern AI inference. **Open-core s
 | **SambaNova** | RDU SN30 / SN40L (PCU/PMU dataflow) | `--target sambanova` | SambaFlow | Commercial runtime · determinism roadmap |
 | **Graphcore IPU** | Bow / Mk2 (BSP supersteps, 1,472 tiles) | `--target ipu` | Poplar / PopART | Commercial runtime · determinism roadmap |
 | **Intel Gaudi** | Gaudi 2 / Gaudi 3 (MME + TPC + RDMA fabric) | `--target gaudi` | SynapseAI | Commercial runtime · determinism roadmap |
+| **Topological quantum** | Microsoft Majorana 1 / Majorana 2 (topological-qubit processor) | `--target quantum` | Q# / quantum SDK | Frontier — gate scheduling / transpilation only. **Bit-identical determinism is physically impossible** (measurement collapses a superposition probabilistically); explicitly OUTSIDE the determinism wedge — the outer boundary of the substrate set. |
 
 **Design principle**: Same `.mind` source compiles to any target. Governance enforcement is backend-agnostic — the 512 invariant check runs whether the execution substrate is a GPU, an SRAM-resident LPU, a SmartNIC DPU, a wafer-scale Cerebras die, or a model-baked Taalas chip.
 
