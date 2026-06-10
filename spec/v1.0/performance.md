@@ -47,12 +47,12 @@ Within Tier 2, **opt-in SIMD fast paths** (e.g. mind-blas Track A) are within-su
 
 ### Tier 3 — Cross-substrate Q16.16 bit-identity (OPTIONAL, substrate-thesis tier)
 
-Q16.16 fixed-point operations produce **byte-identical results** across the supported substrate set: x86 CPU, ARM CPU, NVIDIA GPU, and the photonic-substrate reference. Verified by SHA-256 over the concatenated `(operation_id, q16_output)` stream for a fixed conformance corpus.
+Q16.16 fixed-point operations produce **byte-identical results** across the **proven substrate set: x86 CPU and ARM CPU** (the cross-substrate bit-identity gate, gate #57, is single-host x86 + ARM). Verified by SHA-256 over the concatenated `(operation_id, q16_output)` stream for a fixed conformance corpus. NVIDIA-GPU and photonic-substrate inclusion in this set is **aspirational** — those backends are roadmap and are not yet covered by the gate.
 
 Tier 3 is observable only on the Q16.16 path because:
 - Integer-domain SIMD reduction is associative; SIMD fast paths produce identical byte sequences to scalar reference at every input length.
 - Floating-point SIMD reduction is **not** associative; cross-substrate f32 bit-identity is not claimed for any tier.
-- The Q16.16 path is the substrate-bridge between fixed-precision CPU / GPU / photonic backends.
+- The Q16.16 path is the substrate-bridge across the proven CPU substrates (x86 + ARM), and is the intended bridge to future fixed-precision GPU / photonic backends (roadmap).
 
 A conforming implementation MAY opt out of Tier 3 entirely (no Q16.16 path). An implementation that ships a Q16.16 path MUST satisfy Tier 3 across all advertised substrates, verified by the conformance corpus.
 
@@ -62,7 +62,7 @@ A conforming implementation MAY opt out of Tier 3 entirely (no Q16.16 path). An 
 |---|---|---|---|
 | 1 | Compilation | Same source → same artifact | SHA-256 of build output |
 | 2 | Runtime, within substrate | Same input + same code path → same output | Repeated-invocation hash match |
-| 3 | Runtime, across substrates | Q16.16 output byte-identical across CPU / GPU / photonic | SHA-256 of conformance corpus output |
+| 3 | Runtime, across substrates | Q16.16 output byte-identical across proven CPU substrates (x86 + ARM); GPU / photonic roadmap | SHA-256 of conformance corpus output |
 
 Tier 3 implies Tier 2 for the Q16.16 path; Tier 2 implies nothing about Tier 3; Tier 1 is orthogonal to both.
 
@@ -137,13 +137,14 @@ Core v1.0 benchmarks fall into three categories:
 The reference toolchain ships a **deterministic integer GEMM** whose output is
 byte-identical across runs and across the x86 / ARM substrates (Determinism Tier 3),
 verified by the cross-substrate bit-identity gate. Unlike vendor BLAS, every result is
-reproducible bit-for-bit — and, on the integer path, it is also faster than the vendor's.
+reproducible bit-for-bit — that determinism is the load-bearing property. The integer-path
+throughput numbers below are measured supporting evidence, not a performance headline.
 Measured on commodity 2026 hardware:
 
 | Path | Shape / dtype | Result | Baseline | Conditions |
 |------|---------------|--------|----------|------------|
 | CPU (int8, x86 VNNI) | 1024³ int8 | ~135 GMAC/s | **~2.0× single-core OpenBLAS f32** (66.6 GMAC/s) | one core pinned, median of repeated runs |
-| GPU (int8 tensor core, Ampere) | 4096³ int8 | 37,407 GMAC/s | **1.36× cuBLAS int8** (27,549 GMAC/s) | Ampere-class GPU, byte-exact vs reference |
+| GPU (int8 tensor core, Ampere) | 4096³ int8 | 35,191 GMAC/s | 1.28× cuBLAS int8 (27,549 GMAC/s) | Ampere-class GPU, byte-exact vs reference |
 
 Both paths are **deterministic by construction** — exact integer accumulation, fixed
 tiling, and no atomic reductions — so they reproduce bit-for-bit run-to-run and

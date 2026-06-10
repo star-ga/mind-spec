@@ -204,9 +204,9 @@ fn authenticated_inference(ctx: Context, input: Tensor) -> Result<Tensor, Error>
 - Compatible with Core v1 type system (tensors serialize to nested arrays)
 - Async execution model for non-blocking I/O operations
 
-#### 2. Distributed Execution and Scalability (Implemented in Runtime)
+#### 2. Distributed Execution and Scalability (Research / Roadmap)
 
-**Status**: The runtime backend (`mind-runtime`) implements distributed training with NCCL/Gloo collectives, RingAllReduce, and pipeline parallelism (3,268 LOC). The language-level syntax below is proposed for future surface-language integration.
+**Status**: Research / roadmap — not shipped. Distributed training (collectives, RingAllReduce, pipeline parallelism) and the language-level syntax below are proposed future directions, not an implemented runtime backend.
 
 **Concept**: New constructs for parallel computation and distributed training across multiple nodes:
 
@@ -608,11 +608,11 @@ This section reserves space for future domain-specific extensions:
 - Bounded arithmetic (saturation, overflow traps)
 - Worst-case execution time (WCET) analysis
 
-### Distributed Training ✅ Implemented in Runtime
-- ~~Multi-node collectives (allreduce, allgather, reduce_scatter)~~ ✅
-- ~~Pipeline parallelism primitives~~ ✅
-- ~~Data-parallel gradient synchronization~~ ✅
-- Language-level syntax integration pending (runtime backend complete)
+### Distributed Training (Research / Roadmap)
+- Multi-node collectives (allreduce, allgather, reduce_scatter) — proposed
+- Pipeline parallelism primitives — proposed
+- Data-parallel gradient synchronization — proposed
+- Both the runtime backend and language-level syntax are roadmap, not shipped
 
 ---
 
@@ -764,36 +764,36 @@ Native optimization for 2026+ hardware:
 
 | Hardware | Target | Status |
 |----------|--------|--------|
-| NVIDIA Blackwell (GB200) | Shipped — Apr 2026 | ✅ |
-| AMD MI400 series | Shipped — Apr 2026 | ✅ |
-| Intel Gaudi 3 | Shipped — Apr 2026 | ✅ |
-| Automotive NPUs (Mobileye, NVIDIA DRIVE) | Shipped — Apr 2026 | ✅ |
+| NVIDIA Blackwell (GB200) | Research / roadmap | planned |
+| AMD MI400 series | Research / roadmap | planned |
+| Intel Gaudi 3 | Research / roadmap | planned |
+| Automotive NPUs (Mobileye, NVIDIA DRIVE) | Research / roadmap | planned |
 | Custom safety-rated ASICs | Research | 2027+ |
 
 #### 4.1.1 Full Accelerator Class Coverage
 
-MIND targets every accelerator class powering modern AI inference. As of April 2026 every backend below ships in mind-runtime as a production driver: a deterministic MLIR lowering pass + vendor-SDK-loaded runtime (`libloading`) + caching arena allocator + multi-stream queue + per-op telemetry. When the vendor SDK is unavailable the driver falls back to a deterministic CPU reference path so behaviour stays bit-identical run-to-run — the same model PyTorch uses for CUDA.
+MIND aims to target every accelerator class powering modern AI inference. **Status: research / roadmap — none of the accelerator backends below are shipped.** Execution today is CPU-only; the GPU and accelerator targets are design directions, not production drivers. The intended driver shape per class is a deterministic MLIR lowering pass + vendor-SDK-loaded runtime (`libloading`) + caching arena allocator + multi-stream queue + per-op telemetry, with a deterministic CPU reference fallback when the vendor SDK is unavailable.
 
 | Class | Hardware Examples | MIND Target | Vendor SDK | Status |
 |-------|------------------|-------------|------------|--------|
-| **CPU** | x86, ARM, RISC-V | `--target cpu` | (built in) | ✅ Stable |
-| **GPU** | NVIDIA CUDA, AMD ROCm, Apple Metal, WebGPU, WebNN | `--target gpu` | cuBLAS/cuDNN, rocBLAS, MPS, WGSL, WebNN | ✅ Production |
-| **ASIC** | XRM-SSD xx1, xx1-XL, MatX One | `--target asic` | `mind.asic.*` dialect | ✅ Apr 2026 |
-| **TPU** | Google TPU v5e / v5p, TPU pods (9,216 chips) | `--target tpu` | `libtpu.so` | ✅ Apr 2026 |
-| **NPU** | Apple ANE, Qualcomm Hexagon, Intel NPU | `--target npu` | CoreML, QNN, OpenVINO | ✅ Apr 2026 |
-| **LPU** | Groq TSP / GroqChip (230 MB SRAM, 241 tok/s) | `--target lpu` | `libgroq.so` | ✅ Apr 2026 |
-| **DPU** | NVIDIA BlueField-3, AMD Pensando, Intel IPU | `--target dpu` | DOCA Flow / DPDK | ✅ Apr 2026 |
-| **FPGA** | Xilinx Versal / Alveo, Intel Agilex | `--target fpga` | XRT / OpenCL FPGA / OFS | ✅ Apr 2026 |
-| **Cerebras** | CS-2 (WSE-2) / CS-3 (WSE-3) — wafer-scale | `--target cerebras` | CSL / Cerebras Runtime | ✅ Apr 2026 |
-| **Taalas** | Hardware Models (model-baked silicon) | `--target taalas` | `libtaalas.so` (tape-out card) | ✅ Apr 2026 |
-| **Tenstorrent** | Wormhole / Blackhole (RISC-V Tensix mesh) | `--target tenstorrent` | TT-Metalium | ✅ Apr 2026 |
-| **SambaNova** | RDU SN30 / SN40L (PCU/PMU dataflow) | `--target sambanova` | SambaFlow | ✅ Apr 2026 |
-| **Graphcore IPU** | Bow / Mk2 (BSP supersteps, 1,472 tiles) | `--target ipu` | Poplar / PopART | ✅ Apr 2026 |
-| **Intel Gaudi** | Gaudi 2 / Gaudi 3 (MME + TPC + RDMA fabric) | `--target gaudi` | SynapseAI | ✅ Apr 2026 |
+| **CPU** | x86, ARM, RISC-V | `--target cpu` | (built in) | ✅ Stable (x86 + ARM) |
+| **GPU** | NVIDIA CUDA, AMD ROCm, Apple Metal, WebGPU, WebNN | `--target gpu` | cuBLAS/cuDNN, rocBLAS, MPS, WGSL, WebNN | 🚧 Roadmap (execution returns a structured error today) |
+| **ASIC** | XRM-SSD xx1, xx1-XL, MatX One | `--target asic` | `mind.asic.*` dialect | 🔬 Research |
+| **TPU** | Google TPU v5e / v5p, TPU pods (9,216 chips) | `--target tpu` | `libtpu.so` | 🔬 Research |
+| **NPU** | Apple ANE, Qualcomm Hexagon, Intel NPU | `--target npu` | CoreML, QNN, OpenVINO | 🔬 Research |
+| **LPU** | Groq TSP / GroqChip (230 MB SRAM, 241 tok/s) | `--target lpu` | `libgroq.so` | 🔬 Research |
+| **DPU** | NVIDIA BlueField-3, AMD Pensando, Intel IPU | `--target dpu` | DOCA Flow / DPDK | 🔬 Research |
+| **FPGA** | Xilinx Versal / Alveo, Intel Agilex | `--target fpga` | XRT / OpenCL FPGA / OFS | 🔬 Research |
+| **Cerebras** | CS-2 (WSE-2) / CS-3 (WSE-3) — wafer-scale | `--target cerebras` | CSL / Cerebras Runtime | 🔬 Research |
+| **Taalas** | Hardware Models (model-baked silicon) | `--target taalas` | `libtaalas.so` (tape-out card) | 🔬 Research |
+| **Tenstorrent** | Wormhole / Blackhole (RISC-V Tensix mesh) | `--target tenstorrent` | TT-Metalium | 🔬 Research |
+| **SambaNova** | RDU SN30 / SN40L (PCU/PMU dataflow) | `--target sambanova` | SambaFlow | 🔬 Research |
+| **Graphcore IPU** | Bow / Mk2 (BSP supersteps, 1,472 tiles) | `--target ipu` | Poplar / PopART | 🔬 Research |
+| **Intel Gaudi** | Gaudi 2 / Gaudi 3 (MME + TPC + RDMA fabric) | `--target gaudi` | SynapseAI | 🔬 Research |
 
 **Design principle**: Same `.mind` source compiles to any target. Governance enforcement is backend-agnostic — the 512 invariant check runs whether the execution substrate is a GPU, an SRAM-resident LPU, a SmartNIC DPU, a wafer-scale Cerebras die, or a model-baked Taalas chip.
 
-**Compile-without-SDK guarantee**: every accelerator backend builds on a CI machine that does *not* have the vendor SDK installed. The driver loads its vendor library (e.g., `libtpu.so`, `libSynapse.so`) at first use via `libloading`; if that fails it records an `InternalCpuFallback` event and routes ops through the deterministic CPU reference kernels. This means downstream MIND projects can depend on `mind-runtime` with `--features all-accelerators` without any vendor toolchain on the developer's machine.
+**Compile-without-SDK design goal** (roadmap): each accelerator backend is intended to build on a CI machine that does *not* have the vendor SDK installed. The driver would load its vendor library (e.g., `libtpu.so`, `libSynapse.so`) at first use via `libloading`; if that fails it records an `InternalCpuFallback` event and routes ops through the deterministic CPU reference kernels. This is a design target for the accelerator roadmap, not a shipped guarantee.
 
 **Key differentiator vs HLS4ML**: HLS4ML compiles trained PyTorch/TF models → synthesizable C++ for FPGAs. MIND compiles the *entire inference stack* (model + attention + KV cache + speculative decoding + governance) to native code via MLIR/LLVM, with backend-specific dialects for each accelerator class.
 
@@ -882,7 +882,7 @@ policy CorporateAISafety {
 | **Phase 1** | PyTorch/JAX transpilers, AI proof assistant | Q2 2026 |
 | **Phase 2** | Certified layer library, HuggingFace adapters | Q3 2026 |
 | **Phase 3** | Abstract interpretation, incremental verification | Q4 2026 |
-| **Phase 4 (acc.)** | Full accelerator class coverage (CPU/GPU/TPU/NPU/LPU/DPU/FPGA/ASIC/Cerebras/Taalas/Tenstorrent/SambaNova/IPU/Gaudi) | ✅ Apr 2026 |
+| **Phase 4 (acc.)** | Full accelerator class coverage (CPU/GPU/TPU/NPU/LPU/DPU/FPGA/ASIC/Cerebras/Taalas/Tenstorrent/SambaNova/IPU/Gaudi) | Research / roadmap |
 | **Phase 4 (cloud)** | Verification-as-a-Service, Blackwell/MI400 support | Q1 2027 |
 | **Phase 5** | Regulatory kits (ISO 26262, FDA, EU AI Act) | Q2 2027 |
 

@@ -1,8 +1,8 @@
 # Mind Language Specification
 
-[![Spec Status](https://img.shields.io/badge/spec-v1.0%20stable-brightgreen)](./STATUS.md)
-[![Compiler](https://img.shields.io/badge/compiler-100%25-brightgreen)](https://github.com/star-ga/mind)
-[![Runtime](https://img.shields.io/badge/runtime-100%25-brightgreen)](https://github.com/star-ga/mind-runtime)
+[![Spec Status](https://img.shields.io/badge/Core%20v1%20spec-frozen-blue)](./STATUS.md)
+[![Compiler](https://img.shields.io/badge/reference%20compiler-v0.7.1-blue)](https://github.com/star-ga/mind)
+[![Runtime](https://img.shields.io/badge/runtime-CPU%20backend%3B%20GPU%20roadmap-lightgrey)](https://github.com/star-ga/mind-runtime)
 
 The **MIND** language evolves through an open specification process. This repository is the
 authoritative source for the normative language specification (`spec/`) and the guiding design
@@ -20,7 +20,7 @@ the public reference implementation at [star-ga/mind](https://github.com/star-ga
   - [MLIR lowering](./spec/v1.0/mlir-lowering.md)
   - [Runtime interface](./spec/v1.0/runtime.md)
   - [IR stability + evidence chains](./spec/v1.0/ir-stability.md) — `mic@1` text + `mic@3` binary (RFC 0021), MAP epilogue (RFC 0014), and the load-bearing `trace_hash = SHA-256(canonical mic@3 bytes)` rule (RFC 0016 GAP-1; re-anchored 2026-05-31, supersedes the original `mic@1`-text rule).
-  - [Future extensions](./spec/v1.0/future-extensions.md) — Language Profiles, full accelerator-class coverage (TPU, NPU, LPU, DPU, FPGA, ASIC, Cerebras, Taalas, Tenstorrent, SambaNova, Graphcore IPU, Gaudi), Verification-as-a-Service
+  - [Future extensions](./spec/v1.0/future-extensions.md) — Language Profiles, roadmap for broader accelerator-class coverage (TPU, NPU, LPU, DPU, FPGA, ASIC, Cerebras, Taalas, Tenstorrent, SambaNova, Graphcore IPU, Gaudi — research/roadmap, not shipped), Verification-as-a-Service
 - [Examples](./examples/)
   - [Basic tensor operations](./examples/basics/)
   - [Autodiff](./examples/autodiff/)
