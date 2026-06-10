@@ -20,7 +20,7 @@ the public reference implementation at [star-ga/mind](https://github.com/star-ga
   - [MLIR lowering](./spec/v1.0/mlir-lowering.md)
   - [Runtime interface](./spec/v1.0/runtime.md)
   - [IR stability + evidence chains](./spec/v1.0/ir-stability.md) — `mic@1` text + `mic@3` binary (RFC 0021), MAP epilogue (RFC 0014), and the load-bearing `trace_hash = SHA-256(canonical mic@3 bytes)` rule (RFC 0016 GAP-1; re-anchored 2026-05-31, supersedes the original `mic@1`-text rule).
-  - [Future extensions](./spec/v1.0/future-extensions.md) — Language Profiles, roadmap for broader accelerator-class coverage (TPU, NPU, LPU, DPU, FPGA, ASIC, Cerebras, Taalas, Tenstorrent, SambaNova, Graphcore IPU, Gaudi — research/roadmap, not shipped), Verification-as-a-Service
+  - [Future extensions](./spec/v1.0/future-extensions.md) — Language Profiles, broader accelerator-class coverage (TPU, NPU, LPU, DPU, FPGA, ASIC, Cerebras, Taalas, Tenstorrent, SambaNova, Graphcore IPU, Gaudi — available in the commercial `mind-runtime` under license; **bit-identical determinism** across them is the roadmap), Verification-as-a-Service
 - [Examples](./examples/)
   - [Basic tensor operations](./examples/basics/)
   - [Autodiff](./examples/autodiff/)
