@@ -576,16 +576,29 @@ integration with modern AI development workflows.
 
 - Updated STATUS.md to reflect 10 implemented RFCs
 - Updated implemented.md with MIC and MAP entries
-- GPU backends now production-ready (previously MockGpuBackend)
+- GPU backend scaffolding landed (previously MockGpuBackend)
+
+> **Historical / roadmap note (re-anchored 2026-06):** the "production-grade
+> GPU backends" framing in this 2025-12 entry was aspirational. The shipped
+> open-core reality: `mind-runtime` ships the **CPU backend**; GPU and
+> accelerator backends are available under the **commercial license**
+> (open-core). **Bit-identical determinism across CPU, GPU, and accelerators
+> is the roadmap, not a shipped guarantee.** See [`STATUS.md`](../STATUS.md)
+> and the root [`README.md`](../README.md) for the current version-pinned
+> status.
 
 ---
 
 ## [1.0.0] - 2025-12-19
 
-### Milestone: 100% Specification Complete
+### Milestone: Core v1 Specification Frozen
 
-The Core v1 specification is now stable and complete, with all reference implementations
-verified and passing.
+The Core v1 **specification** is frozen and stable. "Complete" here refers to
+the specification text — the 14 normative chapters and formal grammar — not to
+end-to-end implementation coverage. Reference-implementation maturity is tracked
+separately and version-pinned in [`STATUS.md`](../STATUS.md) and the root
+[`README.md`](../README.md) (reference compiler `v0.7.1`; `mind-runtime` CPU
+backend shipped, GPU + accelerators under commercial license).
 
 ### Added
 

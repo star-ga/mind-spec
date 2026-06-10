@@ -29,7 +29,7 @@ The goal of this specification is to provide a stable foundation for:
 
 ## 🚀 Status
 
-**Spec version:** `v1.0` (stable)
+**Spec version:** `v1.0` — Core v1 frozen
 **Language tag:** `mind-2025a`
 **Last update:** _Auto-populated from CI build timestamp_
 
@@ -39,9 +39,9 @@ The goal of this specification is to provide a stable foundation for:
 
 | Repo | Purpose | Status |
 |------|----------|--------|
-| [`star-ga/mind`](https://github.com/star-ga/mind) | Public compiler, IR, autodiff, and MLIR lowering. | ✅ 100% (69 tests, LLVM 18) |
-| [`star-ga/mind-runtime`](https://github.com/star-ga/mind-runtime) | Reference runtime backend implementing the deterministic executor. | ✅ 100% (33+ tests, GPU docs) |
-| [`star-ga/mind-spec`](https://github.com/star-ga/mind-spec) | This specification and design docs. | ✅ 100% (14 chapters stable) |
+| [`star-ga/mind`](https://github.com/star-ga/mind) | Reference compiler, IR, autodiff, and MLIR lowering. | Reference compiler `v0.7.1` |
+| [`star-ga/mind-runtime`](https://github.com/star-ga/mind-runtime) | Reference runtime backend implementing the deterministic executor. | CPU backend shipped; GPU + accelerators under commercial license (open-core); cross-substrate bit-identity is roadmap |
+| [`star-ga/mind-spec`](https://github.com/star-ga/mind-spec) | This specification and design docs. | Core v1 frozen |
 
 ---
 

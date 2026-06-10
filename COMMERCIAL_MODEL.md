@@ -5,13 +5,13 @@
 Contract is OPEN (auditable, bit-identity verifiable). Optimized implementations of
 commodity substrates are OPEN — the wedge claim must be publicly reproducible by any
 third party. Protected layer captures ONLY the unbounded-future-IP layer that
-competitors structurally cannot replicate: agent OS internals, non-commodity-substrate
-optimization, and the governed runtime kernel.
+competitors structurally cannot replicate: the agent-orchestration runtime internals,
+non-commodity-substrate optimization, and the governed runtime kernel.
 
 Substrate-business shape parallels:
 - LLVM — open IR + open base lowering; commercial target-specific passes protected.
 - Rust — open language + std; paid per-customer toolchain tuning and support.
-- Anthropic — open API patterns and prompt formats; protected model weights.
+- A typical model vendor — open API patterns and prompt formats; protected model artifacts.
 
 STARGA's wedge is bit-identity-first cross-substrate. That claim has no commercial
 weight if it cannot be independently verified. Therefore the commodity-substrate
@@ -43,7 +43,7 @@ Every surface listed here is closed-source commercial IP.
 |---|---|---|
 | `mind-runtime` backends for non-commodity substrates | Optimized kernels for Cerebras CS-3, future neuromorphic, optical, and customer ASICs | Unbounded-future-IP; replication requires the exact customer hardware — structurally non-reproducible by a competitor without the same chips |
 | `mind-mem` fully-protected runtime kernel `.so` | Anti-debug (ptrace / IsDebuggerPresent / PT_DENY_ATTACH) + VM bytecode interpreter + encrypted strings + triple-redundant state + watchdog loop + binary integrity checks | The runtime kernel is the product; obfuscation enforces the governed-write contract at the binary layer |
-| naestro-OS internals | The AGI/ASI agent substrate — orchestration, cognitive kernel, soul-layer | The actual product; 9-LLM orchestration architecture and session memory substrate are the core differentiator |
+| Agent-orchestration runtime internals | Orchestration engine, scheduling kernel, and governed session-memory substrate | The actual product; the orchestration architecture and session-memory substrate are the core differentiator |
 | NikolaChess protected build | Chess engine with `mind-runtime` protection applied | IP-layered: engine open (public `star-ga/NikolaChess`); protection binaries closed (`nikolachess-source` private) |
 | Enterprise certified pipelines | Customer-specific deployment work, SLA attestation chains, regulated-industry governance profiles | Customer-specific; per-contract IP |
 
@@ -70,9 +70,10 @@ optical / customer ASICs). The commodity tier is never protected.
   ReplayScheduler hash) converge onto a single mic@2.1 + MAP-key vocabulary. No
   competitor can claim this chain without reproducing the full RFC history.
 
-- **naestro-OS itself.** The agent substrate is not a feature — it is the product. It
-  is protected not because it is secret but because it is the product of a multi-year
-  architecture; a competitor cannot clone an agent OS by copying a single repo.
+- **The agent-orchestration runtime itself.** The orchestration runtime is not a
+  feature — it is the product. It is protected not because it is secret but because it
+  is the product of a multi-year architecture; a competitor cannot clone an
+  orchestration runtime by copying a single repo.
 
 - **Unified governance vocabulary.** 512-mind + mind-mem + ReplayScheduler share a
   common proof-chain vocabulary. This vocabulary is load-bearing for regulated-industry
@@ -95,7 +96,7 @@ rule in order:
 | (a) It proves a wedge property (bit-identity, determinism, evidence-chain) | **Open** |
 | (b) It is a commodity-substrate implementation (AVX2, NEON, standard CUDA) | **Open** |
 | (c) It is documentation, specification, or RFC text | **Open** |
-| (d) It is the agent substrate itself (naestro-OS layer or cognitive kernel) | **Protected** |
+| (d) It is the agent-orchestration runtime itself (orchestration layer or scheduling kernel) | **Protected** |
 | (e) It captures optimization for non-commodity hardware (Cerebras / neuromorphic / optical / customer ASIC) | **Protected** |
 | (f) It is customer-specific deployment or certified-pipeline work | **Protected** |
 
@@ -145,28 +146,8 @@ value proposition.
 
 ---
 
-## Commit Author and Leak Discipline
+## Related Specs
 
-- All commits: `STARGA Inc <noreply@star.ga>`. No co-author lines. No AI attribution.
-- Forbidden strings in any public STARGA surface: `FORTRESS`, `naestro-bot`,
-  `weavemind`, `sentrux`, `biome`, `nikolachess-source`.
-- Forbidden in public: competitor evaluation paragraphs, prior-art survey text,
-  multi-LLM round transcripts, autoresearch reports. These land in `mind-internal/`
-  only.
-- Per-repo leak audit at every push. If a forbidden string appears in staging, the
-  commit does not land.
-
----
-
-## Cross-References
-
-Memory records (mind-mem):
-- `project_starga_session_checkpoint_2026_05_25`
-- `project_starga_four_pillar_strategy_2026_05_24`
-- `feedback_mind_wedge_vs_credibility_lane`
-
-Related specs:
 - RFC 0016 — evidence-chain unification (mic@2.1 + MAP key)
 - RFC 0019 — governance vocabulary alignment
 - RFC 0011 — ReplayScheduler hash (source pipeline for unification)
-- `512-mind/src/proof_chain.mind` — parent vocabulary anchor

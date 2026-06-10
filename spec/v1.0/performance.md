@@ -407,6 +407,15 @@ Optimizer state: 2× weights (Adam), 0× (SGD)
 
 This section contains empirically validated benchmark results for the reference MIND implementation across multiple machine configurations.
 
+> **Benchmark-snapshot version (important).** The figures, tables, and ratios in
+> this section were measured on the **v0.2.x reference-compiler benchmark run**
+> (February 2026) — that is the version actually exercised by these measurements,
+> and the `v0.2.0` / `v0.2.1` labels below denote that historical snapshot, not
+> the current toolchain. The **current reference compiler is `v0.7.1`** (see
+> [`STATUS.md`](../../STATUS.md)). These numbers have not been re-measured against
+> `v0.7.1`; they are retained as the last published benchmark snapshot. Treat all
+> absolute timings and multipliers as historical and version-pinned to v0.2.x.
+
 ### Reference Platform (February 2026)
 
 | Component | Version |
@@ -485,6 +494,17 @@ This section contains empirically validated benchmark results for the reference 
 
 **Scope Note**: MIND measures **frontend only** (parse + typecheck + IR). PyTorch measures the full torch.compile() pipeline (FX graph + Inductor + Triton/cuBLAS). Mojo measures full LLVM compilation to native binary. Ratios reflect this scope difference.
 
+> **Methodology caveat (read before quoting any multiplier).** The five-figure
+> ratios in this chapter compare MIND's **one-time compile-frontend cost** (a few
+> µs, paid once) against a framework's **full-pipeline cold-start compilation** or
+> its **per-iteration runtime** cost. They are *not* like-for-like wall-clock
+> comparisons of the same work: MIND's measured stage ends at IR emission, whereas
+> the baseline figures include backend codegen and/or runtime execution. In
+> particular, the amortized-autodiff ratios below divide a single compile against
+> **1,000 runtime training iterations** of the baseline. These numbers illustrate
+> the *structural* advantage of moving work from runtime to compile time; they are
+> informative, scope-dependent, and must always be cited with this caveat.
+
 **Key insight**: MIND compilation time scales with **program complexity** (number of operations), not tensor dimensions — matmul operations compile in ~2.8 µs regardless of matrix dimensions (10×20 to 512×1024). Larger programs scale: medium_mlp (5 ops) = 6.15 µs, large_network (12 ops) = 15.49 µs. v0.2.0's hand-written recursive descent parser delivers 340,000+ compilations per second for simple programs.
 
 ### Determinism verification
@@ -515,17 +535,31 @@ This section contains empirically validated benchmark results for the reference 
 | small_mlp | 45.2 | 345.9 | 391.1 |
 | matmul_chain | 67.5 | 428.8 | 496.3 |
 
-**Amortized efficiency** (1000 training iterations, forward + backward):
+**Amortized efficiency** (MIND: one-time compile cost; PyTorch: 1,000 runtime training iterations, forward + backward):
 
-| Program | MIND Total | PyTorch Total | MIND Advantage |
-|---------|------------|---------------|----------------|
+| Program | MIND Total (compile, once) | PyTorch Total (1,000 iters) | Structural Ratio |
+|---------|----------------------------|-----------------------------|------------------|
 | simple_quadratic | ~2 µs (once) | 63,400 µs | 31,700× |
 | small_mlp | ~6 µs (once) | 391,100 µs | 65,200× |
 | matmul_chain | ~6 µs (once) | 496,300 µs | 82,700× |
 
-**Result**: MIND compile-time autodiff is **31,700-82,700× more efficient** than runtime autodiff (v0.2.1).
+> **Caveat:** each ratio divides a **single MIND compile** by **1,000 PyTorch
+> runtime iterations** — it measures the structural benefit of compile-time
+> (symbolic) autodiff over runtime (tape-based) autodiff, not equal-work
+> wall-clock. PyTorch pays its per-iteration cost on every training step; MIND
+> pays its autodiff cost once at compile time. The crossover and the absolute
+> advantage both scale with iteration count.
+
+**Result**: by moving autodiff from runtime to compile time, MIND amortizes to a **~31,700–82,700× structural advantage** over 1,000 runtime-autodiff iterations (basis: v0.2.1 measurements; see the methodology caveat above).
 
 ## Prior art comparison
+
+> **Caveat:** the "faster" multipliers in the tables below compare MIND's
+> **compile-frontend-only** cost against each framework's **full compilation
+> pipeline** (or cold-start). They are scope-dependent structural comparisons,
+> not equal-work wall-clock benchmarks — see the methodology caveat in the
+> Compilation-speed section. All MIND figures are from the v0.2.x benchmark
+> snapshot.
 
 ### PyTorch 2.10 (TorchInductor/TorchDynamo)
 
