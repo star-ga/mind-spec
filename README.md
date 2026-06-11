@@ -1,10 +1,13 @@
 # Mind Language Specification
 
-[![Spec Status](https://img.shields.io/badge/Core%20v1%20spec-frozen-blue)](./STATUS.md)
-[![Compiler](https://img.shields.io/badge/reference%20compiler-v0.7.1-blue)](https://github.com/star-ga/mind)
-[![Runtime](https://img.shields.io/badge/runtime-CPU%20backend%3B%20GPU%20roadmap-lightgrey)](https://github.com/star-ga/mind-runtime)
+[![Spec Status](https://img.shields.io/badge/Core%20v1%20spec-frozen-blue?style=flat-square)](./STATUS.md)
+[![Compiler](https://img.shields.io/badge/reference%20compiler-v0.7.1-blue?style=flat-square)](https://github.com/star-ga/mind)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue?style=flat-square)](./LICENSE)
+[![Deterministic](https://img.shields.io/badge/deterministic-bit--identical-brightgreen?style=flat-square)](https://github.com/star-ga/mind/docs/roadmap.md)
 
-The **MIND** language evolves through an open specification process. This repository is the
+**MIND** is a deterministic language whose compiled output is bit-identical across CPU, ARM, and GPU substrates — the specification and reference compiler form the authoritative source for that determinism.
+
+The language evolves through an open specification process. This repository is the
 authoritative source for the normative language specification (`spec/`) and the guiding design
 principles (`design/`). Content here is versioned, reviewed in the open, and kept in lockstep with
 the public reference implementation at [star-ga/mind](https://github.com/star-ga/mind).
