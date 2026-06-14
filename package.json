@@ -1,39 +1,21 @@
 {
-  "name": "sprucecss-eleventy-documentation-template",
-  "version": "1.2.0",
+  "name": "mind-spec",
+  "version": "1.1.0",
+  "description": "The MIND language specification, published as a Docsify documentation site.",
   "license": "Apache-2.0",
-  "author": "Cone (https://conedevelopment.com)",
-  "main": ".eleventy.js",
-  "scripts": {
-    "build": "npx @11ty/eleventy --input=src --output=dist",
-    "serve": "npx @11ty/eleventy --serve"
+  "author": "STARGA Inc.",
+  "homepage": "https://star-ga.github.io/mind-spec/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/star-ga/mind-spec.git"
   },
-  "dependencies": {
-    "@11ty/eleventy": "^2.0.1",
-    "@11ty/eleventy-navigation": "^0.3.5",
-    "@11ty/eleventy-plugin-syntaxhighlight": "^5.0.0",
-    "del-cli": "^5.0.1",
-    "eleventy-plugin-toc": "^1.1.5",
-    "eslint": "^8.48.0",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-import": "^2.28.1",
-    "himalaya": "^1.1.0",
-    "html-minifier": "^4.0.0",
-    "markdown-it-anchor": "^8.6.7",
-    "moment": "^2.29.4",
-    "npm-run-all": "^4.1.5",
-    "sass": "^1.66.1",
-    "sprucecss": "^2.3.0",
-    "stylelint": "^15.10.3",
-    "stylelint-config-sass-guidelines": "^10.0.0",
-    "stylelint-order": "^6.0.3"
+  "private": true,
+  "scripts": {
+    "build": "node tools/build-site.js",
+    "serve": "npx --yes docsify-cli@4 serve docs",
+    "preview": "npx --yes docsify-cli@4 serve dist"
   },
   "engines": {
-    "node": "^18.12",
-    "npm": "^9.2",
-    "yarn": "please-use-npm"
-  },
-  "devDependencies": {
-    "dotenv": "^17.2.3"
+    "node": ">=18.12"
   }
 }
