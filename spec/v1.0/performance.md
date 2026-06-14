@@ -411,9 +411,9 @@ This section contains empirically validated benchmark results for the reference 
 > this section were measured on the **v0.2.x reference-compiler benchmark run**
 > (February 2026) — that is the version actually exercised by these measurements,
 > and the `v0.2.0` / `v0.2.1` labels below denote that historical snapshot, not
-> the current toolchain. The **current reference compiler is `v0.7.1`** (see
+> the current toolchain. The **current reference compiler is `v0.8.1`** (see
 > [`STATUS.md`](../../STATUS.md)). These numbers have not been re-measured against
-> `v0.7.1`; they are retained as the last published benchmark snapshot. Treat all
+> `v0.8.1`; they are retained as the last published benchmark snapshot. Treat all
 > absolute timings and multipliers as historical and version-pinned to v0.2.x.
 
 ### Reference Platform (February 2026)

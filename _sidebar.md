@@ -1,6 +1,6 @@
 * Overview
   * [Introduction](/)
-  * [Design Philosophy](design.md)
+  * [Design Philosophy](design/principles.md)
 
 * Language Spec
   * [Lexical Structure](lexical.md)
