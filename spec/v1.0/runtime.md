@@ -100,73 +100,50 @@ this specification. Implementations MAY optimise freely provided they preserve t
 
 ## Reference implementation status (`star-ga/mind-runtime`)
 
-### GPU profile operations
+### CPU backend (shipped, open-core)
 
-The reference runtime (`star-ga/mind-runtime`) implements **production-grade GPU backends**:
+The reference runtime (`star-ga/mind-runtime`) v0.2.x provides a stable CPU backend:
 
-| Backend | Status | Features |
-|---------|--------|----------|
-| **Metal** | Production | macOS/iOS, poison-safe locking, defragmentation, context recovery |
-| **ROCm/HIP** | Production | AMD GPUs, full trait implementations, stream sync |
-| **WebGPU** | Production | Cross-platform (browsers, native), WGSL shaders |
-| **CUDA** | Production | NVIDIA GPUs, advanced allocator, comprehensive tests |
+- **Status**: Shipped with open-core license
+- **Features**: Core tensor operations, error handling, memory management
+- **Platforms**: Linux, macOS, Windows (x86-64, ARM64)
+- **API**: C FFI under `--features ffi` with 17-symbol ABI and audit-hardened code
 
-All backends implement:
-- **Poison-safe locking** via `MutexExt.lock_or_recover()`
-- **Defragmenter trait** with fragmentation scoring
-- **ContextRecovery trait** for automatic recovery from poisoned contexts
-- **StreamSync** for cross-stream buffer safety
-- **Drop with metrics flush** for production observability
+### GPU backends (open-core, not production-shipped)
 
-**GPU-supported operations (19)**:
-- Reductions: `sum_all`, `mean_all`, `sum`, `mean`
-- Elementwise: `add`, `mul`, `relu`
-- Linear algebra: `matmul`, `dot`, `conv2d`
-- Shape ops: `reshape`, `expand_dims`, `squeeze`, `transpose`
-- Indexing: `index`, `slice`, `gather`
-- GPU-specific: `copy`, `fill`
+Advanced GPU backends are available under the commercial license:
 
-> **Note**: All GPU backends implement native kernels for their respective platforms (Metal shaders,
-> HIP/CUDA kernels, WGSL compute shaders). CPU fallback is available for unsupported operations.
+| Backend | Status | Platforms |
+|---------|--------|-----------|
+| **CUDA** | Open-core | NVIDIA GPUs with CUDA 12+ |
+| **Metal** | Open-core | macOS 10.15+ / iOS 13+ |
+| **ROCm/HIP** | Open-core | AMD GPUs with ROCm 5.0+ |
+| **WebGPU** | Open-core | Cross-platform (browsers, native) |
 
-### GPU tensor constraints
+> **Note**: GPU backends are distributed under commercial terms. CPU backend is sufficient for
+> many use cases. **Cross-substrate bit-identical determinism across CPU/GPU/accelerators is a
+> roadmap goal, not a shipped guarantee.**
 
-All GPU tensors MUST satisfy the following constraints:
+### Tensor constraints
+
+Tensors in the reference runtime MUST satisfy these constraints:
 
 | Constraint | Requirement |
 |------------|-------------|
-| Device | `DeviceKind::Gpu` |
-| Dtype | `f32` only |
-| Alignment | `numel % 4 == 0` (element count must be multiple of 4) |
+| Dtype | `i32`, `f32` (additional types planned for future releases) |
+| Alignment | 4-byte alignment required (element count must be multiple of 4 for GPU) |
 
-Tensors that violate these constraints MUST be rejected at allocation time or prior to execution.
+Tensors that violate these constraints are rejected at allocation time.
 
-### GPU operation semantics
+### Core operations
 
-**copy** (1 input, 1 output):
-Copies input tensor to output tensor. Shapes must match exactly.
+The reference runtime supports:
+- **Reductions**: `sum`, `mean` (scalar output)
+- **Elementwise**: `add`, `mul`, `relu`
+- **Linear algebra**: `matmul`, `dot` (CPU; GPU available under commercial license)
+- **Shape ops**: `reshape`, `transpose`
 
-**fill** (1 input, 1 output):
-Fills the output tensor with a constant value. Due to the GPU alignment constraint
-(`numel % 4 == 0`), scalar 1-element tensors cannot be allocated on GPU. Therefore,
-the fill value is read from `inputs[0].data[0]` — the first element of the input tensor.
-The remaining elements of the input tensor are ignored (padding).
-
-Example (pseudocode):
-```
-value_tensor = allocate(shape=[4], device=Gpu)  // 4 elements for alignment
-write(value_tensor, [42.0, 0.0, 0.0, 0.0])      // fill value in first element
-
-output = allocate(shape=[8], device=Gpu)
-run_op("fill", inputs=[value_tensor], outputs=[output])
-// output now contains [42.0, 42.0, 42.0, 42.0, 42.0, 42.0, 42.0, 42.0]
-```
-
-### Target hardware
-
-- **CUDA version**: 12+ (production)
-- **ROCm/HIP**: 5.0+ (production)
-- **Metal**: macOS 10.15+ / iOS 13+ (production)
+Additional operations planned for future releases.
 - **WebGPU**: Chrome 113+, Firefox 120+, Safari 17+ (production)
 - **LLVM version**: 18 (for JIT adapter)
 - **Rust version**: 1.73+ (minimum)

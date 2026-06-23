@@ -1,7 +1,7 @@
 # Mind Language Specification
 
 [![Spec Status](https://img.shields.io/badge/Core%20v1%20spec-frozen-blue?style=flat-square)](./STATUS.md)
-[![Compiler](https://img.shields.io/badge/reference%20compiler-v0.8.1-blue?style=flat-square)](https://github.com/star-ga/mind)
+[![Compiler](https://img.shields.io/badge/reference%20compiler-v0.10.0-blue?style=flat-square)](https://github.com/star-ga/mind)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue?style=flat-square)](./LICENSE)
 [![Deterministic](https://img.shields.io/badge/deterministic-bit--identical-brightgreen?style=flat-square)](https://github.com/star-ga/mind/blob/main/docs/roadmap.md)
 

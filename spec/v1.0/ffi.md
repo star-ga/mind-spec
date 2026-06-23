@@ -20,7 +20,7 @@ This chapter specifies the **Foreign Function Interface (FFI)** for interoperabi
 
 ## Scope and stability
 
-The FFI is **feature-gated** (enabled via `--features=ffi` or similar compiler flag) and targets **C ABI compatibility** as the lowest common denominator for cross-language interop.
+The FFI is **feature-gated** (enabled via `--features=ffi-c` compiler flag) and targets **C ABI compatibility** as the lowest common denominator for cross-language interop.
 
 ### ABI stability guarantees
 
@@ -33,10 +33,10 @@ The FFI is **feature-gated** (enabled via `--features=ffi` or similar compiler f
 
 ### Header generation
 
-MIND implementations MUST provide a mechanism to generate C headers:
+MIND implementations MUST provide a mechanism to generate C headers (feature-gated behind `ffi-c`):
 
 ```bash
-mind build --emit-ffi-header model.mind -o model.h
+mind --emit-ffi-c model.h model.mind
 ```
 
 Generated headers include:
@@ -49,65 +49,88 @@ Generated headers include:
 
 #### Primitive types
 
-| MIND Type | C Type | Size | Alignment |
-|-----------|--------|------|-----------|
-| `i32` | `int32_t` | 4 bytes | 4 bytes |
-| `i64` | `int64_t` | 8 bytes | 8 bytes |
-| `f32` | `float` | 4 bytes | 4 bytes |
-| `f64` | `double` | 8 bytes | 8 bytes |
-| `bool` | `uint8_t` | 1 byte | 1 byte |
-| `unit` | `void` | 0 bytes | 1 byte |
+The reference compiler (v0.10.0) currently exports these primitive types via FFI:
+
+| MIND Type | C Type | Size | Alignment | Status |
+|-----------|--------|------|-----------|--------|
+| `i32` | `int32_t` | 4 bytes | 4 bytes | ✅ Supported |
+| `f32` | `float` | 4 bytes | 4 bytes | ✅ Supported |
+
+**Not yet emitted** (planned for future releases):
+- `i64` / `int64_t`
+- `f64` / `double`
+- `bool` / `uint8_t`
+- `unit` / `void`
 
 #### Tensor descriptors
 
+The reference compiler (v0.10.0) emits the following C API (feature: `ffi-c`):
+
 ```c
-// Opaque tensor handle (managed by MIND runtime)
-typedef struct MindTensor MindTensor;
+// Data type enumeration (reference compiler v0.10.0)
+typedef enum {
+    MIND_I32 = 0,
+    MIND_F32 = 1,
+} MindDType;
+
+// Shape descriptor
+typedef struct {
+    uint32_t rank;              // Number of dimensions
+    const uint64_t* dims;       // Array of dimension sizes [d0, d1, ..., dN]
+} MindShape;
 
 // Tensor descriptor for FFI boundary
 typedef struct {
-    void* data;           // Pointer to contiguous data buffer
-    int64_t* shape;       // Array of dimension sizes [d0, d1, ..., dN]
-    int32_t rank;         // Number of dimensions
-    MindDtype dtype;      // Data type enum
-    MindDevice device;    // Device location (CPU, GPU)
-} MindTensorDesc;
+    MindDType dtype;            // Data type enum
+    MindShape shape;            // Shape descriptor
+    void* data;                 // Pointer to contiguous data buffer
+    uint64_t byte_len;          // Total byte length of data buffer
+} MindTensor;
 
-// Data type enumeration
-typedef enum {
-    MIND_DTYPE_F32 = 0,
-    MIND_DTYPE_F64 = 1,
-    MIND_DTYPE_I32 = 2,
-    MIND_DTYPE_I64 = 3,
-    MIND_DTYPE_BOOL = 4,
-} MindDtype;
+// I/O descriptor (pairs a name with a tensor)
+typedef struct {
+    const char* name;           // Name of input or output
+    MindTensor tensor;          // The tensor data
+} MindIO;
 
-// Device enumeration
-typedef enum {
-    MIND_DEVICE_CPU = 0,
-    MIND_DEVICE_GPU = 1,
-} MindDevice;
+// Model metadata
+typedef struct {
+    uint32_t inputs_len;        // Number of inputs
+    uint32_t outputs_len;       // Number of outputs
+    const char* model_name;     // Name of the model
+    uint64_t model_version;     // Model version
+} MindModelMeta;
 ```
 
 #### Function signatures
 
-MIND functions with `export` annotation generate C-compatible entry points:
+The reference compiler (v0.10.0) generates the following core FFI functions:
 
-```mind
-// MIND function (exports wrapper around standard library)
-export fn matmul(a: tensor<f32[m, k]>, b: tensor<f32[k, n]>) -> tensor<f32[m, n]> {
-    return tensor::matmul(a, b);  // Calls standard library matmul
-}
-```
-
-Generated C header:
 ```c
-// Exported function (caller manages memory)
-MindTensor* mind_matmul(const MindTensorDesc* a, const MindTensorDesc* b, MindError* error);
+// Get model metadata
+int mind_model_meta(MindModelMeta* out);
 
-// Cleanup function
-void mind_tensor_free(MindTensor* tensor);
+// Get model input/output descriptors
+int mind_model_io(
+    MindIO* inputs_out, uint32_t cap_inputs,
+    MindIO* outputs_out, uint32_t cap_outputs
+);
+
+// Run inference
+int mind_infer(
+    const MindIO* inputs, uint32_t inputs_len,
+    MindIO* outputs, uint32_t outputs_len
+);
+
+// Memory management
+void* mind_alloc(uint64_t size);
+void mind_free(void* p);
+
+// Error handling
+const char* mind_last_error(void);
 ```
+
+**Return values**: Functions return 0 on success, negative values on error. Error details are available via `mind_last_error()`.
 
 ## Memory management
 
@@ -501,102 +524,30 @@ Planned FFI improvements:
 - **Go bindings**: Via CGo for Go-based services
 - **Async API**: Non-blocking execution with callbacks/futures
 
-## Reference implementation C API (`mind-runtime`)
+## Reference implementation C API
 
-The `star-ga/mind-runtime` provides the following C API (feature flag: `--features ffi`):
+The MIND compiler (feature flag: `--features ffi-c`) generates a stable C FFI interface. The reference implementation (`star-ga/mind-runtime`) provides an open-core C API for model execution and memory management.
 
-### Enumerations
+### Core API (open-core)
 
-```c
-typedef enum {
-    MIND_STATUS_OK = 0,
-    MIND_STATUS_INVALID_ARG = 1,
-    MIND_STATUS_UNSUPPORTED = 2,
-    MIND_STATUS_RUNTIME_ERROR = 3,
-    MIND_STATUS_INTERNAL_ERROR = 4,
-} mind_status_t;
-
-typedef enum {
-    MIND_DTYPE_F32 = 0,
-    MIND_DTYPE_U8 = 1,
-    MIND_DTYPE_F16 = 2,
-    MIND_DTYPE_I32 = 3,
-} mind_dtype_t;
-
-typedef enum {
-    MIND_DEVICE_CPU = 0,
-    MIND_DEVICE_GPU = 1,
-} mind_device_t;
-```
-
-### Opaque types
-
-```c
-typedef struct mind_runtime_s mind_runtime_t;
-typedef struct mind_tensor_s mind_tensor_t;
-```
-
-### Function signatures
-
-```c
-// Runtime lifecycle
-mind_status_t mind_runtime_new(
-    mind_device_t device,
-    mind_runtime_t **out_rt
-);
-
-void mind_runtime_free(mind_runtime_t *rt);
-
-// Tensor memory management
-mind_status_t mind_tensor_alloc(
-    mind_runtime_t *rt,
-    mind_dtype_t dtype,
-    const int64_t *shape,
-    size_t rank,
-    mind_tensor_t **out_tensor
-);
-
-void mind_tensor_free(mind_runtime_t *rt, mind_tensor_t *tensor);
-
-// Tensor I/O
-mind_status_t mind_tensor_write_f32(
-    mind_runtime_t *rt,
-    mind_tensor_t *tensor,
-    const float *data,
-    size_t len
-);
-
-mind_status_t mind_tensor_read_f32(
-    mind_runtime_t *rt,
-    mind_tensor_t *tensor,
-    float *data,
-    size_t len
-);
-
-// Operator execution
-mind_status_t mind_runtime_run_op(
-    mind_runtime_t *rt,
-    const char *op_name,
-    mind_tensor_t *const *inputs,
-    size_t num_inputs,
-    mind_tensor_t *const *outputs,
-    size_t num_outputs
-);
-```
-
-**Total**: 7 exported functions, 3 enums, 2 opaque types.
+The minimum stable API (as of v0.10.0) consists of:
+- 6 exported functions (lifecycle + memory + inference + errors)
+- 2 enumeration types (data types, model metadata)
+- 4 struct types (shape, tensor, I/O descriptor, model metadata)
 
 ### Memory semantics
 
-- **Tensor storage**: `Vec<f32>` backed (standard Rust heap allocation)
-- **Allocation**: Zero-initialized with validated shapes
-- **Deallocation**: RAII via `mind_runtime_free()` / `mind_tensor_free()`
-- **Memory layout**: Row-major (C-style)
-- **GPU alignment**: 4-byte alignment required (`numel % 4 == 0`)
+- **Tensor storage**: Heap-allocated via `mind_alloc()`
+- **Allocation**: Caller-managed; zero-initialization is not guaranteed
+- **Deallocation**: Caller must call `mind_free()` on all allocations
+- **Memory layout**: Row-major (C-style contiguous)
+- **Data pointer lifetime**: Caller retains ownership; buffers must remain valid for the duration of API calls
 
 ### Numerical tolerances
 
-Conformance tests use `1e-5` tolerance for floating-point comparisons in autodiff gradient validation.
+Conformance tests use appropriate precision for each data type:
+- `f32` operations: single-precision floating-point semantics
+- `i32` operations: signed 32-bit integer semantics
 
 ## References
 
