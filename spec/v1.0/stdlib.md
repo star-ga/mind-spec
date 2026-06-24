@@ -411,19 +411,35 @@ Implementations MUST expose them with the signatures below. All addresses are
 opaque `i64` handles — there is no built-in pointer type, and MIND code MUST NOT
 make assumptions about address representation beyond opacity:
 
+The reference implementation (mindc v0.10.0, `runtime-support/mind_intrinsics.c`)
+exposes these seven core primitives with the **exact** signatures below.
+Address arithmetic is performed by the **caller** in MIND source (e.g.
+`__mind_load_i64(addr + i * 8)`) — load/store take a single absolute address,
+not an `(addr, offset)` pair:
+
 | Intrinsic | Signature | Purpose |
 | --- | --- | --- |
-| `__mind_alloc` | `(size: i64) -> i64` | Allocate `size` bytes, return opaque base address (`0` on failure). |
-| `__mind_realloc` | `(addr: i64, new_size: i64) -> i64` | Resize the region at `addr`; returned address MAY differ. |
-| `__mind_free` | `(addr: i64) -> i64` | Release the region at `addr`; returns `0` on success. |
-| `__mind_load_i64` | `(addr: i64, offset: i64) -> i64` | Load an aligned 8-byte value at `addr + offset`. |
-| `__mind_store_i64` | `(addr: i64, offset: i64, value: i64) -> i64` | Store `value` as 8 bytes at `addr + offset`; returns `0`. |
-| `__mind_read` | `(fd: i64, buf: i64, count: i64) -> i64` | POSIX `read`-shaped; returns bytes read or `-errno`. |
-| `__mind_write` | `(fd: i64, buf: i64, count: i64) -> i64` | POSIX `write`-shaped; returns bytes written or `-errno`. |
+| `__mind_alloc` | `(bytes: i64) -> i64` | Allocate `bytes` bytes, return opaque base address (`0` on failure). |
+| `__mind_realloc` | `(addr: i64, new_bytes: i64) -> i64` | Resize the region at `addr`; returned address MAY differ. `realloc(0, n)` ≡ `alloc(n)`. |
+| `__mind_free` | `(addr: i64) -> i64` | Release the region at `addr`; returns `0` on success. `free(0)` is a no-op. |
+| `__mind_load_i64` | `(addr: i64) -> i64` | Load an aligned 8-byte value at the absolute address `addr`. |
+| `__mind_store_i64` | `(addr: i64, value: i64) -> i64` | Store `value` as 8 bytes at the absolute address `addr`; returns `0`. |
+| `__mind_read` | `(fd: i64, buf: i64, count: i64, offset: i64) -> i64` | POSIX `pread`-shaped; returns bytes read or `-errno`. |
+| `__mind_write` | `(fd: i64, buf: i64, count: i64, offset: i64) -> i64` | POSIX `pwrite`-shaped; returns bytes written or `-errno`. |
 
 Determinism rule: an implementation MAY return different concrete addresses
 across runs, but any program written against these intrinsics MUST observe the
 same logical behaviour byte-for-byte given identical inputs.
+
+> **Additive byte-precise + width intrinsics (shipped, RFC 0005 Phase 1.6).**
+> The reference implementation also ships single-address width-precise
+> load/store siblings — `__mind_load_i8` / `__mind_store_i8` (the byte-precise
+> store the `std.string`/`std.sha256`/`std.toml` migration anchors on), plus
+> `__mind_load_i16` / `__mind_store_i16` / `__mind_load_i32` / `__mind_store_i32`
+> — each with the same single-absolute-address shape as the `i64` pair. These
+> are additive to the seven-primitive minimum; a conforming implementation MAY
+> expose a narrower set, but the pure-MIND `std` modules as shipped in v0.10.0
+> use `__mind_load_i8` (e.g. `std/map.mind`'s string-key byte comparison).
 
 ### Four pure-MIND modules
 
@@ -435,32 +451,64 @@ the reference implementation's v0.7.1 release `std-surface` is on by default,
 so this resolution is the default behaviour of a shipped `mindc`; building with
 `--no-default-features` opts back out to the low-level-only subset.
 
-- **`std.vec`** — Growable `Vec` over `i64`-shaped slots.
-  Eight public functions: `vec_new`, `vec_push`, `vec_pop`, `vec_get`,
-  `vec_set`, `vec_len`, `vec_capacity`, `vec_free`. Eight-byte stride,
-  doubling growth, 16-slot initial capacity. The `Vec` struct is an opaque
-  heap record (Option-C struct ABI) with three `i64` fields: `data_addr`,
-  `len`, `cap`.
+- **`std.vec`** — Growable `Vec` over `i64`-shaped slots. Eight-byte stride,
+  doubling growth from an initial capacity of **4** slots. The `Vec` struct
+  is an opaque heap record (Option-C struct ABI) with three `i64` fields:
+  `addr`, `len`, `cap`. The reference implementation (mindc v0.10.0,
+  `std/vec.mind`) ships: `vec_new`, `vec_push`, `vec_get`, `vec_set`,
+  `vec_len`, `vec_cap`, `vec_addr`, `vec_free`, `vec_zeroed`. `vec_push` is
+  non-mutating today (it returns a fresh `Vec`); an in-place push lands once
+  cross-fn `&mut` mutation ships.
 
-- **`std.string`** — UTF-8 `String` shaped as `Vec<u8>`.
-  Eight public functions: `string_new`, `string_push_byte`, `string_push_str`,
-  `string_get`, `string_set`, `string_len`, `string_capacity`, `string_free`.
-  The container stores raw bytes; UTF-8 well-formedness is a documented
-  invariant the producer MUST uphold, not an automatic property of the
-  module (no in-band validation).
+  > **Planned (not yet shipped).** A tail-removing `vec_pop` is on the roadmap
+  > but is **not** present in the reference implementation as of v0.10.0.
+
+- **`std.string`** — UTF-8 `String` shaped as `Vec<u8>`. The container stores
+  raw bytes; UTF-8 well-formedness is a documented invariant the producer
+  MUST uphold. The reference implementation (mindc v0.10.0, `std/string.mind`)
+  ships: `string_new`, `string_push_byte`, `string_push_str`, `string_push_i`,
+  `string_get_byte`, `string_len`, `string_cap`, `string_addr`, `string_eq`,
+  `string_slice_from`, `string_starts_with`, `string_validate_utf`. Note
+  `string_validate_utf` is an **explicit** opt-in check — there is no implicit
+  in-band validation on push.
+
+  > **Planned (not yet shipped).** A by-index `string_set` and an explicit
+  > `string_free` are on the roadmap but are **not** present in the reference
+  > implementation as of v0.10.0.
 
 - **`std.map`** — Insertion-ordered map on parallel `i64`/`i64` arrays.
-  Eight public functions: `map_new`, `map_insert`, `map_get`, `map_remove`,
-  `map_contains`, `map_len`, `map_capacity`, `map_free`. The `Map` struct is
-  a four-field heap record: `keys_addr`, `vals_addr`, `len`, `cap`. Iteration
-  order MUST be insertion order — this is normative for determinism.
+  The `Map` struct is a four-field heap record: `keys_addr`, `vals_addr`,
+  `len`, `cap`. Iteration order MUST be insertion order — this is normative
+  for determinism.
 
-- **`std.io`** — File handles + line I/O on the POSIX-shaped intrinsics.
-  Nine public functions: `stdin`, `stdout`, `stderr`, `print_bytes`,
-  `eprint_bytes`, `read_stdin_bytes`, `file_open`, `file_close`,
-  `file_read_all`. The `File` struct is a one-field record `{ fd: i64 }`.
-  All errors surface as a negative return value (negated `errno`); modules
-  MUST NOT silently swallow them.
+  The reference implementation (mindc v0.10.0, `std/map.mind`) ships these
+  ten public **free functions** (all take the `Map` by value and, where they
+  grow the container, return a fresh `Map` — no in-place mutation):
+  `map_new`, `map_insert`, `map_get`, `map_contains_key`, `map_len`,
+  `map_cap`, `map_key_at`, `map_value_at`, `map_get_str`,
+  `map_contains_key_str`. The `_str` variants compare String **key contents**
+  (byte equality) rather than i64 handle identity, for `map<string, _>`.
+  `map_insert` is currently insert-at-tail (append) semantics; it does not
+  yet update an existing key's value in place. Two accessor helpers
+  `map_keys_addr` / `map_vals_addr` expose the opaque array base addresses.
+
+  > **Planned (not yet shipped).** Key removal, in-place key update, and an
+  > explicit free function — e.g. `map_remove`, an updating `map_insert`,
+  > `map_free` — are on the RFC 0005 roadmap but are **not** present in the
+  > reference implementation as of v0.10.0. The bucket-hash index (today the
+  > lookup is a deterministic linear scan over insertion order) lands once
+  > `loop` codegen matures. A conforming implementation MAY ship these, but
+  > MUST NOT present them as part of the current shipped surface.
+
+- **`std.io`** — Standard-stream handles + byte I/O on the POSIX-shaped
+  intrinsics. The `File` struct is a one-field record `{ fd: i64 }`. All
+  errors surface as a negative return value (negated `errno`); modules MUST
+  NOT silently swallow them. The reference implementation (mindc v0.10.0,
+  `std/io.mind`) ships: `stdin`, `stdout`, `stderr`, `print_bytes`,
+  `eprint_bytes`, `read_stdin_bytes`, `file_fd`, `file_read`, `file_write`,
+  `io_isatty`, plus the ANSI/SGR escape helpers (`sgr_*`, `string_push_ansi_sgr`).
+  Path-level file operations (open/close/stat/read-to-string/directory walk)
+  live in the separate **`std.fs`** module, not `std.io`.
 
 ### `use std.<name>` resolution
 
