@@ -18,7 +18,22 @@ limitations under the License.
 
 The `std::tensor` module provides the core primitives for N-dimensional array construction and linear algebra.
 
-## Constructors
+## Status
+
+**Shipped in v0.10.0:**
+- Dense tensor literals: `let x: tensor<f32[3]> = [1.0, 2.0, 3.0]`
+- Elementwise operations in functions: `a + b`, `a * b`, `relu(a)`
+- Tensor-returning functions: `fn f() -> tensor<f32[3]> { ... }`
+- Determinism tier: int/Q16 are byte-identical across substrates; f32 is
+  reproducible within a single substrate (ordered-reduction cross-substrate
+  support is Phase 13.6)
+
+**Planned (Phase 11):**
+- Deterministic intrinsics: `zeros`, `ones`, `matmul`, `softmax`, `transpose`, `randn`
+- Inter-function tensor arguments (cross-function tensor ABI)
+- Full cross-substrate byte-identity for f32 via ordered reductions
+
+## Constructors (Planned)
 
 ### `zeros`
 ```
@@ -32,7 +47,7 @@ fn ones(shape: [i64]) -> Tensor
 ```
 Allocates a new contiguous tensor initialized with 1.0.
 
-## Operations
+## Operations (Planned)
 
 ### `matmul`
 ```
@@ -41,7 +56,7 @@ fn matmul(a: Tensor, b: Tensor) -> Tensor
 Performs matrix multiplication. Supports broadcasting.
 **Complexity:** O(M * N * K).
 
-## Spectral Operations
+## Spectral Operations (Planned Phase 11+)
 
 ### `fft`
 ```
@@ -81,6 +96,37 @@ Computes the inverse 1D FFT with automatic 1/N normalization.
 Guarantees: `ifft(fft(x)) == x` (within floating-point precision).
 
 **Complexity:** O(N log N).
+
+## Activation Functions (Planned Phase 11)
+
+### `softmax`
+```
+fn softmax(logits: Tensor, axis: i64) -> Tensor
+```
+Computes softmax normalization over the specified axis.
+- **Input:** tensor of any floating-point dtype
+- **Output:** tensor with same shape, values in [0, 1], sum over axis = 1.0
+
+**Complexity:** O(N) where N = product of dimensions.
+
+### `transpose`
+```
+fn transpose(a: Tensor, axes: [i64]) -> Tensor
+```
+Permutes tensor dimensions according to the axis order.
+- **Input:** tensor of shape S = [d₀, d₁, ..., dₙ]
+- **axes:** permutation [i₀, i₁, ..., iₙ] where each iⱼ ∈ [0, n]
+- **Output:** tensor with shape [S[i₀], S[i₁], ..., S[iₙ]]
+
+**Complexity:** O(N) where N = product of shape.
+
+### `randn`
+```
+fn randn(shape: [i64], seed: i64) -> Tensor
+```
+Allocates a tensor of the specified shape filled with deterministic random values
+from a standard normal distribution N(0, 1). The seed determines the random stream;
+identical seeds produce identical results (determinism across substrates).
 
 ### Example: Frequency-domain filtering
 ```mind
