@@ -46,7 +46,8 @@ Core v1 is organised into the following pillars:
 8. **Versioning & Stability** ([`versioning.md`](./versioning.md)) — semantic versioning policy,
    stability guarantees, breaking vs non-breaking changes, and deprecation procedures.
 9. **MLIR Lowering** ([`mlir-lowering.md`](./mlir-lowering.md)) — deterministic lowering patterns for
-   the feature-gated MLIR backend.
+   the feature-gated MLIR backend. Note: MLIR-text is the downstream-interchange and exotic-chip-reach
+   backend; the normative self-host target is the native-ELF backend (`src/native`).
 10. **Runtime Interface** ([`runtime.md`](./runtime.md)) — abstract contract for executing canonical IR
     semantics across CPU and the optional GPU profile.
 11. **Security & Safety** ([`security.md`](./security.md)) — memory safety guarantees, determinism

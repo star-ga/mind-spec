@@ -20,7 +20,7 @@ the public reference implementation at [star-ga/mind](https://github.com/star-ga
   - [Core IR](./spec/v1.0/ir.md)
   - [Static autodiff](./spec/v1.0/autodiff.md)
   - [Shapes & tensor semantics](./spec/v1.0/shapes.md)
-  - [MLIR lowering](./spec/v1.0/mlir-lowering.md)
+  - [MLIR lowering](./spec/v1.0/mlir-lowering.md) — downstream-interchange and exotic-chip-reach backend (non-normative self-host path; the native-ELF backend is the normative self-host target)
   - [Runtime interface](./spec/v1.0/runtime.md)
   - [IR stability + evidence chains](./spec/v1.0/ir-stability.md) — `mic@1` text + `mic@3` binary (RFC 0021), MAP epilogue (RFC 0014), and the load-bearing `trace_hash = SHA-256(canonical mic@3 bytes)` rule (RFC 0016 GAP-1; re-anchored 2026-05-31, supersedes the original `mic@1`-text rule).
   - [Future extensions](./spec/v1.0/future-extensions.md) — Language Profiles, broader accelerator-class coverage (TPU, NPU, LPU, DPU, FPGA, ASIC, Cerebras, Taalas, Tenstorrent, SambaNova, Graphcore IPU, Gaudi — available in the commercial `mind-runtime` under license; **bit-identical determinism** across them is the roadmap), Verification-as-a-Service

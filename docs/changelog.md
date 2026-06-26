@@ -7,6 +7,57 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.5.0] - 2026-06-25
+
+### Milestone: mindc v0.10.0 — native-ELF self-host fixed point closed; backend architecture pivot
+
+This spec cut documents two related changes that land together in the v0.10.0 window:
+
+#### Backend architecture pivot (2026-06-24)
+
+The normative self-host target is now the **native-ELF backend** (`src/native`), not the MLIR-text
+backend. Rationale: the native-ELF output is a pure function of the IR (determinism-by-construction),
+making it the correct anchor for the self-host convergence proof. The MLIR-text backend is demoted to
+**downstream-interchange and exotic-chip-reach** status — it remains fully supported for LLVM/MLIR
+ecosystem interoperability and for reaching accelerator targets (TPU, NPU, custom silicon) available
+in the commercial `mind-runtime` under license. "Target any chip" is implemented via a pluggable
+backend trait; the choice of normative self-host path does not affect that reach.
+
+#### Native-ELF self-host fixed point (verified 2026-06-25)
+
+The pure-MIND compiler front-end (`examples/mindc_mind/main.mind`) now reproduces the Rust reference
+byte-for-byte across all three self-host gates:
+
+- **(a) mic@1 IR-text bootstrap fixed point** — the textual IR of `main.mind` compiled by the
+  pure-MIND front-end matches the Rust oracle byte-for-byte.
+- **(b) mic@3 canonical-binary-IR flip** — the binary `IRModule` matches the Rust reference
+  byte-for-byte (CI gate `mic3_flip_smoke.py` 7/7).
+- **(c) Native x86-64/ELF emit of the entire seeded module** — the native ELF produced by the
+  pure-MIND compiler for the full module (21 stdlib modules + `main.mind`, 1 055 777 B) is
+  byte-identical to the Rust reference. The native-ELF self-host fixed point is closed.
+
+**What remains:**
+- The 32-byte `ir_trace_hash` PT_NOTE embedded in the ELF is still fed from the Rust oracle; a
+  pure-MIND SHA-256 is implemented but not yet wired to the pruned-combined mic@3 emit.
+- The Rust `src/native` backend is not yet deleted.
+Correct framing: the pure-MIND native backend reproduces the full self-host module byte-for-byte
+(the core of Rust-independence); the final trace-hash note emit and the Rust-backend removal remain.
+
+### Spec changes in this 1.5.0 cut
+
+- **`STATUS.md`** — Last-Updated 2026-06-25; header rewritten to state the backend pivot, the
+  three self-host gates, and the two remaining items precisely.
+- **`spec/v1.0/mlir-lowering.md`** — Added a "Backend role" preamble block noting that MLIR-text
+  is the downstream-interchange backend, not the normative self-host target; the native-ELF backend
+  holds that role. The chapter's normative lowering rules are unchanged.
+- **`docs/design/compiler.md`** — Last-Updated 2026-06-25; added a backend note in the header;
+  pipeline diagram updated to show native-ELF as the normative self-host exit alongside the MLIR
+  interchange exit; stage 9 split into 9 (native-ELF, normative) and 9b (MLIR, downstream).
+- **`README.md`** — MLIR lowering TOC entry annotated as downstream-interchange / non-normative
+  self-host path.
+
+---
+
 ## [1.4.0] - 2026-05-28
 
 ### Milestone: mindc v0.7.x — RFC 0007 / 0008 / 0010 / 0011 / 0012 / 0013 Tier 1 ship + IR-canon unification (RFC 0014 / 0016 / 0021)

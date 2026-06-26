@@ -33,6 +33,16 @@ Automatic differentiation is central to MIND. Language features MUST preserve di
 possible and provide explicit escape hatches when not. Compiler passes SHOULD surface derivative
 information for inspection and debugging. See [`star-ga/mind/docs/autodiff`](https://github.com/star-ga/mind/tree/main/docs/autodiff).
 
+## Determinism is load-bearing
+
+Compiled output MUST be bit-identical given identical source and toolchain. This is not merely a
+quality property — it is the foundation of the evidence-chain attestation surface and the
+self-host convergence proof. The **native-ELF backend** (`src/native`) is the normative self-host
+target precisely because its output is a pure function of the IR (determinism-by-construction); the
+MLIR-text backend is a downstream-interchange path for ecosystem interoperability and exotic-chip
+reach. Both paths MUST produce deterministic output on a given host; cross-substrate bit-identity for
+integer/Q16.16 computations is additionally required (see `spec/v1.0/ir-stability.md`).
+
 ## Predictable performance
 
 Program performance SHOULD be predictable from surface-level constructs. Optimisations MAY reorder

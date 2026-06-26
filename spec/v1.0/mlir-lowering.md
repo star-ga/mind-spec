@@ -14,7 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# MLIR Lowering (Normative)
+# MLIR Lowering (Normative — Downstream Interchange)
+
+> **Backend role (pivot 2026-06-24):** The MLIR-text backend is the **downstream-interchange and
+> exotic-chip-reach backend**, not the normative self-host target. The normative self-host target is
+> the **native-ELF backend** (`src/native`), whose output is a pure function of the IR and is
+> therefore deterministic-by-construction. MLIR-text remains a first-class output for interoperability
+> with the LLVM/MLIR ecosystem and for reaching accelerator targets (TPU, NPU, custom silicon)
+> available in the commercial `mind-runtime` under license. Both backends are supported and maintained;
+> only the self-host designation differs.
 
 This chapter specifies the deterministic lowering of canonical Core IR into MLIR for the feature-gate
 that ships with the public compiler. The rules cover only the stable, publicly implemented subset.
@@ -23,8 +31,8 @@ that ships with the public compiler. The rules cover only the stable, publicly i
 
 - Lowering is **feature-gated** (e.g. via an `mlir-lowering` feature flag in the compiler).
 - The input module MUST be **verified and canonicalised** per [Core IR](./ir.md).
-- Lowering produces deterministic MLIR textual IR suitable for snapshot testing. Minor changes may
-  occur between MIND versions but are stable within a release.
+- Lowering produces deterministic MLIR textual IR suitable for snapshot testing and downstream
+  consumption. Minor changes may occur between MIND versions but are stable within a release.
 - Core v1 MLIR lowering rules target the CPU backend. Any GPU-specific MLIR dialects or pipelines are
   experimental and outside the scope of this chapter (see [Runtime](./runtime.md#experimental-gpu-backends-non-normative)).
 
