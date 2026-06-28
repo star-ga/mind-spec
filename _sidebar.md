@@ -7,6 +7,7 @@
   * [Types & Variables](types.md)
   * [Functions](functions.md)
   * [Control Flow](control-flow.md)
+  * [Determinism Contract](determinism.md)
 
 * Standard Library
   * [Core (std::core)](std/core.md)
