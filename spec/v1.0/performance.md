@@ -43,6 +43,8 @@ A conforming compiler MUST satisfy Tier 1 unconditionally. The reference impleme
 
 Same input bytes + same hardware + same selected code path → byte-identical output bytes, every invocation. IEEE 754-2008 strict for floating-point operations (including FMA). No threading non-determinism: deterministic mode disables work-stealing and ordered-reduction-violating optimizations. This is the `RuntimeConfig::deterministic = true` default mode.
 
+Within Tier 2 there is a **scalar strict sub-mode** that is additionally cross-substrate-eligible: scalar `f64`/`f32` arithmetic (`+ − × ÷ √`) is lowered with **no FMA-contraction, no fast-math, no reassociation, and fixed source order**. Because these scalar operations are correctly-rounded under IEEE-754, this sub-mode is run-to-run bit-identical today and is the path along which scalar cross-ISA (x86 == ARM) bit-identity is being verified (verification in progress; the substrate gate is currently all-x86). FMA-contracted lowering remains available for within-substrate Tier 2 but is not cross-substrate-eligible.
+
 Within Tier 2, **opt-in SIMD fast paths** (e.g. mind-blas Track A) are within-substrate deterministic by construction: a fixed input on a fixed CPU evaluating a fixed code path produces a fixed output. SIMD reduction ordering may differ from sequential scalar reduction in floating-point, but the difference is bounded and itself deterministic given the same hardware.
 
 ### Tier 3 — Cross-substrate Q16.16 bit-identity (OPTIONAL, substrate-thesis tier)
@@ -51,7 +53,7 @@ Q16.16 fixed-point operations produce **byte-identical results** across the **pr
 
 Tier 3 is observable only on the Q16.16 path because:
 - Integer-domain SIMD reduction is associative; SIMD fast paths produce identical byte sequences to scalar reference at every input length.
-- Floating-point SIMD reduction is **not** associative; cross-substrate f32 bit-identity is not claimed for any tier.
+- Floating-point **SIMD/vector reduction** is **not** associative; cross-substrate `f32`/`f64` **vector-reduction** bit-identity is not claimed for any tier (canonical reduction trees are roadmap). This non-associativity is specific to vector reductions: **scalar** `f64`/`f32` arithmetic (`+ − × ÷ √`) is correctly-rounded and runs on the strict no-FMA path run-to-run bit-identical, with cross-ISA (x86 == ARM) verification in progress — do not read this line as a claim that scalar float determinism is unavailable.
 - The Q16.16 path is the substrate-bridge across the proven CPU substrates (x86 + ARM), and is the intended bridge to future fixed-precision GPU / photonic backends (roadmap).
 
 A conforming implementation MAY opt out of Tier 3 entirely (no Q16.16 path). An implementation that ships a Q16.16 path MUST satisfy Tier 3 across all advertised substrates, verified by the conformance corpus.

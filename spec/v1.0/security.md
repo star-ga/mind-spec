@@ -90,7 +90,9 @@ For the **Q16.16 / exact-integer path** (Determinism Tier 3), implementations MU
 - Different compiler versions (within the same Core v1.x spec version)
 - The advertised CPU substrate set (x86 and ARM — the path proven by the cross-substrate bit-identity gate)
 
-This MUST is scoped to the Q16.16 / exact-integer path; cross-substrate f32 bit-identity is **not** claimed (see [performance.md](./performance.md) Tier 3). GPU and other-accelerator backends are roadmap; cross-substrate bit-identity to a GPU backend is not yet claimed or verified.
+This MUST is scoped to the Q16.16 / exact-integer path; cross-substrate **vector-reduction** `f32`/`f64` bit-identity is **not** claimed (see [performance.md](./performance.md) Tier 3). GPU and other-accelerator backends are roadmap; cross-substrate bit-identity to a GPU backend is not yet claimed or verified.
+
+Separately, **scalar** IEEE-754 `f64`/`f32` arithmetic (`+ − × ÷ √`) is lowered on the strict no-FMA path and is **bit-exact and run-to-run bit-identical** (across repeated runs on the same hardware/OS and across compiler versions within the same Core v1.x spec). Because these scalar operations are correctly-rounded under IEEE-754, cross-ISA scalar bit-identity (x86 == ARM) is expected and is being verified — implementations MUST NOT introduce FMA-contraction, reassociation, or fast-math rewrites into this path. The cross-ISA scalar guarantee is stated as *verification-in-progress* until re-confirmed on the ARM substrate gate.
 
 **Non-deterministic sources** (randomness, timestamps, thread scheduling) are **prohibited** in Core v1 unless explicitly specified in the operation semantics.
 

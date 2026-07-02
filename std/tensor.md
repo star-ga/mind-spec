@@ -24,9 +24,11 @@ The `std::tensor` module provides the core primitives for N-dimensional array co
 - Dense tensor literals: `let x: tensor<f32[3]> = [1.0, 2.0, 3.0]`
 - Elementwise operations in functions: `a + b`, `a * b`, `relu(a)`
 - Tensor-returning functions: `fn f() -> tensor<f32[3]> { ... }`
-- Determinism tier: int/Q16 are byte-identical across substrates; f32 is
-  reproducible within a single substrate (ordered-reduction cross-substrate
-  support is Phase 13.6)
+- Determinism tier: int/Q16 are byte-identical across the proven CPU substrates
+  (x86 == ARM); scalar `f32`/`f64` elementwise ops run on the strict no-FMA path
+  bit-exact and run-to-run bit-identical (cross-ISA verification in progress);
+  cross-substrate byte-identity for `f32`/`f64` **reductions** (ordered-reduction
+  support) is Phase 13.6 roadmap
 
 **Planned (Phase 11):**
 - Deterministic intrinsics: `zeros`, `ones`, `matmul`, `softmax`, `transpose`, `randn`

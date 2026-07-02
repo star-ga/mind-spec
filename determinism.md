@@ -1,7 +1,9 @@
 # The Determinism Contract
 
-> Status legend — **✅ shipped** (implemented and gated in CI) · **📋 specified** (the
-> rule is fixed by this contract; enforcement is in progress).
+> Status legend — **✅ shipped** (implemented and gated in CI) · **🔄 strict-path
+> run-to-run bit-identical** (implemented on the strict deterministic path,
+> reproducible run-to-run; cross-ISA re-verification in progress) · **📋 specified**
+> (the rule is fixed by this contract; enforcement is in progress).
 
 ## Definition
 
@@ -57,20 +59,25 @@ narrow-field ABI are sound. Gated by the keystone and `cross_substrate` suites.
 ## 2. Floating-point semantics
 
 MIND follows **IEEE 754** and pins every edge case. Scalar `f64`/`f32` follow the
-IEEE rules below; the **Q16.16 fixed-point** tier is fully deterministic and
-byte-identical across substrates today.
+IEEE rules below and now run on the **strict deterministic path** — plain
+`arith.addf` / `arith.mulf`, no FMA-contraction, no fast-math, no reassociation,
+fixed source order — so scalar `+`, `-`, `*`, `/`, `sqrt` are bit-exact and
+**run-to-run bit-identical** today (cross-ISA verification in progress; see
+§2.1). The **Q16.16 fixed-point** tier is fully deterministic and byte-identical
+across the proven CPU substrates (x86 == ARM) today.
 
 | Case | Rule | Status |
 |------|------|--------|
-| `1.0 / 0.0` | `+Inf` (IEEE) | 📋 |
-| `-1.0 / 0.0` | `-Inf` (IEEE) | 📋 |
-| `0.0 / 0.0` | `NaN` (IEEE) | 📋 |
-| `sqrt(-1.0)` | `NaN` (IEEE); `strict_domain` → defined domain error | 📋 |
-| `pow(0.0, 0.0)` | `1.0` — IEEE `pow`: `x^0 == 1` for **all** `x` (including `0` and `NaN`) | 📋 |
-| `powr(0.0, 0.0)` | `NaN` — IEEE `powr` (= `exp(0·log 0)`), the strict real-power form | 📋 |
+| Scalar `+ − × ÷ √` (`f64`/`f32`) | bit-exact IEEE-754 on the strict path; no FMA-contraction, no reassociation, fixed source order | 🔄 |
+| `1.0 / 0.0` | `+Inf` (IEEE) | 🔄 |
+| `-1.0 / 0.0` | `-Inf` (IEEE) | 🔄 |
+| `0.0 / 0.0` | `NaN` (IEEE) | 🔄 |
+| `sqrt(-1.0)` | `NaN` (IEEE); `strict_domain` → defined domain error | 🔄 (`strict_domain` error 📋) |
+| `pow(0.0, 0.0)` | `1.0` — IEEE `pow`: `x^0 == 1` for **all** `x` (including `0` and `NaN`) | 📋 (transcendental) |
+| `powr(0.0, 0.0)` | `NaN` — IEEE `powr` (= `exp(0·log 0)`), the strict real-power form | 📋 (transcendental) |
 | `limit_form(0^0)` | indeterminate — symbolic/calculus context, not a number | 📋 |
 | NaN comparisons | all comparisons `false` except `!=`; `min`/`max`/`sort` use a defined total order (NaN sorts last) so results are deterministic | 📋 |
-| Rounding | round-to-nearest-even (IEEE default), fixed | 📋 |
+| Rounding | round-to-nearest-even (IEEE default), fixed | 🔄 |
 | Q16.16 fixed-point | fully deterministic, byte-identical x86 == ARM | ✅ |
 
 ### `0^0` — worked example
@@ -90,6 +97,34 @@ and keeps polynomial / tensor `x^0` well-behaved. `powr` is the honestly-NaN rea
 power. Both are deterministic — you pick which one. Mathematically honest **and**
 never an accident.
 
+### 2.1 Scalar IEEE-754 strict path — run-to-run bit-identical 🔄
+
+Scalar `f64` and `f32` arithmetic (`+`, `-`, `*`, `/`, `sqrt`) now compiles and
+runs on the **strict deterministic path**: the backend emits plain `arith.addf` /
+`arith.mulf` / `arith.divf` / `arith.sqrt` with **no FMA-contraction, no
+fast-math, no reassociation, and fixed source order**. Because IEEE-754 fixes the
+correctly-rounded result of each of these scalar operations, the output is
+bit-exact and **identical run-to-run**. This is verified end-to-end: a
+loop-carried `f64` integrator (an explicit-Euler Lorenz solver) compiles, runs,
+and reproduces a reference computation bit-for-bit, and reruns produce the exact
+same bytes.
+
+Cross-ISA bit-identity follows in principle from IEEE-754 correct rounding of
+scalar `+ − × ÷ √` (identical on x86-SSE2 and ARM-NEON), **but is not yet
+re-verified on ARM hardware under our control** — the substrate gate today is
+all-x86, with an ARM node pending. The honest claim is therefore *scalar
+IEEE-754 `float64`/`f32` on the strict path, run-to-run bit-identical;
+cross-ISA verification in progress* — not yet "cross-substrate float determinism
+proven." (The integer / Q16.16 path already **is** cross-substrate byte-identical
+on the proven x86 + ARM set; see §1 and the `cross_substrate` gate.)
+
+What remains on the roadmap — deliberately **not** yet deterministic — is the
+frontier of §4/§5: `f32`/`f64` **vector reductions** (currently a documented
+relative tolerance, pending canonical reduction trees / superaccumulators),
+**correctly-rounded transcendentals** (`sin`/`exp`/… pending a vendored
+correctly-rounded libm rather than the host libm), and **GPU float** (pending
+fixed-tree / Ozaki-scheme reductions; Metal/WebGPU have no hardware `f64`).
+
 ---
 
 ## 3. Backend must not change meaning
@@ -98,9 +133,12 @@ Two execution tiers; the contract is **bit-identity**, never "within tolerance"
 (tolerance-equal is a correctness-testing notion, not a determinism guarantee).
 
 - **Strict tier (default).** Integer and Q16.16 results are byte-identical across
-  substrates (x86 == ARM), gated by `cross_substrate` (12/12). ✅ For `f32`, the
-  strict tier fixes the reduction order and pins one transcendental
-  implementation, yielding bit-identical results across substrates. 📋
+  substrates (x86 == ARM), gated by `cross_substrate` (12/12). ✅ Scalar `f64`/`f32`
+  arithmetic (`+ − × ÷ √`) runs on the strict path bit-exact and run-to-run
+  bit-identical, with cross-ISA verification in progress. 🔄 For `f32`/`f64`
+  **vector reductions**, the strict tier will fix the reduction order (canonical
+  reduction tree) and pin one correctly-rounded transcendental implementation to
+  yield bit-identical results across substrates — this is roadmap. 📋
 - **Fast tier (opt-in).** Explicitly labelled non-deterministic; results may differ
   by substrate. You opt **into** it — you never get it by accident.
 

@@ -57,9 +57,13 @@ optical / customer ASICs). The commodity tier is never protected.
 
 ## Wedge Properties that Compose the Unbounded Moat
 
-- **Cross-substrate bit-identity as a type property.** CUDA hash == AVX2 hash == NEON
-  hash for the same workload, enforced at the type level by `mindc`. Not a runtime
-  assertion — a compilation guarantee.
+- **Cross-substrate bit-identity as a type property.** For the integer / Q16.16
+  fixed-point path, AVX2 hash == NEON hash for the same workload on the proven CPU
+  substrate set, enforced at the type level by `mindc`. Not a runtime assertion — a
+  compilation guarantee. Scalar IEEE-754 `float64`/`f32` now compiles on the strict
+  deterministic path (run-to-run bit-identical; cross-ISA verification in progress).
+  Vector-reduction, transcendental, and GPU float (CUDA hash inclusion) determinism
+  are on the roadmap.
 
 - **Composable determinism.** RFC 0012 Phase C checks (determinism call-graph +
   target-name validity + q16-dtype rules) compose across the full pipeline. Each layer
@@ -113,9 +117,10 @@ is extracted and published separately.
 Rationale:
 - AVX2 register-tiled Q16.16 GEMM and NEON dots are replicable by a motivated team in
   months. Bounded IP is not worth the friction of a split repo.
-- The wedge claim — CUDA hash == AVX2 hash == NEON hash — requires that third parties
-  can run the commodity-substrate implementations and verify the claim themselves. A
-  closed blas layer breaks the verifiability of the wedge.
+- The wedge claim — cross-substrate hash identity (AVX2 hash == NEON hash today on the
+  proven CPU set; CUDA/GPU inclusion is roadmap) — requires that third parties can run
+  the commodity-substrate implementations and verify the claim themselves. A closed
+  blas layer breaks the verifiability of the wedge.
 - The moat is not in the commodity kernel. It is in the type-system guarantee that the
   hash identity is a compilation property, and in the non-commodity-substrate backends
   that are structurally hard to replicate.

@@ -238,7 +238,7 @@ Implementations claiming conformance MUST publish:
 3. **Test results**: Pass/fail report for all tests (or link to public CI)
 4. **Skipped tests**: List of skipped tests with rationale (if any)
 5. **Deviations**: Any known deviations from specification (SHOULD be zero for conformance claim)
-6. **Numeric precision**: Floating-point tolerance used (MUST be ≤ 1e-6 for f32, ≤ 1e-12 for f64)
+6. **Numeric precision**: Floating-point tolerance used for transcendental and vector-reduction results (MUST be ≤ 1e-6 for f32, ≤ 1e-12 for f64). Scalar IEEE-754 arithmetic (`+ − × ÷ √`) and integer/Q16.16 operations are bit-exact (0 tolerance) on the strict path; the tolerance applies only to transcendental / vector-reduction operations.
 
 ### Compliance statement template
 

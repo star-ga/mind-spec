@@ -643,7 +643,7 @@ Conforming implementations MUST:
 1. **Provide all functions listed**: No omissions permitted for Core v1 conformance
 2. **Match semantics**: Behavior MUST align with referenced IR operations and autodiff rules
 3. **Report errors consistently**: Use error codes from errors.md where applicable
-4. **Preserve determinism**: Same inputs MUST produce same outputs (within numeric tolerance)
+4. **Preserve determinism**: Same inputs MUST produce same outputs. Scalar IEEE-754 arithmetic (`+ − × ÷ √`) and integer/Q16.16 operations are **bit-exact** (zero tolerance) on the strict path; the numeric-tolerance allowance below applies only to transcendental functions and vector/SIMD reductions, whose cross-substrate bit-identity is on the roadmap.
 5. **Document extensions**: Any additional functions MUST be clearly marked as extensions
 
 Implementations MAY:
@@ -654,8 +654,15 @@ Implementations MAY:
 
 ## Numeric precision
 
-- **f32 operations**: Error MUST be within 1e-6 relative tolerance or 1e-9 absolute
-- **f64 operations**: Error MUST be within 1e-12 relative tolerance or 1e-15 absolute
+The tolerances below bound **transcendental functions** (`sin`, `exp`, `log`, …) and
+**vector/SIMD reductions**, where a correctly-rounded / canonical-reduction
+implementation is on the roadmap. **Scalar** IEEE-754 arithmetic (`+ − × ÷ √`) is
+correctly-rounded and **bit-exact** (zero tolerance) on the strict no-FMA path —
+run-to-run bit-identical, with cross-ISA verification in progress.
+
+- **Scalar `+ − × ÷ √` (`f32`/`f64`)**: bit-exact (0 tolerance) on the strict path
+- **f32 transcendental / vector-reduction operations**: Error MUST be within 1e-6 relative tolerance or 1e-9 absolute
+- **f64 transcendental / vector-reduction operations**: Error MUST be within 1e-12 relative tolerance or 1e-15 absolute
 - **Integer operations**: Exact (no approximation)
   - Overflow behavior: implementation-defined (MAY wrap, saturate, or error)
 

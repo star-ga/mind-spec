@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue?style=flat-square)](./LICENSE)
 [![Deterministic](https://img.shields.io/badge/deterministic-bit--identical-brightgreen?style=flat-square)](https://github.com/star-ga/mind/blob/main/docs/roadmap.md)
 
-**MIND** is a deterministic language whose compiled output is bit-identical across CPU, ARM, and GPU substrates — the specification and reference compiler form the authoritative source for that determinism.
+**MIND** is a deterministic language. For integer and Q16.16 fixed-point computation, its compiled output is bit-identical across the proven CPU substrate set (x86 and ARM); scalar IEEE-754 `float64`/`f32` now runs on the strict deterministic path (run-to-run bit-identical, cross-ISA verification in progress). Vector-reduction, transcendental, and GPU float determinism are on the roadmap. The specification and reference compiler form the authoritative source for that determinism.
 
 The language evolves through an open specification process. This repository is the
 authoritative source for the normative language specification (`spec/`) and the guiding design

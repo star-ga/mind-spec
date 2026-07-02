@@ -121,9 +121,9 @@ mind::neuro::
 
 BCI and neuroscience applications have stricter determinism requirements than typical ML workloads:
 
-1. **Bitwise reproducibility**: Same input data MUST produce identical decoder outputs across:
+1. **Bitwise reproducibility** (target for this profile): Same input data produces identical decoder outputs across:
    - Compiler versions (MIND 1.x series)
-   - Hardware targets (x86, ARM, RISC-V)
+   - Hardware targets — bit-identical today for the integer / Q16.16 fixed-point path on the proven CPU substrate set (x86 and ARM); scalar IEEE-754 `f64`/`f32` runs on the strict no-FMA path run-to-run bit-identical (cross-ISA verification in progress); RISC-V coverage and full `f32`/`f64` **vector-reduction** bitwise reproducibility are roadmap targets for this profile
    - Runtime configurations (single-threaded, multi-threaded with same seed)
 
 2. **Regulatory compliance**: FDA Class III medical devices require:
@@ -136,7 +136,7 @@ BCI and neuroscience applications have stricter determinism requirements than ty
    - Verification against reported metrics (no floating-point drift across platforms)
 
 **Proposed guarantee**:
-> MIND Core v1 with `--deterministic` flag guarantees bitwise-identical IR, MLIR, and LLVM output for identical source and compiler version. Numeric results match within 1 ULP for f32 operations.
+> MIND Core v1 with `--deterministic` flag guarantees bitwise-identical IR, MLIR, and LLVM output for identical source and compiler version. Scalar IEEE-754 `f32`/`f64` arithmetic (`+ − × ÷ √`) on the strict no-FMA path is bit-exact (0 ULP) and run-to-run bit-identical; the 1-ULP allowance applies to transcendental functions and vector reductions, whose canonical/correctly-rounded implementations are on the roadmap.
 
 #### 5. Integration with Existing Features
 
