@@ -32,6 +32,13 @@ The standard library is organized into five modules:
 4. **`diff`**: Automatic differentiation entry points
 5. **`io`**: Minimal console I/O for debugging
 
+Two additive layers sit next to these five normative modules: the
+[pure-MIND standard surface](#pure-mind-standard-surface-rfc-0005-normative)
+(RFC 0005 — `std.vec` / `std.string` / `std.map` / `std.io` written in MIND on
+a fixed intrinsic set), and the informative
+[cryptographic & protocol primitive modules](#cryptographic--protocol-primitive-modules-informative--implementation-status)
+shipped by the reference implementation.
+
 ## `core` module
 
 ### Types
@@ -602,7 +609,14 @@ sub-steps:
 Self-host is informative — not every conforming implementation has
 to ship a MIND-written compiler. The contract is only that the
 language is *expressive enough* to compile itself on top of the
-documented intrinsics + stdlib surface.
+documented intrinsics + stdlib surface. As of the reference
+implementation's v0.10.x line the **bootstrap/front-end self-hosts**:
+the pure-MIND front-end reproduces the reference output byte-for-byte
+on the `mic@1` text, `mic@3` binary, and native-ELF gates.
+Full-chain Rust-independence of the *whole* toolchain (driver, build
+orchestration, remaining Rust compiler phases) is **roadmap**, not a
+current property — implementations MUST NOT describe the toolchain as
+"Rust-independent" on the strength of the front-end fixed point alone.
 
 Loop primitive caveat: mindc v0.4.4 expresses loops as tail
 recursion because `while` is not yet a statement-level construct.
@@ -635,6 +649,53 @@ not regress by more than 7% against a published baseline. (The reference
 implementation initially enforced +5% but loosened to +7% as of
 mindc 0.4.3 to absorb GitHub-hosted-runner variance on microbench
 suites; the bench-gate workflow comment records the rationale.)
+
+## Cryptographic & protocol primitive modules (informative — implementation status)
+
+> **Status:** shipped in the reference implementation's v0.10.x line as
+> pure-MIND `std/` modules. These modules are **informative** for Core v1
+> conformance — a conforming implementation is NOT required to provide them.
+> This section exists so the spec states their scope precisely and so
+> downstream documentation cannot overclaim it.
+
+The reference implementation ships a set of pure-MIND, deterministic
+cryptographic and protocol primitives, each validated against the relevant
+RFC / NIST known-answer test (KAT) vectors:
+
+- **Symmetric / hashing:** AES-128-GCM (AEAD), SHA-256, HKDF,
+  Keccak / SHA-3 + SHAKE (FIPS 202).
+- **Public-key:** X25519 (ECDH), RSA-PSS-SHA256 (verify),
+  ECDSA-P256 / secp256r1 (verify), ML-KEM-768 (FIPS 203, post-quantum KEM).
+- **PKI:** X.509 / DER certificate parsing + signature verification
+  (single-certificate; see honest scope below).
+- **TLS 1.3:** key schedule (HKDF-Expand-Label / Derive-Secret), AEAD record
+  layer, transcript hash + Finished MAC, and handshake-crypto orchestration
+  verified by replaying the RFC 8448 trace vectors.
+- **HTTP/2:** HPACK header compression (RFC 7541) and the binary framing
+  layer (RFC 9113).
+
+**Honest scope — what this is and is not.** This is a **verified primitive
+library**, not a working TLS client or server:
+
+- There is **no socket-level handshake**: the TLS 1.3 code is exercised by
+  replaying published trace vectors (RFC 8448), not by connecting to live
+  peers.
+- There is **no certificate-chain validation**: X.509 support parses and
+  verifies individual certificates; path building, trust anchors, and
+  revocation are not implemented.
+- **HPACK is decode-only**; a compliant encoder is roadmap.
+- These modules are **correctness-first**: they are validated for
+  bit-exactness against KAT/RFC vectors and inherit the language's
+  determinism guarantees. They are **not** constant-time-audited and carry
+  no side-channel resistance claim, and no general performance claim is made
+  for them.
+
+A live TLS client (handshake state machine + socket I/O), certificate-chain
+validation, additional cipher/signature suites (ChaCha20-Poly1305,
+AES-256-GCM, SHA-384/512, Ed25519, ML-DSA), and HTTP/3 + QUIC are roadmap.
+Documentation that describes this surface MUST NOT call it a "TLS stack" or
+"HTTPS support"; the accurate description is *RFC/NIST-KAT-verified
+cryptographic and protocol primitives written in pure MIND*.
 
 ## Implementation requirements
 

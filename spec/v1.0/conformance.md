@@ -52,6 +52,12 @@ Implementations claiming **evidence-chain emission** (RFC 0016) MUST:
 - Emit all five evidence-chain keys (`evidence_chain.determinism`, `.substrate`, `.toolchain`,
   `.trace_hash`; `.parent` is OPTIONAL) when the chain is present.
 
+**Signing status.** Evidence-chain conformance today covers **emission and hash anchoring only**.
+The chain is emitted/embedded but **not cryptographically signed**; Ed25519 signing (RFC 0016
+Phase C / RFC 0017 `mindc verify` signature mode) is a future milestone and is NOT part of the
+current conformance surface. Implementations MUST NOT describe an emitted chain as "signed", and
+conformance claims MUST NOT imply signature verification is available.
+
 See [`ir-stability.md`](./ir-stability.md) for the normative IR-canon contract.
 
 ## Required behaviour
@@ -89,6 +95,10 @@ The golden test corpus is organized into categories corresponding to specificati
    - Type inference, dtype compatibility, trait bounds
    - Function signatures, generic instantiation
    - Expected: type checker accepts valid programs, rejects with E2xxx errors
+   - Note: trait-bound and general generic-instantiation tests apply only to implementations that
+     ship those features; the reference implementation's executable subset (v0.10.x) implements a
+     bounded single-type-parameter scalar generics slice and no traits (see
+     [Types](./types.md#traits-and-generics)), so such tests are skip-documented there
 
 3. **Shape inference tests** (`tests/shapes/`)
    - Broadcasting examples (compatible and incompatible shapes)

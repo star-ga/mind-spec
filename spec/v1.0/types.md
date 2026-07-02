@@ -28,7 +28,8 @@ The following forms are part of the core language:
 - **Primitive types**: `i32`, `f64`, `bool`, `unit`.
 - **Composite types**: tuples `(T1, T2, ...)`, arrays `[T; n]`, and structs defined via `struct`.
 - **Function types**: `(T1, ..., Tn) -> U`.
-- **Trait objects**: `dyn Trait` for traits marked as object-safe.
+- **Trait objects**: `dyn Trait` for traits marked as object-safe *(specified for full v1.0; not
+  yet implemented in the executable subset — see [Traits and generics](#traits-and-generics))*.
 - **Differentiable wrappers**: `diff T` identifies values that participate in differentiation (see
   [Automatic differentiation](./autodiff.md)).
 
@@ -78,6 +79,15 @@ The type checker participates directly in Core IR construction:
 
 ## Traits and generics
 
+> **Implementation status (v0.10.x, honest boundary).** The rules in this section specify the
+> *full* v1.0 type system; they are **not yet implemented** in the reference implementation's
+> executable subset. Shipped today: generics limited to a **single type parameter over scalar
+> types** (a bounded slice — no multi-parameter generics, no generic containers, no `where`-clause
+> bounds). **Not shipped:** `trait` declarations, trait implementations, `dyn Trait` objects, and
+> closures / first-class function values. See
+> [Future Extensions](./future-extensions.md#deferred-core-language-features) for the roadmap.
+> None of these are required for Core v1 conformance.
+
 - Traits declare associated functions, types, and laws. Implementations MUST enforce that all
   required items are provided by conforming types.
 - Trait implementations MUST be coherent: for any type and trait pair there MAY be at most one
@@ -85,7 +95,8 @@ The type checker participates directly in Core IR construction:
 - Generic type parameters use an explicit `where` clause to declare trait bounds.
 
 Trait resolution strategies are implementation-defined but MUST respect lexical scoping. The reference
-implementation uses a runtime trait-based plugin architecture for backend selection.
+implementation uses a Rust-level trait-based plugin architecture internally for backend selection;
+this is an implementation detail, not a MIND-language trait feature.
 
 ## Differentiable types
 

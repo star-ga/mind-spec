@@ -18,6 +18,14 @@ limitations under the License.
 
 This chapter defines performance characteristics, benchmark methodology, and optimization guidance for MIND Core v1.0 implementations. While semantics are normative, performance targets are **informative** and serve as implementation quality guidelines.
 
+> **Honest claim boundary (read first).** The measured "×-faster" numbers later in this chapter
+> are **front-end compile-latency** comparisons (MIND parse+typecheck+IR vs other systems'
+> compilation paths) — they are NOT runtime execution-speed claims. On the runtime side, the
+> reference implementation's **proven** wins are limited to the hand-lowered deterministic
+> **integer GEMM/FFT intrinsics**; no general "faster than X language" runtime claim is made, and
+> a general-codegen baseline against `clang`/`rustc -O3` has not yet been published (roadmap).
+> The crypto/protocol primitive modules are correctness-first and carry **no** performance claim.
+
 ## Performance philosophy
 
 MIND prioritizes **correctness and determinism** over raw performance. However, production-grade implementations SHOULD achieve competitive performance with established frameworks (PyTorch, JAX, TensorFlow) for equivalent operations.

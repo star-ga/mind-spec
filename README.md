@@ -7,6 +7,8 @@
 
 **MIND** is a deterministic language. For integer and Q16.16 fixed-point computation, its compiled output is bit-identical across the proven CPU substrate set (x86 and ARM); scalar IEEE-754 `float64`/`f32` now runs on the strict deterministic path (run-to-run bit-identical, cross-ISA verification in progress). Vector-reduction, transcendental, and GPU float determinism are on the roadmap. The specification and reference compiler form the authoritative source for that determinism.
 
+Two further precise claims, stated at their honest scope: the reference compiler's **bootstrap/front-end self-hosts** (the pure-MIND front-end reproduces the reference output byte-for-byte on the `mic@1` text, `mic@3` binary, and native-ELF gates) — full-chain Rust-independence of the whole toolchain is roadmap; and compiled artifacts carry an **emitted** evidence chain anchored on `trace_hash = SHA-256(canonical mic@3 bytes)` — cryptographic (Ed25519) signing of that chain is the next milestone, not yet shipped.
+
 The language evolves through an open specification process. This repository is the
 authoritative source for the normative language specification (`spec/`) and the guiding design
 principles (`design/`). Content here is versioned, reviewed in the open, and kept in lockstep with
@@ -20,6 +22,7 @@ the public reference implementation at [star-ga/mind](https://github.com/star-ga
   - [Core IR](./spec/v1.0/ir.md)
   - [Static autodiff](./spec/v1.0/autodiff.md)
   - [Shapes & tensor semantics](./spec/v1.0/shapes.md)
+  - [Standard library](./spec/v1.0/stdlib.md) — core/math/tensor/diff/io, the pure-MIND surface (RFC 0005), and the RFC/NIST-KAT-verified crypto & protocol primitive modules (a verified **primitive library** — not a TLS client/server)
   - [MLIR lowering](./spec/v1.0/mlir-lowering.md) — downstream-interchange and exotic-chip-reach backend (non-normative self-host path; the native-ELF backend is the normative self-host target)
   - [Runtime interface](./spec/v1.0/runtime.md)
   - [IR stability + evidence chains](./spec/v1.0/ir-stability.md) — `mic@1` text + `mic@3` binary (RFC 0021), MAP epilogue (RFC 0014), and the load-bearing `trace_hash = SHA-256(canonical mic@3 bytes)` rule (RFC 0016 GAP-1; re-anchored 2026-05-31, supersedes the original `mic@1`-text rule).

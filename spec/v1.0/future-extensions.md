@@ -31,6 +31,32 @@ This chapter serves as a design space exploration and compatibility guide for im
 
 ---
 
+## Deferred Core Language Features
+
+These general-purpose language features are **specified or sketched elsewhere in v1.0 but are NOT
+part of the reference implementation's executable subset (v0.10.x)**. They are future work; no
+document may present them as shipped:
+
+- **Closures and first-class function values** — no closure syntax, no capture semantics, no
+  higher-order functions. The compiler rejects fn-as-value use fail-loud rather than miscompiling.
+- **Traits** — no `trait` declarations, implementations, or `dyn Trait` objects. The normative
+  rules in [Types](./types.md#traits-and-generics) describe the target design.
+- **Full generics** — today's surface is a bounded slice: a single type parameter over scalar
+  types. Multi-parameter generics, generic containers (`map<K, V>`-style), and `where`-clause
+  trait bounds are future extensions.
+- **Slices** (`&[T]` / byte slices) — stubbed; see the byte-slice discussion under
+  [Systems Programming Primitives](#systems-programming-primitives).
+- **Full dynamic collections** — the shipped `std.vec` / `std.string` / `std.map` are
+  region-allocator-backed with documented gaps (non-mutating push, insert-only map); full
+  `Vec`/`String`/`HashMap` equivalents (removal, in-place update, hashing index) are roadmap
+  (see [Standard Library](./stdlib.md#four-pure-mind-modules)).
+
+Design intent: each of these must land without weakening the determinism contract
+(see [`determinism.md`](../../determinism.md)); that constraint, not parser work, is the
+gating cost.
+
+---
+
 ## Neuroscience & Brain-Computer Interfaces
 
 ### Motivation
@@ -492,6 +518,13 @@ profiles.
 MIND's Core v1 focuses on tensor computation, but real-world deployment requires systems-level constructs for governance, access control, and deterministic policy enforcement. The `policy.mind` execution boundary kernel demonstrates this need: fail-closed access control using enums, structs, byte-level string matching, and bitwise operations — all without dynamic allocation.
 
 These primitives extend MIND from a tensor-only language into one capable of expressing complete, self-contained systems programs that compile alongside tensor workloads with the same safety guarantees.
+
+> **Status update (v0.10.x).** Items 1–3 below have since **shipped** in the reference
+> implementation: `enum` declarations (including payload variants and `match`), `const`
+> declarations, and narrow integer types (`i32`/`u32`/`bool` lowering in every context, with
+> cross-substrate shift-count determinism). The prose below is retained as the original design
+> record. Item 4 (byte-slice type) remains **deferred/stubbed**; byte-string literals (`b"…"`)
+> have landed, but a general slice type has not.
 
 ### Proposed Extensions
 

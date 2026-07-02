@@ -16,6 +16,15 @@ limitations under the License.
 
 # ODE Library
 
+> **Status: informative / design-stage — not part of the shipped executable subset.** The
+> signatures below use first-class function values (`fn(f64) -> f64` fields) and the
+> `on(gpu0) { parallel for }` placement construct, neither of which is implemented in the
+> reference compiler (v0.10.x): closures/function values are a future extension and GPU execution
+> is roadmap. The `remizov_*.mind` sources live under `examples/` in `star-ga/mind` as design
+> artifacts. All performance tables in this chapter are **expected/projected** figures, not
+> measurements from the shipped toolchain — the GPU-scaling table in particular describes a
+> backend that does not yet exist.
+
 The `std::ode` module provides solvers for second-order linear ordinary differential equations
 with variable coefficients, based on the Remizov (2025) universal formula using Chernoff
 approximation of operator semigroups.

@@ -41,7 +41,8 @@ byte-for-byte across all three self-host gates:
   pure-MIND SHA-256 is implemented but not yet wired to the pruned-combined mic@3 emit.
 - The Rust `src/native` backend is not yet deleted.
 Correct framing: the pure-MIND native backend reproduces the full self-host module byte-for-byte
-(the core of Rust-independence); the final trace-hash note emit and the Rust-backend removal remain.
+(the core of the front-end self-host fixed point — full-chain toolchain Rust-independence stays
+roadmap); the final trace-hash note emit and the Rust-backend removal remain.
 
 ### Spec changes in this 1.5.0 cut
 
@@ -222,7 +223,7 @@ It is **byte-identical to the Track A scalar oracle `__mind_blas_dot_l1_q16`** a
 
 ### Milestone: RFC 0007 (Mindcraft) sequencing gate CLEARED — documentation/sequencing only, no compiler change
 
-`mind@a29726c` flips RFC 0007 (the pure-MIND `mindc fmt`/`lint`/`check` toolchain — "the toolchain self-hosts") from gated to **build-may-begin**. The gate was native-encoder end-to-end measurement plus numerical correctness, and the criterion benchmark publication. Both are satisfied: the native pure-MIND encoder runs end-to-end and validates against the reference encoder at cosine 0.999996 / top-5 route overlap 0.9975 (≥0.92 gate, n=160) with the cross-arch Q16.16 bit-identity invariant preserved, and the criterion benchmark publication is complete.
+`mind@a29726c` flips RFC 0007 (the pure-MIND `mindc fmt`/`lint`/`check` developer tooling — the fmt/lint/check tools themselves written in MIND; not toolchain-wide self-hosting, which remains roadmap) from gated to **build-may-begin**. The gate was native-encoder end-to-end measurement plus numerical correctness, and the criterion benchmark publication. Both are satisfied: the native pure-MIND encoder runs end-to-end and validates against the reference encoder at cosine 0.999996 / top-5 route overlap 0.9975 (≥0.92 gate, n=160) with the cross-arch Q16.16 bit-identity invariant preserved, and the criterion benchmark publication is complete.
 
 **No compiler/runtime version change** — this is a documentation and sequencing milestone (RFC status + roadmap), recorded here for spec-side traceability. The compiler remains at v0.6.4 (`mind@8e4b925`, tag `v0.6.4`); the gate-flip commit `a29726c` is docs-only and intentionally not tagged. Further native-encoder latency optimization continues independently and is not a Mindcraft prerequisite (the gate is measurement + numerical correctness, both met).
 

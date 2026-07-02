@@ -220,3 +220,27 @@ before IR is emitted.
 
 Language features beyond this tensor core (e.g. generics, traits) are covered in the broader v1.0
 specification but are not required for Core v1 conformance.
+
+## Executable-subset status (informative)
+
+The reference implementation's shipped executable subset (v0.10.x) covers the surface above plus
+the constructs listed in [STATUS.md](../../STATUS.md), with the following **honest boundaries** —
+documentation MUST NOT present these as complete:
+
+- **Enums + `match`**: the core works end-to-end (unit variants, payload variants including `f64`
+  and multi-field payloads, discriminant/`Option`/payload matching). Exhaustiveness checking and
+  nested patterns beyond the shipped forms are still maturing.
+- **Generics**: a **bounded slice only** — a single type parameter over scalar types. There is no
+  general parametric-polymorphism surface (no multi-parameter generics, no generic containers such
+  as a user-defined `map<K, V>`); `where`-clause trait bounds are specified in
+  [Types](./types.md) but not implemented.
+- **Closures / first-class functions**: **not implemented**. Function values, closure capture, and
+  higher-order functions are future extensions (see
+  [Future Extensions](./future-extensions.md)); the compiler rejects fn-as-value use fail-loud.
+- **Traits**: **not implemented** in the executable subset (no `trait` declarations, no `dyn Trait`).
+- **Slices**: stubbed; byte-level work goes through the `std.string`/`std.vec` heap records and the
+  byte-precise intrinsics.
+- **Collections**: region-allocator-backed; `std.vec` push is non-mutating (returns a fresh `Vec`),
+  `std.map` is insert-only (no removal, no in-place update) — see
+  [Standard Library](./stdlib.md#four-pure-mind-modules) for the precise shipped surface. These are
+  not full `Vec`/`String`/`HashMap` equivalents.
