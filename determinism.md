@@ -109,13 +109,18 @@ loop-carried `f64` integrator (an explicit-Euler Lorenz solver) compiles, runs,
 and reproduces a reference computation bit-for-bit, and reruns produce the exact
 same bytes.
 
-Cross-ISA bit-identity follows in principle from IEEE-754 correct rounding of
-scalar `+ − × ÷ √` (identical on x86-SSE2 and ARM-NEON), **but is not yet
-re-verified on ARM hardware under our control** — the substrate gate today is
-all-x86, with an ARM node pending. The honest claim is therefore *scalar
-IEEE-754 `float64`/`f32` on the strict path, run-to-run bit-identical;
-cross-ISA verification in progress* — not yet "cross-substrate float determinism
-proven." (The integer / Q16.16 path already **is** cross-substrate byte-identical
+Cross-substrate bit-identity is **verified on hardware for the CPU↔GPU pair**:
+the same `f64` Lorenz solver produces results identical to the last bit on an
+x86 CPU and on an NVIDIA GPU (CUDA, `sm_86`), because the same no-FMA-contraction
+contract (`-ffp-contract=off` on the CPU, `--fmad=false` on the GPU) forbids the
+fused multiply-add both would otherwise apply — with contraction enabled the
+chaotic trajectory diverges, worse the longer it runs. Because scalar
+`+ − × ÷ √` are correctly-rounded IEEE-754 operations, the same holds in
+principle on any conforming FPU; further substrate coverage is added as it is
+verified on hardware. The honest claim is therefore *scalar IEEE-754
+`float64`/`f32` on the strict path, bit-identical across an x86 CPU and an NVIDIA
+GPU via the no-FMA-contraction contract; wider cross-substrate coverage in
+progress.* (The integer / Q16.16 path already **is** cross-substrate byte-identical
 on the proven x86 + ARM set; see §1 and the `cross_substrate` gate.)
 
 What remains on the roadmap — deliberately **not** yet deterministic — is the
