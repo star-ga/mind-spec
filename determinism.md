@@ -130,12 +130,20 @@ GPU via the no-FMA-contraction contract; wider cross-substrate coverage in
 progress.* (The integer / Q16.16 path already **is** cross-substrate byte-identical
 on the proven x86 + ARM set; see §1 and the `cross_substrate` gate.)
 
+The **f32 vector BLAS reductions** — the `dot` / `L1` / `matmul` `*_v` kernels —
+are now on the strict tier: their per-lane FMA is unfused to separate
+`mulf`+`addf` and the horizontal sum is a pinned fixed-order fold, so they emit
+no `vector.fma` / `vector.reduction <add>` and are bit-exact (run-to-run
+bit-identical, `objdump`-verified free of fused FMA on x86; ARM re-verification
+pending).
+
 What remains on the roadmap — deliberately **not** yet deterministic — is the
-frontier of §4/§5: `f32`/`f64` **vector reductions** (currently a documented
-relative tolerance, pending canonical reduction trees / superaccumulators),
-**correctly-rounded transcendentals** (`sin`/`exp`/… pending a vendored
-correctly-rounded libm rather than the host libm), and **GPU float** (pending
-fixed-tree / Ozaki-scheme reductions; Metal/WebGPU have no hardware `f64`).
+frontier of §4/§5: broader `f32`/`f64` **vector reductions** (tensor `sum`,
+`f64` — still a documented relative tolerance, pending canonical reduction trees
+/ superaccumulators), **correctly-rounded transcendentals** (`sin`/`exp`/…
+pending a vendored correctly-rounded libm rather than the host libm), and **GPU
+float** (pending fixed-tree / Ozaki-scheme reductions; Metal/WebGPU have no
+hardware `f64`).
 
 ---
 
