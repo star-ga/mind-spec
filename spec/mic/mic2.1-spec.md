@@ -224,10 +224,23 @@ mic@2.1 reuses the Ed25519 primitive from
 `mind-mem/src/mind_mem/model_signing.py` (`sign_manifest` / `verify_manifest`).
 The signature is itself a MAP key:
 
-- `signature.ed25519` — `bytes(...)` length 64. The signature.
-- `signature.pubkey` — `bytes(...)` length 32. OPTIONAL; if absent the verifier
-  resolves the pubkey out-of-band (key registry / CI publisher key).
-- `signature.algo` — `"ed25519"`. OPTIONAL, RECOMMENDED for forward-compat.
+- `signature.scheme` — the crypto-agility algorithm tag (RECOMMENDED; selects the
+  verifier): `"ed25519"` | `"ml-dsa-65"` | `"hybrid-ed25519-ml-dsa-65"`. A verifier
+  MUST fail-closed on an unrecognized scheme (downgrade protection, per OMB M-26-15).
+  *(Was `signature.algo` in the Ed25519-only draft; renamed for the multi-scheme surface.)*
+- `signature.ed25519` — `bytes(...)` length 64. Classical Ed25519 signature (present for
+  scheme `ed25519` or `hybrid-*`).
+- `signature.pubkey` — `bytes(...)` length 32. OPTIONAL Ed25519 public key; if absent the
+  verifier resolves it out-of-band (key registry / CI publisher key).
+- `signature.mldsa` — `bytes(...)` ML-DSA-65 (FIPS-204) signature (present for scheme
+  `ml-dsa-65` or `hybrid-*`). The post-quantum signature.
+- `signature.mldsa_pubkey` — `bytes(...)` OPTIONAL ML-DSA-65 public key; resolved
+  out-of-band if absent.
+
+For scheme `hybrid-ed25519-ml-dsa-65`, BOTH `signature.ed25519` and `signature.mldsa` MUST
+be present and BOTH MUST verify (logical AND) — defence-in-depth across the classical→PQC
+transition. All `signature.*` keys remain additive and are stripped wholesale by the §6.1
+bytes-to-sign rule, so they never alter the `trace_hash` anchor.
 
 ### 6.1 Bytes-to-sign rule (normative)
 
@@ -252,12 +265,20 @@ byte-canonical `MODEL_MANIFEST.txt`. Why omit the whole `signature.*` namespace:
 a signature cannot sign itself, and omitting the namespace lets a verifier
 attach its own `signature.pubkey` after-the-fact without invalidating.
 
-### 6.2 Reuse, do not duplicate
+### 6.2 Crypto-agility (supersedes #288 "one primitive")
 
-Implementations MUST call into `mind_mem.model_signing` (or an exact
-byte-equivalent — same library, same RFC 8032 parameters) rather than
-re-implementing Ed25519. Per the #288 ecosystem-fit decision: one signing
-primitive across mind-mem, mic@2.1, and any future signed surface.
+The evidence chain is a covered surface under the US Federal PQC migration mandate
+(EO 14412: ML-DSA by 2031; OMB M-26-15: crypto-agility REQUIRED; FAR contractor rule),
+which makes classical-Ed25519-only signing non-conformant. The signing surface is therefore
+**crypto-agile**, not single-primitive: an implementation MUST support the ML-DSA-65
+(FIPS-204) post-quantum scheme, SHOULD support the `hybrid-ed25519-ml-dsa-65` scheme, and
+MAY retain classical `ed25519` for legacy verification. This supersedes the earlier #288
+"one signing primitive" decision, which predates the mandate.
+
+Ed25519 uses RFC 8032 parameters (byte-equivalent to `mind_mem.model_signing`); ML-DSA-65
+uses a conformant FIPS-204 implementation (the vetted `fips204` crate in the reference
+compiler). Do not re-implement the lattice math. The reference implementation lives in
+`mind/src/ir/compact/v3/{ed25519,mldsa}.rs` behind the `evidence-mldsa` feature.
 
 ## 7. Open questions for follow-up
 
