@@ -1,0 +1,14 @@
+# Configuration for the `Link Check` CI job (lycheeverse/lychee-action).
+# Only links that cannot be checked by an automated crawler are excluded here;
+# every genuinely dead link is fixed at the source rather than ignored.
+
+# Skip loopback/localhost URLs. The only occurrence is the docsify dev-server
+# example `http://localhost:3000` in CONTRIBUTING.md, which is documentation,
+# not a reachable endpoint in CI.
+exclude_loopback = true
+
+exclude = [
+  # Intel VTune Profiler page returns HTTP 403 to non-browser user agents
+  # (bot protection). The URL is correct and loads fine in a real browser.
+  "^https?://(www\\.)?intel\\.com/",
+]

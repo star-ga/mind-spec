@@ -30,7 +30,7 @@ commentary that links to the reference compiler is marked accordingly.
   ignored during tokenisation.
 
 Additional implementation guidance is available in the reference compiler documentation under
-[`star-ga/mind/docs/lexical`](https://github.com/star-ga/mind/tree/main/docs/lexical) (informative).
+[`star-ga/mind`](https://github.com/star-ga/mind) (informative).
 
 ## Tokens
 
@@ -68,7 +68,7 @@ Keywords MUST be matched prior to identifiers.
 - **Floating-point literals** follow the grammar `<digits>.<digits>([eE][+-]?<digits>)?`.
 - **String literals** are enclosed in double quotes. Escape sequences follow the conventions in the
   reference compiler documentation (see
-  [`star-ga/mind/docs/lexical`](https://github.com/star-ga/mind/tree/main/docs/lexical)).
+  [`star-ga/mind`](https://github.com/star-ga/mind)).
 - **Boolean literals** are `true` and `false`.
 - **Differentiable literals** MAY include tangent annotations using the `^` suffix (see
   [Automatic differentiation](./autodiff.md)).

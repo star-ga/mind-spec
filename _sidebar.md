@@ -1,5 +1,5 @@
 * Overview
-  * [Introduction](/)
+  * [Introduction](README.md)
   * [Design Philosophy](design/principles.md)
 
 * Language Spec

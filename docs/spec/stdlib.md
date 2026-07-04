@@ -38,7 +38,7 @@ imports unless otherwise noted.
 | `diff` | Differentiation entry points backed by the language’s AD semantics. | `derivative`, `jacobian`, `with_tangent` |
 | `io` | Minimal console I/O for debugging and examples. | `print`, `println`, `eprint`, `eprintln` |
 
-The reference implementation keeps these modules in [`star-ga/mind-runtime`](https://github.com/star-ga/mind-runtime)
+The reference implementation keeps these modules in `star-ga/mind-runtime`
 (informative). Implementations MAY add extension modules provided they do not shadow or alter the
 behaviour of the core set.
 

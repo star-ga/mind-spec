@@ -40,7 +40,7 @@ The goal of this specification is to provide a stable foundation for:
 | Repo | Purpose | Status |
 |------|----------|--------|
 | [`star-ga/mind`](https://github.com/star-ga/mind) | Reference compiler, IR, autodiff, and MLIR lowering. | Reference compiler `v0.8.1` |
-| [`star-ga/mind-runtime`](https://github.com/star-ga/mind-runtime) | Reference runtime backend implementing the deterministic executor. | CPU backend shipped; GPU + accelerators under commercial license (open-core); cross-substrate bit-identity is roadmap |
+| `star-ga/mind-runtime` | Reference runtime backend implementing the deterministic executor. | CPU backend shipped; GPU + accelerators under commercial license (open-core); cross-substrate bit-identity is roadmap |
 | [`star-ga/mind-spec`](https://github.com/star-ga/mind-spec) | This specification and design docs. | Core v1 frozen |
 
 ---

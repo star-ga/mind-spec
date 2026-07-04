@@ -283,7 +283,7 @@ Security issues SHOULD be reported via:
 
 ## References
 
-- [Rust Security Book](https://rust-lang.github.io/security-book/)
+- [Secure Rust Guidelines](https://anssi-fr.github.io/rust-guide/)
 - [SLSA Supply Chain Framework](https://slsa.dev/)
 - [NIST AI Risk Management Framework](https://www.nist.gov/itl/ai-risk-management-framework)
 - [OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/)
