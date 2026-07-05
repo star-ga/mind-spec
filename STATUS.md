@@ -1,6 +1,6 @@
 # Documentation Status
 
-> **Last Updated:** 2026-07-02 · spec v1.0 · tracking compiler **v0.10.x** (reference implementation at [`star-ga/mind`](https://github.com/star-ga/mind)).
+> **Last Updated:** 2026-07-05 · spec v1.0 · tracking compiler **v0.10.x** (reference implementation at [`star-ga/mind`](https://github.com/star-ga/mind)).
 >
 > **Backend architecture (pivot 2026-06-24):** The **native-ELF backend** (`src/native`) is the normative self-host target — determinism-by-construction (the native ELF is a pure function of the IR). The **MLIR-text backend** is a downstream-interchange and exotic-chip-reach backend; it is not the self-host path but is not dropped. "Target any chip" is implemented via a pluggable backend trait with commercial backends in `mind-runtime`.
 >
