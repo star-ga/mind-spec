@@ -26,7 +26,8 @@ The `std::tensor` module provides the core primitives for N-dimensional array co
 - Tensor-returning functions: `fn f() -> tensor<f32[3]> { ... }`
 - Determinism tier: int/Q16 are byte-identical across the proven CPU substrates
   (x86 == ARM); scalar `f32`/`f64` elementwise ops run on the strict no-FMA path
-  bit-exact and run-to-run bit-identical (cross-ISA verification in progress);
+  bit-exact, run-to-run bit-identical, and verified byte-identical across those
+  substrates (x86_64 + ARM64) on real hardware;
   cross-substrate byte-identity for `f32`/`f64` **reductions** (ordered-reduction
   support) is Phase 13.6 roadmap
 

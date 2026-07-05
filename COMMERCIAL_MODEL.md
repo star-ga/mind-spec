@@ -61,7 +61,7 @@ optical / customer ASICs). The commodity tier is never protected.
   fixed-point path, AVX2 hash == NEON hash for the same workload on the proven CPU
   substrate set, enforced at the type level by `mindc`. Not a runtime assertion — a
   compilation guarantee. Scalar IEEE-754 `float64`/`f32` now compiles on the strict
-  deterministic path (run-to-run bit-identical; cross-ISA verification in progress).
+  deterministic path (run-to-run bit-identical and verified byte-identical across x86_64 + ARM64 on real hardware).
   Vector-reduction, transcendental, and GPU float (CUDA hash inclusion) determinism
   are on the roadmap.
 

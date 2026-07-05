@@ -1,8 +1,9 @@
 # The Determinism Contract
 
 > Status legend — **✅ shipped** (implemented and gated in CI) · **🔄 strict-path
-> run-to-run bit-identical** (implemented on the strict deterministic path,
-> reproducible run-to-run; cross-ISA re-verification in progress) · **📋 specified**
+> bit-identical, cross-ISA verified** (scalar IEEE-754 `f64`/`f32` on the strict
+> deterministic path — run-to-run bit-identical and verified byte-identical on
+> x86_64 (AVX2) + ARM64 (NEON) real hardware) · **📋 specified**
 > (the rule is fixed by this contract; enforcement is in progress).
 
 ## Definition
@@ -68,10 +69,11 @@ narrow-field ABI are sound. Gated by the keystone and `cross_substrate` suites.
 MIND follows **IEEE 754** and pins every edge case. Scalar `f64`/`f32` follow the
 IEEE rules below and now run on the **strict deterministic path** — plain
 `arith.addf` / `arith.mulf`, no FMA-contraction, no fast-math, no reassociation,
-fixed source order — so scalar `+`, `-`, `*`, `/`, `sqrt` are bit-exact and
-**run-to-run bit-identical** today (cross-ISA verification in progress; see
-§2.1). The **Q16.16 fixed-point** tier is fully deterministic and byte-identical
-across the proven CPU substrates (x86 == ARM) today.
+fixed source order — so scalar `+`, `-`, `*`, `/`, `sqrt` are bit-exact,
+**run-to-run bit-identical**, and **verified byte-identical across the proven CPU
+substrates (x86_64 + ARM64) on real hardware** today (see §2.1). The **Q16.16
+fixed-point** tier is fully deterministic and byte-identical across those same
+substrates (x86 == ARM) today.
 
 | Case | Rule | Status |
 |------|------|--------|
@@ -104,7 +106,7 @@ and keeps polynomial / tensor `x^0` well-behaved. `powr` is the honestly-NaN rea
 power. Both are deterministic — you pick which one. Mathematically honest **and**
 never an accident.
 
-### 2.1 Scalar IEEE-754 strict path — run-to-run bit-identical 🔄
+### 2.1 Scalar IEEE-754 strict path — run-to-run and cross-ISA bit-identical 🔄
 
 Scalar `f64` and `f32` arithmetic (`+`, `-`, `*`, `/`, `sqrt`) now compiles and
 runs on the **strict deterministic path**: the backend emits plain `arith.addf` /
@@ -124,10 +126,16 @@ fused multiply-add both would otherwise apply — with contraction enabled the
 chaotic trajectory diverges, worse the longer it runs. Because scalar
 `+ − × ÷ √` are correctly-rounded IEEE-754 operations, the same holds in
 principle on any conforming FPU; further substrate coverage is added as it is
-verified on hardware. The honest claim is therefore *scalar IEEE-754
-`float64`/`f32` on the strict path, bit-identical across an x86 CPU and an NVIDIA
-GPU via the no-FMA-contraction contract; wider cross-substrate coverage in
-progress.* (The integer / Q16.16 path already **is** cross-substrate byte-identical
+verified on hardware. This scalar strict path is now **verified byte-identical
+across x86_64 (AVX2) and ARM64 (NEON) CPUs on real hardware**: the `cross_substrate`
+gate's canary workloads — including the scalar-`f64` arithmetic chain and the
+chaotic Lorenz-Euler `f64` integrator (1000 steps, sensitive to initial
+conditions) — produce byte-identical outputs on a `ubuntu-24.04`-class ARM64
+runner (LLVM 20.1.8, `MIND_BENCH_REQUIRE=1`) matching the pinned x86-verified
+references. The honest claim is therefore *scalar IEEE-754 `float64`/`f32` on the
+strict path, bit-identical across an x86 CPU and an NVIDIA GPU via the
+no-FMA-contraction contract, and verified byte-identical across x86_64 + ARM64
+CPUs.* (The integer / Q16.16 path already **is** cross-substrate byte-identical
 on the proven x86 + ARM set; see §1 and the `cross_substrate` gate.)
 
 The **f32 vector BLAS reductions** — the `dot` / `L1` / `matmul` `*_v` kernels —
@@ -155,7 +163,8 @@ Two execution tiers; the contract is **bit-identity**, never "within tolerance"
 - **Strict tier (default).** Integer and Q16.16 results are byte-identical across
   substrates (x86 == ARM), gated by `cross_substrate` (12/12). ✅ Scalar `f64`/`f32`
   arithmetic (`+ − × ÷ √`) runs on the strict path bit-exact and run-to-run
-  bit-identical, with cross-ISA verification in progress. 🔄 For `f32`/`f64`
+  bit-identical, and is verified byte-identical across substrates (x86_64 + ARM64)
+  on real hardware by the same `cross_substrate` gate. 🔄 For `f32`/`f64`
   **vector reductions**, the strict tier will fix the reduction order (canonical
   reduction tree) and pin one correctly-rounded transcendental implementation to
   yield bit-identical results across substrates — this is roadmap. 📋

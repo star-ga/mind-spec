@@ -719,7 +719,7 @@ The tolerances below bound **transcendental functions** (`sin`, `exp`, `log`, �
 **vector/SIMD reductions**, where a correctly-rounded / canonical-reduction
 implementation is on the roadmap. **Scalar** IEEE-754 arithmetic (`+ − × ÷ √`) is
 correctly-rounded and **bit-exact** (zero tolerance) on the strict no-FMA path —
-run-to-run bit-identical, with cross-ISA verification in progress.
+run-to-run bit-identical and verified byte-identical across x86_64 + ARM64 on real hardware.
 
 - **Scalar `+ − × ÷ √` (`f32`/`f64`)**: bit-exact (0 tolerance) on the strict path
 - **f32 transcendental / vector-reduction operations**: Error MUST be within 1e-6 relative tolerance or 1e-9 absolute

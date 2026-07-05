@@ -149,7 +149,7 @@ BCI and neuroscience applications have stricter determinism requirements than ty
 
 1. **Bitwise reproducibility** (target for this profile): Same input data produces identical decoder outputs across:
    - Compiler versions (MIND 1.x series)
-   - Hardware targets — bit-identical today for the integer / Q16.16 fixed-point path on the proven CPU substrate set (x86 and ARM); scalar IEEE-754 `f64`/`f32` runs on the strict no-FMA path run-to-run bit-identical (cross-ISA verification in progress); RISC-V coverage and full `f32`/`f64` **vector-reduction** bitwise reproducibility are roadmap targets for this profile
+   - Hardware targets — bit-identical today for the integer / Q16.16 fixed-point path on the proven CPU substrate set (x86 and ARM); scalar IEEE-754 `f64`/`f32` runs on the strict no-FMA path run-to-run bit-identical and verified byte-identical on x86_64 + ARM64 hardware; RISC-V coverage and full `f32`/`f64` **vector-reduction** bitwise reproducibility are roadmap targets for this profile
    - Runtime configurations (single-threaded, multi-threaded with same seed)
 
 2. **Regulatory compliance**: FDA Class III medical devices require:
