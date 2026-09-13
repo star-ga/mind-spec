@@ -15,15 +15,15 @@ was reproduced. Those facts require a receipt with the fields below.
 ## Reference under review
 
 The source reference used for the current compiler observations is
-[`star-ga/mind@45846292638920a7865085fd0f3019c74d876bfb`](https://github.com/star-ga/mind/tree/45846292638920a7865085fd0f3019c74d876bfb),
-observed 2026-09-12. No release artifact digest, host/target substrate, or
+[`star-ga/mind@c8efcf9aae0f1967ef20214085ddfd5c3273da92`](https://github.com/star-ga/mind/tree/c8efcf9aae0f1967ef20214085ddfd5c3273da92),
+observed 2026-09-13 (`main`; a docs-only RFC-status correction over the previously accepted source `953d7233`, whose compiler sources are unchanged at this reference). No release artifact digest, host/target substrate, or
 command receipt is attached to this source-only review; those fields remain
 **UNKNOWN** until recorded with the artifact.
 
 | Field | Value |
 | --- | --- |
-| Source SHA | `45846292638920a7865085fd0f3019c74d876bfb` |
-| Features | **UNKNOWN** for an installed binary. The documented full working build uses `mlir-build std-surface cross-module-imports`; see [`docs/cli.md`](https://github.com/star-ga/mind/blob/45846292638920a7865085fd0f3019c74d876bfb/docs/cli.md#L39-L58). |
+| Source SHA | `c8efcf9aae0f1967ef20214085ddfd5c3273da92` |
+| Features | **UNKNOWN** for an installed binary. The documented full working build uses `mlir-build std-surface cross-module-imports`; see [`docs/cli.md`](https://github.com/star-ga/mind/blob/c8efcf9aae0f1967ef20214085ddfd5c3273da92/docs/cli.md#L39-L58). |
 | Artifact SHA / filename | **UNKNOWN** |
 | Command, host/target substrate, timestamp | **UNKNOWN** |
 
@@ -37,9 +37,9 @@ artifact passed the check.
 
 | Gate | Public source contract | Source status | Receipt status and boundary |
 | --- | --- | --- | --- |
-| Native executable target | `--backend native` is a separate build path; the native bridge accepts `binary` emission and rejects library/object emission because the frozen backend emits static ET_EXEC. [`src/bin/mindc.rs`](https://github.com/star-ga/mind/blob/45846292638920a7865085fd0f3019c74d876bfb/src/bin/mindc.rs#L87-L98) dispatches it; [`src/build/native_bridge.rs`](https://github.com/star-ga/mind/blob/45846292638920a7865085fd0f3019c74d876bfb/src/build/native_bridge.rs#L62-L79) enforces the emission boundary. | Verified from source. The bridge’s final output fence checks ELF magic and minimum length; an independent ET_EXEC header receipt is still required for a binary release claim. | Artifact and command receipt **UNKNOWN**. The opt-in boundary is `mindc build --backend native --emit binary`; library emission belongs to the MLIR path. |
-| Cross-module imports | `cross-module-imports` is an optional feature and depends on `std-surface`; it is not a blanket assertion that the resolver is absent. [`Cargo.toml`](https://github.com/star-ga/mind/blob/45846292638920a7865085fd0f3019c74d876bfb/Cargo.toml#L335-L376) and the resolver’s feature gates define this boundary. | Verified from source. | A project-resolution receipt using a compiler built with Cargo feature `cross-module-imports` is **UNKNOWN**. A default/no-feature build cannot be used as evidence for the opt-in path. |
-| CLI capability metadata | `mindc --version` prints the package version and only the components compiled under the enabled feature gates; `mindc --stability` prints the public stability model. [`src/bin/mindc.rs`](https://github.com/star-ga/mind/blob/45846292638920a7865085fd0f3019c74d876bfb/src/bin/mindc.rs#L1438-L1489) | Verified from source. | The output is partial capability metadata, not binary/source identity. Artifact SHA and feature manifest remain **UNKNOWN** until captured. |
+| Native executable target | `--backend native` is a separate build path; the native bridge accepts `binary` emission and rejects library/object emission because the frozen backend emits static ET_EXEC. [`src/bin/mindc.rs`](https://github.com/star-ga/mind/blob/c8efcf9aae0f1967ef20214085ddfd5c3273da92/src/bin/mindc.rs#L87-L98) dispatches it; [`src/build/native_bridge.rs`](https://github.com/star-ga/mind/blob/c8efcf9aae0f1967ef20214085ddfd5c3273da92/src/build/native_bridge.rs#L62-L79) enforces the emission boundary. | Verified from source. The bridge’s final output fence checks ELF magic and minimum length; an independent ET_EXEC header receipt is still required for a binary release claim. | Artifact and command receipt **UNKNOWN**. The opt-in boundary is `mindc build --backend native --emit binary`; library emission belongs to the MLIR path. |
+| Cross-module imports | `cross-module-imports` is an optional feature and depends on `std-surface`; it is not a blanket assertion that the resolver is absent. [`Cargo.toml`](https://github.com/star-ga/mind/blob/c8efcf9aae0f1967ef20214085ddfd5c3273da92/Cargo.toml#L343-L393) and the resolver’s feature gates define this boundary. | Verified from source. | A project-resolution receipt using a compiler built with Cargo feature `cross-module-imports` is **UNKNOWN**. A default/no-feature build cannot be used as evidence for the opt-in path. |
+| CLI capability metadata | `mindc --version` prints the package version and only the components compiled under the enabled feature gates; `mindc --stability` prints the public stability model. [`src/bin/mindc.rs`](https://github.com/star-ga/mind/blob/c8efcf9aae0f1967ef20214085ddfd5c3273da92/src/bin/mindc.rs#L1438-L1468) | Verified from source. | The output is partial capability metadata, not binary/source identity. Artifact SHA and feature manifest remain **UNKNOWN** until captured. |
 | Tensor surface versus exports | [`std/tensor.md`](../../std/tensor.md) is specification text and describes the normative tensor surface. The compiler’s bundled `std/*.mind` export inventory is a separate implementation fact; at this reference it does not contain `std/tensor.mind`. | Separation verified from the two public trees. | A compiled `std::tensor` export and runnable tensor artifact require their own feature, command, and test receipts; status is **UNKNOWN** here. |
 
 ## Comparative performance claims
