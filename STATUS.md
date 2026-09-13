@@ -103,7 +103,7 @@ The formal Core v1 specification documents are located in `spec/v1.0/`. See [`ov
 | `mindc verify` CLI (hash + SSA + `--require-strict-fp` / `--require-deterministic` / `--signer-pubkey`) | RFC 0021 step 4 + RFC 0017 | ✅ Shipped | v0.10.x | [`docs/rfcs/0021-canonical-ir-unification.md`](https://github.com/star-ga/mind/blob/main/docs/rfcs/0021-canonical-ir-unification.md) |
 | `mic@2.x` → `mind-model@2` demotion + remaining oracle wiring | RFC 0021 steps 5–6 | 🚧 In progress | post-v0.10 | [`docs/rfcs/0021-canonical-ir-unification.md`](https://github.com/star-ga/mind/blob/main/docs/rfcs/0021-canonical-ir-unification.md) |
 | `__mind_load_i8` / `__mind_store_i8` byte-precise intrinsics (additive) | RFC 0005 Phase 1.6 (#306 path-B) | ✅ Shipped | v0.7.x (post-tag, mind@`0e7dd6c`) | `mind/runtime-support/mind_intrinsics.c` |
-| `std.string` / `std.sha256` / `std.toml` site migration to byte-precise stores | #306 keystone re-bless | 🚧 Pending fresh-context session | targets v0.7.1 | [`mind/docs/byte-store-migration.md`](https://github.com/star-ga/mind/blob/main/docs/byte-store-migration.md) |
+| `std.string` / `std.sha256` / `std.toml` site migration to byte-precise stores | #306 keystone re-bless | ✅ Closed | v0.7.x (post-tag, `mind@a664a71`; present at `45846292`) | [`std/` sources](https://github.com/star-ga/mind/tree/45846292638920a7865085fd0f3019c74d876bfb/std) + [migration commit](https://github.com/star-ga/mind/commit/a664a71e) |
 | Cross-substrate bit-identity CI gate (AVX2 + NEON hash comparison, `MIND_BENCH_REQUIRE` hard-fail) | RFC 0015 | ✅ Shipped | v0.7.x (post-tag, mind@`3037c04`) | [`docs/rfcs/0015-cross-substrate-bit-identity.md`](https://github.com/star-ga/mind/blob/main/docs/rfcs/0015-cross-substrate-bit-identity.md) |
 | `mindc verify` artifact verification surface (hash-equality; optional pinned-signer mode) | RFC 0017 | ✅ Shipped (unsigned default; signing opt-in) | v0.10.x | [`docs/rfcs/0017-mindc-verify.md`](https://github.com/star-ga/mind/blob/main/docs/rfcs/0017-mindc-verify.md) |
 | Bare-metal substrate lowering tier (no-OS, static-memory, RFC 0015 determinism obligations) | RFC 0018 | 📝 Draft (authored 2026-05-29) | targets post-v0.7.1 | [`docs/rfcs/0018-bare-metal-substrate.md`](https://github.com/star-ga/mind/blob/main/docs/rfcs/0018-bare-metal-substrate.md) |
@@ -137,7 +137,7 @@ self-hosted or Rust-independent — that is roadmap.
 
 Canonical spec: [`docs/rfcs/0007-mindcraft.md`](https://github.com/star-ga/mind/blob/main/docs/rfcs/0007-mindcraft.md) in `star-ga/mind`.
 
-## RFC 0008 (`mindc build` / `mindc test`) — 5/7 Phases Shipped
+## RFC 0008 (`mindc build` / `mindc test`) — 7/7 Phases Shipped
 
 The cargo retirement track. 850-line spec at
 [`docs/rfcs/0008-mindc-build.md`](https://github.com/star-ga/mind/blob/main/docs/rfcs/0008-mindc-build.md)
