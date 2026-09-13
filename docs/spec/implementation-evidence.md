@@ -27,24 +27,28 @@ command receipt is attached to this source-only review; those fields remain
 | Artifact SHA / filename | **UNKNOWN** |
 | Command, host/target substrate, timestamp | **UNKNOWN** |
 
-## Hard release gates
+## Release requirements and scoped contract checks
 
-These are pass/fail contract checks. A row marked source-verified is not a
-claim that a release artifact passed it.
+Keep release requirements, comparative claims, and migration inventory in one
+report with separate verdicts. A performance result cannot compensate for a failed
+mandatory release requirement. The examples below describe scoped contracts, not
+an exhaustive release checklist. A source-verified row does not establish that an
+artifact passed the check.
 
 | Gate | Public source contract | Source status | Receipt status and boundary |
 | --- | --- | --- | --- |
 | Native executable target | `--backend native` is a separate build path; the native bridge accepts `binary` emission and rejects library/object emission because the frozen backend emits static ET_EXEC. [`src/bin/mindc.rs`](https://github.com/star-ga/mind/blob/45846292638920a7865085fd0f3019c74d876bfb/src/bin/mindc.rs#L87-L98) dispatches it; [`src/build/native_bridge.rs`](https://github.com/star-ga/mind/blob/45846292638920a7865085fd0f3019c74d876bfb/src/build/native_bridge.rs#L62-L79) enforces the emission boundary. | Verified from source. The bridge’s final output fence checks ELF magic and minimum length; an independent ET_EXEC header receipt is still required for a binary release claim. | Artifact and command receipt **UNKNOWN**. The opt-in boundary is `mindc build --backend native --emit binary`; library emission belongs to the MLIR path. |
-| Cross-module imports | `cross-module-imports` is an optional feature and depends on `std-surface`; it is not a blanket assertion that the resolver is absent. [`Cargo.toml`](https://github.com/star-ga/mind/blob/45846292638920a7865085fd0f3019c74d876bfb/Cargo.toml#L335-L376) and the resolver’s feature gates define this boundary. | Verified from source. | A project-resolution receipt using `--features cross-module-imports` is **UNKNOWN**. A default/no-feature build cannot be used as evidence for the opt-in path. |
-| CLI capability metadata | `mindc --version` prints the package version and only the components compiled under the enabled feature gates; `mindc --stability` prints the public stability model. [`src/bin/mindc.rs`](https://github.com/star-ga/mind/blob/45846292638920a7865085fd0f3019c74d876bfb/src/bin/mindc.rs#L1690-L1720) | Verified from source. | The output is partial capability metadata, not binary/source identity. Artifact SHA and feature manifest remain **UNKNOWN** until captured. |
+| Cross-module imports | `cross-module-imports` is an optional feature and depends on `std-surface`; it is not a blanket assertion that the resolver is absent. [`Cargo.toml`](https://github.com/star-ga/mind/blob/45846292638920a7865085fd0f3019c74d876bfb/Cargo.toml#L335-L376) and the resolver’s feature gates define this boundary. | Verified from source. | A project-resolution receipt using a compiler built with Cargo feature `cross-module-imports` is **UNKNOWN**. A default/no-feature build cannot be used as evidence for the opt-in path. |
+| CLI capability metadata | `mindc --version` prints the package version and only the components compiled under the enabled feature gates; `mindc --stability` prints the public stability model. [`src/bin/mindc.rs`](https://github.com/star-ga/mind/blob/45846292638920a7865085fd0f3019c74d876bfb/src/bin/mindc.rs#L1438-L1489) | Verified from source. | The output is partial capability metadata, not binary/source identity. Artifact SHA and feature manifest remain **UNKNOWN** until captured. |
 | Tensor surface versus exports | [`std/tensor.md`](../../std/tensor.md) is specification text and describes the normative tensor surface. The compiler’s bundled `std/*.mind` export inventory is a separate implementation fact; at this reference it does not contain `std/tensor.mind`. | Separation verified from the two public trees. | A compiled `std::tensor` export and runnable tensor artifact require their own feature, command, and test receipts; status is **UNKNOWN** here. |
 
 ## Comparative performance claims
 
 Historical numbers in `STATUS.md` and the benchmark documents are retained as
-historical reports. A new comparison is publishable only when both sides use
-the same source/configuration reference, input vectors, optimization settings,
-substrate, warm-up and measurement protocol. Record the exact artifact SHA and
+historical reports. A new comparison is publishable only when each side has a bound source/configuration reference and both use comparable
+algorithms, input vectors, precision, optimization settings, thread counts,
+substrate, warm-up and measurement protocol. Report unavoidable configuration
+differences explicitly. Record the exact artifact SHA and
 command for each side. A source SHA by itself cannot reproduce a performance
 number, so new values without those fields are **UNKNOWN**.
 
