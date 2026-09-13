@@ -313,6 +313,12 @@ Implementations SHOULD:
 
 ## Reference Implementation Status (`star-ga/mind-runtime`)
 
+> **Scope note (2026-09-12):** the module table below describes the private
+> `mind-runtime` implementation and is not publicly verifiable from the open
+> `star-ga/mind` repository, which today ships `src/package/manifest.rs` only.
+> Treat these rows as an implementation status report, not as an open-source
+> conformance claim.
+
 The reference package manager in `star-ga/mind-runtime` implements all normative requirements plus the following production features:
 
 ### Implemented Modules
@@ -326,7 +332,7 @@ The reference package manager in `star-ga/mind-runtime` implements all normative
 | `workspace.rs` | ✅ Complete | Glob patterns, dependency inheritance |
 | `audit.rs` | ✅ Complete | OSV integration, severity filtering |
 | `sbom.rs` | ✅ Complete | SPDX 3.0 and CycloneDX 1.5 generation |
-| `provenance.rs` | ✅ Complete | SLSA Level 1-3, Ed25519 signing |
+| `provenance.rs` | ✅ Complete | SLSA Level 1-3; signing follows the current evidence-signing profile (opt-in ML-DSA-87 + SLH-DSA-SHAKE-256s — Ed25519 is retired, see [`security.md`](security.md)) |
 
 ### Production Dependencies
 
@@ -352,7 +358,7 @@ The resolver supports all three isolation modes:
 
 - **Vulnerability Scanning**: OSV database queries with configurable severity thresholds
 - **License Compliance**: SPDX expression parsing, category-based policy gates
-- **Provenance Verification**: Ed25519 signature verification, Sigstore compatibility
+- **Provenance Verification**: signature verification under the current evidence-signing profile (ML-DSA-87 + SLH-DSA-SHAKE-256s; Ed25519 retired), Sigstore compatibility
 - **Integrity Checking**: SRI-format hashes verified on every install
 
 ### Target Platforms

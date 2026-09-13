@@ -143,9 +143,10 @@ no access to the build environment.
   the commercial `mind-runtime` and is outside the open-source `mindc` verifier
   surface this RFC governs (see [`determinism.md`](../../determinism.md) §3).
 - **No signing dependency.** This RFC governs the emitted, hash-anchored surface
-  only. Ed25519 signing of the evidence chain (RFC-0016 Phase C / RFC-0017 signature
-  mode) is a separate, later milestone; `--require-strict-fp` does **not** imply a
-  signed chain.
+  only. Signing of the evidence chain (RFC-0016 Phase C / RFC-0017 signature
+  mode) is a separate surface — shipped opt-in with the ML-DSA-87 + SLH-DSA-SHAKE-256s
+  profile, Ed25519 retired (the original draft named Ed25519; correction 2026-09-12);
+  `--require-strict-fp` does **not** imply a signed chain.
 
 ## References
 

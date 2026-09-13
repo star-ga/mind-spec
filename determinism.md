@@ -133,17 +133,25 @@ chaotic Lorenz-Euler `f64` integrator (1000 steps, sensitive to initial
 conditions) — produce byte-identical outputs on a `ubuntu-24.04`-class ARM64
 runner (LLVM 20.1.8, `MIND_BENCH_REQUIRE=1`) matching the pinned x86-verified
 references. The honest claim is therefore *scalar IEEE-754 `float64`/`f32` on the
-strict path, bit-identical across an x86 CPU and an NVIDIA GPU via the
-no-FMA-contraction contract, and verified byte-identical across x86_64 + ARM64
-CPUs.* (The integer / Q16.16 path already **is** cross-substrate byte-identical
-on the proven x86 + ARM set; see §1 and the `cross_substrate` gate.)
+strict path, verified byte-identical across x86_64 (AVX2) and ARM64 (NEON)
+CPUs on real hardware.* The claim is computational **output** identity for the
+covered workloads on those two tested substrates — 25 workload manifests /
+26 identity tests in the `cross_substrate` gate, with `scalar-float-f64`,
+`dot-f32-v-4093` and `matmul-f32-v-64x64` carrying committed matching AVX2 and
+NEON output hashes — not native-binary identity, and not a universal
+floating-point, CPU or GPU claim. The no-FMA-contraction contract is designed
+to extend to GPU substrates, but GPU coverage is a roadmap proof obligation
+until it is verified on hardware. (The integer / Q16.16 path already **is**
+cross-substrate byte-identical on the proven x86 + ARM set; see §1 and the
+`cross_substrate` gate.)
 
 The **f32 vector BLAS reductions** — the `dot` / `L1` / `matmul` `*_v` kernels —
 are now on the strict tier: their per-lane FMA is unfused to separate
 `mulf`+`addf` and the horizontal sum is a pinned fixed-order fold, so they emit
 no `vector.fma` / `vector.reduction <add>` and are bit-exact (run-to-run
-bit-identical, `objdump`-verified free of fused FMA on x86; ARM re-verification
-pending).
+bit-identical, `objdump`-verified free of fused FMA on x86; the `dot-f32-v-4093`
+and `matmul-f32-v-64x64` workloads carry committed matching AVX2 and NEON output
+hashes in the `cross_substrate` gate).
 
 What remains on the roadmap — deliberately **not** yet deterministic — is the
 frontier of §4/§5: broader `f32`/`f64` **vector reductions** (tensor `sum`,
