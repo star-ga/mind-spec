@@ -319,7 +319,7 @@ Implementations SHOULD:
 > Treat these rows as an implementation status report, not as an open-source
 > conformance claim.
 
-The reference package manager in `star-ga/mind-runtime` implements all normative requirements plus the following production features:
+The reference package manager in `star-ga/mind-runtime` reports the following implementation status for the normative package-management requirements and production features:
 
 ### Implemented Modules
 
@@ -332,7 +332,7 @@ The reference package manager in `star-ga/mind-runtime` implements all normative
 | `workspace.rs` | ✅ Complete | Glob patterns, dependency inheritance |
 | `audit.rs` | ✅ Complete | OSV integration, severity filtering |
 | `sbom.rs` | ✅ Complete | SPDX 3.0 and CycloneDX 1.5 generation |
-| `provenance.rs` | ✅ Complete | SLSA Level 1-3; signing follows the current evidence-signing profile (opt-in ML-DSA-87 + SLH-DSA-SHAKE-256s — Ed25519 is retired, see [`security.md`](security.md)) |
+| `provenance.rs` | ⚠️ Legacy profile | SLSA Level 1-3 metadata and Ed25519 signing/verification are present in the private implementation; the required ML-DSA-87 + SLH-DSA-SHAKE-256s hybrid profile remains pending implementation and release evidence (see [`security.md`](security.md)) |
 
 ### Production Dependencies
 
@@ -340,7 +340,7 @@ The reference implementation uses the following production-grade crates:
 
 - `reqwest` — Async HTTP client for registry operations
 - `tokio` — Async runtime for concurrent fetches
-- `ed25519-dalek` — Cryptographic signing for provenance
+- `ed25519-dalek` — Legacy dependency used by the current private provenance implementation
 - `sha2` — SHA-256/384/512 integrity hashing
 - `serde` / `toml` — Manifest and lockfile serialization
 - `semver` — Semantic version parsing and comparison
@@ -358,7 +358,7 @@ The resolver supports all three isolation modes:
 
 - **Vulnerability Scanning**: OSV database queries with configurable severity thresholds
 - **License Compliance**: SPDX expression parsing, category-based policy gates
-- **Provenance Verification**: signature verification under the current evidence-signing profile (ML-DSA-87 + SLH-DSA-SHAKE-256s; Ed25519 retired), Sigstore compatibility
+- **Provenance Verification**: Ed25519 verification is present in the current private implementation; the required ML-DSA-87 + SLH-DSA-SHAKE-256s hybrid verification and Sigstore compatibility remain pending implementation and release evidence
 - **Integrity Checking**: SRI-format hashes verified on every install
 
 ### Target Platforms

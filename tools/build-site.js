@@ -48,11 +48,19 @@ if (!fs.existsSync(normativeDir) || !fs.statSync(normativeDir).isDirectory()) {
 }
 fs.cpSync(normativeDir, path.join(outDir, 'spec'), { recursive: true });
 
-// Root-level chapters that spec/ pages link to with `../../` paths. Without
-// them the published artifact carries dangling internal links (STATUS,
-// determinism, rfc-process). Each is required: a missing chapter is a broken
-// link in the published navigation, not an optional extra.
-for (const rel of ['STATUS.md', 'determinism.md', 'design/rfc-process.md']) {
+// Root-level chapters and linked design/stdlib references that spec/ and docs/
+// pages link to with `../../` paths. Without them the published artifact
+// carries dangling internal links. Each is required: a missing chapter is a
+// broken link in the published navigation, not an optional extra.
+for (const rel of [
+  'STATUS.md',
+  'determinism.md',
+  'design/rfc-process.md',
+  'design/principles.md',
+  'design/rfcs/0001-mindir-compact.md',
+  'design/rfcs/0002-ai-protocol.md',
+  'std/tensor.md',
+]) {
   const src = path.join(repoRoot, rel);
   if (!fs.existsSync(src)) fail(`${rel} is missing — spec/ chapters link to it`);
   fs.mkdirSync(path.dirname(path.join(outDir, rel)), { recursive: true });
