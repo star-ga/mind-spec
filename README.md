@@ -5,7 +5,15 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue?style=flat-square)](./LICENSE)
 [![Deterministic](https://img.shields.io/badge/deterministic-bit--identical-brightgreen?style=flat-square)](https://github.com/star-ga/mind/blob/main/docs/roadmap.md)
 
-**MIND** is a deterministic language. For integer and Q16.16 fixed-point computation, its compiled output is bit-identical across the proven CPU substrate set (x86 and ARM); scalar IEEE-754 `float64`/`f32` runs on the strict deterministic path and is verified byte-identical across that same CPU substrate set (x86_64 + ARM64, run-to-run and cross-ISA bit-identical on real hardware). Vector-reduction, transcendental, and GPU float determinism are on the roadmap. The specification and reference compiler form the authoritative source for that determinism.
+**MIND** is a deterministic language. Its cross-substrate CI gate verifies
+bit-identical **computational outputs** for the committed integer, Q16.16 and
+strict floating-point workloads on x86-AVX2 and ARM-NEON. Native machine-code
+bytes may differ between ISAs. The floating-point coverage includes a strict
+f32 dot product, an f32 matrix-vector product and a scalar f64 operation chain;
+it is not a proof for arbitrary floating-point programs. General reductions,
+transcendentals and GPU/other-substrate coverage require further implementation
+and conformance evidence. [Compiler RFC 0015 §5A](https://github.com/star-ga/mind/blob/main/docs/rfcs/0015-cross-substrate-bit-identity.md#5a-conformance-evidence)
+records the exact workloads, output encodings and reference hashes.
 
 Two further precise claims, stated at their honest scope: the reference compiler's **bootstrap/front-end self-hosts** (the pure-MIND front-end reproduces the reference output byte-for-byte on the `mic@1` text, `mic@3` binary, and native-ELF gates), while full-chain Rust-independence of the whole toolchain remains roadmap. The bounded RI-D driver path has landed: `mindc build --backend native` resolves a manifest entry and its local imports, enforces export scope and entry-module ownership of `main`, and emits a native executable for the admitted scalar/control-flow subset through the pure-MIND emitter. The invoking host driver remains implemented in Rust; imported aliases, structs, and enums refuse until their source ownership can survive lowering, and native aggregate/full-language coverage remains unfinished ([compiler PR #257](https://github.com/star-ga/mind/pull/257)).
 
