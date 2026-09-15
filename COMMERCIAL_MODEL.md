@@ -21,7 +21,8 @@ implementations that prove the wedge are always open.
 
 ## Open Layer
 
-Every repo listed here is public and remains open indefinitely.
+This table identifies open interfaces and documentation. A public website can
+publish those documents while keeping its website source repository private.
 
 | Repo | Role | Why open | Canonical location |
 |---|---|---|---|
@@ -30,8 +31,15 @@ Every repo listed here is public and remains open indefinitely.
 | `mind-nerve` | Python binding + MCP wire layer | Commodity integration surface; drives adoption | `star-ga/mind-nerve` |
 | `rfn-mind` | Recursive-function-network runtime | Wedge property: Q16.16 bit-identity gate across microarch | `star-ga/rfn-mind` |
 | `mind-inference` | MIND-native LLM inference pipeline | Wedge property: deterministic inference on open substrates | `star-ga/mind-inference` |
-| `mind-mem` Python API | 84 MCP tools + `.mind` config-dialect surface + Python client | Commodity API surface; open to prove governed-write moat exists | `star-ga/mind-mem` (API layer) |
-| `mindlang.dev` | Language website and public documentation | Spec/doc; must be public | `star-ga/mindlang.dev` |
+| `mind-mem` Python API | 107 registered MCP tools in release 5.0.3 + `.mind` config-dialect surface + Python client | Commodity API surface; open to prove governed-write moat exists | `star-ga/mind-mem` (API layer) |
+| `mindlang.dev` | Public language website and documentation; its source repository is private | Public documentation remains available at mindlang.dev | `star-ga/mindlang.dev` |
+
+MIND-Mem release identity: [5.0.3 on PyPI](https://pypi.org/project/mind-mem/5.0.3/),
+source `3226e4c7dcdfe2b9d0aaacc701b159bcc8c0fc78`. Its optional `mind-mem-4b`
+model was trained on 83 tools; the 107-tool runtime inventory is a separate
+capability. The released application runtime is Python with optional native
+scoring; pure-MIND migration is in development. This release inventory does not
+change the commercial boundaries proposed below.
 
 ---
 
