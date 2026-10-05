@@ -78,7 +78,7 @@ optical / customer ASICs). The commodity tier is never protected.
   that adopts the Q16.16 dtype inherits the guarantee without re-proving it.
 
 - **Evidence-chain unification (RFC 0016 + RFC 0019).** The three existing governance
-  pipelines (512-mind Hash256/Hash512, mind-mem Ed25519 model\_signing, RFC 0011
+  pipelines (MIND-Law Hash256/Hash512, mind-mem Ed25519 model\_signing, RFC 0011
   ReplayScheduler hash) converge onto a single mic@2.1 + MAP-key vocabulary. No
   competitor can claim this chain without reproducing the full RFC history.
 
@@ -87,7 +87,7 @@ optical / customer ASICs). The commodity tier is never protected.
   is the product of a multi-year architecture; a competitor cannot clone an
   orchestration runtime by copying a single repo.
 
-- **Unified governance vocabulary.** 512-mind + mind-mem + ReplayScheduler share a
+- **Unified governance vocabulary.** MIND-Law + mind-mem + ReplayScheduler share a
   common proof-chain vocabulary. This vocabulary is load-bearing for regulated-industry
   buyers (right-of-integrity, chain-of-title, provable-original attestation). No one
   else has this vocabulary.
@@ -145,12 +145,12 @@ Three governance pipelines exist today:
 
 | Pipeline | Source | Hash / signing scheme |
 |---|---|---|
-| 512-mind proof chain | `512-mind/src/proof_chain.mind` | Hash256 / Hash512 sealed-preimage |
+| MIND-Law proof chain | `mind-law/src/proof_chain.mind` | Hash256 / Hash512 sealed-preimage |
 | mind-mem model signing | mind-mem runtime kernel | Ed25519 model\_signing |
 | RFC 0011 ReplayScheduler | `mind` RFC track | ReplayScheduler hash |
 
 RFC 0016 (task #288) MUST unify these three onto a single `mic@2.1` + MAP-key
-vocabulary, citing `512-mind/src/proof_chain.mind` as the parent vocabulary anchor.
+vocabulary, citing `mind-law/src/proof_chain.mind` as the parent vocabulary anchor.
 
 **Never add a fourth governance pipeline.** Any new hash or signing scheme proposed for
 a STARGA repo is either unified into the RFC 0016 track at design time, or it is

@@ -172,7 +172,7 @@ For governance-enforced inference, model artifacts SHOULD include:
 
 The `sha256` field enables integrity verification before inference.
 When `mind_governance` is set, the inference pipeline enforces all
-512-mind invariants on every forward pass.
+MIND-Law invariants on every forward pass.
 
 ### Compile-time evidence chain (RFC 0016)
 

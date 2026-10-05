@@ -75,8 +75,8 @@ program do not depend on them.
   is module-private unless re-exported via `pub use`.
 
 ### Reference implementations
-- `star-ga/512-mind/src/nexus_key.mind` declares HSM and AEAD primitives as
-  `extern fn` and resolves them through the 512-mind HSM runtime adapter.
+- `star-ga/mind-law/src/nexus_key.mind` declares HSM and AEAD primitives as
+  `extern fn` and resolves them through the MIND-Law HSM runtime adapter.
 - `star-ga/mind-nerve/src/runtime_ffi.mind` declares I/O, time, and entropy
   primitives consumed by the inference path; mind-runtime resolves them on
   CPU and CUDA backends.
