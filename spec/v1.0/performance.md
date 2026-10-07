@@ -51,7 +51,9 @@ A conforming compiler MUST satisfy Tier 1 unconditionally. The reference impleme
 
 Same input bytes + same hardware + same selected code path → byte-identical output bytes, every invocation. IEEE 754-2008 strict for floating-point operations (including FMA). No threading non-determinism: deterministic mode disables work-stealing and ordered-reduction-violating optimizations. This is the `RuntimeConfig::deterministic = true` default mode.
 
-Within Tier 2 there is a **scalar strict sub-mode** that is additionally cross-substrate-eligible: scalar `f64`/`f32` arithmetic (`+ − × ÷ √`) is lowered with **no FMA-contraction, no fast-math, no reassociation, and fixed source order**. Because these scalar operations are correctly-rounded under IEEE-754, this sub-mode is run-to-run bit-identical today and is **verified byte-identical across x86_64 (AVX2) and ARM64 (NEON) on real hardware** by the `cross_substrate` gate (scalar-`f64` arithmetic chain + a chaotic Lorenz-Euler `f64` integrator). FMA-contracted lowering remains available for within-substrate Tier 2 but is not cross-substrate-eligible.
+Within Tier 2 there is a **scalar strict sub-mode** that is additionally cross-substrate-eligible: scalar `f64`/`f32` arithmetic (`+ − × ÷ √`) is lowered with **no FMA-contraction, no fast-math, no reassociation, and fixed source order**. Because these scalar operations are correctly-rounded under IEEE-754, this sub-mode is run-to-run bit-identical today and is **verified byte-identical across x86_64 (AVX2) and ARM64 (NEON) on real hardware** by the `cross_substrate` gate (scalar-`f64` arithmetic chain, `scalar-float-f64`; the gate's Lorenz workload, `lorenz-q16`, is integer Q16.16, not `f64`). FMA-contracted lowering remains available for within-substrate Tier 2 but is not cross-substrate-eligible.
+
+**Implementation evidence (informative).** The same gate carries two vector kernels on the strict path, a length-4093 `f32` dot product and a 64×64 `f32` matrix-vector product, each lowered with unfused multiply and add and a fixed-order lane fold; both have committed matching AVX2 and NEON output hashes ([compiler RFC 0015 §5A.3](https://github.com/star-ga/mind/blob/main/docs/rfcs/0015-cross-substrate-bit-identity.md#5a3-committed-reference-hashes-the-load-bearing-constants), `c8efcf9a`). After v0.10.2 it also gained ten scalar-`f64` quantitative-finance workloads (`545ed80c`, `82e34947`; pending release), each hashing one exported MIND kernel over eight fixed inputs, whose floating-point arithmetic is `+ − × ÷` and `sqrt` in fixed source order (some kernels also use comparisons, `max`, integer loop counts, and in the Monte Carlo kernel an integer LCG with integer-to-`f64` conversion), with committed equal AVX2 and NEON hashes whose NEON values the maintainers record as verified on aarch64 hardware. This is evidence for those kernels and programs on the compiled MLIR path only; it is not evidence for general vector reductions or for compiler-provided transcendentals.
 
 Within Tier 2, **opt-in SIMD fast paths** (e.g. mind-blas Track A) are within-substrate deterministic by construction: a fixed input on a fixed CPU evaluating a fixed code path produces a fixed output. SIMD reduction ordering may differ from sequential scalar reduction in floating-point, but the difference is bounded and itself deterministic given the same hardware.
 
@@ -59,9 +61,9 @@ Within Tier 2, **opt-in SIMD fast paths** (e.g. mind-blas Track A) are within-su
 
 Q16.16 fixed-point operations produce **byte-identical results** across the **proven substrate set: x86 CPU and ARM CPU** (the cross-substrate bit-identity gate, gate #57, is single-host x86 + ARM). Verified by SHA-256 over the concatenated `(operation_id, q16_output)` stream for a fixed conformance corpus. NVIDIA-GPU and photonic-substrate inclusion in this set is **aspirational** — those backends are roadmap and are not yet covered by the gate.
 
-Tier 3 is observable only on the Q16.16 path because:
+Tier 3 is defined over the Q16.16 path because:
 - Integer-domain SIMD reduction is associative; SIMD fast paths produce identical byte sequences to scalar reference at every input length.
-- Floating-point **SIMD/vector reduction** is **not** associative; cross-substrate `f32`/`f64` **vector-reduction** bit-identity is not claimed for any tier (canonical reduction trees are roadmap). This non-associativity is specific to vector reductions: **scalar** `f64`/`f32` arithmetic (`+ − × ÷ √`) is correctly-rounded and runs on the strict no-FMA path run-to-run bit-identical and verified byte-identical across x86_64 + ARM64 (x86 == ARM) on real hardware — do not read this line as a claim that scalar float determinism is unavailable.
+- Floating-point **SIMD/vector reduction** is **not** associative; cross-substrate bit-identity for general `f32`/`f64` **vector reductions** is not claimed for any tier (canonical reduction trees are roadmap). The two fixed-order strict `f32` kernels named under Tier 2 (the length-4093 dot product and the 64×64 matrix-vector product) carry committed matching AVX2 and NEON hashes; that is evidence for those kernels, not a claim about other reductions. This non-associativity is specific to vector reductions: **scalar** `f64`/`f32` arithmetic (`+ − × ÷ √`) is correctly-rounded and runs on the strict no-FMA path run-to-run bit-identical and verified byte-identical across x86_64 + ARM64 (x86 == ARM) on real hardware — do not read this line as a claim that scalar float determinism is unavailable.
 - The Q16.16 path is the substrate-bridge across the proven CPU substrates (x86 + ARM), and is the intended bridge to future fixed-precision GPU / photonic backends (roadmap).
 
 A conforming implementation MAY opt out of Tier 3 entirely (no Q16.16 path). An implementation that ships a Q16.16 path MUST satisfy Tier 3 across all advertised substrates, verified by the conformance corpus.
@@ -421,9 +423,9 @@ This section contains empirically validated benchmark results for the reference 
 > this section were measured on the **v0.2.x reference-compiler benchmark run**
 > (February 2026) — that is the version actually exercised by these measurements,
 > and the `v0.2.0` / `v0.2.1` labels below denote that historical snapshot, not
-> the current toolchain. The **current reference compiler is `v0.8.1`** (see
+> the current toolchain. The **tracked reference compiler is `v0.10.2`** (see
 > [`STATUS.md`](../../STATUS.md)). These numbers have not been re-measured against
-> `v0.8.1`; they are retained as the last published benchmark snapshot. Treat all
+> `v0.10.2`; they are retained as the last published benchmark snapshot. Treat all
 > absolute timings and multipliers as historical and version-pinned to v0.2.x.
 
 ### Reference Platform (February 2026)

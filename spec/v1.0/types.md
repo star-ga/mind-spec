@@ -35,6 +35,25 @@ The following forms are part of the core language:
 
 Implementations MAY extend the set of primitive types but MUST document the extensions.
 
+> **Compiler integration update, pending release (informative).** The reference
+> compiler source at `4fd65cfb` refuses an `iN` or `uN` annotation with `N`
+> greater than 64 (`i128`, `u128`, `i256`, ...) during checking. The refusal covers
+> `let` annotations, parameters, return types, `as` casts, `const` and extern
+> `const` types, type-alias targets, struct fields, enum payloads, extern function
+> signatures, closure and trait-method signatures, and the same annotations
+> nested inside generic, tuple, array, reference and pointer types. Widths up to
+> 64 (for example `u8`, `i16`, `u32`, `i64` and `u64`) still check, and tensor
+> dtype strings are outside this check. Before this change such annotations were
+> accepted outside extern function signatures, whose C-ABI check already refused
+> them, and (as the commit records for a `let` binding) their values were computed
+> in 64 bits. The check does not depend on a cargo feature. The compiler test
+> `wide_integer_types` exercises the `let`, parameter and return positions; the
+> other positions go through the same validation walk and have no dedicated
+> control. This check refuses only widths greater than 64 that fit in 32 bits;
+> an unrecognised width of 64 bits or less (for example `i24`) is not refused by
+> this check and is not computed at its written width. This does not change the
+> published v0.10.2 artifact.
+
 ## Typing judgements
 
 Typing rules are written using natural deduction. The primary judgement `Γ ⊢ e : T` reads “under
@@ -58,6 +77,37 @@ MUST identify the literal and report both the required and actual element
 counts; execution failure at a later call site is not an adequate substitute.
 This rule concerns literal cardinality; nonliteral initializers remain subject
 to the ordinary type compatibility rules.
+
+**Implementation coverage (informative, pending release).** The normative rule
+above is limited to annotated `let` and `const` bindings. Compiler commit
+`c4c7b034` additionally applies the cardinality check, and an element-type
+check, to the value supplied for a struct-literal field whose declared type is
+exactly `[i64; N]` (an array literal, or a non-literal value of known type;
+module-local type aliases resolved). The checker reports `E2001` during checking
+when:
+
+- the literal does not have `N` elements;
+- an element has a type known not to be `i64`, for example a float literal, a
+  bool literal or a comparison or logical result, a record value, a call whose
+  lexically nearest declaration returns a known type other than `i64`, a `for`
+  range variable (typed `i32` by this check) used without `as i64`, or a local
+  or parameter of another known type;
+- a non-literal value has a known type other than `[i64; N]`.
+
+An `if`/`else` expression or a block inside an element is checked branch by
+branch through its tail, so a known-bad branch is not hidden by an unknown
+sibling. The same commit also rejects, with `E2001`, a float literal reached
+through an `if`/`else` branch or block tail of a fixed-array return whose
+element type is an integer type. Fields whose element type is not `i64` are not
+checked by this pass, a struct declared in another source has no schema for it,
+and a fact the checker cannot prove (an unresolved identifier or a method call,
+for example) is deferred rather than rejected. The pass runs in builds with the
+`std-surface` feature, which the reference compiler enables by default. The
+compiler controls are its `fixed_array_return_lengths` tests.
+
+This coverage does not extend the normative rule to struct-literal fields;
+whether it should become a rule is a decision pending for 1.7.0. It does not
+change the published v0.10.2 artifact.
 
 A comprehensive derivation catalogue is maintained in the implementation notes
 ([informative](https://github.com/star-ga/mind/blob/main/docs/type-system.md)).
@@ -120,12 +170,31 @@ pure-MIND native-ELF support.
 [Compiler PR #263](https://github.com/star-ga/mind/pull/263), merged at
 [`1833f095`](https://github.com/star-ga/mind/commit/1833f095ce74b966287f27932c92733529c08b53),
 extends reference record-field fixed arrays to `i8`, `u8`, `i16` and `u16`.
-Executing shared-artifact controls preserve element width and signedness,
-neighboring fields, and exactly-once receiver/index/right-hand-side evaluation.
-Known opaque handles assigned to narrow elements are refused with `E2036`,
-rather than truncated into address-dependent values. The eight-byte cell stride
-is this reference backend's layout, not a new language-level layout mandate.
-Pure-MIND native record-array support remains a separate capability gate.
+Executing shared-artifact controls preserve element width and signedness and
+neighboring fields (`aa56de24`), and exactly-once receiver/index/right-hand-side
+evaluation (`5a4e4b02`). Known non-integer values, such as floats, and known
+opaque handles assigned to narrow elements are refused with
+[`E2036`](./errors.md#e2036-non-integer-value-stored-into-a-narrow-integer-element)
+(`0a8b34a5`), rather than truncated; an opaque handle would otherwise become an
+address-dependent value. The eight-byte cell stride is this reference backend's
+layout, not a new language-level layout mandate.
+
+The pure-MIND native emitter has a separate, emitter-level, read-only slice for
+record fields of type `[i64; N]` and `[u8; N]` with `1 <= N <= 4096` (a
+capability bound of that emitter, not a language limit). The `i64` form landed
+in `c4c7b034` and the `u8` form in `9b23e3fe`. The slice admits construction
+from a direct array literal, whole-field reads and bounds-checked indexed
+reads. Indexed write-back through the field, aliases, non-literal construction,
+other element widths, aggregate cells and multi-module ownership are refused. The
+slice is reachable only through the emitter's self-test entry, which takes a
+caller-supplied trace hash. The emitter's other entry, which computes its own
+canonical trace hash, returned no artifact for the `direct.mind` fixture, and the
+standalone bootstrap also refuses that fixture; the canonical mic@3 trace path's
+layout precondition fails closed for every record that has a fixed-array field
+(`f7bba8c6` for field reads, `a80b67ea` for construction), so the slice is not
+reachable through that path. The slice is therefore not native-profile support,
+not standalone-compiler support, and is in no published artifact, including
+v0.10.2.
 
 Struct-owned fixed arrays of records remain unsupported: checking may succeed,
 but shared-library emission refuses with `E6009` and leaves no artifact.
@@ -187,8 +256,9 @@ The type checker participates directly in Core IR construction:
 
 > **Compiler integration update, pending release.** The project-module source
 > implementation under review resolves qualified imported types and enum
-> variants as described here. This does not change the published v0.10.2
-> artifact.
+> variants as described here, and compiler commit `1def5dde` adds the
+> bare-headed enum variant resolution described below. This does not change the
+> published v0.10.2 artifact.
 
 For a manifest project, the defining source module owns each enum, struct, and
 type alias. A qualifier MUST resolve to the current module or to exactly one
@@ -202,6 +272,49 @@ positions. Same-named types in different modules remain distinct.
 An unknown, unimported, non-exported, or ambiguous owner MUST be refused with
 `E2002` during both checking and artifact-producing builds. A refused build
 MUST leave no artifact.
+
+This clarifies the owner rule above for bare-headed enum variant paths. In a
+manifest project, a bare-headed enum variant path whose enum is not
+declared in the current module (`Table::Raw`, `Table.Raw`, or the same head in a
+pattern) resolves through that module's imports. When exactly one import exports
+a type of that name and that type is an enum, its module is the owner, and the
+value, payload-constructor, dot-form and pattern spellings all denote the
+owner's variant. A type declared in the current module keeps lexical
+precedence. A bare-headed `Enum::Variant` value or pattern MUST be refused
+with `E2002` during checking and artifact-producing builds, and a refused build
+MUST leave no artifact, when its head names an enum declared by another project
+module and (a) no import exports a type of that name, (b) several imports export
+one, or (c) the single imported enum does not declare the variant. The dot
+spelling `Enum.Variant` denotes a variant only when its head resolves to a
+visible enum; with such a head, case (c) applies to it.
+
+**Implementation coverage (informative, pending release).** Compiler commit
+`1def5dde` implements this resolution, and the refusal with the gaps listed
+below, for manifest projects in builds with the `cross-module-imports` feature,
+which is not a default feature; a build without it does not perform them. The
+resolution matters most when several project modules declare an enum of the same
+name, because the reference keys each such enum by its owner. The reference
+locates the diagnostic at the path, or at the match arm for a pattern.
+
+Implementation gap: the reference check inspects a bare `Enum::Variant` used as
+a plain value and in patterns, including payload patterns. It does not inspect a
+payload-constructor call such as `Table::Text(9)` or a struct-variant literal
+(`Table::Text { ... }`), and the name resolver accepts any `::`-qualified callee
+and does not resolve a struct-literal name, so checking reports no `E2002` for
+those spellings on another module's enum; no compiler control records what a
+build then does with them. The parser rewrites `Table.Raw` to `Table::Raw` only
+when the enum is visible to the module, so for the dot spelling the check
+refuses an unknown variant of an imported enum but not an unimported or
+ambiguous enum.
+
+Coverage: the compiler control `cross_module_enum_variant_lowering` builds a
+four-module project with colliding enum names and runs it when the MLIR
+toolchain produces an artifact. It refuses the not-imported and unknown-variant
+cases through both `mindc check` and `mindc build`, with no artifact left, and
+the ambiguous case through `mindc check` only. Its refusal cases use
+`::`-spelled value paths; no dedicated control asserts a refusal reported at a
+pattern. The control is compiled only with the `mlir-build` and
+`cross-module-imports` features on a unix host.
 
 Inline `module name { ... }` blocks are transparent syntax containers in the
 current parser. The parser accepts and preserves dotted type names and

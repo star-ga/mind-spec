@@ -39,6 +39,10 @@ document may present them as shipped:
 
 - **Closures and first-class function values** — no closure syntax, no capture semantics, no
   higher-order functions. The compiler rejects fn-as-value use fail-loud rather than miscompiling.
+  On compiler main a bare name of a function of the current module, or of a function-only
+  standard-surface export, used as a value is refused with
+  [`E2037`](./errors.md#e2037-function-name-used-as-a-value) (`1def5dde`, pending release); see that
+  entry for its limit.
 - **Traits** — no `trait` declarations, implementations, or `dyn Trait` objects. The normative
   rules in [Types](./types.md#traits-and-generics) describe the target design.
 - **Full generics** — today's surface is a bounded slice: a single type parameter over scalar

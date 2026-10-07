@@ -61,6 +61,53 @@ shipped by the reference implementation.
   - Diagnostic MUST include source location (file, line, column)
   - Implementations MAY include the condition text in the diagnostic
 
+- **`assert(condition: bool, message) -> unit`**, where `message` is a string literal
+  - Surface spellings: `assert cond, "message"` (the message operand of the Core v1
+    `AssertStatement` production in
+    [`grammar-syntax.ebnf`](./grammar-syntax.ebnf)) and the parenthesised
+    `assert(cond, "message")`. The parenthesised spelling is an additive form
+    targeted for specification 1.7.0 (reference compiler commit `487dd5c7`,
+    pending release); this does not declare that release or promote an
+    unreleased compiler artifact.
+  - Aborts execution if `condition` is `false`, and the diagnostic SHOULD surface `message`
+  - In the parenthesised spelling, a pair whose second element is a string
+    literal is the condition and the message, not a tuple. A tuple is not a
+    `bool`, so a tuple-typed condition is ill-typed under the signatures above.
+
+  > **Compiler integration update, pending release.** In the reference
+  > implementation (compiler commit `487dd5c7`) the parser splits
+  > `assert(cond, "message")` into the condition and the message, exactly as
+  > `assert cond, "message"` spells them; the message is kept as written between
+  > the quotes. The commit changes how the parenthesised spelling is parsed; the
+  > lowering described next is shared with the bare spelling and is not new. In
+  > a compiler built with the `mlir-build` feature (the assert lowering is gated
+  > on the default `std-surface` feature), a native MLIR build aborts with
+  > SIGABRT when the condition is false and returns normally when it is true; the
+  > abort goes through `__mind_assert_fail`, which receives only the message's
+  > byte length, so the executable prints no diagnostic of its own: neither the
+  > message nor a source location. `mindc test` reports `FAILED` with the
+  > message for a false condition. Outside `mindc test` the reference evaluator
+  > does not evaluate assert conditions, and the `--backend native` path is not
+  > covered by this note. When the whole condition is itself a tuple expression
+  > other than that pair, such as `assert(cond, 9)` or a three-element tuple, it
+  > is a parse error. `mindc check` and `mindc build` report it under `E1001`,
+  > the code the reference uses for any parse error (see the
+  > reference-implementation table in [errors.md](./errors.md); there is no
+  > dedicated code), while `mindc test` reports the message without a code. For
+  > a two-element tuple whose second element is not a string literal the message
+  > begins `an assert's second operand must be a string message`; for any other
+  > arity it is `an assert condition must be one expression, not a tuple`. The
+  > wording is not normative. The check is syntactic only. A tuple inside a
+  > further pair of parentheses, such as `assert((cond, "message"))`, and a
+  > tuple-valued variable are not rejected, and the reference does not otherwise
+  > check at compile time that an assert condition has type `bool`. Such a
+  > condition, when the tuple has two or more elements, lowers to a non-zero
+  > tuple pointer, which a native MLIR build treats as true. In the published
+  > v0.10.2 compiler the parenthesised form parses as an assert of one tuple,
+  > which a native MLIR build treats as true, so such an assert never aborts
+  > there; on v0.10.2 write `assert cond, "message"`. This note does not change
+  > the published v0.10.2 artifact.
+
 - **`panic(message: string) -> !`**
   - Terminates execution immediately with the given message
   - Return type `!` (never) indicates this function does not return
@@ -655,10 +702,15 @@ miscompile — under the default feature set.
 
 A conforming implementation that exposes both features MUST publish a
 benchmark gate asserting that the headline `parse_typecheck_ir` workloads do
-not regress by more than 7% against a published baseline. (The reference
-implementation initially enforced +5% but loosened to +7% as of
-mindc 0.4.3 to absorb GitHub-hosted-runner variance on microbench
-suites; the bench-gate workflow comment records the rationale.)
+not regress by more than 10% against a published baseline (normative change
+targeted for specification 1.7.0, decided by the specification owner on
+2026-10-07). (The reference
+implementation enforced +5%, then +7% from mindc 0.4.3; it now applies the
+one-sided +10% threshold described in
+[IR stability](./ir-stability.md), which is what its gate runs. This text
+previously stated 7% while the gate enforced 10%. The bound is to be tightened
+only when the gate's measured run-to-run noise is well below the tighter value;
+otherwise the gate would fail on noise alone.)
 
 ## Cryptographic & protocol primitive modules (informative — implementation status)
 
@@ -736,6 +788,8 @@ run-to-run bit-identical and verified byte-identical across x86_64 + ARM64 on re
 - **f64 transcendental / vector-reduction operations**: Error MUST be within 1e-12 relative tolerance or 1e-15 absolute
 - **Integer operations**: Exact (no approximation)
   - Overflow behavior: implementation-defined (MAY wrap, saturate, or error)
+
+Implementation evidence (informative): the reference implementation's fixed-order strict `f32` dot (length 4093) and 64×64 matrix-vector kernels carry committed output hashes that are identical for x86_64 AVX2 and ARM64 NEON (RFC 0015 section 5A.3, `c8efcf9a`); this covers those fixtures only and does not remove the tolerance allowance above for other vector reductions or transcendental functions.
 
 ## Versioning
 

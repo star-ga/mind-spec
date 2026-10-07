@@ -36,16 +36,19 @@ information for inspection and debugging. See [`star-ga/mind/docs/autodiff.md`](
 ## Determinism is load-bearing
 
 Compiled output MUST be bit-identical given identical source and toolchain. This is not merely a
-quality property — it is the foundation of the evidence-chain attestation surface and the
-self-host convergence proof. The **native-ELF backend** (`src/native`) is the normative self-host
-target precisely because its output is a pure function of the IR (determinism-by-construction); the
-MLIR-text backend is a downstream-interchange path for ecosystem interoperability and exotic-chip
-reach. Both paths MUST produce deterministic output on a given host; cross-substrate bit-identity is
-additionally required for integer/Q16.16 computations and — as of the 2026-07-05 hardware
-verification — for scalar IEEE-754 `f64`/`f32` arithmetic (`+ − × ÷ √`) on the strict no-FMA path,
-both proven byte-identical across x86_64 (AVX2) and ARM64 (NEON). Cross-substrate bit-identity for
-`f32`/`f64` vector reductions and transcendentals remains roadmap (see `spec/v1.0/ir-stability.md`
-and `determinism.md`).
+quality property — it is the foundation of the evidence-chain attestation surface and the self-host
+convergence proof. The **native-ELF backend** (the pure-MIND native emitter in
+`examples/mindc_mind`; on compiler main, pending release, it is reached through
+`mindc build --backend native`, `52bd6d3b`) is the normative self-host target precisely because its
+output is a pure function of the source image it is given (the user sources plus the seed
+standard-library modules, in the fixed order of the committed std manifest;
+determinism-by-construction); the MLIR-text backend is a downstream-interchange path for ecosystem
+interoperability and exotic-chip reach. Both paths MUST produce deterministic output on a given
+host; cross-substrate bit-identity is additionally required for integer/Q16.16 computations and — as
+of the 2026-07-05 hardware verification — for scalar IEEE-754 `f64`/`f32` arithmetic (`+ − × ÷ √`)
+on the strict no-FMA path, both proven byte-identical across x86_64 (AVX2) and ARM64 (NEON).
+Cross-substrate bit-identity for `f32`/`f64` vector reductions and transcendentals remains roadmap
+(see `spec/v1.0/ir-stability.md` and `determinism.md`).
 
 ## Predictable performance
 

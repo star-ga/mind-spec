@@ -9,6 +9,69 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed — owner rulings of 2026-10-07 (targeted for specification 1.7.0)
+
+- Import paths separate their segments with `.` in the grammar (`ImportPath`). The earlier `::` spelling was never accepted for `import` by a released reference compiler; the reference `use` still accepts `::` as an extension.
+- Added the normative [Module-qualified references](../spec/v1.0/language.md#module-qualified-references) rule: an import qualifier selects the member exported by the module that import names, and an unexported member is refused with `E2002`. The reference does not yet conform for functions: two imported modules that export the same function check without a diagnostic but fail to link.
+- The compile-speed bound in [Standard Library](../spec/v1.0/stdlib.md) is now 10%, matching what the reference gate enforces (it previously stated 7%). It is to be tightened only when measured run-to-run noise is well below the tighter value.
+- A verifier MUST name a retired signature scheme's tag as legacy and non-compliant, so a retired signature is never mistaken for corruption, and MUST NOT silently downgrade verification. The reference's wording is a pending compiler change.
+
+### Fixed — status accuracy
+
+- Qualified the ML-DSA-87 + SLH-DSA-SHAKE-256s signing profile as implemented on compiler main after v0.10.2 (pending release; v0.10.2 contains neither scheme) and replaced the legacy-format sentence that implied retired signatures could still be accepted.
+- Described the native-ELF image as a pure function of the source image it is given (user sources plus the fixed seed standard library) everywhere, not of "the IR".
+- RFC 0001: replaced the unmeasured `mic@3` ratio, which came from a reference-model encoder rather than `mindc --emit-mic3`, with the measured canonical size of the same network (87 bytes at compiler `83ed6a11`). No JSON encoding of that IR exists, so no ratio is stated.
+- Removed vendor attribution from the MHS profile and roadmap pages and from STATUS.
+
+### Added — E2036 and E2037 type-check refusals
+
+- Added pending catalog entries `E2036` (a proven non-integer or opaque-handle value stored into an `i8`/`u8`/`i16`/`u16` element; compiler `0a8b34a5`, merged with PR #263 at `1833f095`) and `E2037` (a function name used as a value; compiler `1def5dde`). Both are additive Core v1 catalog changes targeted for specification 1.7.0; they do not declare that release or promote an unreleased compiler artifact.
+- Clarified that `E2002` covers bare-headed `Enum::Variant` paths whose enum is unimported, exported by several imports, or lacks the variant. The compiler integrations remain pending and unpromoted.
+
+### Documentation alignment: type-checking refusals and record arrays
+
+- Recorded pending reference coverage for `[i64; N]` struct-literal field cardinality and element checks under `E2001` (compiler `c4c7b034`) without extending the normative let/const cardinality rule.
+- Clarified that an unsupported integer width must be refused rather than computed at another width; the reference refuses annotations wider than 64 bits (compiler `4fd65cfb`).
+- Documented bare-headed imported enum variants, resolved through the module's imports or refused with `E2002` (compiler `1def5dde`, `cross-module-imports`).
+- Linked `E2036` from record-field array coverage and narrowed the pure-MIND native record-array statement to a read-only emitter slice (`c4c7b034`, `9b23e3fe`) that the standalone compiler and canonical trace paths still refuse (`fe912396`, `a80b67ea`). The compiler integrations remain pending and unpromoted.
+
+### Documentation alignment: surface-language status
+
+- Clarified that `f32`/`f64` comparison operators are IEEE 754 comparisons (with a NaN operand all are false except `!=`) and recorded reference status: unordered MLIR `!=` since compiler `2597ee9c`, native x86-64 `f64` since `ccbb00b8`, and an open `mindc test` defect for `f64` comparisons.
+- Added the parenthesised `assert(cond, "message")` form to the grammar as an additive form targeted for specification 1.7.0 (compiler `487dd5c7`).
+- Recorded informative reference status for range-`for` loop-variable re-declaration (`fe9854ec`), the `E2037` function-as-value refusal (`1def5dde`), and import aliases and `::` member references (`f2fc890d`, `cd150ae7`). The import-path separator and the qualifier rule are covered by the owner-ruling entry above.
+- Fixed the Core IR link for binary operations. The compiler integrations remain pending and unpromoted.
+
+### Documentation alignment: source test evaluation
+
+- Required source test runners to evaluate integers at the same declared widths as compiled artifacts and to refuse values they cannot materialise at a narrow width; recorded the reference evaluator's coverage and gaps (compiler `97c0d273`, `74004786`, `2575c1e9`, `a7f9520a`).
+- Recorded path-spelled imported calls and constants under `mindc test` (`953d7233`) and failure reporting for `assert(cond, "message")` (`487dd5c7`), and noted the open `mindc test` defect for `f64` comparisons. The compiler integrations remain pending and unpromoted; this entry does not represent a compiler-version change.
+
+### Documentation alignment: assertion message form and reduction evidence
+
+- Added `assert(condition, message)` with a string-literal message to the `core` module as an additive form targeted for specification 1.7.0 (compiler `487dd5c7`, pending release).
+- Noted that the fixed-order strict `f32` dot (length 4093) and 64x64 matrix-vector kernels carry committed matching AVX2 and NEON output hashes (compiler `c8efcf9a`), without removing the vector-reduction tolerance allowance.
+
+### Documentation alignment: determinism and evidence verification
+
+- Clarified that a retired-scheme evidence signature verifies as `retired`, never valid or absent, and that retired or malformed signing seeds are refused without an artifact (compiler PR #262: `83bebf39`, `2b8d5e2e`, `9881cb91`). This supersedes the 'pending retirement' wording in the bounded native project builds entry; releases remain unsigned.
+- Recorded declared-width integer wrapping, refusal of integer widths above 64 bits (`4fd65cfb`), per-backend status of IEEE NaN comparisons (`2597ee9c`, `ccbb00b8`), and the rule that a user-defined function is never replaced by a host library routine (`9c231f50`).
+- Qualified vector-reduction wording with the two committed strict `f32` kernels (`c8efcf9a`) and updated the cross-substrate inventory to 35 workloads, including ten scalar-`f64` quant workloads (`545ed80c`, `82e34947`). The compiler changes remain pending release.
+
+### Documentation alignment: MLIR build path and native backend location
+
+- Recorded that the reference build driver marks every MLIR function definition `nobuiltin` before the LLVM toolchain runs, leaving `--emit-mlir` text unchanged (compiler `9c231f50`, pending release).
+- Replaced the removed `src/native` path with the pure-MIND emitter in `examples/mindc_mind` (removed in compiler `776facc8`) and repaired the runtime GPU-backends link.
+
+### Documentation alignment: implementation evidence reference
+
+- Moved the implementation-evidence source reference to compiler `7831998b` and re-verified its source anchors.
+- Recorded the native first-fence changes (IEEE-ordered `f64` comparisons, `ccbb00b8`; named refusal of `f32`/`f16`/`bf16` types, `a1b0b5f5`, `f6541e21`), the formatter write guard and check drift reporting (`eb872eaf`, `f2fc890d`, `6f9ac5eb`), early-failure reporter output (`fbb08821`) and the LLVM/MLIR 20 toolchain requirement (`3f9b80df`). Artifact and command receipts remain UNKNOWN; none of these is a release claim.
+
+### Documentation alignment: mic@3 0x04 mirror status
+
+- Updated the experimental pure-MIND mirror status: complete core body decoding with canonical re-emission (compiler `70434b42` to `bb53942b`) and a separate semantic gate covering ValueId coverage, function identity, parameter agreement, duplicate definitions, authority presence, scope membership and per-function element allowances (`1eefe191` to `3923608a`). Parameter names, typed call relationships, string-table minimality and refusal-order parity remain open. The mirror remains a review candidate; no v04 wire contract or Core v1 requirement is established.
+
 ### Documentation alignment: checked canonical source lowering
 
 - Recorded the opt-in source-to-canonical-IR API from [compiler PR #259](https://github.com/star-ga/mind/pull/259), including captured ownership, checked scalar producer facts, and validation of returns in each function scope.
@@ -18,7 +81,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Recorded the native project-build path landed in [compiler PR #257](https://github.com/star-ga/mind/pull/257): manifest entry and local-import resolution, export visibility, and entry-module ownership of `main` for the admitted scalar/control-flow subset.
 - Kept Rust host-driver dependence and aggregate/full-language native coverage explicit. Unsupported owned aliases, structs, and enums are refused.
-- Clarified the supported production signing profile, ML-DSA-87 **and** SLH-DSA-SHAKE-256s, and that published releases are currently unsigned. Earlier schemes remain in source pending retirement.
+- Clarified the supported production signing profile, ML-DSA-87 **and** SLH-DSA-SHAKE-256s, and that published releases are currently unsigned. Ed25519 and the Ed25519/ML-DSA-65 hybrid have since been retired from signing and trust verification (see the determinism and evidence verification entry above).
 
 ### Added — E6009 compiler materialization refusal
 

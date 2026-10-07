@@ -79,11 +79,45 @@ Type errors occur during type checking and type inference.
 ### E2002: Unresolved name or qualified owner
 - **Trigger**: reference to an undeclared variable, or to a qualified type or
   enum variant whose owner is unknown, unimported, ambiguous, or does not
-  export that declaration. Recognising a qualified path during parsing does
-  not establish semantic module ownership.
+  export that declaration. This covers a bare-headed `Enum::Variant` (or
+  `Enum.Variant`) value or pattern whose head names an enum declared by another
+  project module, when the current module declares no type of that name and
+  (a) no import exports a type of that name, including when the module that
+  declares the enum is imported but does not export it, (b) several imports
+  export one, or (c) the single import exports an enum of that name that does
+  not declare the variant. Recognising a qualified path during parsing does not
+  establish semantic module ownership.
+- **Implementation status**: bare-headed variant resolution is pending compiler
+  integration (compiler commit `1def5dde`). It applies in compiler builds with
+  the `cross-module-imports` feature, which is not a default feature, wherever
+  several source modules are checked or built together (see Scope). The
+  control `cross_module_enum_variant_lowering` is compiled only with the
+  `mlir-build` and `cross-module-imports` features on a unix host. Checking
+  reports a located E2002, and the project build refuses to embed the module
+  as a runtime fallback.
 - **Required context**: unresolved name or qualified path and source location
 - **Examples**: `E2002: Undefined variable 'x' at line 8, column 5`;
-  `E2002: unknown module-qualified type \`config.Mode\``
+  ``E2002: unknown module-qualified type `config.Mode` ``;
+  ``E2002: enum `Table` in `Table::Other` is not visible in this module; import the module that declares it``;
+  ``E2002: ambiguous enum `Table` in `Table::Other`: several imported modules export it; qualify it with its module``;
+  ``E2002: unknown variant `X` of imported enum `Table` ``
+- **Scope**: the reference reports the three bare-variant messages above only
+  when its owner registry is built from several source modules: by a project
+  build, by a single-file entry that imports modules of its enclosing manifest
+  project, or by `mindc check` run on several files or on a directory that
+  holds several, which builds the registry from the checked files and does not
+  read a `Mind.toml`. A single source checked or built on its own gets none of
+  them. It reports them only when the head names an enum that some project
+  module declares; a head that names no project enum, and the `Option` and
+  `Result` heads, are not inspected by this check. It inspects a unit-variant
+  value path (`Enum::Variant`) and a `match` pattern, which is reported at its
+  match arm. It does not inspect a payload-constructor call
+  (`Enum::Variant(...)`) or a struct-variant literal (`Enum::Variant { ... }`).
+  It rewrites `Enum.Variant` to the `::` form only for an enum that is visible
+  to the module, so for the dot spelling it covers an unknown variant of an
+  imported enum but not an unimported or ambiguous enum. A type that the
+  current module declares keeps lexical precedence over an imported type of the
+  same name.
 
 ### E2003: Cannot infer type
 - **Trigger**: Type inference fails due to insufficient constraints
@@ -147,6 +181,70 @@ Type errors occur during type checking and type inference.
 
 The pending checker does not provide general lifetime inference or mutable-alias
 exclusivity analysis; those guarantees remain future work.
+
+### E2036: Non-integer value stored into a narrow integer element
+
+- **Implementation status**: pending compiler integration; additive Core v1
+  catalog entry targeted for specification 1.7.0. It does not declare that
+  release or promote an unreleased compiler artifact. Reference compiler
+  commit `0a8b34a5`, merged with
+  [compiler PR #263](https://github.com/star-ga/mind/pull/263) at `1833f095`;
+  see [record identity implementation coverage](./types.md#implementation-coverage).
+- **Trigger**: an indexed assignment whose destination element type, after
+  resolving type aliases, is `i8`, `u8`, `i16` or `u16`, and whose right-hand
+  side is proven not to be an integer value. That is either a known
+  non-integer scalar class (for example a float literal, a float-typed
+  binding, a float-returning call, or a cast to a float type) or an opaque
+  handle: a string, a declared struct value, a value of an array, tuple,
+  generic, slice, reference, tensor, raw-pointer or function-pointer type, or
+  an array, tuple, struct, map or set literal, or a reference expression.
+  `bool` counts as an integer class.
+- **Required context**: the assigned value's span and guidance to use an
+  explicit numeric conversion.
+- **Scope**: best effort. A right-hand side whose type the checker cannot
+  establish is admitted, and integer right-hand sides, including integer
+  aliases and integer values outside the element's range, are not diagnosed by
+  this rule. The reference resolves module-local `type` aliases when it builds
+  the element types of struct fields; a destination whose element type is
+  written as an alias elsewhere, such as in a parameter annotation, is
+  classified by its written spelling and is admitted. The reference runs the
+  check only in builds with the `std-surface` feature, which is a default
+  feature. An indexed destination whose array, fixed-array or slice type the
+  checker cannot establish is not checked, and the check runs only inside
+  function bodies. Struct-field arrays and parameters typed as a fixed array,
+  `array<T>` or a slice are checked; a local `let` fixed-array binding
+  initialised from an array literal (for example
+  `let xs: [u8; 4] = [0, 0, 0, 0]`) is not recorded, so a store into it is not
+  checked. The compiler controls `fixed_array_narrow_assignment_types` and
+  `fixed_array_struct_field_run` cover struct-field arrays only.
+- The rule refuses a proven opaque handle instead of truncating it to the cell
+  width; a handle the checker cannot prove is not covered.
+- **Example**: `E2036: a narrow integer array element cannot store a proven non-integer or opaque-handle value; use an explicit numeric conversion`
+
+### E2037: Function name used as a value
+
+- **Implementation status**: pending compiler integration; additive Core v1
+  catalog entry targeted for specification 1.7.0. It does not declare that
+  release or promote an unreleased compiler artifact. Reference compiler
+  commit `1def5dde`; the rule does not depend on the `cross-module-imports`
+  feature, and without the default `std-surface` feature
+  (`--no-default-features`) the function-only standard-surface names are not
+  collected, so only the module's own functions are classified. Its only
+  controls, in `cross_module_enum_variant_lowering`, are compiled with the
+  `mlir-build` and `cross-module-imports` features on a unix host.
+- **Trigger**: a bare identifier in value position whose only meaning is a
+  function of the current module or a function-only standard-surface export.
+  Function values are not part of the executable subset. Member-access
+  receivers such as `sha256.hash(...)` are not affected.
+- **Required context**: the function name and the source location of the
+  reference.
+- **Limit**: the reference classifies identifiers only inside function bodies;
+  a module-level `const` or `let` initializer is not checked by this rule. A
+  function name that resolves only through another project module's exports is
+  not classified by the reference, which does not report `E2037` for it.
+- **Check/build**: the reference refuses the build rather than lowering the
+  module.
+- **Example**: ``E2037: `null` is a function, not a value: first-class functions are not yet supported``
 
 ### E2300: Collection mutation in expression position
 
@@ -383,7 +481,7 @@ E6xxx errors occur during backend execution or while producing a runnable artifa
 - **Required context**: the invalid entry and the validation reason
 - **Artifact contract**: Compilation MUST terminate with a non-zero status;
   this user configuration error MUST NOT be classified as backend capability
-- **Example**: `E6010: invalid Mind.toml [exports] c_abi entry \`bad name\`: export name must be ASCII alphanumeric or underscore`
+- **Example**: ``E6010: invalid Mind.toml [exports] c_abi entry `bad name`: export name must be ASCII alphanumeric or underscore``
 
 ## Diagnostic requirements
 
@@ -457,6 +555,8 @@ The reference compiler implements the following error codes:
 |-------|-------------|------------------------------------------|
 | E1001 | Parse       | Unexpected token / parsing error         |
 | E2001 | Type-check  | General type error                       |
+| E2036 | Type-check  | Non-integer value stored into a narrow integer element (pending, `0a8b34a5`) |
+| E2037 | Type-check  | Function name used as a value (pending, `1def5dde`) |
 | E2101 | Type-check  | Broadcast compatibility failure          |
 | E2102 | Type-check  | Rank/shape mismatch, invalid reductions  |
 | E2103 | Type-check  | MatMul inner-dimension mismatch          |

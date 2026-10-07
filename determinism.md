@@ -56,11 +56,19 @@ Integer arithmetic is fully deterministic and byte-identical across substrates.
 | `x % 0` | `= 0` (defined) |
 | `INT_MIN / -1` | `= INT_MIN` (defined; no overflow trap) |
 | Integer overflow | wraps two's-complement (defined; identical on x86 and ARM) |
+| Declared narrow width (`i8`, `u8`, `i16`, `u16`, `i32`, `u32`) | a value wraps at the declared width where it is materialised (binding, assignment, argument, return, struct field): two's-complement for signed widths, modulo 2^N for unsigned widths. An 8- or 16-bit arithmetic intermediate (`+ - * / %` and shifts) is re-wrapped to the widest 8- or 16-bit operand width; an operand that is a wider variable, or a cast to a wider type, leaves it unwrapped. ✅ on the MLIR build path for the 8- and 16-bit widths since v0.10.2 (not v0.10.0); the wider-operand rule is on compiler main since `732edb0f` (pending release), and v0.10.2 re-wrapped such an intermediate to the narrow width (`i64` 1000 + `u8` 1 gave 233). The native backend is not covered by this evidence. |
+| Integer type the implementation does not compute at its written width (e.g. `i128`, `u128`, `i256`) | never computed at a narrower width: it is either computed at its written width as a documented extension, or refused at check time. 📋 The reference compiler refuses `iN`/`uN` with N > 64 at check time on compiler main (`4fd65cfb`, pending release); v0.10.2 accepted them outside extern function signatures, and a `let` binding of one was computed in 64 bits. Widths of 64 or less that it does not recognise (e.g. `i24`) are not covered by this check (see [types.md](spec/v1.0/types.md#type-formation)). |
 | Oversized shift (`count ≥ bit-width`) | given a defined result (never UB) |
 | Condition truthiness (`if c`) | tests `c != 0` — the whole value, not the low bit |
 
 The narrow-integer call ABI (`i32`/`u32` across call boundaries) and struct
 narrow-field ABI are sound. Gated by the keystone and `cross_substrate` suites.
+
+The declared-width row describes compiled output of the default (`std-surface`)
+build on the MLIR build path. On compiler main the `mindc test` evaluator applies the same widths for the
+covered cases (`97c0d273`, `74004786`, `2575c1e9`, `a7f9520a`; pending release).
+The gaps, where agreement with compiled output is not claimed, are listed in
+[`spec/v1.0/conformance.md`](spec/v1.0/conformance.md).
 
 ---
 
@@ -85,7 +93,8 @@ substrates (x86 == ARM) today.
 | `pow(0.0, 0.0)` | `1.0` — IEEE `pow`: `x^0 == 1` for **all** `x` (including `0` and `NaN`) | 📋 (transcendental) |
 | `powr(0.0, 0.0)` | `NaN` — IEEE `powr` (= `exp(0·log 0)`), the strict real-power form | 📋 (transcendental) |
 | `limit_form(0^0)` | indeterminate — symbolic/calculus context, not a number | 📋 |
-| NaN comparisons | all comparisons `false` except `!=`; `min`/`max`/`sort` use a defined total order (NaN sorts last) so results are deterministic | 📋 |
+| Float comparisons (NaN operand, signed zero) | `<`, `<=`, `>`, `>=`, `==` are `false` and `!=` is `true`; `-0.0 == +0.0` is `true` | 📋 compiled MLIR path on compiler main since `2597ee9c` (the v0.10.2 release lowered `!=` as ordered, so `NaN != NaN` was `false` there); native x86-64 `f64` since `ccbb00b8` (pending release; the native backend refuses `f32`); the `mindc test` evaluator has an open `f64` comparison defect |
+| `min` / `max` / `sort` with NaN | use a defined total order (NaN sorts last) so results are deterministic | 📋 |
 | Rounding | round-to-nearest-even (IEEE default), fixed | 🔄 |
 | Q16.16 fixed-point | fully deterministic, byte-identical x86 == ARM | ✅ |
 
@@ -128,18 +137,19 @@ chaotic trajectory diverges, worse the longer it runs. Because scalar
 principle on any conforming FPU; further substrate coverage is added as it is
 verified on hardware. This scalar strict path is now **verified byte-identical
 across x86_64 (AVX2) and ARM64 (NEON) CPUs on real hardware**: the `cross_substrate`
-gate's canary workloads — including the scalar-`f64` arithmetic chain and the
-chaotic Lorenz-Euler `f64` integrator (1000 steps, sensitive to initial
-conditions) — produce byte-identical outputs on a `ubuntu-24.04`-class ARM64
+gate's canary workloads — including the scalar-`f64` arithmetic chain
+(`scalar-float-f64`; the gate's Lorenz workload, `lorenz-q16`, is integer Q16.16, not
+`f64`) — produce byte-identical outputs on a `ubuntu-24.04`-class ARM64
 runner (LLVM 20.1.8, `MIND_BENCH_REQUIRE=1`) matching the pinned x86-verified
 references. The honest claim is therefore *scalar IEEE-754 `float64`/`f32` on the
 strict path, verified byte-identical across x86_64 (AVX2) and ARM64 (NEON)
 CPUs on real hardware.* The claim is computational **output** identity for the
-covered workloads on those two tested substrates — 25 workload manifests /
-26 identity tests in the `cross_substrate` gate, with `scalar-float-f64`,
+covered workloads on those two tested substrates — at compiler `7831998b`, 35
+workload manifests in the `cross_substrate` gate, with `scalar-float-f64`,
 `dot-f32-v-4093` and `matmul-f32-v-64x64` carrying committed matching AVX2 and
-NEON output hashes — not native-binary identity, and not a universal
-floating-point, CPU or GPU claim. The no-FMA-contraction contract is designed
+NEON output hashes, and ten scalar-`f64` quantitative-finance workloads described
+below — not native-binary identity, and not a universal floating-point, CPU or GPU
+claim. The no-FMA-contraction contract is designed
 to extend to GPU substrates, but GPU coverage is a roadmap proof obligation
 until it is verified on hardware. (The integer / Q16.16 path already **is**
 cross-substrate byte-identical on the proven x86 + ARM set; see §1 and the
@@ -152,6 +162,20 @@ no `vector.fma` / `vector.reduction <add>` and are bit-exact (run-to-run
 bit-identical, `objdump`-verified free of fused FMA on x86; the `dot-f32-v-4093`
 and `matmul-f32-v-64x64` workloads carry committed matching AVX2 and NEON output
 hashes in the `cross_substrate` gate).
+
+Ten scalar-`f64` quantitative-finance workloads (option pricing, implied
+volatility, binomial lattices, Monte Carlo, bond curve and portfolio risk programs
+under `examples/quant`) were added to the gate after v0.10.2 (`545ed80c`,
+`82e34947`; pending release). Each hashes one exported MIND kernel over eight fixed
+inputs. The kernels' floating-point arithmetic is `+ - * /` and `sqrt` in fixed
+source order (some kernels also use comparisons, `max`, integer loop counts, and in
+the Monte Carlo kernel an integer LCG with integer-to-`f64` conversion), with `exp`,
+`log` and `erfc` re-derived in MIND, and each has committed AVX2 and NEON
+hashes that are equal; the maintainers record the NEON values as verified on
+aarch64 hardware. The identity test binary has 26 base tests plus ten quant
+reproducibility gates and two quant consistency tests, one of which runs on x86_64
+only. This is evidence for those programs only, on the compiled MLIR path only; it
+is not evidence for compiler-provided transcendentals.
 
 What remains on the roadmap — deliberately **not** yet deterministic — is the
 frontier of §4/§5: broader `f32`/`f64` **vector reductions** (tensor `sum`,
@@ -169,7 +193,7 @@ Two execution tiers; the contract is **bit-identity**, never "within tolerance"
 (tolerance-equal is a correctness-testing notion, not a determinism guarantee).
 
 - **Strict tier (default).** Integer and Q16.16 results are byte-identical across
-  substrates (x86 == ARM), gated by `cross_substrate` (12/12). ✅ Scalar `f64`/`f32`
+  substrates (x86 == ARM), gated by `cross_substrate` (see §2.1 for the workload set). ✅ Scalar `f64`/`f32`
   arithmetic (`+ − × ÷ √`) runs on the strict path bit-exact and run-to-run
   bit-identical, and is verified byte-identical across substrates (x86_64 + ARM64)
   on real hardware by the same `cross_substrate` gate. 🔄 For `f32`/`f64`
@@ -214,9 +238,25 @@ MIND separates two math modes:
 - **`fast_math` (opt-in).** Permits those rewrites; the spec labels the result
   non-deterministic.
 
-The native-ELF backend emits an image that is a **pure function of the IR** — there
+The native-ELF backend emits an image that is a **pure function of the source image it
+is given** (the user sources plus the fixed seed standard library) — there
 is no external toolchain whose `-ffast-math` can leak in. ✅ The `strict_math` /
 `fast_math` surface is being finalised. 📋
+
+A call to a MIND function runs that function's body. An implementation MUST NOT
+replace a user-defined function, or a call to it, with a host library routine or a
+host-folded constant because its name matches a C library routine (`pow`, `sin`,
+`exp`, `log`, `cos`, ...).
+
+Reference status (pending release): on the MLIR build path the reference compiler
+marks every function definition `nobuiltin` before LLVM sees it (`9c231f50`), so
+LLVM does not treat a MIND function as the library routine its name matches.
+`--emit-mlir` text is unchanged, the feature-gated `mlir-exec`, `mlir-jit` and
+`mlir-gpu` execution modes of the `mind` binary do not apply it, and the native ELF
+path has no external toolchain to apply such a rewrite. The evidence is one runtime test with three probe names
+(`pow`, `sin`, `exp`), not an audit of every libm symbol. This does not make the
+`std.math` transcendentals correctly rounded or identical across substrates; that
+remains on the roadmap (§2.1). It does not change the published v0.10.2 artifact.
 
 ---
 

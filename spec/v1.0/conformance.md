@@ -78,8 +78,11 @@ For the profile(s) an implementation claims:
 
 > **Compiler integration update, pending release.** The `mindc test`
 > implementation in compiler commit `eedcfb2c` implements the bounded source
-> test behavior below. This does not promote the published compiler artifact
-> or establish native-backend conformance.
+> test behavior below, and compiler commits `953d7233`, `97c0d273`, `74004786`,
+> `2575c1e9`, `a7f9520a` and `487dd5c7` implement the additions below to the
+> extent stated in the implementation-coverage notes. None of these commits
+> promotes the published compiler artifact or establishes native-backend
+> conformance.
 
 A source test runner MUST discover module-level test functions inside
 transparent inline module blocks in depth-first source order. Function-local
@@ -95,6 +98,21 @@ same short name. Bundled standard-library imports use explicit `std.*` paths;
 dependencies' standard-library imports are part of the captured evaluator
 closure. A bare import names a project module and does not imply `std.*`.
 
+**Implementation coverage (informative, pending release).** On such builds the
+reference runner applies that resolution rule to the dot spelling (`dep.f(x)`,
+`dep.K`) and, from compiler commit `953d7233`, to the path spelling `dep::f(x)`,
+`dep::K` and `crate::a::b::f(x)`, where the qualifier names a declared import by
+its import name or by the full `use` path written with `::` separators. A path
+to a non-exported symbol, and a standalone path import without a manifest, fail
+test preparation; a path call with the wrong number of arguments is refused.
+Enum-variant paths whose leading segment is a type (`Side::Left(3)`,
+`Color::Red`) are not treated as imports and resolve as before. Commit
+`953d7233` changes only the evaluator-side import capture, which `mindc test`
+and the opt-in canonical source-lowering bridge read; the ordinary parse result
+is unchanged. The ordinary parse of the path spelling for `mindc check` and
+`mindc build` is described under imports and module-qualified references in
+[`language.md`](./language.md#module-qualified-references) (`cd150ae7`).
+
 Functions MUST read initialized module-level bindings from their defining
 module. Caller-local bindings MUST NOT supply a missing global or override
 the callee's module state. Arguments are evaluated in the caller's context,
@@ -109,6 +127,97 @@ controls are `mindc_test_imports` and `mindc_test_nested_modules`. Their
 standard-library digest test compares all expected digest bytes through a
 project dependency; a passing digest calculation does not establish signing,
 authorization, native artifact execution or cross-host byte identity.
+
+A source test runner MUST give a value of a declared integer type the same
+width and overflow behaviour that the implementation's compiled artifacts give
+it, and MUST refuse a value it cannot materialise at a declared narrow width
+rather than report it at a wider width. A narrow width here is any declared
+integer width below 64 bits. This requirement is additive and targeted for
+specification 1.7.0; this does not declare that release or promote an
+unreleased compiler artifact.
+
+**Implementation coverage (informative, pending release).** In the reference
+implementation, compiled artifacts on the default MLIR build path wrap
+two's-complement at the declared width
+(see section 1 of [`determinism.md`](../../determinism.md)). The reference
+evaluator behind `mindc test` wraps `i8`, `i16`, `i32`, `u8`, `u16` and `u32`
+values, and module-local `type` aliases of them in `std-surface` builds, at the
+declared width: signed widths truncate and sign-extend, unsigned widths mask.
+The wrap applies at function return, at argument binding to a parameter, at
+`let` and at reassignment of a binding declared with a narrow type, and at
+struct-literal construction for scalar fields and for array or slice fields
+with a narrow element type (`97c0d273`, `74004786`). For example,
+`fn f() -> u8 { return 300 }` evaluates to 44 and
+`fn g() -> i32 { return 50000 * 50000 }` to -1794967296; the compiler test
+`evaluator_declared_width` records these as the compiled artifact's values.
+Declarations of other types, including `i64`, `u64`, floating-point types and
+`bool`, pass through unchanged. A value that cannot be materialised at a
+declared narrow width, such as a string bound to a `u8` binding, is refused with
+a diagnostic that names the declaration.
+
+**Implementation coverage, arithmetic (informative, pending release).** In
+`std-surface` builds the evaluator also re-wraps 8- and 16-bit intermediate `+`,
+`-`, `*`, `/` and `%` results, and shift results, to the width inferred from the
+operands, mirroring the compiled lowering (`2575c1e9`, `a7f9520a`): with
+`a: u8 = 250`, `(a + 10) / 2` is 2 because `a + 10` wraps to 4 first, while an
+operand that is a variable not declared with an 8- or 16-bit type (an `i32`,
+`u32`, `i64` or `u64` variable included), or a cast to any other type (for
+example `as i64` or `as i32`), leaves unmasked each operation that has it as an
+operand, directly or through nested arithmetic; a narrow sub-expression that
+does not contain it, such as `a + 10` in `(a + 10) / b` with `b: i64`, is still
+re-wrapped. A shift whose left operand is 8- or 16-bit also masks the shift
+count with the width minus one, so with `a: u8 = 1`, `a << 8` is 1. Known gaps,
+where agreement with compiled artifacts is not claimed, include: 32-bit
+intermediates are not re-masked by the evaluator; a field read through a
+non-identifier receiver and an array element read by index are width-neutral in
+intermediate arithmetic; a binding, parameter or return value of narrow-element
+array or slice type is not narrowed by the evaluator (only struct fields are
+narrowed element by element); fields of structs that are not registered in the
+evaluated module are not narrowed at construction; signed 64-bit
+`INT_MIN / -1` makes the evaluator panic (`mindc test` reports the test as
+failed) where compiled output defines `INT_MIN`; and `x / 0` and `x % 0` are
+evaluation errors where compiled output defines 0, except where the evaluator
+treats an operand as `u64` (see section 1 of
+[`determinism.md`](../../determinism.md)). Agreement is claimed only for the
+covered cases. Commits `97c0d273`, `74004786`, `2575c1e9` and `a7f9520a` change
+the evaluator only, and compiled artifacts are unchanged.
+
+A source test runner MUST report a test during which an `assert` condition
+evaluates to false as failed, and MUST report the assert's message when one is
+written (the message may be written in the Core v1 form
+`assert cond, "message"` or in the parenthesised form
+`assert(cond, "message")`; the parenthesised form is additive and targeted for
+specification 1.7.0; see
+[`stdlib.md`](./stdlib.md#control-flow-and-assertions)). This is stricter than
+the SHOULD for a runtime abort in that entry and applies to source test runners
+only. This requirement is additive and targeted for specification 1.7.0; it
+does not declare that release.
+
+**Implementation coverage (informative, pending release).** The reference runner
+reports such a test as `FAILED` and prints the message, for the bare spelling
+`assert cond, "message"` and for the parenthesised spelling
+`assert(cond, "message")` (`487dd5c7`); the parser reads the parenthesised pair
+as the condition `cond` with that message. Any other parenthesised tuple
+written directly as the condition, including `assert(cond, 9)` and a
+three-element tuple, is refused at parse time; a condition that evaluates to a
+tuple value (for example a variable bound to a tuple) is refused when
+`mindc test` evaluates it. The compiler tests `assert_parenthesised_message`
+and `mindc_test_evaluator_issues` cover this.
+
+**Honest scope (informative).** At compiler commit `7831998b` the reference
+evaluator has an open defect for floating-point comparisons (finding 15 of the
+compiler independence audit, `docs/independence-audit-plan-20260925.md` in
+`star-ga/mind`): a floating-point comparison (`f32` or `f64`, including a
+comparison of a float with an integer) yields a float 1.0 or 0.0 that the
+evaluator's truthiness rules do not handle. As a bare `if` condition or `match`
+guard it is treated as true. Combined with `&&` or `||` it is treated as false,
+so an `if` takes the else branch and an `assert` fails even when the condition
+holds. `!` applied to it is refused. A `while` on such a bare condition does not
+exit through its condition: it ends only by `return` or by the evaluator's
+1,000,000-iteration cap, with an error, because `break` does not exit the loop
+in this evaluator. Source-test verdicts, and value cells of the reference `mindc conformance`
+runner (which executes cases through the same evaluator), are not conformance
+evidence for programs with such a condition until it is fixed.
 
 ## Conformance verification
 

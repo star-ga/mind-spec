@@ -17,15 +17,19 @@ limitations under the License.
 # Compiler Architecture (Informative)
 
 > **Status:** Stable
-> **Last updated:** 2026-06-25
+> **Last updated:** 2026-10-07
 > **Specification reference:** [Core v1 Overview](../../spec/v1.0/overview.md)
 >
-> **Backend note (2026-06-24):** The pipeline below has two code-generation exits. The **native-ELF
-> backend** (`src/native`) is the **normative self-host target** — its output is a pure function of the
-> verified canonical IR, yielding determinism-by-construction. The **MLIR-text backend** is the
-> **downstream-interchange and exotic-chip-reach path** for LLVM/MLIR ecosystem interoperability and
-> commercial accelerator targets; it is not the self-host path but remains fully supported. See
-> [`spec/v1.0/mlir-lowering.md`](../../spec/v1.0/mlir-lowering.md) for the MLIR backend spec.
+> **Backend note (2026-06-24, updated 2026-10-07):** The pipeline below has two code-generation
+> exits. The **native-ELF backend** (the pure-MIND native emitter in `examples/mindc_mind`; on
+> compiler main, pending release, it is reached through `mindc build --backend native`, `52bd6d3b`)
+> is the **normative self-host target** — its output is a pure function of the source image it is
+> given (the user sources plus the seed standard-library modules, in the fixed order of the
+> committed std manifest), with no external toolchain, which yields determinism-by-construction. The
+> **MLIR-text backend** is the **downstream-interchange and exotic-chip-reach path** for LLVM/MLIR
+> ecosystem interoperability and commercial accelerator targets; it is not the self-host path but
+> remains fully supported. See [`spec/v1.0/mlir-lowering.md`](../../spec/v1.0/mlir-lowering.md) for
+> the MLIR backend spec.
 
 This document describes the architecture of a conforming MIND compiler implementation.
 It provides guidance for implementers and context for understanding the normative
@@ -219,12 +223,13 @@ Key responsibilities:
 
 ### 9. Native-ELF Backend (Normative self-host target)
 
-Lowers canonical IR directly to a native x86-64/ELF (or ARM) binary. The output is a pure function
-of the IR; no external toolchain is required on the normative path. The self-host fixed point
-(mic@1 + mic@3 + native-ELF emit, 1 055 777 B for the full seeded module) is byte-identical to the
-Rust reference as of v0.10.0.
+Compiles the composed source image (the user sources plus the seed standard-library modules) to a
+static x86-64 Linux ELF executable through the pure-MIND native emitter in `examples/mindc_mind`. The
+output is a pure function of that image; no MLIR, LLVM or clang is involved. There is no ARM output.
+The self-host fixed point (mic@1 + mic@3 + native-ELF emit; the native-ELF image of the full seeded module was 1 055 777 B at v0.10.0) is
+byte-identical to the Rust reference as of v0.10.0.
 
-**Inputs:** Canonical IR
+**Inputs:** Source image (user sources + seed std)
 **Outputs:** Native ELF binary
 
 ### 9b. MLIR Lowering (Downstream interchange — Optional)

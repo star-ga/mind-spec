@@ -59,7 +59,14 @@ FunctionSignature = "fn" , Identifier , "(" , [ ParameterList ] , ")" , [ "->" ,
 (* Import/Export *)
 ImportDeclaration = "import" , ImportPath , ";" ;
 ExportDeclaration = "export" , Identifier , ";" ;
-ImportPath = Identifier , { "::" , Identifier } ;
+(* Normative correction targeted for specification 1.7.0, decided  *)
+(* by the specification owner on 2026-10-07: path segments are      *)
+(* separated by ".". Earlier text of this grammar                   *)
+(* wrote "::", which no released reference compiler accepted for    *)
+(* `import`; the reference `use` additionally accepts "::" as an    *)
+(* extension. Qualifier semantics: language.md, "Module-qualified   *)
+(* references".                                                     *)
+ImportPath = Identifier , { "." , Identifier } ;
 
 (* Types *)
 Type = PrimitiveType
@@ -234,7 +241,17 @@ AttributeArgList = AttributeArg , { "," , AttributeArg } ;
 AttributeArg    = Identifier | Literal ;
 
 (* Runtime assertion (no return value).                         *)
-AssertStatement = "assert" , Expression , [ "," , StringLiteral ] , [ ";" ] ;
+(* Additive, targeted for specification 1.7.0. In the            *)
+(* parenthesised alternative a pair whose second element is a    *)
+(* string literal is the condition and the message, not a tuple. *)
+(* Any other tuple written as the condition is ill-typed,        *)
+(* because an assert condition is `bool` (stdlib.md, core        *)
+(* module); the reference compiler rejects such a parenthesised  *)
+(* tuple at parse time (487dd5c7, pending release) and does not  *)
+(* otherwise check the condition's type.                         *)
+AssertStatement = "assert" , Expression , [ "," , StringLiteral ] , [ ";" ]
+                | "assert" , "(" , Expression , "," , StringLiteral , ")" , [ ";" ]
+                ;
 
 (* Postfix cast.                                                *)
 AsCast          = Expression , "as" , Type ;

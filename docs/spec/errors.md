@@ -18,7 +18,7 @@ limitations under the License.
 
 > **Status:** Core v1 normative catalog
 >
-> **Last updated:** 2026-09-08
+> **Last updated:** 2026-10-07
 >
 > **MIND Spec Section**
 
@@ -26,6 +26,22 @@ The canonical error-code assignments and stability rules are maintained in
 [Error Catalog (Normative)](../../spec/v1.0/errors.md). Diagnostic codes remain
 stable within Core v1; adding a code requires a minor specification release,
 while renumbering or reusing an existing code requires a major release.
+
+Two E2xxx entries are pending compiler integration and targeted for
+specification 1.7.0: `E2036` (a proven non-integer or opaque-handle value stored
+into an `i8`, `u8`, `i16` or `u16` array element) and `E2037` (a function name
+used as a value). The `E2002` entry is also clarified to cover a bare-headed
+`Enum::Variant` value path or `match` pattern that names another project
+module's enum when no import exports a type of that name, several imports
+export one, or the single imported enum lacks the variant. The reference checks
+this only in compiler builds with the non-default `cross-module-imports`
+feature, and only when several source modules are checked or built together (a
+project build, a single-file entry that imports modules of its manifest
+project, or `mindc check` over several files or a directory), and that
+resolution is pending compiler integration as well.
+The entries, their limits and the reference commits are in the
+[Error Catalog (Normative)](../../spec/v1.0/errors.md). This does not declare
+the 1.7.0 release or promote an unreleased compiler artifact.
 
 The E6xxx catalog distinguishes these current compilation refusals:
 
