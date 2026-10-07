@@ -282,7 +282,7 @@ Comparison for a 6-node neural network layer (param, matmul, add, relu):
 | TOON | $0.12 | $117 | $370 (76%) |
 | **MIC** | **$0.09** | **$91** | **$396 (81%)** |
 
-**MIC achieves 5.3x token reduction and 2.4x faster parsing compared to JSON.** (Superseded ratios: mic@2 reaches 10.3x fewer tokens — see star-ga/mind benchmarks/. The canonical `mic@3` binary of the same matmul + bias + relu network, as the reference compiler lowers it (six instructions over three tensor constants), is 87 bytes from `mindc --emit-mic3` at compiler `83ed6a11`; no JSON encoding of that same IR exists, so no byte ratio is stated.)
+**MIC achieves 5.3x token reduction and 2.4x faster parsing compared to JSON.** (Superseded ratios: mic@2 reaches 10.3x fewer tokens — see star-ga/mind benchmarks/. The canonical `mic@3` binary of the same matmul + bias + relu network, as the reference compiler lowers it (six instructions over three tensor constants), is 87 bytes: `mindc mlp.mind --emit-mic3 mlp.mic3` at compiler `83ed6a11`, where `mlp.mind` is `let input: Tensor[f32,(B,784)] = 0; let weight: Tensor[f32,(784,256)] = 0; let bias: Tensor[f32,(256)] = 0; tensor.relu(tensor.matmul(input, weight) + bias)` (one statement per line; output SHA-256 `73beda1df272f7cb54bdf15270ced149517cad954919d96840461dcdcbac2d28`, see the compiler README). No JSON encoding of that same IR exists, so no byte ratio is stated.)
 
 ## Error Handling
 
