@@ -1,0 +1,182 @@
+# MIND architecture registry. Prose: registry.md. Versioned with the specification.
+# status = "filled" rows need owner_repo, normative_doc and version.
+# status = "stub" rows name an owner; the owner completes them.
+
+registry_version = "0.1-proposed"
+spec_version = "1.0"
+
+# ---- Group 1: syntax, semantics, Core IR, native lowering, optimization ----
+
+[[interface]]
+name = "surface-language"
+group = 1
+owner_repo = "mind-spec"
+normative_doc = "spec/v1.0/language.md"
+version = "1.0"
+wire_or_abi = ""
+status = "filled"
+consumers = [{ repo = "mind", pinned_version = "1.0", gate = "conformance" }]
+
+[[interface]]
+name = "lexical-and-syntax-grammar"
+group = 1
+owner_repo = "mind-spec"
+normative_doc = "spec/v1.0/grammar-syntax.ebnf"
+version = "1.0"
+wire_or_abi = ""
+status = "filled"
+consumers = [{ repo = "mind-grammar", pinned_version = "1.0", gate = "grammar-scope-check (planned)" }]
+
+[[interface]]
+name = "scalar-determinism"
+group = 1
+owner_repo = "mind-spec"
+normative_doc = "determinism.md"
+version = "1.0"
+wire_or_abi = ""
+status = "filled"
+consumers = [{ repo = "mind", pinned_version = "1.0", gate = "int_determinism" }]
+
+[[interface]]
+name = "core-ir-mic1"
+group = 1
+owner_repo = "mind-spec"
+normative_doc = "spec/v1.0/ir-stability.md"
+version = "mic@1"
+wire_or_abi = "mic@1 textual form"
+status = "filled"
+consumers = [{ repo = "mind", pinned_version = "mic@1", gate = "keystone" }]
+
+[[interface]]
+name = "core-ir-mic3"
+group = 1
+owner_repo = "mind"
+normative_doc = "spec/v1.0/ir-stability.md"
+version = "mic@3"
+wire_or_abi = "mic@3 binary IRModule"
+status = "filled"
+consumers = [{ repo = "mind", pinned_version = "mic@3", gate = "mic3_flip_smoke" }]
+
+[[interface]]
+name = "mlir-lowering"
+group = 1
+owner_repo = "mind-spec"
+normative_doc = "spec/v1.0/mlir-lowering.md"
+version = "1.0"
+wire_or_abi = ""
+status = "filled"
+consumers = [{ repo = "mlir-tools", pinned_version = "1.0", gate = "" }]
+
+[[interface]]
+name = "native-lowering-and-optimization"
+group = 1
+owner_repo = "mind"
+normative_doc = "docs/roadmap.md"
+version = "0.10"
+wire_or_abi = "native ELF"
+status = "filled"
+consumers = [{ repo = "mind", pinned_version = "0.10", gate = "self-host fixed point" }]
+
+# ---- Group 2: runtime ABI, resources, hardware capabilities, determinism profiles ----
+
+[[interface]]
+name = "runtime-abi"
+group = 2
+owner_repo = "mind-runtime"
+status = "stub"
+
+# ---- Group 3: evidence schemas, hashing, signatures, custody, verification ----
+
+[[interface]]
+name = "compiler-evidence-chain"
+group = 3
+owner_repo = "mind"
+normative_doc = "spec/v1.0/ir-stability.md"
+version = "0.10"
+wire_or_abi = "evidence MAP epilogue on mic@3"
+status = "filled"
+consumers = [{ repo = "mind", pinned_version = "0.10", gate = "mindc verify" }]
+
+[[interface]]
+name = "evidence-schema"
+group = 3
+owner_repo = "mind-evidence"
+status = "stub"
+
+# ---- Group 4: memory, vector, graph, retrieval ----
+
+[[interface]]
+name = "memory"
+group = 4
+owner_repo = "mind-mem"
+status = "stub"
+
+[[interface]]
+name = "graph"
+group = 4
+owner_repo = "mind-kg"
+status = "stub"
+
+[[interface]]
+name = "vector"
+group = 4
+owner_repo = "mind-vec"
+status = "stub"
+
+# ---- Group 5: intent, authorization, workflow, orchestration ----
+
+[[interface]]
+name = "intent"
+group = 5
+owner_repo = "mind-intent"
+status = "stub"
+
+[[interface]]
+name = "authorization"
+group = 5
+owner_repo = "mind-law"
+status = "stub"
+
+[[interface]]
+name = "workflow"
+group = 5
+owner_repo = "mind-flow"
+status = "stub"
+
+[[interface]]
+name = "orchestration"
+group = 5
+owner_repo = "naestro"
+status = "stub"
+
+# ---- Group 6: build, release, consumer conformance ----
+
+[[interface]]
+name = "conformance-corpus"
+group = 6
+owner_repo = "mind-spec"
+normative_doc = "spec/v1.0/conformance.md"
+version = "1.0"
+wire_or_abi = ""
+status = "filled"
+consumers = [{ repo = "mind-ci", pinned_version = "1.0", gate = "conformance" }]
+
+[[interface]]
+name = "compiler-capability-manifest"
+group = 6
+owner_repo = "mind"
+normative_doc = "config/capabilities.toml"
+version = "0.10"
+wire_or_abi = ""
+status = "filled"
+consumers = [{ repo = "mindlang.dev", pinned_version = "0.10", gate = "check_claims" }]
+
+[[interface]]
+name = "ci-gates"
+group = 6
+owner_repo = "mind-ci"
+normative_doc = "docs/ROADMAP.md"
+version = "0.1"
+wire_or_abi = ""
+status = "filled"
+consumers = [{ repo = "mind", pinned_version = "0.1", gate = "required checks" }]
