@@ -40,13 +40,20 @@ Operators on the same level have equal precedence and are resolved by associativ
 |------------|----------|-------------|---------------|---------|
 | **1 (Highest)** | `()` `[]` `.` | Grouping, indexing, field access | Left-to-right | `f(x)`, `a[i]`, `x.field` |
 | **2** | Unary `-` `!` | Negation, logical NOT | Right-to-left | `-x`, `!flag` |
-| **3** | `*` | Multiplication (elementwise) | Left-to-right | `a * b` |
-| **4** | `+` `-` | Addition, subtraction (elementwise) | Left-to-right | `a + b`, `a - b` |
-| **5** | `==` `!=` `<` `>` `<=` `>=` | Comparison operators | Left-to-right | `a == b`, `x < y` |
-| **6** | `&&` | Logical AND | Left-to-right | `a && b` |
-| **7** | `||` | Logical OR | Left-to-right | `a || b` |
-| **8** | `=` `+=` `-=` `*=` `:=` | Assignment and compound assignment | Right-to-left | `x = y`, `x += 1` |
-| **9 (Lowest)** | `,` | Comma (sequence) | Left-to-right | `f(a, b, c)` |
+| **3** | `*` `/` `%` `.*` `./` | Multiplication, division, remainder (elementwise `.*` `./`) | Left-to-right | `a * b`, `a % n` |
+| **4** | `<<` `>>` `&` `^` `\|` | Shift and bitwise operators (one level) | Left-to-right | `a << 2`, `x & mask` |
+| **5** | `+` `-` `.+` `.-` | Addition, subtraction (elementwise `.+` `.-`) | Left-to-right | `a + b`, `a - b` |
+| **6** | `==` `!=` `<` `>` `<=` `>=` | Comparison operators | Left-to-right | `a == b`, `x < y` |
+| **7** | `&&` | Logical AND | Left-to-right | `a && b` |
+| **8** | `\|\|` | Logical OR | Left-to-right | `a \|\| b` |
+| **9** | `=` `+=` `-=` `*=` `:=` | Assignment and compound assignment | Right-to-left | `x = y`, `x += 1` |
+| **10 (Lowest)** | `,` | Comma (sequence) | Left-to-right | `f(a, b, c)` |
+
+> **Shift and bitwise operators bind tighter than `+` and `-`.** This differs from C and Rust,
+> where `+` and `-` bind tighter than shifts and bitwise operators. In MIND `0 - 17 >> 2` parses as
+> `0 - (17 >> 2)` and evaluates to `-4`; in C and Rust it is `(0 - 17) >> 2`, which is `-5`. Likewise
+> `a + b & c` is `a + (b & c)` in MIND. Write explicit parentheses whenever a shift or bitwise
+> operator meets `+` or `-` in one expression.
 
 ### Precedence rules
 
