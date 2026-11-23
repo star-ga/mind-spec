@@ -69,6 +69,12 @@ examples it is explicitly marked as informative.
 Security disclosures should follow [`SECURITY.md`](./SECURITY.md). Project status tracking lives in
 [`STATUS.md`](./STATUS.md).
 
+## Community
+
+- **Discussions:** <https://github.com/star-ga/mind/discussions> — questions,
+  ideas and help for mind-spec and the wider MIND ecosystem.
+- **Discord:** <https://mindlang.dev/discord> — the MindLang community server.
+
 ## Licensing
 
 The MIND Specification is maintained by STARGA Inc. and follows an open-core
