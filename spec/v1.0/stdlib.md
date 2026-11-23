@@ -728,10 +728,13 @@ The reference implementation ships a set of pure-MIND, deterministic
 cryptographic and protocol primitives, each validated against the relevant
 RFC / NIST known-answer test (KAT) vectors:
 
-- **Symmetric / hashing:** AES-128-GCM (AEAD), SHA-256, HKDF,
-  Keccak / SHA-3 + SHAKE (FIPS 202).
+- **Symmetric / hashing:** AES-128-GCM (AEAD), ChaCha20-Poly1305 (AEAD,
+  RFC 8439), SHA-256, SHA-512 / SHA-384, HKDF, Keccak / SHA-3 + SHAKE
+  (FIPS 202).
 - **Public-key:** X25519 (ECDH), RSA-PSS-SHA256 (verify),
-  ECDSA-P256 / secp256r1 (verify), ML-KEM-768 (FIPS 203, post-quantum KEM).
+  ECDSA-P256 / secp256r1 (verify), ML-KEM-768 (FIPS 203, post-quantum KEM),
+  X25519MLKEM768 (hybrid key exchange). ECDSA P-384 (verify) is part of
+  X.509 chain validation.
 - **PKI:** X.509 / DER certificate parsing + signature verification, and
   server-chain path validation from the leaf through intermediates to a
   caller-supplied anchor set (`x509_verify_server_chain`, v0.10.3).
@@ -756,8 +759,8 @@ RFC / NIST known-answer test (KAT) vectors:
 - **Revocation (CRL, OCSP) is not checked.** Redirects are not followed: a
   3xx is returned as the response.
 - Chain validation has stated limits: DNS/IP-only name constraints, at most 8
-  certificates and 32 anchors, exact-DER issuer matching. A case outside the
-  limits fails closed.
+  certificates in a chain, at most 1024 trust anchors (in at most 4 MiB),
+  exact-DER issuer matching. A case outside the limits fails closed.
 - **HPACK is decode-only**; a compliant encoder is roadmap.
 - The modules are validated for bit-exactness against KAT/RFC vectors and
   inherit the language's determinism guarantees. They are **not**

@@ -240,8 +240,8 @@ if (output == NULL) {
 
 ### Planned bindings: `mindlang` package
 
-> **Planned, not available.** No `mindlang` package is published on PyPI, and the reference compiler
-> ships no Python binding. This section describes the intended design only. It gives no release date.
+> **Planned, not available.** No `mindlang` package is published on PyPI, and no Python package of
+> the reference compiler is installable. This section describes the intended design only. It gives no release date.
 
 **Intended architecture**:
 - Thin wrapper over C FFI using `ctypes` or `cffi`

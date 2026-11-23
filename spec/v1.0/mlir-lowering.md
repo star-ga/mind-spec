@@ -151,13 +151,13 @@ allocates nothing.
 
 **Memory profiles.** `mindc build --backend native --native-profile <default|bounded>` (v0.10.3) selects the
 memory layout of the image. `default` has a 1 GiB arena and a 4 GiB stack. `bounded` has a 768 MiB arena, a 1 MiB
-unmapped guard and a 384 MiB stack, and its images load and run under `RLIMIT_AS` = 2 GiB. An allocation
+unmapped guard and a 384 MiB stack, and its images load under `RLIMIT_AS` = 2 GiB. An allocation
 past the arena cap in a bounded image ends with `error: native arena exhausted` and exit status 70. In v0.10.4 a
 default-profile image whose source frees at a loop position takes a free-list runtime on the 1 GiB arena
 (freed blocks are reused, a full arena ends the same way); every other `default`-profile image keeps the bump allocator and its bytes.
 The line `// mind: native_alloc = bump` in the leading comment block keeps the bump allocator.
 
-**Group intrinsic rows.** The native compiler has three AVX2 rows that walk memory in groups. Kind 87
+**Group intrinsic rows.** The native compiler has three AVX2 group rows. Kind 87
 `__mind_group_bank_i64` takes five i64 arguments. Kind 88 `__mind_group_acc32_i64` takes six i64
 arguments. Kind 89 `__mind_group_accrows_i64` joins them: one call walks many rows. For each row it adds
 bank rows for the index range `j0..j1` and subtracts bank rows for `j1..j2` into an i64 accumulator
