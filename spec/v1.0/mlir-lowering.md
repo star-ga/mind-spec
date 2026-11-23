@@ -18,19 +18,26 @@ limitations under the License.
 
 > **Backend role (pivot 2026-06-24):** The MLIR-text backend is the **downstream-interchange and
 > exotic-chip-reach backend**, not the normative self-host target. The normative self-host target is
-> the **native-ELF backend** (the pure-MIND native emitter in `examples/mindc_mind`; it is reached
-> through `mindc build --backend native` since `52bd6d3b` and is the default backend of `mindc build`
-> since v0.10.3: `--backend mlir` or `[build] backend = "mlir"` selects the MLIR backend, and `mindc`
-> never changes the backend by itself; the frozen compiler and the seed standard-library modules are
-> embedded in the `mindc` binary, `MINDC_NATIVE_ELF` names another compiler in place of the embedded one
-> (a test hook) and `MINDC_STD_DIR` names a directory of std modules in place of the embedded copy; the
-> published v0.10.2 refuses `--backend native` with `error[backend]`), whose output is a pure
-> function of the source image it is given (the user sources plus the seed standard-library modules, in
-> the fixed order of the committed std manifest) and is therefore deterministic-by-construction. It
-> admits only a defined subset of programs (candidate `native-lane-v1`) and emits an x86-64 Linux
-> executable only; a program outside that subset, or a host that is not x86-64 Linux, is refused by
-> name (exit status 3, no artifact; see [Native backend refusals](#native-backend-refusals-informative))
-> and there is no MLIR fallback. MLIR-text remains a first-class output for interoperability with the
+> the **native-ELF backend** (the pure-MIND native emitter in `examples/mindc_mind`). The output of
+> the native backend is a pure function of the source image it is given: the user sources plus the seed
+> standard-library modules, in the fixed order of the committed std manifest. It is therefore
+> deterministic-by-construction.
+>
+> The native backend is reached through `mindc build --backend native` since `52bd6d3b`. It is the
+> default backend of `mindc build` since v0.10.3. `--backend mlir` or `[build] backend = "mlir"` selects
+> the MLIR backend. `mindc` never changes the backend by itself. The published v0.10.2 refuses
+> `--backend native` with `error[backend]`.
+>
+> The frozen compiler and the seed standard-library modules are embedded in the `mindc` binary.
+> `MINDC_NATIVE_ELF` names another compiler in place of the embedded one (a test hook).
+> `MINDC_STD_DIR` names a directory of std modules in place of the embedded copy.
+>
+> The native backend admits only a defined subset of programs (candidate `native-lane-v1`). It emits an
+> x86-64 Linux executable only. A program outside that subset, or a host that is not x86-64 Linux, is
+> refused by name (exit status 3, no artifact; see
+> [Native backend refusals](#native-backend-refusals-informative)). There is no MLIR fallback.
+>
+> MLIR-text remains a first-class output for interoperability with the
 > LLVM/MLIR ecosystem and for reaching accelerator targets (TPU, NPU, custom silicon) available in the
 > commercial `mind-runtime` under license. Both backends are supported and maintained; only the
 > self-host designation differs.
@@ -132,7 +139,20 @@ declaration and admits it whatever its name. The compiler refuses a declaration 
 | 3 | 65 | `lane.extern.arity` | the parameter count differs from the row |
 | 4 | 66 | `lane.extern.signature_mismatch` | a parameter or result type differs from the row |
 
-A second declaration of an extern with equal types is accepted. A declaration with other types is refused.
+A varargs marker, an `f64` parameter and a `u32` result on a name that has a row are 66. Twelve parameters on a
+name that has a row are 65. On a name that has no row, each of them is 64. A parameter or result type that is not
+a scalar of the registry (a struct, a `#[repr(C)]` struct, a type alias, a pointer to a struct) is judged like any
+other width: 66, or 65 when the count differs. A defect that stands earlier in the source keeps its word. The
+reason word of a refusal is `key * 4294967296 + site`, where the site is the byte offset of the declaration name
+from the start of the composed image. The capability mark of the named refusals is `nblxk001`.
+
+A second declaration of an extern with equal types, in one block or in several, is accepted. A declaration with
+other types is refused.
+
+The extern table of the native compiler has the rows 89 to 98: `readlink`, `bind`, `getsockname`, `sendto`,
+`recvfrom`, `getenv`, `creat`, `poll`, `listen` and `getsockopt`. Each is bound through `libc.so.6` at
+`GLIBC_2.2.5`. A declaration must spell the signature of its row exactly. The capability mark of these rows is
+`nblibc03`.
 
 **Loops and free.** The host does not refuse a `__mind_free` in a loop: the rule `lane.alloc.free_in_loop`
 is removed. A bare `break` or `continue` in a seed body that a loop calls is refused with
@@ -140,14 +160,18 @@ is removed. A bare `break` or `continue` in a seed body that a loop calls is ref
 
 **Strings.** The host types `String`, a string literal and a field read as the i64 word. The keys
 `lane.source.string` and (for a field read) `lane.source.struct` are no longer raised by the host. A
-field write and every other type name (`u8`, `i16`, `usize` and the rest) are still refused. A string
+field write and every other type name (`u8`, `i16`, `usize` and the rest) are still refused. A `let` of any
+type, or a loop binder, with the name of a `String` parameter makes that name a non-`String` in its scope: a
+field read of it is refused with `lane.source.struct`. The `.addr` and `.len` of a `String` parameter are
+accepted in a pointer cast (`p.addr as *const u8`); `.cap`, another receiver and a shadowing `let` are not. A string
 literal with a raw line feed or an escape that the lexer does not know is refused with
 `lane.string.raw_newline` or `lane.string.escape` at its own position. The string family is judged
 before the extern family. Of two refused constructs, the smaller position wins.
 
 **String literal handle.** The handle `{addr, len, cap = 0}` of a string literal is written at compile
 time into the read-only literal segment. A store through it faults. A literal that is evaluated in a loop
-allocates nothing.
+allocates nothing. The read-only literal window is 8 MiB. It counts the literal bytes, the alignment gap (0 to 7
+bytes) and the 24 handle bytes of every literal site. The compiler refuses a program that passes it.
 
 **Memory profiles.** `mindc build --backend native --native-profile <default|bounded>` (v0.10.3) selects the
 memory layout of the image. `default` has a 1 GiB arena and a 4 GiB stack. `bounded` has a 768 MiB arena, a 1 MiB

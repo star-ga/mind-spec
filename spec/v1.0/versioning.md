@@ -235,13 +235,13 @@ Implementations MUST provide version information:
 - **Implementation version**: Compiler/runtime own version number
 - **Supported features**: List of optional features (GPU profile, etc.)
 
-Example:
+Example (the output of the reference compiler `mindc` v0.10.4 built with the `autodiff` and
+`mlir-lowering` features; it lists only the components compiled into the binary):
 
 ```console
-$ mind --version
-mind-compiler 0.10.0
-Core v1.0 (CPU baseline)
-Features: autodiff, mlir-lowering
+$ mindc --version
+mind 0.10.4
+core-ir=1.0  core-autodiff=1.0  mlir-lowering=0.1
 ```
 
 (A GPU-profile implementation would additionally list the GPU profile and its backend

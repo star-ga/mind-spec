@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """
-MIND Language Example: Python Embedding
+MIND Language Example: Python Embedding (planned, not available)
 Specification reference: spec/v1.0/ffi.md#python-bindings
+
+No Python package of the reference compiler is published or installable, so this file
+does not run. It shows the intended design of the planned Python bindings.
 
 This example demonstrates:
 1. Loading MIND modules from Python
