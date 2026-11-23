@@ -92,7 +92,7 @@ For the **Q16.16 / exact-integer path** (Determinism Tier 3), implementations MU
 
 This MUST is scoped to the Q16.16 / exact-integer path; cross-substrate **vector-reduction** `f32`/`f64` bit-identity is **not** claimed in general (see [performance.md](./performance.md) Tier 3 for the two fixed-order kernels that carry committed hashes). GPU and other-accelerator backends are roadmap; cross-substrate bit-identity to a GPU backend is not yet claimed or verified.
 
-Separately, **scalar** IEEE-754 `f64`/`f32` arithmetic (`+ − × ÷ √`) is lowered on the strict no-FMA path and is **bit-exact and run-to-run bit-identical** (across repeated runs on the same hardware/OS and across compiler versions within the same Core v1.x spec). Because these scalar operations are correctly-rounded under IEEE-754, cross-ISA scalar bit-identity (x86 == ARM) holds and is **verified on real hardware**: the `cross_substrate` gate confirms the scalar-`f64` arithmetic chain (`scalar-float-f64`) is byte-identical on x86_64 (AVX2) and ARM64 (NEON) (the gate's Lorenz workload, `lorenz-q16`, is integer Q16.16, not `f64`) — implementations MUST NOT introduce FMA-contraction, reassociation, or fast-math rewrites into this path, or substitute host library routines for user-defined functions (see [determinism.md](../../determinism.md) section 5). This scalar cross-ISA guarantee is scoped to scalar `+ − × ÷ √`; general **vector-reduction** `f32`/`f64` bit-identity remains roadmap (see above). Two fixed-order strict `f32` kernels, a length-4093 dot product and a 64×64 matrix-vector product, carry committed matching AVX2 and NEON output hashes in the `cross_substrate` gate ([compiler RFC 0015 §5A.3](https://github.com/star-ga/mind/blob/main/docs/rfcs/0015-cross-substrate-bit-identity.md#5a3-committed-reference-hashes-the-load-bearing-constants), `c8efcf9a`); that is evidence for those two kernels, not a claim about other reductions. After v0.10.2 the gate also gained ten scalar-`f64` quantitative-finance workloads (`545ed80c`, `82e34947`; pending release), each hashing one exported MIND kernel over eight fixed inputs, whose floating-point arithmetic is `+ − × ÷` and `sqrt` in fixed source order (some kernels also use comparisons, `max`, integer loop counts, and in the Monte Carlo kernel an integer LCG with integer-to-`f64` conversion), with committed equal AVX2 and NEON hashes whose NEON values the maintainers record as verified on aarch64 hardware. That is evidence for those programs only, on the compiled MLIR path only, and not for compiler-provided transcendentals.
+Separately, **scalar** IEEE-754 `f64`/`f32` arithmetic (`+ − × ÷ √`) is lowered on the strict no-FMA path and is **bit-exact and run-to-run bit-identical** (across repeated runs on the same hardware/OS and across compiler versions within the same Core v1.x spec). Because these scalar operations are correctly-rounded under IEEE-754, cross-ISA scalar bit-identity (x86 == ARM) holds and is **verified on real hardware**: the `cross_substrate` gate confirms the scalar-`f64` arithmetic chain (`scalar-float-f64`) is byte-identical on x86_64 (AVX2) and ARM64 (NEON) (the gate's Lorenz workload, `lorenz-q16`, is integer Q16.16, not `f64`) — implementations MUST NOT introduce FMA-contraction, reassociation, or fast-math rewrites into this path, or substitute host library routines for user-defined functions (see [determinism.md](../../determinism.md) section 5). This scalar cross-ISA guarantee is scoped to scalar `+ − × ÷ √`; general **vector-reduction** `f32`/`f64` bit-identity remains roadmap (see above). Two fixed-order strict `f32` kernels, a length-4093 dot product and a 64×64 matrix-vector product, carry committed matching AVX2 and NEON output hashes in the `cross_substrate` gate ([compiler RFC 0015 §5A.3](https://github.com/star-ga/mind/blob/main/docs/rfcs/0015-cross-substrate-bit-identity.md#5a3-committed-reference-hashes-the-load-bearing-constants), `c8efcf9a`); that is evidence for those two kernels, not a claim about other reductions. After v0.10.2 the gate also gained ten scalar-`f64` quantitative-finance workloads (`545ed80c`, `82e34947`; v0.10.3), each hashing one exported MIND kernel over eight fixed inputs, whose floating-point arithmetic is `+ − × ÷` and `sqrt` in fixed source order (some kernels also use comparisons, `max`, integer loop counts, and in the Monte Carlo kernel an integer LCG with integer-to-`f64` conversion), with committed equal AVX2 and NEON hashes whose NEON values the maintainers record as verified on aarch64 hardware. That is evidence for those programs only, on the compiled MLIR path only, and not for compiler-provided transcendentals.
 
 **Non-deterministic sources** (randomness, timestamps, thread scheduling) are **prohibited** in Core v1 unless explicitly specified in the operation semantics.
 
@@ -114,9 +114,9 @@ Separately, **scalar** IEEE-754 `f64`/`f32` arithmetic (`+ − × ÷ √`) is lo
   `mic@1`-text rule); hashing on the `mic@1` textual or `mic@2.x` binary form is non-conformant
 - **Signing status**: default emit is **unsigned** (`signature: absent`). Opt-in
   evidence signing (RFC 0016 Phase C), including the AND-combined
-  ML-DSA-87 + SLH-DSA-SHAKE-256s hybrid, is **implemented on compiler main
-  after v0.10.2** ([compiler PR #262](https://github.com/star-ga/mind/pull/262),
-  pending release; v0.10.2 contains neither scheme) and is
+  ML-DSA-87 + SLH-DSA-SHAKE-256s hybrid, is **implemented in compiler v0.10.3**
+  ([compiler PR #262](https://github.com/star-ga/mind/pull/262);
+  v0.10.2 contains neither scheme) and is
   enabled only with both signing seeds — never signed-by-default. Unsigned
   artifacts stay byte-identical. Refer to the default chain as *tamper-evident*,
   never as a *signed-by-default* chain
@@ -144,15 +144,15 @@ Separately, **scalar** IEEE-754 `f64`/`f32` arithmetic (`+ − × ÷ √`) is lo
   the seed in its diagnostic. For trust verification this supersedes the
   scheme-support statements of
   [mic@2.1 §6.2](../mic/mic2.1-spec.md#62-crypto-agility-supersedes-288-one-primitive).
-- **Reference status (informative, pending release).** Compiler PR #262
-  commits `83bebf39`, `2b8d5e2e` and `9881cb91` (all after v0.10.2) implement
+- **Reference status (informative, released in v0.10.3).** Compiler PR #262
+  commits `83bebf39`, `2b8d5e2e` and `9881cb91` (all in v0.10.3, none in v0.10.2) implement
   the bullet above in `mindc`. `mindc verify` prints
   `signature:        retired (ed25519)` or
   `signature:        retired (hybrid-ed25519-ml-dsa-65)` and exits 1. With
   `MIND_EVIDENCE_ED25519_KEY` present, `mindc --emit-evidence` exits 1 and writes
   no artifact, whether or not supported keys are also set. Unsigned output stays
-  byte-identical to the committed reference artifact. This does not change the
-  published v0.10.2 artifact, which has no retired status, and published
+  byte-identical to the committed reference artifact. The retired status is in v0.10.3 and later; the
+  published v0.10.2 artifact has no retired status. Published
   releases remain unsigned. The reference names the tag and says the artifact is
   structurally intact, but its report does not yet use the words legacy or
   non-compliant; that wording is a pending compiler change.
@@ -222,12 +222,15 @@ under a retired scheme remain inspectable, but a verifier reports such a
 signature as retired and never accepts it as a trusted signature, for releases
 or for ordinary artifacts.
 
-**Implementation status (2026-10-07):** the reference compiler has opt-in
-hybrid evidence-signing capability and Linux CI controls on main after v0.10.2
-(pending release). Production release-key
+**Implementation status (2026-11-23):** the reference compiler has opt-in
+hybrid evidence-signing capability and Linux CI controls since v0.10.3
+(not in v0.10.2). Production release-key
 custody, public trust anchors, the bound release-descriptor workflow and
 independent release replay remain open. Existing archive-plus-checksum releases
 MUST NOT be described as signed releases or as satisfying this policy.
+Since v0.10.4 each release archive also holds `std/`, `stdlib_manifest.txt` and a `SHA256SUMS` file;
+`SHA256SUMS` lists the sha256 of the files under `std/` and of the manifest, not of the archive or the
+binary, and it is not a signature. The `<asset>.sha256` file covers the archive.
 See the reference [operational signing roadmap](https://github.com/star-ga/mind/blob/main/docs/roadmap.md).
 Normative algorithm references are [FIPS 204](https://csrc.nist.gov/pubs/fips/204/final)
 and [FIPS 205](https://csrc.nist.gov/pubs/fips/205/final); choosing those algorithms

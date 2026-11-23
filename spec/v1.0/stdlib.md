@@ -67,14 +67,13 @@ shipped by the reference implementation.
     [`grammar-syntax.ebnf`](./grammar-syntax.ebnf)) and the parenthesised
     `assert(cond, "message")`. The parenthesised spelling is an additive form
     targeted for specification 1.7.0 (reference compiler commit `487dd5c7`,
-    pending release); this does not declare that release or promote an
-    unreleased compiler artifact.
+    released in v0.10.3); this does not declare that specification release.
   - Aborts execution if `condition` is `false`, and the diagnostic SHOULD surface `message`
   - In the parenthesised spelling, a pair whose second element is a string
     literal is the condition and the message, not a tuple. A tuple is not a
     `bool`, so a tuple-typed condition is ill-typed under the signatures above.
 
-  > **Compiler integration update, pending release.** In the reference
+  > **Compiler integration update, released in v0.10.3.** In the reference
   > implementation (compiler commit `487dd5c7`) the parser splits
   > `assert(cond, "message")` into the condition and the message, exactly as
   > `assert cond, "message"` spells them; the message is kept as written between
@@ -515,14 +514,14 @@ so this resolution is the default behaviour of a shipped `mindc`; building with
   store and returns the replacement `Vec` owner. `vec_set` updates existing
   storage and returns the scalar status from the store operation.
 
-  > **Compiler integration update, pending release.** The source surface under
-  > review maps owned `array<T>` mutation onto these two result contracts. A
+  > **Compiler integration update, released in v0.10.3.** The source surface
+  > maps owned `array<T>` mutation onto these two result contracts. A
   > `push` must be a bare statement or be assigned back to the same owner;
   > unrebindable uses produce `E2300`. A `set` is valid as a statement, but its
   > scalar result cannot replace the array owner (`E2032`). Mutable borrowed
   > slices may use `set` as a statement; borrowed slices cannot use ownership
-  > operations such as `push` (`E2033`). This note does not change the shipped
-  > compiler surface.
+  > operations such as `push` (`E2033`). The v0.10.2 compiler
+  > does not have this surface.
 
   > **Planned (not yet shipped).** A tail-removing `vec_pop` is on the roadmap
   > but is **not** present in the reference implementation as of v0.10.0.
@@ -535,6 +534,11 @@ so this resolution is the default behaviour of a shipped `mindc`; building with
   `string_slice_from`, `string_starts_with`, `string_validate_utf`. Note
   `string_validate_utf` is an **explicit** opt-in check — there is no implicit
   in-band validation on push.
+
+  > **Native backend (informative).** In the native backend since v0.10.4, the handle
+  > `{addr, len, cap = 0}` of a string literal is written at compile time into the
+  > read-only literal segment, so a store through it faults. See
+  > [MLIR Lowering](./mlir-lowering.md#native-backend-refusals-informative).
 
   > **Planned (not yet shipped).** A by-index `string_set` and an explicit
   > `string_free` are on the roadmap but are **not** present in the reference

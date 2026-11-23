@@ -34,7 +34,7 @@ on backend / GPU / optimization level"* — does not exist in MIND.
 Determinism in MIND is **checkable**. Each compiled artifact embeds an evidence
 chain whose `trace_hash = SHA-256` of the canonical `mic@3` bytes. Identical
 (source, inputs, version, target) ⇒ identical `trace_hash`. `mindc verify ./artifact`
-confirms it without trusting the build host. No other toolchain ships a verifiable
+confirms it without trusting the build host. Since v0.10.4 `mindc verify --json` also prints `scope` (`whole_program` or `partial`), defined in [RFC 0017 section 4.7](https://github.com/star-ga/mind/blob/v0.10.4/docs/rfcs/0017-mindc-verify.md#47-the-scope-key) of the compiler repository. No other toolchain ships a verifiable
 determinism contract. ✅
 
 The verifier also re-derives the artifact's **floating-point contract mode**
@@ -56,8 +56,8 @@ Integer arithmetic is fully deterministic and byte-identical across substrates.
 | `x % 0` | `= 0` (defined) |
 | `INT_MIN / -1` | `= INT_MIN` (defined; no overflow trap) |
 | Integer overflow | wraps two's-complement (defined; identical on x86 and ARM) |
-| Declared narrow width (`i8`, `u8`, `i16`, `u16`, `i32`, `u32`) | a value wraps at the declared width where it is materialised (binding, assignment, argument, return, struct field): two's-complement for signed widths, modulo 2^N for unsigned widths. An 8- or 16-bit arithmetic intermediate (`+ - * / %` and shifts) is re-wrapped to the widest 8- or 16-bit operand width; an operand that is a wider variable, or a cast to a wider type, leaves it unwrapped. ✅ on the MLIR build path for the 8- and 16-bit widths since v0.10.2 (not v0.10.0); the wider-operand rule is on compiler main since `732edb0f` (pending release), and v0.10.2 re-wrapped such an intermediate to the narrow width (`i64` 1000 + `u8` 1 gave 233). The native backend is not covered by this evidence. |
-| Integer type the implementation does not compute at its written width (e.g. `i128`, `u128`, `i256`) | never computed at a narrower width: it is either computed at its written width as a documented extension, or refused at check time. 📋 The reference compiler refuses `iN`/`uN` with N > 64 at check time on compiler main (`4fd65cfb`, pending release); v0.10.2 accepted them outside extern function signatures, and a `let` binding of one was computed in 64 bits. Widths of 64 or less that it does not recognise (e.g. `i24`) are not covered by this check (see [types.md](spec/v1.0/types.md#type-formation)). |
+| Declared narrow width (`i8`, `u8`, `i16`, `u16`, `i32`, `u32`) | a value wraps at the declared width where it is materialised (binding, assignment, argument, return, struct field): two's-complement for signed widths, modulo 2^N for unsigned widths. An 8- or 16-bit arithmetic intermediate (`+ - * / %` and shifts) is re-wrapped to the widest 8- or 16-bit operand width; an operand that is a wider variable, or a cast to a wider type, leaves it unwrapped. ✅ on the MLIR build path for the 8- and 16-bit widths since v0.10.2 (not v0.10.0); the wider-operand rule holds since `732edb0f` (v0.10.3), and v0.10.2 re-wrapped such an intermediate to the narrow width (`i64` 1000 + `u8` 1 gave 233). The native backend is not covered by this evidence. |
+| Integer type the implementation does not compute at its written width (e.g. `i128`, `u128`, `i256`) | never computed at a narrower width: it is either computed at its written width as a documented extension, or refused at check time. 📋 The reference compiler refuses `iN`/`uN` with N > 64 at check time since `4fd65cfb` (v0.10.3); v0.10.2 accepted them outside extern function signatures, and a `let` binding of one was computed in 64 bits. Widths of 64 or less that it does not recognise (e.g. `i24`) are not covered by this check (see [types.md](spec/v1.0/types.md#type-formation)). |
 | Oversized shift (`count ≥ bit-width`) | given a defined result (never UB) |
 | Condition truthiness (`if c`) | tests `c != 0` — the whole value, not the low bit |
 
@@ -65,8 +65,8 @@ The narrow-integer call ABI (`i32`/`u32` across call boundaries) and struct
 narrow-field ABI are sound. Gated by the keystone and `cross_substrate` suites.
 
 The declared-width row describes compiled output of the default (`std-surface`)
-build on the MLIR build path. On compiler main the `mindc test` evaluator applies the same widths for the
-covered cases (`97c0d273`, `74004786`, `2575c1e9`, `a7f9520a`; pending release).
+build on the MLIR build path. Since v0.10.3 the `mindc test` evaluator applies the same widths for the
+covered cases (`97c0d273`, `74004786`, `2575c1e9`, `a7f9520a`; v0.10.3).
 The gaps, where agreement with compiled output is not claimed, are listed in
 [`spec/v1.0/conformance.md`](spec/v1.0/conformance.md).
 
@@ -93,7 +93,7 @@ substrates (x86 == ARM) today.
 | `pow(0.0, 0.0)` | `1.0` — IEEE `pow`: `x^0 == 1` for **all** `x` (including `0` and `NaN`) | 📋 (transcendental) |
 | `powr(0.0, 0.0)` | `NaN` — IEEE `powr` (= `exp(0·log 0)`), the strict real-power form | 📋 (transcendental) |
 | `limit_form(0^0)` | indeterminate — symbolic/calculus context, not a number | 📋 |
-| Float comparisons (NaN operand, signed zero) | `<`, `<=`, `>`, `>=`, `==` are `false` and `!=` is `true`; `-0.0 == +0.0` is `true` | 📋 compiled MLIR path on compiler main since `2597ee9c` (the v0.10.2 release lowered `!=` as ordered, so `NaN != NaN` was `false` there); native x86-64 `f64` since `ccbb00b8` (pending release; the native backend refuses `f32`); the `mindc test` evaluator has an open `f64` comparison defect |
+| Float comparisons (NaN operand, signed zero) | `<`, `<=`, `>`, `>=`, `==` are `false` and `!=` is `true`; `-0.0 == +0.0` is `true` | 📋 compiled MLIR path since `2597ee9c` (v0.10.3) (the v0.10.2 release lowered `!=` as ordered, so `NaN != NaN` was `false` there); native x86-64 `f64` since `ccbb00b8` (v0.10.3; the native backend refuses `f32`); the `mindc test` evaluator has an open `f64` comparison defect |
 | `min` / `max` / `sort` with NaN | use a defined total order (NaN sorts last) so results are deterministic | 📋 |
 | Rounding | round-to-nearest-even (IEEE default), fixed | 🔄 |
 | Q16.16 fixed-point | fully deterministic, byte-identical x86 == ARM | ✅ |
@@ -166,7 +166,7 @@ hashes in the `cross_substrate` gate).
 Ten scalar-`f64` quantitative-finance workloads (option pricing, implied
 volatility, binomial lattices, Monte Carlo, bond curve and portfolio risk programs
 under `examples/quant`) were added to the gate after v0.10.2 (`545ed80c`,
-`82e34947`; pending release). Each hashes one exported MIND kernel over eight fixed
+`82e34947`; v0.10.3). Each hashes one exported MIND kernel over eight fixed
 inputs. The kernels' floating-point arithmetic is `+ - * /` and `sqrt` in fixed
 source order (some kernels also use comparisons, `max`, integer loop counts, and in
 the Monte Carlo kernel an integer LCG with integer-to-`f64` conversion), with `exp`,
@@ -248,7 +248,7 @@ replace a user-defined function, or a call to it, with a host library routine or
 host-folded constant because its name matches a C library routine (`pow`, `sin`,
 `exp`, `log`, `cos`, ...).
 
-Reference status (pending release): on the MLIR build path the reference compiler
+Reference status (v0.10.3): on the MLIR build path the reference compiler
 marks every function definition `nobuiltin` before LLVM sees it (`9c231f50`), so
 LLVM does not treat a MIND function as the library routine its name matches.
 `--emit-mlir` text is unchanged, the feature-gated `mlir-exec`, `mlir-jit` and
@@ -256,7 +256,7 @@ LLVM does not treat a MIND function as the library routine its name matches.
 path has no external toolchain to apply such a rewrite. The evidence is one runtime test with three probe names
 (`pow`, `sin`, `exp`), not an audit of every libm symbol. This does not make the
 `std.math` transcendentals correctly rounded or identical across substrates; that
-remains on the roadmap (§2.1). It does not change the published v0.10.2 artifact.
+remains on the roadmap (§2.1). The published v0.10.2 artifact does not have it.
 
 ---
 

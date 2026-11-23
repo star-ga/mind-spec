@@ -174,10 +174,9 @@ adds no operator.
 **Implementation status (informative).**
 
 - The reference MLIR path emits `arith.cmpf` with the ordered predicates `olt`, `ole`, `ogt`, `oge`
-  and `oeq`. Since compiler `2597ee9c` (pending release) it emits the unordered `une` for `!=`; the
+  and `oeq`. Since compiler `2597ee9c` (v0.10.3) it emits the unordered `une` for `!=`; the
   v0.10.2 release used the ordered `one`, so `NaN != NaN` was false there.
-- The native x86-64 backend (`--backend native`) matches this for `f64` since `ccbb00b8` (pending
-  release). The evidence is one script gate: 14 operand pairs plus one NaN program, each also built
+- The native x86-64 backend (`--backend native`) matches this for `f64` since `ccbb00b8` (v0.10.3). The evidence is one script gate: 14 operand pairs plus one NaN program, each also built
   with the MLIR backend, with the pair programs checked against Python float comparisons. That gate is
   run in preflight, not in CI, and covers `f64` on x86-64 only. The compiler independence audit
   records the gate as exiting 1 (its wording: "3 of 5 in-profile programs fail"), and the `ccbb00b8`
@@ -280,11 +279,11 @@ local binding of the same name; that remains open.
 **Implementation status (informative).** The reference resolves qualified types and enum variants by
 owner as described in [Types](./types.md) (manifest projects, `cross-module-imports`). It does not
 yet select the owner of a qualified function call in `mindc check` and `mindc build`: `q.f(x)` and,
-since `cd150ae7` (pending release), `q::f(x)` are parsed to the bare member name `f`, with the
+since `cd150ae7` (v0.10.3), `q::f(x)` are parsed to the bare member name `f`, with the
 qualifier kept beside the AST by source span, where only the formatter reads it; type checking and
 lowering see only the bare member name. Two imported modules that both export a function `f`, called
 as `a.f()` and `b.f()`, therefore check without a diagnostic but fail to link
-(`multiple definition of 'f'`); measured on compiler main with `cd150ae7` applied (pending release).
+(`multiple definition of 'f'`); measured with `cd150ae7` applied (v0.10.3).
 The `mindc test` evaluator is different: under `cross-module-imports` it captures the qualifier
 separately and binds the reference to the named import (see
 [Conformance](./conformance.md#source-test-execution-and-module-scope)). The reference is not
@@ -306,10 +305,10 @@ documentation MUST NOT present these as complete:
   [Types](./types.md) but not implemented.
 - **Closures / first-class functions**: **not implemented**. Function values, closure capture, and
   higher-order functions are future extensions (see
-  [Future Extensions](./future-extensions.md)); the compiler rejects fn-as-value use fail-loud. On
-  compiler main a bare name of a function of the current module, or of a function-only
+  [Future Extensions](./future-extensions.md)); the compiler rejects fn-as-value use fail-loud. Since
+  v0.10.3 a bare name of a function of the current module, or of a function-only
   standard-surface export, used as a value is refused with
-  [`E2037`](./errors.md#e2037-function-name-used-as-a-value) (`1def5dde`, pending release); see that
+  [`E2037`](./errors.md#e2037-function-name-used-as-a-value) (`1def5dde`, v0.10.3); see that
   entry for its limit.
 - **Traits**: **not implemented** in the executable subset (no `trait` declarations, no `dyn Trait`).
 - **Slices**: stubbed; byte-level work goes through the `std.string`/`std.vec` heap records and the
@@ -321,15 +320,15 @@ documentation MUST NOT present these as complete:
 - **Range `for` loops**: the range form `for v in s..e { ... }` is not yet in the grammar:
   [`grammar-syntax.ebnf`](./grammar-syntax.ebnf) has a `ForExpression` over an arbitrary
   `Expression` but no range expression. The reference interpreter evaluates `e` once and binds `v`
-  fresh on each iteration. On compiler main, compiled output follows it when the body re-declares
+  fresh on each iteration. Since v0.10.3, compiled output follows it when the body re-declares
   `v` with `let` or a tuple `let`: the re-declaration shadows `v` from that statement to the end of
-  the iteration and does not change the iteration count (`fe9854ec`, pending release; Rust IR
-  lowering, not the pure-MIND native path). Before `fe9854ec`, compiler main built such a loop to an
+  the iteration and does not change the iteration count (`fe9854ec`, v0.10.3; Rust IR
+  lowering, not the pure-MIND native path). Before `fe9854ec`, the compiler built such a loop to an
   executable that did not terminate; the behaviour of v0.10.2 for this shape is not established
   here. Known gap: an end bound that reads memory the body mutates through an index or field store is
   not detected, so compiled output can re-evaluate it on each iteration.
 - **Assertions**: `assert cond`, `assert cond, "message"` and the parenthesised
-  `assert(cond, "message")` each assert `cond` (parenthesised form: `487dd5c7`, pending release);
+  `assert(cond, "message")` each assert `cond` (parenthesised form: `487dd5c7`, v0.10.3);
   the message is kept as written between the quotes. A false condition aborts an executable built
   with the default MLIR backend (SIGABRT; the message text is not printed) and fails the test under
   `mindc test`; the native backend is not covered here. Any other parenthesised tuple condition,
@@ -344,7 +343,7 @@ documentation MUST NOT present these as complete:
 - **Imports and module-qualified references**: the normative rule is in
   [Module-qualified references](#module-qualified-references) above. Reference status
   (informative): the reference also accepts `import a.b as c;` and `use a.b as c` (`f2fc890d`,
-  pending release), registering both the alias and the last path segment as qualifiers; the `as`
+  v0.10.3), registering both the alias and the last path segment as qualifiers; the `as`
   form is not in [`grammar-syntax.ebnf`](./grammar-syntax.ebnf). `use` also accepts `::` between
   path segments as an extension. A zero-argument `.sum()` or `.mean()` on a receiver named like an
   import is a module call, not a tensor reduction (`f2fc890d`).

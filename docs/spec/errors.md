@@ -27,7 +27,7 @@ The canonical error-code assignments and stability rules are maintained in
 stable within Core v1; adding a code requires a minor specification release,
 while renumbering or reusing an existing code requires a major release.
 
-Two E2xxx entries are pending compiler integration and targeted for
+Two E2xxx entries are implemented in the reference compiler v0.10.3 and targeted for
 specification 1.7.0: `E2036` (a proven non-integer or opaque-handle value stored
 into an `i8`, `u8`, `i16` or `u16` array element) and `E2037` (a function name
 used as a value). The `E2002` entry is also clarified to cover a bare-headed
@@ -38,10 +38,10 @@ this only in compiler builds with the non-default `cross-module-imports`
 feature, and only when several source modules are checked or built together (a
 project build, a single-file entry that imports modules of its manifest
 project, or `mindc check` over several files or a directory), and that
-resolution is pending compiler integration as well.
+resolution is implemented in the reference compiler v0.10.3 as well.
 The entries, their limits and the reference commits are in the
 [Error Catalog (Normative)](../../spec/v1.0/errors.md). This does not declare
-the 1.7.0 release or promote an unreleased compiler artifact.
+the 1.7.0 release.
 
 The E6xxx catalog distinguishes these current compilation refusals:
 

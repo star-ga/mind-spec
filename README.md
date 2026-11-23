@@ -1,7 +1,7 @@
 # Mind Language Specification
 
 [![Spec Status](https://img.shields.io/badge/Core%20v1%20spec-frozen-blue?style=flat-square)](./STATUS.md)
-[![Compiler](https://img.shields.io/badge/reference%20compiler-v0.10.2-blue?style=flat-square)](https://github.com/star-ga/mind)
+[![Compiler](https://img.shields.io/badge/reference%20compiler-v0.10.4-blue?style=flat-square)](https://github.com/star-ga/mind)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue?style=flat-square)](./LICENSE)
 [![Deterministic](https://img.shields.io/badge/deterministic-bit--identical-brightgreen?style=flat-square)](https://github.com/star-ga/mind/blob/main/docs/roadmap.md)
 
@@ -15,7 +15,7 @@ transcendentals and GPU/other-substrate coverage require further implementation
 and conformance evidence. [Compiler RFC 0015 §5A](https://github.com/star-ga/mind/blob/main/docs/rfcs/0015-cross-substrate-bit-identity.md#5a-conformance-evidence)
 records the exact workloads, output encodings and reference hashes.
 
-Two further precise claims, stated at their honest scope: the reference compiler's **bootstrap/front-end self-hosts** (the pure-MIND front-end reproduces the reference output byte-for-byte on the `mic@1` text, `mic@3` binary, and native-ELF gates), while full-chain Rust-independence of the whole toolchain remains roadmap. The bounded RI-D driver path has landed: `mindc build --backend native` resolves a manifest entry and its local imports, enforces export scope and entry-module ownership of `main`, and emits a native executable for the admitted scalar/control-flow subset through the pure-MIND emitter. The invoking host driver remains implemented in Rust; imported aliases, structs, and enums refuse until their source ownership can survive lowering, and native aggregate/full-language coverage remains unfinished ([compiler PR #257](https://github.com/star-ga/mind/pull/257)).
+Two further precise claims, stated at their honest scope: the reference compiler's **bootstrap/front-end self-hosts** (the pure-MIND front-end reproduces the reference output byte-for-byte on the `mic@1` text, `mic@3` binary, and native-ELF gates), while full-chain Rust-independence of the whole toolchain remains roadmap. The bounded RI-D driver path has landed: `mindc build --backend native` (the default backend of `mindc build` since v0.10.3) resolves a manifest entry and its local imports, enforces export scope and entry-module ownership of `main`, and emits a native executable for the admitted scalar/control-flow subset through the pure-MIND emitter. The invoking host driver remains implemented in Rust; imported aliases, structs, and enums refuse until their source ownership can survive lowering, and native aggregate/full-language coverage remains unfinished ([compiler PR #257](https://github.com/star-ga/mind/pull/257)).
 
 Compiled artifacts carry an **emitted, hash-anchored (tamper-evident)** evidence chain anchored on `trace_hash = SHA-256(canonical mic@3 bytes)`. Opt-in signing is implemented. The supported production profile requires **both ML-DSA-87 and SLH-DSA-SHAKE-256s**, with both public keys pinned for trusted verification. Ed25519 and the earlier Ed25519/ML-DSA-65 hybrid are retired from signing and trust verification; historical artifacts remain inspectable ([compiler PR #262](https://github.com/star-ga/mind/pull/262)). Published releases are currently unsigned.
 

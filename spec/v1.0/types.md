@@ -35,7 +35,7 @@ The following forms are part of the core language:
 
 Implementations MAY extend the set of primitive types but MUST document the extensions.
 
-> **Compiler integration update, pending release (informative).** The reference
+> **Compiler integration update, released in v0.10.3 (informative).** The reference
 > compiler source at `4fd65cfb` refuses an `iN` or `uN` annotation with `N`
 > greater than 64 (`i128`, `u128`, `i256`, ...) during checking. The refusal covers
 > `let` annotations, parameters, return types, `as` casts, `const` and extern
@@ -51,8 +51,8 @@ Implementations MAY extend the set of primitive types but MUST document the exte
 > other positions go through the same validation walk and have no dedicated
 > control. This check refuses only widths greater than 64 that fit in 32 bits;
 > an unrecognised width of 64 bits or less (for example `i24`) is not refused by
-> this check and is not computed at its written width. This does not change the
-> published v0.10.2 artifact.
+> this check and is not computed at its written width. The published v0.10.2
+> artifact does not have this check.
 
 ## Typing judgements
 
@@ -78,7 +78,7 @@ counts; execution failure at a later call site is not an adequate substitute.
 This rule concerns literal cardinality; nonliteral initializers remain subject
 to the ordinary type compatibility rules.
 
-**Implementation coverage (informative, pending release).** The normative rule
+**Implementation coverage (informative, released in v0.10.3).** The normative rule
 above is limited to annotated `let` and `const` bindings. Compiler commit
 `c4c7b034` additionally applies the cardinality check, and an element-type
 check, to the value supplied for a struct-literal field whose declared type is
@@ -106,8 +106,8 @@ for example) is deferred rather than rejected. The pass runs in builds with the
 compiler controls are its `fixed_array_return_lengths` tests.
 
 This coverage does not extend the normative rule to struct-literal fields;
-whether it should become a rule is a decision pending for 1.7.0. It does not
-change the published v0.10.2 artifact.
+whether it should become a rule is a decision pending for 1.7.0. The published
+v0.10.2 artifact does not have this coverage.
 
 A comprehensive derivation catalogue is maintained in the implementation notes
 ([informative](https://github.com/star-ga/mind/blob/main/docs/type-system.md)).
@@ -193,8 +193,8 @@ standalone bootstrap also refuses that fixture; the canonical mic@3 trace path's
 layout precondition fails closed for every record that has a fixed-array field
 (`f7bba8c6` for field reads, `a80b67ea` for construction), so the slice is not
 reachable through that path. The slice is therefore not native-profile support,
-not standalone-compiler support, and is in no published artifact, including
-v0.10.2.
+not standalone-compiler support. The commits named here are in the v0.10.3
+tag and not in v0.10.2.
 
 Struct-owned fixed arrays of records remain unsupported: checking may succeed,
 but shared-library emission refuses with `E6009` and leaves no artifact.
@@ -254,11 +254,11 @@ The type checker participates directly in Core IR construction:
 
 ## Module-qualified type ownership
 
-> **Compiler integration update, pending release.** The project-module source
-> implementation under review resolves qualified imported types and enum
+> **Compiler integration update, released in v0.10.3.** The project-module source
+> implementation resolves qualified imported types and enum
 > variants as described here, and compiler commit `1def5dde` adds the
-> bare-headed enum variant resolution described below. This does not change the
-> published v0.10.2 artifact.
+> bare-headed enum variant resolution described below. The published v0.10.2
+> artifact does not have them.
 
 For a manifest project, the defining source module owns each enum, struct, and
 type alias. A qualifier MUST resolve to the current module or to exactly one
@@ -288,7 +288,7 @@ one, or (c) the single imported enum does not declare the variant. The dot
 spelling `Enum.Variant` denotes a variant only when its head resolves to a
 visible enum; with such a head, case (c) applies to it.
 
-**Implementation coverage (informative, pending release).** Compiler commit
+**Implementation coverage (informative, released in v0.10.3).** Compiler commit
 `1def5dde` implements this resolution, and the refusal with the gaps listed
 below, for manifest projects in builds with the `cross-module-imports` feature,
 which is not a default feature; a build without it does not perform them. The
@@ -326,16 +326,16 @@ establish `config` as a semantic owner; compiling that source without a
 manifest-resolved module MUST refuse the qualified type and variants with
 `E2002`.
 
-The pending integration's executable coverage is the compiler-side
+The executable coverage of this integration (v0.10.3) is the compiler-side
 `qualified_enum_run` test together with the parser and single-source refusal
 controls in `parse_match_and_ref`.
 
 ## Slice call implementation boundary
 
-> **Compiler integration update, pending release.** The `std-surface` source
-> implementation under review defines a bounded dynamic-array-to-slice call
-> ABI. This describes the pending integration; it does not change the
-> published v0.10.2 artifact.
+> **Compiler integration update, released in v0.10.3.** The `std-surface` source
+> implementation defines a bounded dynamic-array-to-slice call
+> ABI. This describes the integration that ships in v0.10.3; the published
+> v0.10.2 artifact does not have it.
 
 A compatible `array<T>` value or array literal MAY be passed to `&[T]` or
 `&mut [T]` parameters. Both use the existing `std.vec` Option-C dynamic-array
@@ -364,7 +364,7 @@ alias-exclusivity analysis remains outside this implementation. These limits
 are separate from the general byte-slice design in [Future Extensions](./future-extensions.md#systems-programming-primitives).
 
 For an owned `array<T>`, `push` returns the replacement owner handle. The
-pending compiler accepts an explicit same-binding update such as
+reference compiler (v0.10.3) accepts an explicit same-binding update such as
 `xs = xs.push(value)` and rewrites a bare statement `xs.push(value)` to that
 same owner-preserving form. A collection mutation used where its replacement
 handle cannot be rebound, including assignment to a different binding or a
@@ -378,7 +378,7 @@ for an owned array or mutable slice, while `xs = xs.set(index, value)` cannot
 replace an owned array and MUST be refused with `E2032`. Neither read-only nor
 mutable borrowed slices provide `push`; attempts MUST be refused with `E2033`.
 
-The pending integration's executable coverage is the compiler-side
+The executable coverage of this integration (v0.10.3) is the compiler-side
 `slice_call_abi_run` and `lowering_refusal_diagnostics_run` tests; they are not
 yet shipped conformance artifacts.
 

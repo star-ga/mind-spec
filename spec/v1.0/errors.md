@@ -87,8 +87,8 @@ Type errors occur during type checking and type inference.
   export one, or (c) the single import exports an enum of that name that does
   not declare the variant. Recognising a qualified path during parsing does not
   establish semantic module ownership.
-- **Implementation status**: bare-headed variant resolution is pending compiler
-  integration (compiler commit `1def5dde`). It applies in compiler builds with
+- **Implementation status**: bare-headed variant resolution is implemented in
+  the reference compiler v0.10.3 (compiler commit `1def5dde`). It applies in compiler builds with
   the `cross-module-imports` feature, which is not a default feature, wherever
   several source modules are checked or built together (see Scope). The
   control `cross_module_enum_variant_lowering` is compiled only with the
@@ -158,7 +158,7 @@ Type errors occur during type checking and type inference.
 
 ### E2032: Unsupported slice call ABI
 
-- **Implementation status**: pending compiler integration; see the
+- **Implementation status**: implemented in the reference compiler v0.10.3; see the
   [slice call boundary](./types.md#slice-call-implementation-boundary).
 - **Trigger**: unsupported slice layout, a call argument without proven
   compatible dynamic-array provenance, or a slice/array result that is not
@@ -170,7 +170,7 @@ Type errors occur during type checking and type inference.
 
 ### E2033: Borrowed slice capability violation
 
-- **Implementation status**: pending compiler integration.
+- **Implementation status**: implemented in the reference compiler v0.10.3.
 - **Trigger**: read-only mutation, ownership operations, capability erasure,
   escape through a non-slice parameter or return, or a slice-containing
   aggregate or struct field.
@@ -179,14 +179,14 @@ Type errors occur during type checking and type inference.
   preserve a compatible slice capability. The compiler preserves borrowed
   capabilities through branch and loop joins.
 
-The pending checker does not provide general lifetime inference or mutable-alias
+The reference checker does not provide general lifetime inference or mutable-alias
 exclusivity analysis; those guarantees remain future work.
 
 ### E2036: Non-integer value stored into a narrow integer element
 
-- **Implementation status**: pending compiler integration; additive Core v1
-  catalog entry targeted for specification 1.7.0. It does not declare that
-  release or promote an unreleased compiler artifact. Reference compiler
+- **Implementation status**: implemented in the reference compiler v0.10.3;
+  additive Core v1 catalog entry targeted for specification 1.7.0. It does not
+  declare that release. Reference compiler
   commit `0a8b34a5`, merged with
   [compiler PR #263](https://github.com/star-ga/mind/pull/263) at `1833f095`;
   see [record identity implementation coverage](./types.md#implementation-coverage).
@@ -223,9 +223,9 @@ exclusivity analysis; those guarantees remain future work.
 
 ### E2037: Function name used as a value
 
-- **Implementation status**: pending compiler integration; additive Core v1
-  catalog entry targeted for specification 1.7.0. It does not declare that
-  release or promote an unreleased compiler artifact. Reference compiler
+- **Implementation status**: implemented in the reference compiler v0.10.3;
+  additive Core v1 catalog entry targeted for specification 1.7.0. It does not
+  declare that release. Reference compiler
   commit `1def5dde`; the rule does not depend on the `cross-module-imports`
   feature, and without the default `std-surface` feature
   (`--no-default-features`) the function-only standard-surface names are not
@@ -248,7 +248,7 @@ exclusivity analysis; those guarantees remain future work.
 
 ### E2300: Collection mutation in expression position
 
-- **Implementation status**: pending compiler integration.
+- **Implementation status**: implemented in the reference compiler v0.10.3.
 - **Trigger**: a mutating method on a tracked collection appears in an
   expression position rather than as a supported top-level owner update. This
   includes nested expressions, call arguments, conditions, match values or
@@ -267,7 +267,7 @@ exclusivity analysis; those guarantees remain future work.
 
 ### E2301: Non-final enum-variant binding collision
 
-- **Implementation status**: pending compiler integration.
+- **Implementation status**: implemented in the reference compiler v0.10.3.
 - **Trigger**: an unguarded bare-identifier match arm occurs before the final
   arm and its identifier collides with a registered enum variant. Such an arm
   is neither a qualified discriminant test nor a valid final catch-all.
@@ -555,8 +555,8 @@ The reference compiler implements the following error codes:
 |-------|-------------|------------------------------------------|
 | E1001 | Parse       | Unexpected token / parsing error         |
 | E2001 | Type-check  | General type error                       |
-| E2036 | Type-check  | Non-integer value stored into a narrow integer element (pending, `0a8b34a5`) |
-| E2037 | Type-check  | Function name used as a value (pending, `1def5dde`) |
+| E2036 | Type-check  | Non-integer value stored into a narrow integer element (v0.10.3, `0a8b34a5`) |
+| E2037 | Type-check  | Function name used as a value (v0.10.3, `1def5dde`) |
 | E2101 | Type-check  | Broadcast compatibility failure          |
 | E2102 | Type-check  | Rank/shape mismatch, invalid reductions  |
 | E2103 | Type-check  | MatMul inner-dimension mismatch          |

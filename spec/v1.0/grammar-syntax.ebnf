@@ -247,7 +247,7 @@ AttributeArg    = Identifier | Literal ;
 (* Any other tuple written as the condition is ill-typed,        *)
 (* because an assert condition is `bool` (stdlib.md, core        *)
 (* module); the reference compiler rejects such a parenthesised  *)
-(* tuple at parse time (487dd5c7, pending release) and does not  *)
+(* tuple at parse time (487dd5c7, v0.10.3) and does not          *)
 (* otherwise check the condition's type.                         *)
 AssertStatement = "assert" , Expression , [ "," , StringLiteral ] , [ ";" ]
                 | "assert" , "(" , Expression , "," , StringLiteral , ")" , [ ";" ]

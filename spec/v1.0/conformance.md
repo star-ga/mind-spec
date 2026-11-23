@@ -76,13 +76,12 @@ For the profile(s) an implementation claims:
 
 ## Source test execution and module scope
 
-> **Compiler integration update, pending release.** The `mindc test`
+> **Compiler integration update, released in v0.10.3.** The `mindc test`
 > implementation in compiler commit `eedcfb2c` implements the bounded source
 > test behavior below, and compiler commits `953d7233`, `97c0d273`, `74004786`,
 > `2575c1e9`, `a7f9520a` and `487dd5c7` implement the additions below to the
 > extent stated in the implementation-coverage notes. None of these commits
-> promotes the published compiler artifact or establishes native-backend
-> conformance.
+> establishes native-backend conformance.
 
 A source test runner MUST discover module-level test functions inside
 transparent inline module blocks in depth-first source order. Function-local
@@ -98,7 +97,7 @@ same short name. Bundled standard-library imports use explicit `std.*` paths;
 dependencies' standard-library imports are part of the captured evaluator
 closure. A bare import names a project module and does not imply `std.*`.
 
-**Implementation coverage (informative, pending release).** On such builds the
+**Implementation coverage (informative, released in v0.10.3).** On such builds the
 reference runner applies that resolution rule to the dot spelling (`dep.f(x)`,
 `dep.K`) and, from compiler commit `953d7233`, to the path spelling `dep::f(x)`,
 `dep::K` and `crate::a::b::f(x)`, where the qualifier names a declared import by
@@ -133,10 +132,9 @@ width and overflow behaviour that the implementation's compiled artifacts give
 it, and MUST refuse a value it cannot materialise at a declared narrow width
 rather than report it at a wider width. A narrow width here is any declared
 integer width below 64 bits. This requirement is additive and targeted for
-specification 1.7.0; this does not declare that release or promote an
-unreleased compiler artifact.
+specification 1.7.0; this does not declare that release.
 
-**Implementation coverage (informative, pending release).** In the reference
+**Implementation coverage (informative, released in v0.10.3).** In the reference
 implementation, compiled artifacts on the default MLIR build path wrap
 two's-complement at the declared width
 (see section 1 of [`determinism.md`](../../determinism.md)). The reference
@@ -155,7 +153,7 @@ Declarations of other types, including `i64`, `u64`, floating-point types and
 declared narrow width, such as a string bound to a `u8` binding, is refused with
 a diagnostic that names the declaration.
 
-**Implementation coverage, arithmetic (informative, pending release).** In
+**Implementation coverage, arithmetic (informative, released in v0.10.3).** In
 `std-surface` builds the evaluator also re-wraps 8- and 16-bit intermediate `+`,
 `-`, `*`, `/` and `%` results, and shift results, to the width inferred from the
 operands, mirroring the compiled lowering (`2575c1e9`, `a7f9520a`): with
@@ -193,7 +191,7 @@ the SHOULD for a runtime abort in that entry and applies to source test runners
 only. This requirement is additive and targeted for specification 1.7.0; it
 does not declare that release.
 
-**Implementation coverage (informative, pending release).** The reference runner
+**Implementation coverage (informative, released in v0.10.3).** The reference runner
 reports such a test as `FAILED` and prints the message, for the bare spelling
 `assert cond, "message"` and for the parenthesised spelling
 `assert(cond, "message")` (`487dd5c7`); the parser reads the parenthesised pair

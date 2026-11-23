@@ -50,8 +50,8 @@ Core v1 is organised into the following pillars:
 9. **MLIR Lowering** ([`mlir-lowering.md`](./mlir-lowering.md)) — deterministic lowering patterns for
    the feature-gated MLIR backend. Note: MLIR-text is the downstream-interchange and exotic-chip-reach
    backend; the normative self-host target is the native-ELF backend (the pure-MIND native emitter in
-   `examples/mindc_mind`; on compiler main, pending release, it is reached through
-   `mindc build --backend native`, `52bd6d3b`).
+   `examples/mindc_mind`; it is reached through `mindc build --backend native`
+   since `52bd6d3b` and is the default backend of `mindc build` since v0.10.3).
 10. **Runtime Interface** ([`runtime.md`](./runtime.md)) — abstract contract for executing canonical IR
     semantics across CPU and the optional GPU profile.
 11. **Security & Safety** ([`security.md`](./security.md)) — memory safety guarantees, determinism

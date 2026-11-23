@@ -14,6 +14,12 @@ was reproduced. Those facts require a receipt with the fields below.
 
 ## Reference under review
 
+> **Release status (2026-11-23).** The reference below was observed on 2026-10-07 and is a dated receipt.
+> Commit `7831998b` and every compiler commit that this page cites as past `v0.10.2` are part of the
+> `v0.10.3` tag (2026-11-18). The current reference compiler is `v0.10.4` (2026-11-23). This page has no
+> receipt for `v0.10.4`: the native backend items of that release are recorded in
+> [MLIR Lowering](../../spec/v1.0/mlir-lowering.md#native-backend-refusals-informative).
+
 The source reference used for the current compiler observations is
 [`star-ga/mind@7831998b07a23d3c973d56505aa761a696ea8df9`](https://github.com/star-ga/mind/tree/7831998b07a23d3c973d56505aa761a696ea8df9),
 observed 2026-10-07 (`main`, commit date 2026-10-07; previous accepted source `c8efcf9a`). Unlike that previous step, compiler sources differ between the two references. The reference is 580 commits past the `v0.10.2` tag. The compiler commits cited in the gate rows below for the native bridge and its fence (`52bd6d3b`, `ccbb00b8`, `a1b0b5f5`, `f6541e21`), the `stage1.elf` rebuild (`593abbc7`), the formatter and `mindc check` (`eb872eaf`, `f2fc890d`, `6f9ac5eb`, `fbb08821`), the MLIR `!=` predicate (`2597ee9c`) and the MLIR toolchain messages (`3f9b80df`) are on `main` after that tag, so none of them is part of the released `v0.10.2` artifact. The `v0.10.2` release refuses `--backend native` with `error[backend]` and exit status 2. No release artifact digest, host/target substrate, or

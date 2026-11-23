@@ -39,17 +39,17 @@ document may present them as shipped:
 
 - **Closures and first-class function values** — no closure syntax, no capture semantics, no
   higher-order functions. The compiler rejects fn-as-value use fail-loud rather than miscompiling.
-  On compiler main a bare name of a function of the current module, or of a function-only
+  Since v0.10.3 a bare name of a function of the current module, or of a function-only
   standard-surface export, used as a value is refused with
-  [`E2037`](./errors.md#e2037-function-name-used-as-a-value) (`1def5dde`, pending release); see that
+  [`E2037`](./errors.md#e2037-function-name-used-as-a-value) (`1def5dde`, v0.10.3); see that
   entry for its limit.
 - **Traits** — no `trait` declarations, implementations, or `dyn Trait` objects. The normative
   rules in [Types](./types.md#traits-and-generics) describe the target design.
 - **Full generics** — today's surface is a bounded slice: a single type parameter over scalar
   types. Multi-parameter generics, generic containers (`map<K, V>`-style), and `where`-clause
   trait bounds are future extensions.
-- **Slice call ABI** (`&[T]` / `&mut [T]`) — issue #234 is pending compiler
-  integration; see [its precise limits](./types.md#slice-call-implementation-boundary).
+- **Slice call ABI** (`&[T]` / `&mut [T]`) — issue #234 is implemented in the reference compiler
+  v0.10.3; see [its precise limits](./types.md#slice-call-implementation-boundary).
   The bounded `std.vec` handle boundary does not provide general lifetime or
   mutable-alias exclusivity checking.
 - **General byte-slice type** — remains deferred; see the byte-slice discussion
@@ -532,8 +532,8 @@ These primitives extend MIND from a tensor-only language into one capable of exp
 > declarations, and narrow integer types (`i32`/`u32`/`bool` lowering in every context, with
 > cross-substrate shift-count determinism). The prose below is retained as the original design
 > record. Item 4 (general byte-slice type) remains deferred. Byte-string literals
-> (`b"…"`) have landed; the separate issue #234 slice-call ABI remains pending
-> compiler integration and does not provide general byte-slice lifetime or
+> (`b"…"`) have landed; the separate issue #234 slice-call ABI is implemented in the
+> reference compiler v0.10.3 and does not provide general byte-slice lifetime or
 > alias-exclusivity semantics.
 
 ### Proposed Extensions

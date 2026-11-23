@@ -39,10 +39,10 @@ three or five elements do not. A mismatch must produce a static diagnostic at
 the literal with the expected and actual counts. Nonliteral initializers remain
 subject to the ordinary type compatibility rules.
 
-Informative, pending release: the reference checker on compiler main
+Informative, released in v0.10.3: the reference checker
 (`c4c7b034`) also checks the value supplied for struct fields declared
 `[i64; N]` (an array literal, or a non-literal value of known type), which is
-not part of the rule above and does not change the
+not part of the rule above and is not in the
 published v0.10.2 artifact (see the
 [versioned chapter](https://github.com/star-ga/mind-spec/blob/main/spec/v1.0/types.md#fixed-array-literal-cardinality)).
 

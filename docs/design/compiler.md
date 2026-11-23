@@ -21,8 +21,8 @@ limitations under the License.
 > **Specification reference:** [Core v1 Overview](../../spec/v1.0/overview.md)
 >
 > **Backend note (2026-06-24, updated 2026-10-07):** The pipeline below has two code-generation
-> exits. The **native-ELF backend** (the pure-MIND native emitter in `examples/mindc_mind`; on
-> compiler main, pending release, it is reached through `mindc build --backend native`, `52bd6d3b`)
+> exits. The **native-ELF backend** (the pure-MIND native emitter in `examples/mindc_mind`; it
+> is reached through `mindc build --backend native` since `52bd6d3b` and is the default backend of `mindc build` since v0.10.3)
 > is the **normative self-host target** — its output is a pure function of the source image it is
 > given (the user sources plus the seed standard-library modules, in the fixed order of the
 > committed std manifest), with no external toolchain, which yields determinism-by-construction. The

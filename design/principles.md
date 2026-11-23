@@ -38,8 +38,8 @@ information for inspection and debugging. See [`star-ga/mind/docs/autodiff.md`](
 Compiled output MUST be bit-identical given identical source and toolchain. This is not merely a
 quality property — it is the foundation of the evidence-chain attestation surface and the self-host
 convergence proof. The **native-ELF backend** (the pure-MIND native emitter in
-`examples/mindc_mind`; on compiler main, pending release, it is reached through
-`mindc build --backend native`, `52bd6d3b`) is the normative self-host target precisely because its
+`examples/mindc_mind`; it is reached through
+`mindc build --backend native` since `52bd6d3b` and is the default backend of `mindc build` since v0.10.3) is the normative self-host target precisely because its
 output is a pure function of the source image it is given (the user sources plus the seed
 standard-library modules, in the fixed order of the committed std manifest;
 determinism-by-construction); the MLIR-text backend is a downstream-interchange path for ecosystem
