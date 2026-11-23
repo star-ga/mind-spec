@@ -238,15 +238,12 @@ if (output == NULL) {
 
 ## Python bindings
 
-### Official bindings: `mindlang` package
+### Planned bindings: `mindlang` package
 
-Python bindings are provided via the `mindlang` package (PyPI):
+> **Planned, not available.** No `mindlang` package is published on PyPI, and the reference compiler
+> ships no Python binding. This section describes the intended design only. It gives no release date.
 
-```bash
-pip install mindlang
-```
-
-**Architecture**:
+**Intended architecture**:
 - Thin wrapper over C FFI using `ctypes` or `cffi`
 - NumPy array zero-copy interop
 - Pythonic error handling (exceptions)
