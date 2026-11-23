@@ -32,7 +32,7 @@ the public reference implementation at [star-ga/mind](https://github.com/star-ga
   - [Core IR](./spec/v1.0/ir.md)
   - [Static autodiff](./spec/v1.0/autodiff.md)
   - [Shapes & tensor semantics](./spec/v1.0/shapes.md)
-  - [Standard library](./spec/v1.0/stdlib.md) — core/math/tensor/diff/io, the pure-MIND surface (RFC 0005), and the RFC/NIST-KAT-verified crypto & protocol primitive modules (verified primitives and the `std.https` client; RSA-2048 leaf profile, no revocation check)
+  - [Standard library](./spec/v1.0/stdlib.md) — core/math/tensor/diff/io, the pure-MIND surface (RFC 0005), the RFC/NIST-KAT-verified crypto & protocol primitive modules, and the `std.https` client (not a KAT-verified primitive; RSA-2048 leaf profile, no revocation check)
   - [MLIR lowering](./spec/v1.0/mlir-lowering.md) — downstream-interchange and exotic-chip-reach backend (non-normative self-host path; the native-ELF backend is the normative self-host target)
   - [Runtime interface](./spec/v1.0/runtime.md)
   - [IR stability + evidence chains](./spec/v1.0/ir-stability.md) — `mic@1` text + `mic@3` binary (RFC 0021), MAP epilogue (RFC 0014), and the load-bearing `trace_hash = SHA-256(canonical mic@3 bytes)` rule (RFC 0016 GAP-1; re-anchored 2026-05-31, supersedes the original `mic@1`-text rule).

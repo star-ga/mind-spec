@@ -724,9 +724,11 @@ otherwise the gate would fail on noise alone.)
 > This section exists so the spec states their scope precisely and so
 > downstream documentation cannot overclaim it.
 
-The reference implementation ships a set of pure-MIND, deterministic
-cryptographic and protocol primitives, each validated against the relevant
-RFC / NIST known-answer test (KAT) vectors:
+The reference implementation ships a set of pure-MIND cryptographic and
+protocol primitives and one HTTPS client module. Each primitive is
+deterministic and validated against the relevant RFC / NIST known-answer
+test (KAT) vectors. `std.https` is not a primitive: it reads the world and
+is tested against loopback and OpenSSL servers, not KAT vectors.
 
 - **Symmetric / hashing:** AES-128-GCM (AEAD), ChaCha20-Poly1305 (AEAD,
   RFC 8439), SHA-256, SHA-512 / SHA-384, HKDF, Keccak / SHA-3 + SHAKE
@@ -762,10 +764,12 @@ RFC / NIST known-answer test (KAT) vectors:
   certificates in a chain, at most 1024 trust anchors (in at most 4 MiB),
   exact-DER issuer matching. A case outside the limits fails closed.
 - **HPACK is decode-only**; a compliant encoder is roadmap.
-- The modules are validated for bit-exactness against KAT/RFC vectors and
-  inherit the language's determinism guarantees. They are **not**
-  constant-time-audited and carry no side-channel resistance claim, and no
-  general performance claim is made for them.
+- The primitive modules (all of the above except `std.https`) are validated
+  for bit-exactness against KAT/RFC vectors and inherit the language's
+  determinism guarantees. `std.https` reads the world and is not
+  deterministic. No module is constant-time-audited, none carries a
+  side-channel resistance claim, and no general performance claim is made
+  for them.
 
 Revocation checking, HPACK encoding, additional cipher/signature suites
 (AES-256-GCM, Ed25519, ML-DSA), and HTTP/3 + QUIC are not provided in `std`.

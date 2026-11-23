@@ -12,7 +12,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Aligned: mindc v0.10.3 and v0.10.4 (2026-11-23)
 
 - **Compiler reference bumped to mindc v0.10.4.** v0.10.3 (2026-11-18) and v0.10.4 (2026-11-23) are recorded in [STATUS](../STATUS.md). The specification version is unchanged: this entry does not declare specification 1.7.0.
-- **Pending-release notes are now release notes.** Every compiler commit that the chapters and the entries below name as "pending release" is part of the v0.10.3 tag. The chapters now say that they are part of v0.10.3 ("released in v0.10.3", "implemented in the reference compiler v0.10.3" or "(v0.10.3)"). The entries below stay as written when they were made.
+- **Pending-release notes are now release notes.** Every compiler commit that the chapters and the entries below name as "pending release" is part of the v0.10.3 tag. The chapters now say that they are part of v0.10.3 ("released in v0.10.3", "implemented in the reference compiler v0.10.3" or "(v0.10.3)"). The entries below keep their original wording except that the words "pending release" now read "released in v0.10.3". Where an entry below says that a compiler integration "remains pending", it describes the state when that entry was made; every compiler commit that it names is in the v0.10.3 tag.
 - **Native backend.** `mindc build` uses the native backend by default since v0.10.3; `--backend mlir` or `[build] backend = "mlir"` selects MLIR. The backend note in [MLIR Lowering](../spec/v1.0/mlir-lowering.md) no longer says that the native backend is pending or that it reads its seed from the working directory.
 - **Native backend refusals (informative).** [MLIR Lowering](../spec/v1.0/mlir-lowering.md#native-backend-refusals-informative) records the lane mark `nblane02`, the extern refusal keys 64 to 67, the removal of the free-in-loop refusal, the string refusal keys, the shadowing `let` and pointer-cast rules for a `String` parameter, the read-only string literal handle and its 8 MiB window, the libc extern rows 89 to 98, the free-list runtime of the `default` memory profile, the memory profiles `default` and `bounded` (v0.10.3), and the group intrinsic rows 87 to 89 (87 and 88 in v0.10.3, 89 in v0.10.4).
 - **`mindc verify --json` `scope`.** Recorded in [STATUS](../STATUS.md) with a link to RFC 0017 section 4.7 in the compiler repository. The RFC is not copied here.
@@ -28,7 +28,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed — status accuracy
 
-- Qualified the ML-DSA-87 + SLH-DSA-SHAKE-256s signing profile as implemented on compiler main after v0.10.2 (pending release; v0.10.2 contains neither scheme) and replaced the legacy-format sentence that implied retired signatures could still be accepted.
+- Qualified the ML-DSA-87 + SLH-DSA-SHAKE-256s signing profile as implemented in the compiler after v0.10.2 (released in v0.10.3; v0.10.2 contains neither scheme) and replaced the legacy-format sentence that implied retired signatures could still be accepted.
 - Described the native-ELF image as a pure function of the source image it is given (user sources plus the fixed seed standard library) everywhere, not of "the IR".
 - RFC 0001: replaced the unmeasured `mic@3` ratio, which came from a reference-model encoder rather than `mindc --emit-mic3`, with the measured canonical size of the same network (87 bytes at compiler `83ed6a11`). No JSON encoding of that IR exists, so no ratio is stated.
 - Removed vendor attribution from the MHS profile and roadmap pages and from STATUS.
@@ -59,7 +59,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Documentation alignment: assertion message form and reduction evidence
 
-- Added `assert(condition, message)` with a string-literal message to the `core` module as an additive form targeted for specification 1.7.0 (compiler `487dd5c7`, pending release).
+- Added `assert(condition, message)` with a string-literal message to the `core` module as an additive form targeted for specification 1.7.0 (compiler `487dd5c7`, released in v0.10.3).
 - Noted that the fixed-order strict `f32` dot (length 4093) and 64x64 matrix-vector kernels carry committed matching AVX2 and NEON output hashes (compiler `c8efcf9a`), without removing the vector-reduction tolerance allowance.
 
 ### Documentation alignment: determinism and evidence verification
@@ -70,7 +70,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Documentation alignment: MLIR build path and native backend location
 
-- Recorded that the reference build driver marks every MLIR function definition `nobuiltin` before the LLVM toolchain runs, leaving `--emit-mlir` text unchanged (compiler `9c231f50`, pending release).
+- Recorded that the reference build driver marks every MLIR function definition `nobuiltin` before the LLVM toolchain runs, leaving `--emit-mlir` text unchanged (compiler `9c231f50`, released in v0.10.3).
 - Replaced the removed `src/native` path with the pure-MIND emitter in `examples/mindc_mind` (removed in compiler `776facc8`) and repaired the runtime GPU-backends link.
 
 ### Documentation alignment: implementation evidence reference
