@@ -149,12 +149,12 @@ before the extern family. Of two refused constructs, the smaller position wins.
 time into the read-only literal segment. A store through it faults. A literal that is evaluated in a loop
 allocates nothing.
 
-**Memory profiles.** `mindc build --backend native --native-profile <default|bounded>` selects the memory
-layout of the image. `default` has a 1 GiB arena and a 4 GiB stack. `bounded` has a 768 MiB arena, a 1 MiB
+**Memory profiles.** `mindc build --backend native --native-profile <default|bounded>` (v0.10.3) selects the
+memory layout of the image. `default` has a 1 GiB arena and a 4 GiB stack. `bounded` has a 768 MiB arena, a 1 MiB
 unmapped guard and a 384 MiB stack, and its images load and run under `RLIMIT_AS` = 2 GiB. An allocation
-past the arena cap in a bounded image ends with `error: native arena exhausted` and exit status 70. A
+past the arena cap in a bounded image ends with `error: native arena exhausted` and exit status 70. In v0.10.4 a
 default-profile image whose source frees at a loop position takes a free-list runtime on the 1 GiB arena
-(freed blocks are reused, a full arena ends the same way); every other image keeps the bump allocator.
+(freed blocks are reused, a full arena ends the same way); every other `default`-profile image keeps the bump allocator and its bytes.
 The line `// mind: native_alloc = bump` in the leading comment block keeps the bump allocator.
 
 **Group intrinsic rows.** The native compiler has three AVX2 rows that walk memory in groups. Kind 87

@@ -16,7 +16,9 @@ was reproduced. Those facts require a receipt with the fields below.
 
 > **Release status (2026-11-23).** The reference below was observed on 2026-10-07 and is a dated receipt.
 > Commit `7831998b` and every compiler commit that this page cites as past `v0.10.2` are part of the
-> `v0.10.3` tag (2026-11-18). The current reference compiler is `v0.10.4` (2026-11-23). This page has no
+> `v0.10.3` tag (2026-11-18). The rows below say that the default backend is `mlir`: that was true at
+> `7831998b`. Since `v0.10.3` the default backend of `mindc build` is `native`. The current reference
+> compiler is `v0.10.4` (2026-11-23). This page has no
 > receipt for `v0.10.4`: the native backend items of that release are recorded in
 > [MLIR Lowering](../../spec/v1.0/mlir-lowering.md#native-backend-refusals-informative).
 

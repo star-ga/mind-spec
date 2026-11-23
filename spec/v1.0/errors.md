@@ -146,8 +146,8 @@ Type errors occur during type checking and type inference.
 
 ### E2026: Numeric scalar used as a known struct
 
-- **Implementation status**: pending compiler integration for inferred
-  bindings and reassignment; see [struct literal bindings](./types.md#struct-literal-bindings).
+- **Implementation status**: released in v0.10.3 (compiler `24897697`) for
+  inferred bindings and reassignment; see [struct literal bindings](./types.md#struct-literal-bindings).
 - **Trigger**: a provably numeric scalar is used where a locally declared
   struct is required, including replacement of a known struct binding.
 - **Required context**: the binding, declared struct name and offending value

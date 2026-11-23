@@ -30,7 +30,7 @@ implementation in [`star-ga/mind`](https://github.com/star-ga/mind).
 | MLIR lowering | [Lowering](../../spec/v1.0/mlir-lowering.md) | [MLIR lowering](../../spec/v1.0/mlir-lowering.md) |
 | Runtime interface | [Runtime](../../spec/v1.0/runtime.md) | [Runtime interface, devices and backends](../../spec/v1.0/runtime.md) |
 | Conformance | [Conformance overview](../../spec/v1.0/conformance.md) | [Core v1 conformance levels](../../spec/v1.0/conformance.md) |
-| MIC@3 `0x04` status | [Unreleased scalar-stage proposal](./mic3-v04-status.md) | Informative status only; the v04 wire is not normative |
+| MIC@3 `0x04` status | [Scalar-stage draft](./mic3-v04-status.md) | Informative status only; the v04 wire is not normative |
 
 Additional design context and RFCs live under [`docs/design`](../design/index.md) and
 [`docs/rfcs`](../rfcs/index.md) respectively. GPU support is optional in Core v1; see

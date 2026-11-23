@@ -80,8 +80,8 @@ shipped by the reference implementation.
   > the quotes. The commit changes how the parenthesised spelling is parsed; the
   > lowering described next is shared with the bare spelling and is not new. In
   > a compiler built with the `mlir-build` feature (the assert lowering is gated
-  > on the default `std-surface` feature), a native MLIR build aborts with
-  > SIGABRT when the condition is false and returns normally when it is true; the
+  > on the default `std-surface` feature), an executable built with the MLIR
+  > backend (`--backend mlir`) aborts with SIGABRT when the condition is false and returns normally when it is true; the
   > abort goes through `__mind_assert_fail`, which receives only the message's
   > byte length, so the executable prints no diagnostic of its own: neither the
   > message nor a source location. `mindc test` reports `FAILED` with the
@@ -732,35 +732,43 @@ RFC / NIST known-answer test (KAT) vectors:
   Keccak / SHA-3 + SHAKE (FIPS 202).
 - **Public-key:** X25519 (ECDH), RSA-PSS-SHA256 (verify),
   ECDSA-P256 / secp256r1 (verify), ML-KEM-768 (FIPS 203, post-quantum KEM).
-- **PKI:** X.509 / DER certificate parsing + signature verification
-  (single-certificate; see honest scope below).
+- **PKI:** X.509 / DER certificate parsing + signature verification, and
+  server-chain path validation from the leaf through intermediates to a
+  caller-supplied anchor set (`x509_verify_server_chain`, v0.10.3).
 - **TLS 1.3:** key schedule (HKDF-Expand-Label / Derive-Secret), AEAD record
   layer, transcript hash + Finished MAC, and handshake-crypto orchestration
-  verified by replaying the RFC 8448 trace vectors.
+  verified by replaying the RFC 8448 trace vectors; a bounded sans-IO client
+  built on them.
+- **HTTPS:** `std.https` (v0.10.3), authenticated HTTPS GET and POST for
+  executables built with `mindc build` on Linux. It runs the TLS 1.3 client,
+  authenticates the chain against the system CA bundle, and speaks HTTP/1.1.
+  A call is a world read (DNS, network, kernel entropy, clock): the
+  determinism veto refuses it without `--allow-nondeterministic`.
 - **HTTP/2:** HPACK header compression (RFC 7541) and the binary framing
   layer (RFC 9113).
 
-**Honest scope — what this is and is not.** This is a **verified primitive
-library**, not a working TLS client or server:
+**Honest scope — what this is and is not.** The modules are
+**correctness-first** primitives and a bounded HTTPS client:
 
-- There is **no socket-level handshake**: the TLS 1.3 code is exercised by
-  replaying published trace vectors (RFC 8448), not by connecting to live
-  peers.
-- There is **no certificate-chain validation**: X.509 support parses and
-  verifies individual certificates; path building, trust anchors, and
-  revocation are not implemented.
+- The `std.https` server profile is TLS 1.3 with an RSA-2048 leaf key and an
+  `rsa_pss_rsae_sha256` CertificateVerify. A leaf with another key type or
+  size is refused with `https_err_unsupported_key`.
+- **Revocation (CRL, OCSP) is not checked.** Redirects are not followed: a
+  3xx is returned as the response.
+- Chain validation has stated limits: DNS/IP-only name constraints, at most 8
+  certificates and 32 anchors, exact-DER issuer matching. A case outside the
+  limits fails closed.
 - **HPACK is decode-only**; a compliant encoder is roadmap.
-- These modules are **correctness-first**: they are validated for
-  bit-exactness against KAT/RFC vectors and inherit the language's
-  determinism guarantees. They are **not** constant-time-audited and carry
-  no side-channel resistance claim, and no general performance claim is made
-  for them.
+- The modules are validated for bit-exactness against KAT/RFC vectors and
+  inherit the language's determinism guarantees. They are **not**
+  constant-time-audited and carry no side-channel resistance claim, and no
+  general performance claim is made for them.
 
-A live TLS client (handshake state machine + socket I/O), certificate-chain
-validation, additional cipher/signature suites (ChaCha20-Poly1305,
-AES-256-GCM, SHA-384/512, Ed25519, ML-DSA), and HTTP/3 + QUIC are roadmap.
-Documentation that describes this surface MUST NOT call it a "TLS stack" or
-"HTTPS support"; the accurate description is *RFC/NIST-KAT-verified
+Revocation checking, HPACK encoding, additional cipher/signature suites
+(AES-256-GCM, Ed25519, ML-DSA), and HTTP/3 + QUIC are not provided in `std`.
+Documentation that describes this surface MUST state the limits above (leaf
+key profile, no revocation check) when it uses the words "HTTPS support"; the
+accurate description of the other modules is *RFC/NIST-KAT-verified
 cryptographic and protocol primitives written in pure MIND*.
 
 ## Implementation requirements

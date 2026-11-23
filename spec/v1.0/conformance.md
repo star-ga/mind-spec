@@ -135,7 +135,7 @@ integer width below 64 bits. This requirement is additive and targeted for
 specification 1.7.0; this does not declare that release.
 
 **Implementation coverage (informative, released in v0.10.3).** In the reference
-implementation, compiled artifacts on the default MLIR build path wrap
+implementation, compiled artifacts of the MLIR backend (`--backend mlir`) wrap
 two's-complement at the declared width
 (see section 1 of [`determinism.md`](../../determinism.md)). The reference
 evaluator behind `mindc test` wraps `i8`, `i16`, `i32`, `u8`, `u16` and `u32`

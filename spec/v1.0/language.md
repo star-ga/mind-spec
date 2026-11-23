@@ -330,7 +330,7 @@ documentation MUST NOT present these as complete:
 - **Assertions**: `assert cond`, `assert cond, "message"` and the parenthesised
   `assert(cond, "message")` each assert `cond` (parenthesised form: `487dd5c7`, v0.10.3);
   the message is kept as written between the quotes. A false condition aborts an executable built
-  with the default MLIR backend (SIGABRT; the message text is not printed) and fails the test under
+  with the MLIR backend (`--backend mlir`; SIGABRT; the message text is not printed) and fails the test under
   `mindc test`; the native backend is not covered here. Any other parenthesised tuple condition,
   such as `assert(cond, 9)` or a three-element tuple, is a parse error; the reference reports it
   with code `E1001`, which it uses for every parse error that has no dedicated code (there is no

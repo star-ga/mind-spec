@@ -164,8 +164,7 @@ paths in
 [`fixed_array_struct_field_run`](https://github.com/star-ga/mind/blob/143bdd8f8f85d0bb82e82d88cce0d0725c1998f5/tests/fixed_array_struct_field_run.rs)
 and
 [`cross_module_field_access_run`](https://github.com/star-ga/mind/blob/143bdd8f8f85d0bb82e82d88cce0d0725c1998f5/tests/cross_module_field_access_run.rs).
-This source coverage is not a new published compiler artifact or evidence of
-pure-MIND native-ELF support.
+This source coverage is not evidence of pure-MIND native-ELF support.
 
 [Compiler PR #263](https://github.com/star-ga/mind/pull/263), merged at
 [`1833f095`](https://github.com/star-ga/mind/commit/1833f095ce74b966287f27932c92733529c08b53),
@@ -230,7 +229,7 @@ struct binding cannot be replaced with a numeric scalar; the implemented
 confident-scalar check reports `E2026`. A fresh lexical binding shadows the
 previous binding and does not inherit its struct identity.
 
-Implementation status: pending compiler integration. The regression exercises
+Implementation status: released in v0.10.3 (compiler `24897697`). The regression exercises
 check/build agreement, full-width values and deterministic shared-library
 emission. It does not promote full structural type inference or native-ELF
 coverage beyond the independently verified backend subset.

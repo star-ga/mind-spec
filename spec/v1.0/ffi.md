@@ -49,7 +49,7 @@ Generated headers include:
 
 #### Primitive types
 
-The reference compiler (v0.10.2) currently exports these primitive types via FFI:
+As observed at compiler v0.10.2, and unchanged in the generated C header of v0.10.4 (`MindDType`), the reference compiler exports these primitive types via FFI:
 
 | MIND Type | C Type | Size | Alignment | Status |
 |-----------|--------|------|-----------|--------|
@@ -249,7 +249,7 @@ if (output == NULL) {
 - Pythonic error handling (exceptions)
 - Type hints for IDE support
 
-### Usage example
+### Usage example (planned, not available)
 
 ```python
 import mindlang as mind
@@ -283,7 +283,7 @@ del runtime
 - MIND tensors are wrapped as NumPy arrays with custom destructor
 - Memory is managed by MIND runtime until NumPy array is garbage-collected
 
-### Python API design
+### Python API design (planned, not available)
 
 ```python
 class Runtime:

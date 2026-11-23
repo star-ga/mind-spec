@@ -16,9 +16,10 @@ limitations under the License.
 
 # MIC@3 `0x04` implementation status
 
-**Status: unreleased implementation draft.** The reference implementation landed
-on compiler `main` through [PR #256](https://github.com/star-ga/mind/pull/256) at
-[`66f43a6b`](https://github.com/star-ga/mind/commit/66f43a6bed42709047682b28cef6bd8e27118c7b).
+**Status: implementation draft; the wire is not frozen.** The reference implementation landed
+through [PR #256](https://github.com/star-ga/mind/pull/256) at
+[`66f43a6b`](https://github.com/star-ga/mind/commit/66f43a6bed42709047682b28cef6bd8e27118c7b)
+and is part of compiler v0.10.3 (2026-11-18).
 This page is an informative cross-reference rather than a
 versioned or normative wire specification; the v04 wire contract, shared
 golden vectors, and release status remain unfrozen.
@@ -61,8 +62,7 @@ not evidence that those dependencies are complete.
 ## Draft intrinsic contract alignment
 
 The following table records the ten-row intrinsic registry implemented by
-[compiler PR #261](https://github.com/star-ga/mind/pull/261), merged on compiler
-`main` at
+[compiler PR #261](https://github.com/star-ga/mind/pull/261), merged at
 [`a334ead4`](https://github.com/star-ga/mind/commit/a334ead49cfe9e98501c4345d9ec64d6ce2db3b2).
 This remains a draft alignment note and does not make v04 a released wire
 contract. A canonical declaration using the reserved owner `__mind_intrinsic`
@@ -187,7 +187,7 @@ The candidate's implementation limits are:
 | Implemented descriptor scopes | `2^40` elements | check each descriptor, the schema-field total, and the shared total over every declaration signature plus module semantic rows (`2^40` admitted, `2^40 + 1` refused); each function's own scoped rows have a separate `2^40` allowance, counted per function |
 
 The input cap, body cap, and budget are implementation limits for this
-unreleased draft. They do not establish complete v04 reader/writer parity
+draft. They do not establish complete v04 reader/writer parity
 or native aggregate execution. The ULEB limit is a declared narrowing. The
 reference decoder reads ULEB values over the full `u64` range, while the mirror
 refuses any ULEB field above `2^62 - 1` (exit 17, or exit 14 past nine bytes).

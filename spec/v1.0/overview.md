@@ -40,7 +40,7 @@ Core v1 is organised into the following pillars:
 5. **Standard Library** ([`stdlib.md`](./stdlib.md)) — normative specifications for core, math, tensor,
    diff, and io modules with function signatures and semantics; plus the pure-MIND surface (RFC 0005)
    and an informative section on the reference implementation's RFC/NIST-KAT-verified crypto &
-   protocol primitive modules (a primitive library — not a TLS client/server).
+   protocol primitive modules and the `std.https` client (RSA-2048 leaf profile, no revocation check).
 6. **Error Catalog** ([`errors.md`](./errors.md)) — comprehensive error codes (E1xxx–E6xxx), diagnostic
    requirements, and error recovery semantics.
 7. **Conformance** ([`conformance.md`](./conformance.md)) — test corpus structure, coverage requirements,
