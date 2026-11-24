@@ -127,7 +127,7 @@ artifact:
 error[native-lane]: the program is outside candidate native-lane-v1 (<key>) at line L, column C of the composed user image. No artifact written.
 ```
 
-A site in the standard library says `in the std region.` in place of the position.
+A site in the std region says `in the std region.`
 
 **Extern keys.** The native compiler alone judges an `extern "C"` declaration. The host types each
 declaration and admits it whatever its name. The compiler refuses a declaration in this order:
@@ -181,8 +181,47 @@ default-profile image whose source frees at a loop position takes a free-list ru
 (freed blocks are reused, a full arena ends the same way); every other `default`-profile image keeps the bump allocator and its bytes.
 The line `// mind: native_alloc = bump` in the leading comment block keeps the bump allocator.
 
-**Group intrinsic rows.** The native compiler has three AVX2 group rows. Kind 87
-`__mind_group_bank_i64` takes five i64 arguments. Kind 88 `__mind_group_acc32_i64` takes six i64
-arguments. Kind 89 `__mind_group_accrows_i64` joins them: one call walks many rows. For each row it adds
-bank rows for the index range `j0..j1` and subtracts bank rows for `j1..j2` into an i64 accumulator
-(wrapping). A descriptor of eight i64 fields drives the call. An optional tail step exists.
+**Group intrinsic rows.** The native compiler has three AVX2 group rows. Each returns 0 and writes
+memory. Kind 87 `__mind_group_bank_i64(ptrs, bank, plane, pixels, group)` takes five i64 arguments. Kind 88
+`__mind_group_acc32_i64(out, bank, off, pos, neg, init)` takes six. Kind 89 `__mind_group_accrows_i64(desc)`
+takes one descriptor and walks many accumulator rows in one call: each row adds and subtracts bank rows into
+an accumulator row. Kinds 87 and 88 are in v0.10.3. Kind 89 and the complete set of modes are in v0.10.4.
+Kinds 87 and 88 probe the CPU and take a scalar path without AVX2. Kind 89 has one AVX2 path (ymm0 to ymm7)
+behind the ymm entry guard of the program. A program that calls none of the three rows compiles to the same
+bytes as before.
+
+The argument bits are as follows. A reserved bit that is set stops the program with a trap (`ud2`, SIGILL)
+before any store.
+
+| Kind | Argument bits | Meaning |
+| ---- | ------------- | ------- |
+| 87 | `group` bit 4 | Skips the CPU probe and takes the AVX2 path. The group used is `group & 15`. |
+| 87 | `group` bit 5 | Stores the low 32 bits of each code (4-byte rows). |
+| 87 | `group` bits 5 and 6 | Reads u32 channels, 8 pixels per vector step. |
+| 87 | `group` bit 6 alone, bits 7 to 63 | Trap. |
+| 88 | `init` in [2^62, 2^63) | Skips the CPU probe, clears bit 62 and decides "keep" on the cleared value. |
+| 88 | `init` above 3 after that arm (bits 2 to 61, bit 63, every negative value) | Trap. |
+| 89 | `desc[7]` bit 0 | Keeps or adds to `out`. |
+| 89 | `desc[7]` bit 2 | i32 walk over a 4-byte bank (64 lanes). Bits 63 to 32 hold the segment bound. A bound of 2^31 or more takes an exact i64 fallback. |
+| 89 | `desc[7]` bit 3 | Two terms per loop step. |
+| 89 | `desc[7]` bit 4 | u16 lane offsets. |
+| 89 | `desc[7]` bit 5 | Epilogue tail over the stored rows. `desc[8]` holds the row records, `desc[9]` the trip flag that the call writes, `desc[10]` the limit. |
+| 89 | `desc[7]` bit 7 | Finishes each row in registers instead. `desc` is i64[15], `desc[11]` to `desc[14]` give the src and dst rows and their steps, and the out row is not written. |
+| 89 | `desc[7]` bit 8 | src and dst are u32. Only with bit 5 or bit 7, and `desc[10]` must fit in 32 bits. |
+| 89 | bit 1 with bit 2, 3 or 4; bit 6; bits 9 to 31; bits 63 to 32 without bit 2; bit 8 without bit 5 or bit 7 | Trap. |
+
+The descriptor fields of kind 89 are `out, out_step, bank, off, starts, starts_step, rows, init`, and the
+mode bits are in `desc[7]`. For the i32 walk every code must fit in i32. The bound field is written as
+`min(B, 0xFFFFFFFF)`, and with a bound below 2^31 every partial sum must stay in i32. An overlap that the
+module headers of the compiler do not allow is an error of the caller.
+
+The caller's duty: a program that sets a probe-skip bit must also hold a guarded row (any ymm row or kind 89).
+Without one, a CPU without AVX2 stops at the first VEX instruction (SIGILL, exit status 132) and prints no
+`isa.avx2_missing` line.
+
+Changed in v0.10.4: kinds 87 and 88 trap on a reserved argument bit. The released v0.10.3 did not. For such a
+`group`, kind 87 read and wrote nothing, and kind 88 took such an `init` as a zero start (`acc[i] = 0`) and ran to
+its end. A program that passes such a value and exited 0 on v0.10.3 now ends with SIGILL. Pass only the bits that
+the table lists. The argument bits and the descriptor fields are also in
+[`docs/compiler/NATIVE_LANE_PROFILE.md`](https://github.com/star-ga/mind/blob/v0.10.4/docs/compiler/NATIVE_LANE_PROFILE.md)
+of the compiler repository.

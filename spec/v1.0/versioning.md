@@ -236,7 +236,7 @@ Implementations MUST provide version information:
 - **Supported features**: List of optional features (GPU profile, etc.)
 
 Example (the output of the reference compiler `mindc` v0.10.4 built with the `autodiff` and
-`mlir-lowering` features; it lists only the components compiled into the binary):
+`mlir-lowering` features; it lists only the components compiled into the binary, and it has no line for the specification version):
 
 ```console
 $ mindc --version
