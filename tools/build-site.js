@@ -59,6 +59,12 @@ for (const rel of [
   'design/principles.md',
   'design/rfcs/0001-mindir-compact.md',
   'design/rfcs/0002-ai-protocol.md',
+  'design/rfcs/0023-type-parameters-on-user-types.md',
+  'design/rfcs/0024-impl-forms.md',
+  'design/rfcs/0025-patterns.md',
+  'design/rfcs/0026-module-items.md',
+  'design/rfcs/0027-function-generics.md',
+  'design/rfcs/decision-notes.md',
   'std/tensor.md',
 ]) {
   const src = path.join(repoRoot, rel);
