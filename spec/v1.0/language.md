@@ -281,23 +281,33 @@ Inside the body of a `while` or a `for`, the statements `break` and `continue` e
 loop and start its next iteration, respectively. Neither takes a value or a label: no token of the
 [lexical grammar](./grammar-lexical.ebnf) starts with `'`, so `break 'a;` contains an invalid token and
 MUST be diagnosed. The words `break`, `continue` and `loop` are not in the keyword list of
-[Lexical Structure](./lexical.md#keywords); this edition does not reserve them. An item of a block that
-starts with the word `break` or `continue` is the loop exit: it ends after the word and an optional `;`, and
-what follows starts the next statement. `{ break }` is therefore a block with one loop exit, and no block
-ends with an expression that is one of these words. `break - 1;` is the statement `break` followed by the
-statement `- 1;`, and `break = 5;` is not a statement and MUST be refused. The two words are ordinary names in
-every position where no item of a block starts (`let break = 4; return break;` is valid). The range after `in`
-(`for i in a..b`) is not defined by the grammar; it is an extension.
+[Lexical Structure](./lexical.md#keywords); this edition does not reserve them. A source is read by the
+reading rule of [Words that the grammar spells out](#words-that-the-grammar-spells-out): where the grammar
+derives the source with a `LoopExitStatement`, the word is the loop exit, and a source with no such derivation
+uses the word as a name. `break - 1;` has a derivation with the loop exit `break` followed by the statement
+`- 1;`, so it means that. `break = 5;` has no derivation with the loop exit, because `=` starts no statement,
+so `break` is a name there: after `let break = 4;` the statement assigns 5 to that name. `let break = 4;
+return break;` is valid for the same reason. The range after `in` (`for i in a..b`) is not defined by the
+grammar; it is an extension.
 
 ## Words that the grammar spells out
 
 The syntactic grammar spells out words that are not keywords (`in`, `as`, `break`, `continue`, `const`,
 `enum`, `module`, `use`, `assert`, `diff`, `dyn`, `Tensor`, `tensor`, `dtype`, the primitive type names
 and `_`). [`grammar-lexical.ebnf`](./grammar-lexical.ebnf) lists them as `ContextualWord`: the lexer
-produces each of them as an identifier, and this edition does not reserve them. Where a source has a
-reading in which a rule of the syntactic grammar spells such a word out and a reading in which the word is
-an identifier, the reading that spells the word out is the meaning. So `_` in a pattern is the wildcard,
-`i64` in a type is the primitive type and `tensor(` starts a tensor constructor.
+produces each of them as an identifier, and this edition does not reserve them. A source is read by the
+derivation in which a rule of the syntactic grammar spells the word out, when such a derivation exists. A
+source with no such derivation reads the word as an identifier. This is the only rule for these words. The
+rows give the verdict that the rule has for a source. The grammar does not look at declarations, so
+`tensor(1);` is the constructor also where a function `tensor` is declared.
+
+| Source | Readings of the word | Meaning |
+|--------|---------------------------|---------|
+| `tensor(1, 2);` with `struct P { }` and `fn tensor(a: P, b: P) { }` declared | One: a call of the function `tensor`. `TensorConstructor` takes `, dtype :` after its first argument, so no derivation spells the word out. | The call of the user function `tensor` with two arguments |
+| `tensor(1);` | Two: a `TensorConstructor`, and a call of the name `tensor`. | The tensor constructor |
+| `let _ = 1;` | Two: a `WildcardPattern`, and an `IdentifierPattern` named `_`. | The wildcard |
+| `let x: i64 = 1;` | Two: the primitive type `i64`, and an `IdentifierType` named `i64`. | The primitive type |
+| `let in = 1; return in;` | One: the name `in` as an identifier. No rule spells the word out here. | The name `in` |
 
 ## String escapes
 

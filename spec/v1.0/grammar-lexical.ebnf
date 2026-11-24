@@ -45,11 +45,11 @@ Keyword = "fn" | "let" | "type" | "struct" | "trait"
 
 (* Contextual words. The syntactic grammar spells these words out. The   *)
 (* lexer produces each of them as an Identifier. The Keyword list above   *)
-(* does not include them, so they are not reserved. Where one source has  *)
-(* a reading in which a rule of the syntactic grammar spells such a word  *)
-(* out and a reading in which it is an Identifier, the reading that       *)
-(* spells the word out is the meaning. The words are therefore names      *)
-(* only where no rule spells them out (`let break = 4;` binds a name).    *)
+(* does not include them, so they are not reserved. A source is read by   *)
+(* the derivation in which a rule of the syntactic grammar spells the     *)
+(* word out, when such a derivation exists. A source with no such         *)
+(* derivation reads the word as an Identifier (`let break = 4;` binds a   *)
+(* name).                                                                  *)
 ContextualWord = "i32" | "i64" | "f32" | "f64" | "bool" | "unit"
                | "Tensor" | "tensor" | "dtype" | "diff" | "dyn"
                | "in" | "as" | "break" | "continue" | "_"

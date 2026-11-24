@@ -42,7 +42,7 @@ refuse those.
 | [`loop_exit_accept_while`](./loop_exit_accept_while.yaml) | accept, returns 8 | `LoopExitStatement` and [Loop exits](../../../spec/v1.0/language.md#loop-exits) |
 | [`loop_exit_accept_for_array`](./loop_exit_accept_for_array.yaml) | accept | as above |
 | [`loop_exit_accept_statement_after_break`](./loop_exit_accept_statement_after_break.yaml) | accept, returns 1 | as above: a statement that follows `break` is the next statement |
-| [`loop_exit_reject_assignment_to_break`](./loop_exit_reject_assignment_to_break.yaml) | reject | as above: `break = 5;` is not a statement |
+| [`loop_exit_accept_name_break_assigned`](./loop_exit_accept_name_break_assigned.yaml) | accept, returns 5 | as above: `break = 5;` has no derivation with the loop exit, so `break` is a name |
 | [`loop_exit_reject_label`](./loop_exit_reject_label.yaml) | reject | as above: a label is an invalid token and MUST be diagnosed |
 | [`loop_exit_reject_continue_label`](./loop_exit_reject_continue_label.yaml) | reject | as above |
 | [`loop_exit_reject_label_in_for`](./loop_exit_reject_label_in_for.yaml) | reject | as above |
