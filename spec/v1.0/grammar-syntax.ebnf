@@ -37,13 +37,7 @@ ModuleItem = FunctionDeclaration
            ;
 
 (* Function declarations *)
-FunctionDeclaration = "fn" , Identifier , [ FunctionTypeParameters ] , "(" , [ ParameterList ] , ")" , [ "->" , Type ] , Block ;
-
-(* Core v1 admits one unbounded type parameter on a function; the      *)
-(* argument is inferred at each call (types.md, Generics in Core v1).   *)
-(* NOT IN CORE v1: a second type parameter, a bound (<T: Bound>), a    *)
-(* where clause and an explicit type argument at a call (id::<i64>(5)). *)
-FunctionTypeParameters = "<" , Identifier , ">" ;
+FunctionDeclaration = "fn" , Identifier , "(" , [ ParameterList ] , ")" , [ "->" , Type ] , Block ;
 
 ParameterList = Parameter , { "," , Parameter } , [ "," ] ;
 Parameter = Identifier , ":" , Type ;
@@ -121,7 +115,8 @@ TraitObjectType = "dyn" , Identifier ;
 (* Option and Result. A user-declared type has no type parameters in    *)
 (* Core v1.                                                             *)
 (* NOT IN CORE v1: the [ "<" , TypeList , ">" ] part of IdentifierType  *)
-(* when the identifier names a user-declared type.                      *)
+(* when the identifier names a user-declared type. The token ">>" that  *)
+(* ends two nested type argument lists closes both lists.               *)
 IdentifierType = Identifier , [ "<" , TypeList , ">" ] ;
 
 (* Statements and blocks *)
@@ -152,17 +147,18 @@ ReturnStatement = "return" , [ Expression ] , ";" ;
 
 DeferStatement = "defer" , Block ;
 
-(* A loop exit is valid inside the body of a WhileExpression or a      *)
-(* ForExpression. It ends the innermost loop (break) or starts its     *)
-(* next iteration (continue). It takes no value and no label. The      *)
-(* semicolon is optional. The words are not reserved, and they are     *)
-(* names in every position except the first token of a statement. A    *)
-(* statement that starts with the word `break` or `continue` is a      *)
-(* LoopExitStatement: it ends after the word and the optional          *)
-(* semicolon, and what follows starts the next statement. `break - 1;` *)
-(* is the statement `break` and then the statement `- 1;`, and         *)
-(* `break = 5;` is not a statement. No ExpressionStatement starts      *)
-(* with these two words.                                               *)
+(* A loop exit is valid inside the body of a WhileExpression or a     *)
+(* ForExpression. It ends the innermost loop (break) or starts its    *)
+(* next iteration (continue). It takes no value and no label. The     *)
+(* semicolon is optional. The words are not reserved: they are names  *)
+(* in every position except the first token of an item of a Block.    *)
+(* An item of a Block that starts with the word `break` or            *)
+(* `continue` is a LoopExitStatement: it ends after the word and the  *)
+(* optional semicolon, and what follows starts the next statement.    *)
+(* `break - 1;` is the statement `break` and then the statement       *)
+(* `- 1;`, and `break = 5;` is not a statement. No ExpressionStatement *)
+(* starts with these two words, and the final Expression of a Block   *)
+(* is never one of them.                                              *)
 LoopExitStatement = ( "break" | "continue" ) , [ ";" ] ;
 
 (* Expressions *)
@@ -280,11 +276,12 @@ UseDeclaration  = "use" , ImportPath , [ ";" ] ;
 
 (* Attribute on items (`#[name]`, `#[name(arg, ...)]`). The spelling *)
 (* starts with "#". The form `[name]` without the "#" is not an      *)
-(* attribute: it reads as an array expression.                       *)
+(* attribute. An argument is an identifier, a literal, or a name     *)
+(* bound to a literal (`#[requires(mind_spec = "1.2")]`).            *)
 Attribute       = "#" , "[" , Identifier , [ "(" , [ AttributeArgList ] , ")" ] , "]" ;
 AttributeArgList = AttributeArg , { "," , AttributeArg } ;
 AttributedItem  = Attribute , { Attribute } , ModuleItem ;
-AttributeArg    = Identifier | Literal ;
+AttributeArg    = Identifier | Literal | Identifier , "=" , Literal ;
 
 (* Runtime assertion (no return value).                         *)
 (* Additive, targeted for specification 1.7.0. In the            *)

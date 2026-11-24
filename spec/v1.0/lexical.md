@@ -62,19 +62,16 @@ return defer import  export    where
 
 Keywords MUST be matched prior to identifiers.
 
-The syntactic grammar also spells out words that are not in this list (`in`, `as`, `break`, `continue`, `const`,
-`enum`, `module`, `use`, `assert`, `diff`, `dyn`, `tensor`, `dtype`, the primitive type names and `_`).
-[`grammar-lexical.ebnf`](./grammar-lexical.ebnf) lists them as `ContextualWord`: the lexer produces each of them as
-an identifier and the parser reads it by its position. This edition does not reserve them.
+The syntactic grammar also spells out words that are not in this list; they are not reserved
+([Words that the grammar spells out](./language.md#words-that-the-grammar-spells-out)).
 
 ### Literals
 
 - **Integer literals** consist of an optional sign followed by digits. Binary (`0b`), octal (`0o`),
   and hexadecimal (`0x`) prefixes are allowed.
 - **Floating-point literals** follow the grammar `<digits>.<digits>([eE][+-]?<digits>)?`.
-- **String literals** are enclosed in double quotes. The escape sequences are `\n`, `\r`, `\t`, `\0`,
-  `\\`, `\'`, `\"` and `\u{HEX}` (one to any number of hexadecimal digits), as in
-  [`grammar-lexical.ebnf`](./grammar-lexical.ebnf). Any other escape sequence MUST be diagnosed with
+- **String literals** are enclosed in double quotes. The escape sequences are listed in
+  [String escapes](./language.md#string-escapes); any other escape sequence MUST be diagnosed with
   [`E1004`](./errors.md#e1004-invalid-escape-sequence).
 - **Boolean literals** are `true` and `false`.
 - **Differentiable literals** MAY include tangent annotations using the `^` suffix (see

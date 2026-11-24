@@ -68,7 +68,7 @@ Core v1 is organised into the following pillars:
 15. **Package Management** ([`package.md`](./package.md)) — dependency resolution with PubGrub CDCL,
     lockfile format with integrity hashes, sparse registry protocol, SLSA provenance attestations,
     SBOM generation (SPDX/CycloneDX), and policy enforcement.
-16. **Core v1 Forms** ([`core-v1-forms.md`](./core-v1-forms.md)) — every form of the surface grammar with its
+16. **Core v1 Forms** ([`core-v1-forms.md`](./core-v1-forms.md)) — forms of the surface grammar with their
     status in Core v1 (core, not in Core v1, extension, open).
 
 Legacy chapters such as [`lexical.md`](./lexical.md) and [`types.md`](./types.md) remain available for

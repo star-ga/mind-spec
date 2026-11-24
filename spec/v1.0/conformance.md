@@ -272,9 +272,9 @@ The golden test corpus is organized into categories corresponding to specificati
    - GPU backend availability and graceful failure (for GPU profile claims)
    - Expected: correct backend or E6002 error with diagnostic
 
-8. **Syntax tests** (`tests/syntax/`)
-   - Accepted and refused forms of the surface grammar: loop exits and escapes. An accept row is a source that
-     the grammar derives. A reject row is a source that a normative sentence of this specification forbids.
+8. **Syntax tests**
+   - Accepted and refused forms of the surface grammar. An accept row is a source that the grammar derives.
+     A reject row is a source that a normative sentence of this specification forbids.
    - Expected: the source is accepted, or it is refused with the error code of the catalog where the catalog has
      one; sample rows are in [`tests/conformance/syntax`](../../tests/conformance/syntax/README.md)
 

@@ -262,18 +262,18 @@ specification but are not required for Core v1 conformance.
 [`grammar-syntax.ebnf`](./grammar-syntax.ebnf) marks every form that is written for a later edition
 with the words "NOT IN CORE v1". Read without its marked parts, the grammar is the Core v1 grammar.
 The marked forms are: function types, function expressions (closures), trait declarations,
-`dyn Trait`, type parameters on `struct`, `enum`, `trait` and `type` declarations, bounds on type
-parameters, a `where` clause, a second type parameter on a function, an explicit type argument at a
-call, and type arguments on user-declared types. A marked form is not part of Core v1: a conforming
+`dyn Trait`, type parameters on `struct`, `enum`, `trait` and `type` declarations, and type
+arguments on user-declared types. A marked form is not part of Core v1: a conforming
 implementation refuses it or documents it as an extension. [Core v1 forms](./core-v1-forms.md) lists the
 status of each form.
 
 ## Attributes
 
 An attribute is written `#[name]` or `#[name(arg, ...)]` and stands before an item
-(`AttributedItem` in the grammar). An argument is an identifier or a literal. The spelling without
-`#`, `[name]`, is not an attribute: it reads as an array expression. The meaning of an attribute name
-is defined where the name is used; this chapter defines none.
+(`AttributedItem` in the "v1.1 candidate additions" block of the grammar). An argument is an identifier,
+a literal, or an identifier bound to a literal (`#[requires(mind_spec = "1.2")]`). The spelling without
+`#`, `[name]`, is not an attribute; inside a block it reads as an array expression. The meaning of an
+attribute name is defined where the name is used; this chapter defines none.
 
 ## Loop exits
 
@@ -281,12 +281,30 @@ Inside the body of a `while` or a `for`, the statements `break` and `continue` e
 loop and start its next iteration, respectively. Neither takes a value or a label: no token of the
 [lexical grammar](./grammar-lexical.ebnf) starts with `'`, so `break 'a;` contains an invalid token and
 MUST be diagnosed. The words `break`, `continue` and `loop` are not in the keyword list of
-[Lexical Structure](./lexical.md#keywords); this edition does not reserve them. A statement that starts
-with the word `break` or `continue` is the loop exit: it ends after the word and an optional `;`, and
-what follows starts the next statement. `break - 1;` is therefore the statement `break` followed by the
+[Lexical Structure](./lexical.md#keywords); this edition does not reserve them. An item of a block that
+starts with the word `break` or `continue` is the loop exit: it ends after the word and an optional `;`, and
+what follows starts the next statement. `{ break }` is therefore a block with one loop exit, and no block
+ends with an expression that is one of these words. `break - 1;` is the statement `break` followed by the
 statement `- 1;`, and `break = 5;` is not a statement and MUST be refused. The two words are ordinary names in
-every other position (`let break = 4; return break;` is valid). The range after `in`
+every position where no item of a block starts (`let break = 4; return break;` is valid). The range after `in`
 (`for i in a..b`) is not defined by the grammar; it is an extension.
+
+## Words that the grammar spells out
+
+The syntactic grammar spells out words that are not keywords (`in`, `as`, `break`, `continue`, `const`,
+`enum`, `module`, `use`, `assert`, `diff`, `dyn`, `Tensor`, `tensor`, `dtype`, the primitive type names
+and `_`). [`grammar-lexical.ebnf`](./grammar-lexical.ebnf) lists them as `ContextualWord`: the lexer
+produces each of them as an identifier, and this edition does not reserve them. Where a source has a
+reading in which a rule of the syntactic grammar spells such a word out and a reading in which the word is
+an identifier, the reading that spells the word out is the meaning. So `_` in a pattern is the wildcard,
+`i64` in a type is the primitive type and `tensor(` starts a tensor constructor.
+
+## String escapes
+
+The escape sequences of a string literal are `\n`, `\r`, `\t`, `\0`, `\\`, `\'`, `\"` and
+`\u{HEX}` (one or more hexadecimal digits), as in `EscapeSequence` of
+[`grammar-lexical.ebnf`](./grammar-lexical.ebnf). Any other escape sequence MUST be diagnosed with
+[`E1004`](./errors.md#e1004-invalid-escape-sequence).
 
 ## Macros are not part of the language (informative)
 
@@ -336,11 +354,10 @@ documentation MUST NOT present these as complete:
 - **Enums + `match`**: the core works end-to-end (unit variants, payload variants including `f64`
   and multi-field payloads, discriminant/`Option`/payload matching). Exhaustiveness checking and
   nested patterns beyond the shipped forms are still maturing.
-- **Generics**: a **bounded slice only** — a single type parameter over scalar types
-  ([Generics in Core v1](./types.md#generics-in-core-v1)). There is no
+- **Generics**: a **bounded slice only** — a single type parameter over scalar types. There is no
   general parametric-polymorphism surface (no multi-parameter generics, no generic containers such
   as a user-defined `map<K, V>`); `where`-clause trait bounds are specified in
-  [Types](./types.md) but are not in Core v1.
+  [Types](./types.md) but not implemented.
 - **Closures / first-class functions**: **not implemented**. Function values, closure capture, and
   higher-order functions are future extensions (see
   [Future Extensions](./future-extensions.md)); the compiler rejects fn-as-value use fail-loud. Since
@@ -348,7 +365,7 @@ documentation MUST NOT present these as complete:
   standard-surface export, used as a value is refused with
   [`E2037`](./errors.md#e2037-function-name-used-as-a-value) (`1def5dde`, v0.10.3); see that
   entry for its limit.
-- **Traits**: **not in Core v1** and not implemented in the executable subset (no `trait` declarations, no `dyn Trait`).
+- **Traits**: **not implemented** in the executable subset (no `trait` declarations, no `dyn Trait`).
 - **Slices**: stubbed; byte-level work goes through the `std.string`/`std.vec` heap records and the
   byte-precise intrinsics.
 - **Collections**: region-allocator-backed; `std.vec` push is non-mutating (returns a fresh `Vec`),

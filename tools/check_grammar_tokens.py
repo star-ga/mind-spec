@@ -4,7 +4,8 @@
 A terminal of grammar-syntax.ebnf (a quoted string) MUST be listed in the Keyword,
 ContextualWord, Operator or Punctuation rule of grammar-lexical.ebnf, or be a boolean
 literal. Every nonterminal that the syntactic grammar uses MUST be defined in one of
-the two files, and no rule is defined in both.
+the two files, and no rule is defined in both. Every ContextualWord entry MUST have the shape of an
+identifier, because the lexer produces it as an Identifier.
 
 usage: check_grammar_tokens.py [LEXICAL.ebnf SYNTAX.ebnf]
 exit status 0 when there is no finding, 1 otherwise.
@@ -15,6 +16,7 @@ import sys
 from pathlib import Path
 
 TOKEN_RULES = ("Keyword", "ContextualWord", "Operator", "Punctuation", "BooleanLiteral")
+IDENTIFIER_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 TOKEN_RE = re.compile(r'"[^"]*"|\'[^\']*\'|\?[^?]*\?|[A-Za-z_][A-Za-z0-9_]*|[=;|,\[\]\(\)\{\}]')
 
 
@@ -61,6 +63,9 @@ def check(lexical_text: str, syntax_text: str) -> list:
     lex, syn = parse_rules(lexical_text), parse_rules(syntax_text)
     tokens = {t for r in TOKEN_RULES for t in terminals(lex.get(r, []))}
     findings = []
+    for word in terminals(lex.get("ContextualWord", [])):
+        if not IDENTIFIER_RE.fullmatch(word):
+            findings.append("ContextualWord %r is not shaped like an identifier" % word)
     for name, body in syn.items():
         for t in terminals(body):
             if t not in tokens:

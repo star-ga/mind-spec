@@ -25,6 +25,14 @@ class TestGrammarTokens(unittest.TestCase):
         self.assertEqual(len(findings), 1)
         self.assertIn("B", findings[0])
 
+    def test_contextual_word_must_be_identifier_shaped(self) -> None:
+        # positive control: the same grammar with an identifier-shaped word is clean
+        lexical = 'ContextualWord = "break" ; Punctuation = ";" ;'
+        self.assertEqual(check(lexical, 'A = "break" , ";" ;'), [])
+        findings = check('ContextualWord = "$$" | "break" ; Punctuation = ";" ;', 'A = "$$" , ";" ;')
+        self.assertEqual(len(findings), 1)
+        self.assertIn("'$$'", findings[0])
+
     def test_comment_text_is_ignored(self) -> None:
         self.assertEqual(check(LEXICAL, '(* "zzz" *) A = "fn" ;'), [])
 

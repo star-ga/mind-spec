@@ -37,9 +37,8 @@ refuse those.
 | Row | Result | Normative sentence |
 |-----|--------|--------------------|
 | [`escape_single_quote_accept`](./escape_single_quote_accept.yaml) | accept | `EscapeSequence` in [`grammar-lexical.ebnf`](../../../spec/v1.0/grammar-lexical.ebnf) |
-| [`escape_reject_unlisted_letter`](./escape_reject_unlisted_letter.yaml) | reject, `E1004` | [Literals](../../../spec/v1.0/lexical.md#literals): any other escape MUST be diagnosed |
+| [`escape_reject_unlisted_letter`](./escape_reject_unlisted_letter.yaml) | reject, `E1004` | [String escapes](../../../spec/v1.0/language.md#string-escapes): any other escape MUST be diagnosed |
 | [`escape_reject_hex`](./escape_reject_hex.yaml) | reject, `E1004` | as above |
-| [`fn_type_parameter_accept`](./fn_type_parameter_accept.yaml) | accept | `FunctionTypeParameters` and [Generics in Core v1](../../../spec/v1.0/types.md#generics-in-core-v1) |
 | [`loop_exit_accept_while`](./loop_exit_accept_while.yaml) | accept, returns 8 | `LoopExitStatement` and [Loop exits](../../../spec/v1.0/language.md#loop-exits) |
 | [`loop_exit_accept_for_array`](./loop_exit_accept_for_array.yaml) | accept | as above |
 | [`loop_exit_accept_statement_after_break`](./loop_exit_accept_statement_after_break.yaml) | accept, returns 1 | as above: a statement that follows `break` is the next statement |

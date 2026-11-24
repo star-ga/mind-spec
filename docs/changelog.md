@@ -11,11 +11,11 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed: the grammar marks the forms that are not in Core v1 (2026-11-24)
 
-- **Marks.** [`grammar-syntax.ebnf`](../spec/v1.0/grammar-syntax.ebnf) marks function types, function expressions, trait declarations, `dyn Trait`, type parameters on `struct`, `enum`, `trait` and `type`, bounds, type arguments on user types, a second type parameter of a function, a `where` clause and an explicit type argument at a call as "NOT IN CORE v1". A conforming implementation refuses a marked form or documents it as an extension. A new chapter, [Core v1 forms](../spec/v1.0/core-v1-forms.md), lists the status of each form.
-- **Settled text.** The attribute is written `#[name]` in the syntactic and the lexical grammar. `break` and `continue` are loop-exit statements ([Loop exits](../spec/v1.0/language.md#loop-exits)). The escape `\'` is listed. A function MAY have one unbounded type parameter ([Generics in Core v1](../spec/v1.0/types.md#generics-in-core-v1)). Macros are not part of the language (informative).
+- **Marks.** [`grammar-syntax.ebnf`](../spec/v1.0/grammar-syntax.ebnf) marks function types, function expressions, trait declarations, `dyn Trait`, type parameters on `struct`, `enum`, `trait` and `type`, and type arguments on user types as "NOT IN CORE v1". A conforming implementation refuses a marked form or documents it as an extension. A new chapter, [Core v1 forms](../spec/v1.0/core-v1-forms.md), lists the status of each form.
+- **Settled text.** The attribute is written `#[name]` in the syntactic and the lexical grammar. `break` and `continue` are loop-exit statements ([Loop exits](../spec/v1.0/language.md#loop-exits)). The escape `\'` is listed. An item of a block that starts with `break` or `continue` is the loop exit. A source that has both a reading with a word that the grammar spells out and a reading with an identifier means the first ([Words that the grammar spells out](../spec/v1.0/language.md#words-that-the-grammar-spells-out)). An attribute argument MAY be an identifier bound to a literal. Macros are not part of the language (informative).
 - **Lexical grammar.** Every token that the syntactic grammar uses is in the lexical grammar: the operators `|`, `&`, `<<` and `>>`, the character `#`, and the contextual words (`ContextualWord`). `tools/check_grammar_tokens.py` checks this.
 - **Error catalog.** New entries `E2701`, `E2702`, `E2703` and `E2707` for the faults of `impl` blocks.
-- **Conformance rows.** New category `syntax` with sample rows for loop exits, escapes and the function type parameter ([`tests/conformance/syntax`](../tests/conformance/syntax/README.md)).
+- **Conformance rows.** New category `syntax` with sample rows for loop exits and escapes ([`tests/conformance/syntax`](../tests/conformance/syntax/README.md)).
 
 ### Aligned: mindc v0.10.3 and v0.10.4 (2026-11-23)
 
