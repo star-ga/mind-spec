@@ -68,7 +68,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Clarified that a retired-scheme evidence signature verifies as `retired`, never valid or absent, and that retired or malformed signing seeds are refused without an artifact (compiler PR #262: `83bebf39`, `2b8d5e2e`, `9881cb91`). This supersedes the 'pending retirement' wording in the bounded native project builds entry; releases remain unsigned.
 - Recorded declared-width integer wrapping, refusal of integer widths above 64 bits (`4fd65cfb`), per-backend status of IEEE NaN comparisons (`2597ee9c`, `ccbb00b8`), and the rule that a user-defined function is never replaced by a host library routine (`9c231f50`).
-- Qualified vector-reduction wording with the two committed strict `f32` kernels (`c8efcf9a`) and updated the cross-substrate inventory to 35 workloads, including ten scalar-`f64` quant workloads (`545ed80c`, `82e34947`). The compiler changes are released in v0.10.3.
+- Qualified vector-reduction wording with the two committed strict `f32` kernels (`c8efcf9a`) and updated the cross-substrate inventory to 35 workloads at that time (36 at v0.10.3), including ten scalar-`f64` quant workloads (`545ed80c`, `82e34947`). The compiler changes are released in v0.10.3.
 
 ### Documentation alignment: MLIR build path and native backend location
 
