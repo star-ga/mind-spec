@@ -272,6 +272,12 @@ The golden test corpus is organized into categories corresponding to specificati
    - GPU backend availability and graceful failure (for GPU profile claims)
    - Expected: correct backend or E6002 error with diagnostic
 
+8. **Syntax tests** (`tests/syntax/`)
+   - Accepted and refused forms of the surface grammar: loop exits and escapes. An accept row is a source that
+     the grammar derives. A reject row is a source that a normative sentence of this specification forbids.
+   - Expected: the source is accepted, or it is refused with the error code of the catalog where the catalog has
+     one; sample rows are in [`tests/conformance/syntax`](../../tests/conformance/syntax/README.md)
+
 ### Test format
 
 Each conformance test is a structured file containing:
@@ -279,7 +285,7 @@ Each conformance test is a structured file containing:
 ```yaml
 # test_name.yaml
 description: "Human-readable test description"
-category: "lexical" | "type_checker" | "shapes" | "ir_verification" | "autodiff" | "runtime" | "backend"
+category: "lexical" | "syntax" | "type_checker" | "shapes" | "ir_verification" | "autodiff" | "runtime" | "backend"
 profile: "cpu" | "gpu"  # Minimum profile required
 
 input:

@@ -70,6 +70,15 @@ for (const rel of [
   fs.writeFileSync(path.join(outDir, rel), body);
 }
 
+// The sample syntax rows are linked from spec/v1.0. Copy the folder (the README and the
+// YAML rows) so that those links resolve in the artifact.
+const syntaxRowsRel = path.join('tests', 'conformance', 'syntax');
+const syntaxRowsSrc = path.join(repoRoot, syntaxRowsRel);
+if (!fs.existsSync(syntaxRowsSrc) || !fs.statSync(syntaxRowsSrc).isDirectory()) {
+  fail(`${syntaxRowsRel} is missing — spec/ chapters link to it`);
+}
+fs.cpSync(syntaxRowsSrc, path.join(outDir, syntaxRowsRel), { recursive: true });
+
 let fileCount = 0;
 const walk = (dir) => {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {

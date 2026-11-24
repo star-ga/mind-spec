@@ -1,0 +1,18 @@
+# MIND Conformance Test: The escape \' is accepted in a string literal
+# Specification reference: spec/v1.0/grammar-lexical.ebnf (EscapeSequence)
+# Category: syntax
+# Profile: cpu
+
+description: "The escape \\' is accepted in a string literal"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let s = "a\'b";
+        return 0;
+    }
+
+expected:
+  status: success

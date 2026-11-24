@@ -28,6 +28,7 @@ tests/
 ├── README.md                    # This file
 ├── conformance/                 # Sample conformance tests (YAML format)
 │   ├── lexical/                 # E1xxx error tests
+│   ├── syntax/                  # surface grammar rows (see syntax/README.md)
 │   ├── type_checker/            # E2xxx error tests
 │   ├── shapes/                  # E3xxx shape inference tests
 │   ├── ir_verification/         # E4xxx IR verification tests
@@ -42,7 +43,7 @@ Tests follow the YAML format specified in [`conformance.md`](../spec/v1.0/confor
 
 ```yaml
 description: "Human-readable test description"
-category: "lexical" | "type_checker" | "shapes" | "ir_verification" | "autodiff" | "runtime"
+category: "lexical" | "syntax" | "type_checker" | "shapes" | "ir_verification" | "autodiff" | "runtime"
 profile: "cpu" | "gpu"
 
 input:
@@ -94,6 +95,7 @@ Each test corresponds to specific normative requirements:
 | Category | Spec Reference | Error Codes |
 |----------|----------------|-------------|
 | lexical | `spec/v1.0/lexical.md`, `grammar-lexical.ebnf` | E1001-E1006 |
+| syntax | `spec/v1.0/grammar-syntax.ebnf`, `spec/v1.0/language.md`, `spec/v1.0/lexical.md` | E1004 |
 | type_checker | `spec/v1.0/language.md`, `types.md` | E2001-E2007 |
 | shapes | `spec/v1.0/shapes.md` | E3001-E3008 |
 | ir_verification | `spec/v1.0/ir.md` | E4001-E4006 |

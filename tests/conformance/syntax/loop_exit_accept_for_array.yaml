@@ -1,0 +1,25 @@
+# MIND Conformance Test: break inside a for loop over an array is accepted
+# Specification reference: spec/v1.0/language.md#loop-exits
+# Category: syntax
+# Profile: cpu
+
+description: "break inside a for loop over an array is accepted"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let xs = [1, 2, 3, 4, 5];
+        let s = 0;
+        for v in xs {
+            if v == 3 {
+                break
+            };
+            s = s + v;
+        };
+        return s;
+    }
+
+expected:
+  status: success

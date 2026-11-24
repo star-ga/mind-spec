@@ -1,0 +1,21 @@
+# MIND Conformance Test: break takes no label
+# Specification reference: spec/v1.0/language.md#loop-exits
+# Category: syntax
+# Profile: cpu
+
+description: "break takes no label"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let i = 0;
+        while i < 3 {
+            break 'a;
+        };
+        return i;
+    }
+
+expected:
+  status: error
