@@ -43,6 +43,15 @@ Keyword = "fn" | "let" | "type" | "struct" | "trait"
         | "return" | "defer" | "import" | "export" | "where"
         ;
 
+(* Contextual words. The syntactic grammar spells these words out. The   *)
+(* lexer produces each of them as an Identifier and the parser reads it  *)
+(* by its position. The Keyword list above does not include them.        *)
+ContextualWord = "i32" | "i64" | "f32" | "f64" | "bool" | "unit"
+               | "Tensor" | "tensor" | "dtype" | "diff" | "dyn"
+               | "in" | "as" | "break" | "continue" | "_"
+               | "const" | "enum" | "module" | "use" | "assert"
+               ;
+
 (* Literals *)
 Literal = IntegerLiteral
         | FloatingPointLiteral
@@ -72,7 +81,7 @@ Exponent = ( "e" | "E" ) , [ Sign ] , DecimalDigits ;
 (* String literals *)
 StringLiteral = '"' , { StringCharacter | EscapeSequence } , '"' ;
 StringCharacter = ? any Unicode scalar value except '"', '\', newline ? ;
-EscapeSequence = "\" , ( "n" | "r" | "t" | "\" | '"' | "0" | UnicodeEscape ) ;
+EscapeSequence = "\" , ( "n" | "r" | "t" | "\" | "'" | '"' | "0" | UnicodeEscape ) ;
 UnicodeEscape = "u" , "{" , HexDigit , { HexDigit } , "}" ;
 
 (* Boolean literals *)
@@ -88,12 +97,13 @@ Operator = "+" | "-" | "*" | "/" | "%"
          | "=" | "+=" | "-=" | "*=" | "/="
          | "->" | "=>" | ":="
          | "." | "::" | "@"
-         | "^"
+         | "^" | "|" | "&" | "<<" | ">>"
          ;
 
 (* Punctuation *)
 Punctuation = "(" | ")" | "{" | "}" | "[" | "]"
             | "," | ";" | ":"
+            | "#"
             ;
 
 (* Comments *)

@@ -27,9 +27,9 @@ The following forms are part of the core language:
 
 - **Primitive types**: `i32`, `f64`, `bool`, `unit`.
 - **Composite types**: tuples `(T1, T2, ...)`, arrays `[T; n]`, and structs defined via `struct`.
-- **Function types**: `(T1, ..., Tn) -> U`.
-- **Trait objects**: `dyn Trait` for traits marked as object-safe *(specified for full v1.0; not
-  yet implemented in the executable subset — see [Traits and generics](#traits-and-generics))*.
+- **Function types**: `(T1, ..., Tn) -> U` *(not in Core v1; specified for a later edition)*.
+- **Trait objects**: `dyn Trait` for traits marked as object-safe *(not in Core v1; specified for a
+  later edition — see [Traits and generics](#traits-and-generics))*.
 - **Differentiable wrappers**: `diff T` identifies values that participate in differentiation (see
   [Automatic differentiation](./autodiff.md)).
 
@@ -397,6 +397,25 @@ yet shipped conformance artifacts.
 - Trait implementations MUST be coherent: for any type and trait pair there MAY be at most one
   implementation in scope.
 - Generic type parameters use an explicit `where` clause to declare trait bounds.
+
+The three rules above are **not in Core v1**. The grammar does not agree with the last rule: it
+writes a bound inline (`<T: Bound>`, [`grammar-syntax.ebnf`](./grammar-syntax.ebnf)) and has no
+position for a `where` clause. Which spelling a later edition uses is open.
+
+### Generics in Core v1
+
+Core v1 has exactly this generic surface:
+
+- A function MAY declare **one** type parameter without a bound, written `fn id<T>(x: T) -> T`.
+  The type argument is inferred at each call from the argument types. Core v1 has no syntax for an
+  explicit type argument at a call. A call whose argument types do not fix the type argument (the parameter
+  is not used in a parameter type) MUST be refused with [`E2003`](./errors.md#e2003-cannot-infer-type), and a call
+  that gives two parameters of type `T` different types MUST be refused with
+  [`E2001`](./errors.md#e2001-type-mismatch). There is no implicit default type.
+- Core v1 has no type parameter on a `struct`, `enum`, `trait` or `type` declaration, no bound on a
+  type parameter, no `where` clause and no function with two or more type parameters.
+- The built-in generic types `Option<T>` and `Result<T, E>` keep their type arguments
+  ([Standard Library](./stdlib.md)).
 
 Trait resolution strategies are implementation-defined but MUST respect lexical scoping. The reference
 implementation uses a Rust-level trait-based plugin architecture internally for backend selection;

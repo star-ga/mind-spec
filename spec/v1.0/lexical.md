@@ -40,7 +40,8 @@ Tokens are classified as follows:
    underscores.
 2. **Keywords** — reserved words listed in [Keywords](#keywords).
 3. **Literals** — numeric, string, boolean, and differentiable literals as defined below.
-4. **Operators and punctuation** — symbols such as `+`, `->`, and `:=`.
+4. **Operators and punctuation** — symbols such as `+`, `->`, and `:=`, and the character `#` that
+   starts an attribute (`#[name]`, [Attributes](./language.md#attributes)).
 
 Whitespace and comments separate tokens but are otherwise discarded.
 
@@ -61,14 +62,20 @@ return defer import  export    where
 
 Keywords MUST be matched prior to identifiers.
 
+The syntactic grammar also spells out words that are not in this list (`in`, `as`, `break`, `continue`, `const`,
+`enum`, `module`, `use`, `assert`, `diff`, `dyn`, `tensor`, `dtype`, the primitive type names and `_`).
+[`grammar-lexical.ebnf`](./grammar-lexical.ebnf) lists them as `ContextualWord`: the lexer produces each of them as
+an identifier and the parser reads it by its position. This edition does not reserve them.
+
 ### Literals
 
 - **Integer literals** consist of an optional sign followed by digits. Binary (`0b`), octal (`0o`),
   and hexadecimal (`0x`) prefixes are allowed.
 - **Floating-point literals** follow the grammar `<digits>.<digits>([eE][+-]?<digits>)?`.
-- **String literals** are enclosed in double quotes. Escape sequences follow the conventions in the
-  reference compiler documentation (see
-  [`star-ga/mind`](https://github.com/star-ga/mind)).
+- **String literals** are enclosed in double quotes. The escape sequences are `\n`, `\r`, `\t`, `\0`,
+  `\\`, `\'`, `\"` and `\u{HEX}` (one to any number of hexadecimal digits), as in
+  [`grammar-lexical.ebnf`](./grammar-lexical.ebnf). Any other escape sequence MUST be diagnosed with
+  [`E1004`](./errors.md#e1004-invalid-escape-sequence).
 - **Boolean literals** are `true` and `false`.
 - **Differentiable literals** MAY include tangent annotations using the `^` suffix (see
   [Automatic differentiation](./autodiff.md)).

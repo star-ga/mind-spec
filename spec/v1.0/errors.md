@@ -278,6 +278,36 @@ exclusivity analysis; those guarantees remain future work.
   the same source with `E2301`; a refused build MUST terminate as a user error
   and leave no artifact.
 
+### E2701: Impl of an undeclared trait
+
+- **Trigger**: an `impl Trait for Type` block names a trait that no `trait` declaration declares.
+- **Required context**: the trait name and the source location of the `impl`.
+- **Example**: `E2701: Impl of undeclared trait 'Nope' for type 'P' at line 4, column 1`
+- **Scope**: the `trait` declaration is not in Core v1 ([Core v1 forms](./core-v1-forms.md)). An implementation
+  that accepts `trait` and `impl` blocks MUST use this code for this fault.
+
+### E2702: Duplicate impl
+
+- **Trigger**: two `impl Trait for Type` blocks name the same trait and the same type.
+- **Required context**: the trait name, the type name and the source location of the second block.
+- **Example**: `E2702: Duplicate impl of trait 'T' for type 'P' at line 12, column 1`
+- **Scope**: as for E2701.
+
+### E2703: Method that the trait does not declare
+
+- **Trigger**: an `impl Trait for Type` block defines a method that the trait does not declare.
+- **Required context**: the method name, the trait name and the source location of the method.
+- **Example**: `E2703: Method 'extra' is not declared in trait 'T' at line 11, column 5`
+- **Scope**: as for E2701.
+
+### E2707: Trait method missing from an impl
+
+- **Trigger**: an `impl Trait for Type` block lacks a method that the trait declares.
+- **Required context**: the trait name, the type name, the missing method name and the source location of the
+  `impl`.
+- **Example**: `E2707: Impl of trait 'T' for type 'P' is missing method 'put' at line 8, column 1`
+- **Scope**: as for E2701.
+
 ## E3xxx: Shape errors
 
 Shape errors occur during shape inference, broadcasting, or shape validation.

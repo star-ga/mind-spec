@@ -16,6 +16,13 @@ limitations under the License.
 
 This grammar corresponds to the normative syntax rules in language.md.
 Core v1 focuses on the tensor-oriented subset described in that chapter.
+
+Status marks. A comment that starts with "NOT IN CORE v1" marks a form
+that is written here for a later edition of the language; the mark names the
+part that it covers. Read as Core v1, this grammar has every marked part
+removed. The form is not part of Core v1: a conforming implementation
+refuses it or documents it as an extension. The file core-v1-forms.md lists the
+status of each form.
 *)
 
 (* Module structure *)
@@ -24,18 +31,27 @@ Module = { ModuleItem } ;
 ModuleItem = FunctionDeclaration
            | TypeDeclaration
            | StructDeclaration
-           | TraitDeclaration
+           | TraitDeclaration          (* NOT IN CORE v1 *)
            | ImportDeclaration
            | ExportDeclaration
            ;
 
 (* Function declarations *)
-FunctionDeclaration = "fn" , Identifier , "(" , [ ParameterList ] , ")" , [ "->" , Type ] , Block ;
+FunctionDeclaration = "fn" , Identifier , [ FunctionTypeParameters ] , "(" , [ ParameterList ] , ")" , [ "->" , Type ] , Block ;
+
+(* Core v1 admits one unbounded type parameter on a function; the      *)
+(* argument is inferred at each call (types.md, Generics in Core v1).   *)
+(* NOT IN CORE v1: a second type parameter, a bound (<T: Bound>), a    *)
+(* where clause and an explicit type argument at a call (id::<i64>(5)). *)
+FunctionTypeParameters = "<" , Identifier , ">" ;
 
 ParameterList = Parameter , { "," , Parameter } , [ "," ] ;
 Parameter = Identifier , ":" , Type ;
 
 (* Type declarations *)
+(* NOT IN CORE v1: the [ TypeParameters ] part of TypeDeclaration,      *)
+(* StructDeclaration, TraitDeclaration and EnumDeclaration, with        *)
+(* TypeParameters, TypeParameter, TraitBounds and TraitBound below.     *)
 TypeDeclaration = "type" , Identifier , [ TypeParameters ] , "=" , Type , ";" ;
 
 TypeParameters = "<" , TypeParameter , { "," , TypeParameter } , [ "," ] , ">" ;
@@ -51,6 +67,7 @@ FieldList = Field , { "," , Field } , [ "," ] ;
 Field = Identifier , ":" , Type ;
 
 (* Trait declarations *)
+(* NOT IN CORE v1: TraitDeclaration, TraitItem and FunctionSignature.   *)
 TraitDeclaration = "trait" , Identifier , [ TypeParameters ] , [ ":" , TraitBounds ] , "{" , { TraitItem } , "}" ;
 
 TraitItem = FunctionSignature ;
@@ -73,9 +90,9 @@ Type = PrimitiveType
      | TensorType
      | TupleType
      | ArrayType
-     | FunctionType
+     | FunctionType            (* NOT IN CORE v1 *)
      | DifferentiableType
-     | TraitObjectType
+     | TraitObjectType         (* NOT IN CORE v1 *)
      | IdentifierType
      ;
 
@@ -92,12 +109,19 @@ TypeList = Type , { "," , Type } , [ "," ] ;
 
 ArrayType = "[" , Type , ";" , IntegerLiteral , "]" ;
 
+(* NOT IN CORE v1: FunctionType. *)
 FunctionType = "(" , [ TypeList ] , ")" , "->" , Type ;
 
 DifferentiableType = "diff" , Type ;
 
+(* NOT IN CORE v1: TraitObjectType. *)
 TraitObjectType = "dyn" , Identifier ;
 
+(* In Core v1 the type arguments belong to the built-in generic types   *)
+(* Option and Result. A user-declared type has no type parameters in    *)
+(* Core v1.                                                             *)
+(* NOT IN CORE v1: the [ "<" , TypeList , ">" ] part of IdentifierType  *)
+(* when the identifier names a user-declared type.                      *)
 IdentifierType = Identifier , [ "<" , TypeList , ">" ] ;
 
 (* Statements and blocks *)
@@ -107,6 +131,7 @@ Statement = LetStatement
           | ExpressionStatement
           | ReturnStatement
           | DeferStatement
+          | LoopExitStatement
           ;
 
 LetStatement = "let" , Pattern , [ ":" , Type ] , "=" , Expression , ";" ;
@@ -126,6 +151,19 @@ ExpressionStatement = Expression , ";" ;
 ReturnStatement = "return" , [ Expression ] , ";" ;
 
 DeferStatement = "defer" , Block ;
+
+(* A loop exit is valid inside the body of a WhileExpression or a      *)
+(* ForExpression. It ends the innermost loop (break) or starts its     *)
+(* next iteration (continue). It takes no value and no label. The      *)
+(* semicolon is optional. The words are not reserved, and they are     *)
+(* names in every position except the first token of a statement. A    *)
+(* statement that starts with the word `break` or `continue` is a      *)
+(* LoopExitStatement: it ends after the word and the optional          *)
+(* semicolon, and what follows starts the next statement. `break - 1;` *)
+(* is the statement `break` and then the statement `- 1;`, and         *)
+(* `break = 5;` is not a statement. No ExpressionStatement starts      *)
+(* with these two words.                                               *)
+LoopExitStatement = ( "break" | "continue" ) , [ ";" ] ;
 
 (* Expressions *)
 Expression = AssignmentExpression ;
@@ -183,7 +221,7 @@ PrimaryExpression = Literal
                   | MatchExpression
                   | WhileExpression
                   | ForExpression
-                  | FunctionExpression
+                  | FunctionExpression      (* NOT IN CORE v1 *)
                   ;
 
 ParenthesizedExpression = "(" , Expression , ")" ;
@@ -205,8 +243,12 @@ MatchArm = Pattern , "=>" , ( Expression , "," | Block ) ;
 
 WhileExpression = "while" , Expression , Block ;
 
+(* The expression after "in" is an ordinary Expression. This grammar has *)
+(* no range expression: `for i in a..b` is not defined here; a range is  *)
+(* an extension.                                                          *)
 ForExpression = "for" , Pattern , "in" , Expression , Block ;
 
+(* NOT IN CORE v1: FunctionExpression (closures, function values).     *)
 FunctionExpression = "fn" , "(" , [ ParameterList ] , ")" , [ "->" , Type ] , Block ;
 
 (* Tensor operations (Core v1 intrinsics) *)
@@ -223,7 +265,8 @@ FunctionExpression = "fn" , "(" , [ ParameterList ] , ")" , [ "->" , Type ] , Bl
 (* Compile-time constant declaration.                           *)
 ConstDeclaration = "const" , Identifier , [ ":" , Type ] , "=" , Expression , [ ";" ] ;
 
-(* Algebraic enums.                                             *)
+(* Algebraic enums.                                                  *)
+(* NOT IN CORE v1: the [ TypeParameters ] part of EnumDeclaration.   *)
 EnumDeclaration = "enum" , Identifier , [ TypeParameters ] , "{" , [ EnumVariantList ] , "}" ;
 EnumVariantList = EnumVariant , { "," , EnumVariant } , [ "," ] ;
 EnumVariant     = Identifier , [ "(" , [ EnumPayloadList ] , ")" ] ;
@@ -235,9 +278,12 @@ ModuleBlock     = "module" , Identifier , "{" , { ModuleItem } , "}" ;
 (* Use-clause (lightweight import).                             *)
 UseDeclaration  = "use" , ImportPath , [ ";" ] ;
 
-(* Attribute on items (`[name]`, `[name(arg, ...)]`).           *)
-Attribute       = "[" , Identifier , [ "(" , [ AttributeArgList ] , ")" ] , "]" ;
+(* Attribute on items (`#[name]`, `#[name(arg, ...)]`). The spelling *)
+(* starts with "#". The form `[name]` without the "#" is not an      *)
+(* attribute: it reads as an array expression.                       *)
+Attribute       = "#" , "[" , Identifier , [ "(" , [ AttributeArgList ] , ")" ] , "]" ;
 AttributeArgList = AttributeArg , { "," , AttributeArg } ;
+AttributedItem  = Attribute , { Attribute } , ModuleItem ;
 AttributeArg    = Identifier | Literal ;
 
 (* Runtime assertion (no return value).                         *)
