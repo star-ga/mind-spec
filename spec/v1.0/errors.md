@@ -383,9 +383,9 @@ exclusivity analysis; those guarantees remain future work.
   function of the standard library; or a region block, that is where a statement can start the name `region`
   directly followed by `{` ([Region blocks](./memory.md#region-blocks)), also in a function of the standard
   library and also where an implementation does not provide region blocks.
-- **Required context**: the called function, the location of the call and the function that holds it, with the
-  fix: declare that function with `#[raw_memory]`, or with `#[raw_memory(sealed)]` when no parameter and no result
-  of it carries an address.
+- **Required context**: the called function or the region block, its location and the function that holds it, with the
+  fix: declare that function with `#[raw_memory]`, or with `#[raw_memory(sealed)]` when no parameter and no result of it
+  carries an address.
 - **Example**: `E2501: '__mind_load_i64' is raw memory; mark 'read_at' with #[raw_memory] at line 2, column 12`
 - **Check/build contract**: checking and artifact-producing builds MUST refuse the same source with `E2501`.
 
