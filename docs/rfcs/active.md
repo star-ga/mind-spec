@@ -34,10 +34,10 @@ reaches consensus, it moves to [Implemented RFCs](./implemented.md).
 | [RFC 0026](../../design/rfcs/0026-module-items.md) | Module items: `module`, `export`, import alias, attributes, version attribute | Draft |
 | [RFC 0027](../../design/rfcs/0027-function-generics.md) | Function generics: several type parameters, bounds, predeclared numeric bounds, supertraits, `where`, explicit type arguments | Draft |
 
-The specification owner decided the questions of these drafts on 2026-11-24; each draft lists the decided
-questions and the points that stay open. RFC 0023, RFC 0024 and RFC 0027 belong to one edition, Core v1.1. The
-[decision notes](../../design/rfcs/decision-notes.md) record the decisions on the points that the specification
-text did not decide. The numbers are provisional.
+The specification owner decided the questions of these drafts on 2026-11-24; each draft lists the decided questions and
+the points that stay open. RFC 0023, RFC 0024 and RFC 0027 belong to one edition, Core v1.1. The
+[decision notes](../../design/rfcs/decision-notes.md) (with [part 2](../../design/rfcs/decision-notes-2.md)) record the
+decisions on the points that the specification text did not decide. The numbers are provisional.
 
 New proposals are welcome! See the [RFC Process](../../design/rfc-process.md)
 for how to submit a proposal.
