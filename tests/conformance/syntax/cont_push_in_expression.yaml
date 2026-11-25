@@ -1,0 +1,21 @@
+# MIND Conformance Test: a push as the initializer of another binding
+# Specification reference: spec/v1.0/memory.md#changing-a-container
+# Category: syntax
+# Profile: cpu
+
+description: "let ys = xs.push(2); is neither a statement push nor the update of xs"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let mut xs: array<i64> = [1];
+        let ys = xs.push(2);
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2300

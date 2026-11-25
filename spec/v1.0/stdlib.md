@@ -507,23 +507,13 @@ so this resolution is the default behaviour of a shipped `mindc`; building with
 `--no-default-features` opts back out to the low-level-only subset.
 
 - **`std.vec`** — Growable `Vec` over `i64`-shaped slots. Eight-byte stride,
-  doubling growth from an initial capacity of **4** slots. The `Vec` struct
-  is an opaque heap record (Option-C struct ABI) with three `i64` fields:
-  `addr`, `len`, `cap`. The reference implementation (mindc v0.10.0,
-  `std/vec.mind`) ships: `vec_new`, `vec_push`, `vec_get`, `vec_set`,
-  `vec_len`, `vec_cap`, `vec_addr`, `vec_free`, `vec_zeroed`. `vec_push` is
-  functional at the value level today: it may update or reallocate the backing
-  store and returns the replacement `Vec` owner. `vec_set` updates existing
-  storage and returns the scalar status from the store operation.
-
-  > **Compiler integration update, released in v0.10.3.** The source surface
-  > maps owned `array<T>` mutation onto these two result contracts. A
-  > `push` must be a bare statement or be assigned back to the same owner;
-  > unrebindable uses produce `E2300`. A `set` is valid as a statement, but its
-  > scalar result cannot replace the array owner (`E2032`). Mutable borrowed
-  > slices may use `set` as a statement; borrowed slices cannot use ownership
-  > operations such as `push` (`E2033`). The v0.10.2 compiler
-  > does not have this surface.
+  doubling growth from an initial capacity of **4** slots. A `Vec` value is a
+  [container record](./memory.md#records-and-containers) with three `i64` fields `addr`, `len` and `cap`
+  (Option-C struct ABI). The functions: `vec_new() -> Vec`, `vec_push(v: Vec, value: i64) -> Vec`,
+  `vec_get(v: Vec, i: i64) -> i64`, `vec_set(v: Vec, i: i64, value: i64) -> i64`, `vec_len(v: Vec) -> i64`,
+  `vec_cap(v: Vec) -> i64`, `vec_addr(v: Vec) -> i64`, `vec_free(v: Vec) -> i64`, `vec_zeroed(n: i64) -> i64`.
+  `vec_push` appends `value` to the record of `v` in place and returns `v`; `vec_set` replaces the element
+  `i` and returns 0; `vec_len` gives the number of elements.
 
   > **Planned (not yet shipped).** A tail-removing `vec_pop` is on the roadmap
   > but is **not** present in the reference implementation as of v0.10.0.
@@ -532,7 +522,10 @@ so this resolution is the default behaviour of a shipped `mindc`; building with
   standard library it is available without an import, and a string literal has this type
   ([Type formation](./types.md#type-formation)). The container stores
   raw bytes; UTF-8 well-formedness is a documented invariant the producer
-  MUST uphold. The reference implementation (mindc v0.10.0, `std/string.mind`)
+  MUST uphold. Signatures: `string_new() -> String`, `string_push_byte(s: String, b: i64) -> String` (appends
+  the byte `b` to the record of `s` in place and returns `s`), `string_len(s: String) -> i64`,
+  `string_get_byte(s: String, i: i64) -> i64`, `string_slice_from(s: String, start: i64) -> String` (a new
+  record with a copy of the bytes from `start`). The reference implementation (mindc v0.10.0, `std/string.mind`)
   ships: `string_new`, `string_push_byte`, `string_push_str`, `string_push_i`,
   `string_get_byte`, `string_len`, `string_cap`, `string_addr`, `string_eq`,
   `string_slice_from`, `string_starts_with`, `string_validate_utf`. Note
@@ -553,9 +546,10 @@ so this resolution is the default behaviour of a shipped `mindc`; building with
   `len`, `cap`. Iteration order MUST be insertion order — this is normative
   for determinism.
 
-  The reference implementation (mindc v0.10.0, `std/map.mind`) ships these
-  ten public **free functions** (all take the `Map` by value and, where they
-  grow the container, return a fresh `Map` — no in-place mutation):
+  A `Map` value is a [container record](./memory.md#records-and-containers). Signatures: `map_new() -> Map`,
+  `map_insert(m: Map, key: i64, value: i64) -> Map` (adds the pair to the record of `m` in place and returns
+  `m`), `map_len(m: Map) -> i64`, `map_get(m: Map, key: i64) -> i64`. The reference implementation ships ten
+  public **free functions**:
   `map_new`, `map_insert`, `map_get`, `map_contains_key`, `map_len`,
   `map_cap`, `map_key_at`, `map_value_at`, `map_get_str`,
   `map_contains_key_str`. The `_str` variants compare String **key contents**

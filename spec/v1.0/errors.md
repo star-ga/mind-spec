@@ -267,17 +267,14 @@ exclusivity analysis; those guarantees remain future work.
 ### E2300: Collection mutation in expression position
 
 - **Implementation status**: implemented in the reference compiler v0.10.3.
-- **Trigger**: a mutating method on a tracked collection appears in an
-  expression position rather than as a supported top-level owner update. This
-  includes nested expressions, call arguments, conditions, match values or
-  guards, and assignment of an owner-returning mutation to a different
-  binding. The same-binding form `xs = xs.push(value)` and its bare-statement
-  rewrite are allowed by this rule; their arguments are still checked for
-  nested violations. Separate result-type rules still apply, so assigning the
+- **Trigger**: a `push` on a container that stands neither as a statement nor in the update
+  `xs = xs.push(value)` of the same place: a nested expression, a call argument, a condition, a match
+  value or guard, or the initializer or right side of another binding
+  ([Changing a container](./memory.md#changing-a-container)). The arguments of an allowed push are still
+  checked for nested violations. Separate result-type rules still apply, so assigning the
   scalar result of `set` back to an array is `E2032`.
 - **Required context**: the mutating call, its collection receiver, a source
-  span, and guidance to use an owner-preserving statement or same-binding
-  update. The decision is type-aware, so an equally named user-defined method
+  span, and guidance to write the push as a statement or as the update of the same place. The decision is type-aware, so an equally named user-defined method
   on a non-collection receiver is not refused.
 - **Check/build contract**: checking and artifact-producing builds MUST refuse
   the same source with `E2300`; a refused build MUST terminate as a user error
@@ -307,10 +304,11 @@ exclusivity analysis; those guarantees remain future work.
 
 ### E2402: Invalid assignment target
 
-- **Trigger**: an assignment or a compound assignment whose left operand is not a place, or is a place whose
-  root name is not declared with `let mut`: a name that a `let` without `mut`, a parameter, the pattern of a
-  `for` or the pattern of a `match` arm binds
-  ([Bindings and assignment](./language.md#bindings-and-assignment)).
+- **Trigger**: an assignment, a compound assignment, or a method call that changes a container, whose left
+  operand or receiver is not a place, or is a place whose root name is not declared with `let mut`: a name that a
+  `let` without `mut`, a parameter, the pattern of a `for` or the pattern of a `match` arm binds
+  ([Bindings and assignment](./language.md#bindings-and-assignment),
+  [Changing a container](./memory.md#changing-a-container)).
 - **Required context**: the left operand, the location of the assignment and, for a place, the location of
   the binding of its root, with the fix: declare the root with `let mut`, or assign to a place.
 - **Example**: `E2402: cannot assign to 'x', which is not declared with 'let mut', at line 3, column 5`

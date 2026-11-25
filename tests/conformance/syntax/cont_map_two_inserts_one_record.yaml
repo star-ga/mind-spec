@@ -1,0 +1,27 @@
+# MIND Conformance Test: two inserts through two aliases land in one record
+# Specification reference: spec/v1.0/memory.md#records-and-containers
+# Category: syntax
+# Profile: cpu
+
+description: "base has one entry; a and b each insert once; base has three entries"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let base = map_insert(map_new(), 1, 10);
+        let a = base;
+        let b = base;
+        let ra = map_insert(a, 2, 20);
+        let rb = map_insert(b, 3, 30);
+        return map_len(base);
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 3

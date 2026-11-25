@@ -1,0 +1,30 @@
+# MIND Conformance Test: each evaluation of a string literal creates a new record
+# Specification reference: spec/v1.0/memory.md#records-and-containers
+# Category: syntax
+# Profile: cpu
+
+description: "each iteration pushes one byte to a new record of ab; the last length is 3"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let mut i: i64 = 0;
+        let mut n: i64 = 0;
+        while i < 2 {
+            let s: String = "ab";
+            let r = string_push_byte(s, 99);
+            n = string_len(s);
+            i = i + 1;
+        }
+        return n;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 3

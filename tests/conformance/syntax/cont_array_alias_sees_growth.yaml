@@ -1,0 +1,29 @@
+# MIND Conformance Test: an alias of an array sees the growth of its storage
+# Specification reference: spec/v1.0/memory.md#records-and-containers
+# Category: syntax
+# Profile: cpu
+
+description: "99 pushes grow the storage; the alias taken before them reads element 99"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let mut xs: array<i64> = [0];
+        let view = xs;
+        let mut i: i64 = 1;
+        while i < 100 {
+            xs.push(i);
+            i = i + 1;
+        }
+        return view[99];
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 99

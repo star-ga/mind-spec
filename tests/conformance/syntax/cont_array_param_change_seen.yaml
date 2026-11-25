@@ -1,0 +1,30 @@
+# MIND Conformance Test: a function changes an array that it receives through let mut
+# Specification reference: spec/v1.0/memory.md#changing-a-container
+# Category: syntax
+# Profile: cpu
+
+description: "grow pushes 3 through w; the caller sees xs[2] = 3"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn grow(p: array<i64>) -> i64 {
+        let mut w = p;
+        w.push(3);
+        return 0;
+    }
+
+    fn main() -> i64 {
+        let xs: array<i64> = [1, 2];
+        let z = grow(xs);
+        return xs[2] + z;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 3

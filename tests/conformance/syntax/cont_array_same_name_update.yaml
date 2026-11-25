@@ -1,0 +1,24 @@
+# MIND Conformance Test: the update xs = xs.push(v)
+# Specification reference: spec/v1.0/memory.md#changing-a-container
+# Category: syntax
+# Profile: cpu
+
+description: "the push stands in the update of the same place; xs[1] is 2"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let mut xs: array<i64> = [1];
+        xs = xs.push(2);
+        return xs[1];
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 2

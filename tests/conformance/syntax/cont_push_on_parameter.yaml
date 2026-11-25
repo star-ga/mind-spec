@@ -1,0 +1,25 @@
+# MIND Conformance Test: a push on a parameter
+# Specification reference: spec/v1.0/memory.md#changing-a-container
+# Category: syntax
+# Profile: cpu
+
+description: "p is a parameter, which is not mutable"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn grow(p: array<i64>) -> i64 {
+        p.push(3);
+        return 0;
+    }
+
+    fn main() -> i64 {
+        let xs: array<i64> = [1];
+        return grow(xs);
+    }
+
+expected:
+  status: error
+  error:
+    code: E2402

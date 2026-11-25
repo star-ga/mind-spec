@@ -1,0 +1,25 @@
+# MIND Conformance Test: a part of a string is a new record with a copy of the bytes
+# Specification reference: spec/v1.0/memory.md#records-and-containers
+# Category: syntax
+# Profile: cpu
+
+description: "p holds a copy of bc; a push to s does not change p"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let s: String = "abc";
+        let p = string_slice_from(s, 1);
+        let r = string_push_byte(s, 100);
+        return string_len(p);
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 2

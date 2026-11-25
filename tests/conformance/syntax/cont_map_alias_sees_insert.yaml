@@ -1,0 +1,25 @@
+# MIND Conformance Test: an alias of a map sees an insert
+# Specification reference: spec/v1.0/memory.md#records-and-containers
+# Category: syntax
+# Profile: cpu
+
+description: "view and m denote one record; after the insert view has one entry"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let m = map_new();
+        let view = m;
+        let r = map_insert(m, 1, 10);
+        return map_len(view);
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 1

@@ -1,0 +1,21 @@
+# MIND Conformance Test: a push needs a let mut root
+# Specification reference: spec/v1.0/memory.md#changing-a-container
+# Category: syntax
+# Profile: cpu
+
+description: "xs is bound by let without mut"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let xs: array<i64> = [1];
+        xs.push(2);
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2402

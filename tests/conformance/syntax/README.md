@@ -148,3 +148,15 @@ implementation MAY accept or refuse those.
 | [`literal_type_reject_out_of_range`](./literal_type_reject_out_of_range.yaml) | reject, `E2408` | as above, rule 3 |
 | [`literal_type_reject_integer_for_float`](./literal_type_reject_integer_for_float.yaml) | reject, `E2001` | as above, rule 4 |
 | [`literal_type_reject_float_for_integer`](./literal_type_reject_float_for_integer.yaml) | reject, `E2001` | as above, rule 4 |
+| [`cont_array_alias_sees_push`](./cont_array_alias_sees_push.yaml) | accept, returns 5 | [Records and containers](../../../spec/v1.0/memory.md#records-and-containers): a change through one reference is visible through every other reference |
+| [`cont_array_alias_sees_growth`](./cont_array_alias_sees_growth.yaml) | accept, returns 99 | as above, and no container handle shows released storage |
+| [`cont_array_param_change_seen`](./cont_array_param_change_seen.yaml) | accept, returns 3 | [Changing a container](../../../spec/v1.0/memory.md#changing-a-container): a parameter is changed through `let mut w = p;` |
+| [`cont_array_same_name_update`](./cont_array_same_name_update.yaml) | accept, returns 2 | as above: a push stands as a statement or in the update of the same place |
+| [`cont_push_root_not_mut`](./cont_push_root_not_mut.yaml) | reject, `E2402` | as above: a method call that changes a container whose root is not mutable MUST be refused |
+| [`cont_push_on_parameter`](./cont_push_on_parameter.yaml) | reject, `E2402` | as above |
+| [`cont_push_in_expression`](./cont_push_in_expression.yaml) | reject, `E2300` | as above: any other use of a push MUST be refused |
+| [`cont_map_alias_sees_insert`](./cont_map_alias_sees_insert.yaml) | accept, returns 1 | [Records and containers](../../../spec/v1.0/memory.md#records-and-containers): the insert function of a map changes the record in place |
+| [`cont_map_two_inserts_one_record`](./cont_map_two_inserts_one_record.yaml) | accept, returns 3 | as above |
+| [`cont_string_alias_sees_push`](./cont_string_alias_sees_push.yaml) | accept, returns 1 | as above: the string push functions change the record in place |
+| [`cont_string_part_is_copy`](./cont_string_part_is_copy.yaml) | accept, returns 2 | as above: a function that gives a part of a string creates a new record with a copy of the bytes |
+| [`cont_string_literal_new_record`](./cont_string_literal_new_record.yaml) | accept, returns 3 | as above: each evaluation of a string literal creates a new string record |

@@ -33,6 +33,8 @@ The following forms are part of the core language:
   later edition — see [Traits and generics](#traits-and-generics))*.
 - **Differentiable wrappers**: `diff T` identifies values that participate in differentiation (see
   [Automatic differentiation](./autodiff.md)).
+- **Container types**: `array<T>`, `Vec`, `Map` and `String`. A value of one of them is a container record
+  ([Memory model](./memory.md#records-and-containers)).
 - **The string type**: `String`, the type of the module `std.string` of the
   [standard library](./stdlib.md#four-pure-mind-modules). Like every entity of the standard library, `String` is
   available without an import. A string literal has the type `String`, so `let s: String = "a";` is valid and
@@ -410,14 +412,9 @@ may preserve a compatible slice capability. General lifetime and
 alias-exclusivity analysis remains outside this implementation. These limits
 are separate from the general byte-slice design in [Future Extensions](./future-extensions.md#systems-programming-primitives).
 
-For an owned `array<T>`, `push` returns the replacement owner handle. The
-reference compiler (v0.10.3) accepts an explicit same-binding update such as
-`xs = xs.push(value)` and rewrites a bare statement `xs.push(value)` to that
-same owner-preserving form. A collection mutation used where its replacement
-handle cannot be rebound, including assignment to a different binding or a
-nested expression, MUST be refused with `E2300`. This rule follows the
-receiver's collection type; a user-defined method with the same name on a
-non-collection value is unaffected.
+An `array<T>` value is a container record: `push` changes the record in place and returns the handle that it
+received. Where a push may stand, and when it needs a `let mut` root, is in
+[Changing a container](./memory.md#changing-a-container).
 
 `set` has a different result contract: it updates existing storage and returns
 a scalar status. Consequently `xs.set(index, value)` is valid as a statement

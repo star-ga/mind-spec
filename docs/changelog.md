@@ -17,6 +17,11 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   defined stop of a failed check, which the other chapters link. The list of raw memory functions names the group
   intrinsics of the lowering. The determinism item of the library conformance list covers the programs that keep
   the address rules.
+- **Containers.** A value of `array<T>`, `Vec`, `Map` or `String` is a container record with identity, as a struct
+  value is; `push`, `map_insert` and the string push functions change the record in place, and an alias sees the
+  change. A method call that changes a container needs a `let mut` root (`E2402`); a push stands as a statement
+  or in `xs = xs.push(v)` (`E2300`). The sentences of the replacement-owner and fresh-map model are replaced
+  ([Records and containers](../spec/v1.0/memory.md#records-and-containers)). A region block is a raw memory use.
 
 ### Changed: raw memory, the string type, elementwise operands, the tensor constructor, slice bounds, literal types, cast and method readings (2026-11-25)
 

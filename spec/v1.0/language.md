@@ -619,8 +619,8 @@ documentation MUST NOT present these as complete:
 - **Traits**: **not implemented** in the executable subset (no `trait` declarations, no `dyn Trait`).
 - **Slices**: stubbed; byte-level work goes through the `std.string`/`std.vec` heap records and the
   byte-precise intrinsics.
-- **Collections**: region-allocator-backed; `std.vec` push is non-mutating (returns a fresh `Vec`),
-  `std.map` is insert-only (no removal, no in-place update) — see
+- **Collections**: `array<T>`, `Vec`, `Map` and `String` are container records that change in place
+  ([Memory model](./memory.md#records-and-containers)); `std.map` is insert-only (no removal) — see
   [Standard Library](./stdlib.md#four-pure-mind-modules) for the precise shipped surface. These are
   not full `Vec`/`String`/`HashMap` equivalents.
 - **Range `for` loops**: the range form `for v in s..e { ... }` is not yet in the grammar:

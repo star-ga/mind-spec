@@ -55,7 +55,7 @@ document may present them as shipped:
 - **General byte-slice type** — remains deferred; see the byte-slice discussion
   under [Systems Programming Primitives](#systems-programming-primitives).
 - **Full dynamic collections** — the shipped `std.vec` / `std.string` / `std.map` are
-  region-allocator-backed with documented gaps (non-mutating push, insert-only map); full
+  container records that change in place, with documented gaps (insert-only map, no release point); full
   `Vec`/`String`/`HashMap` equivalents (removal, in-place update, hashing index) are roadmap
   (see [Standard Library](./stdlib.md#four-pure-mind-modules)).
 

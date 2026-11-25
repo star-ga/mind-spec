@@ -1,0 +1,25 @@
+# MIND Conformance Test: an alias of an array sees a push
+# Specification reference: spec/v1.0/memory.md#records-and-containers
+# Category: syntax
+# Profile: cpu
+
+description: "view and xs denote one record; after the push view[4] is 5"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let mut xs: array<i64> = [1, 2, 3, 4];
+        let view = xs;
+        xs.push(5);
+        return view[4];
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 5
