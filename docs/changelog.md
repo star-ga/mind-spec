@@ -9,6 +9,24 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed: forms of Core v1 decided by the specification owner (2026-11-24)
+
+- **`:=`.** The operator is removed from the grammar, the operator list and the precedence table. `x := 1;` MUST be refused.
+- **Loops.** `while` and `for` stay expressions; a loop has the type `unit` and the value `()` ([Loops](../spec/v1.0/language.md#loops)).
+- **Block-like statements.** `if`, `match`, a block, `while` and `for` may stand as a statement with no `;` (`BlockLikeStatement`). At a statement start such a form ends at its closing brace; a `;` directly after it makes an expression statement; before the closing brace of a block it is the tail. A block-like statement that is not the tail has the type `unit` ([Block-like statements](../spec/v1.0/language.md#block-like-statements)).
+- **Separators.** `;` is required after a `let`, a `return`, a loop exit and an expression statement; a block-like statement takes none. A `match` arm with an expression ends with `,`. Checking and building refuse a missing separator; a formatter MAY read such a source and write the strict form ([Statement separators](../spec/v1.0/language.md#statement-separators)).
+- **`%` on floats.** The truncated remainder: exact, with the sign of the left operand, and a complete table of special cases ([Floating-point remainder](../spec/v1.0/language.md#floating-point-remainder)). [Types](../spec/v1.0/types.md#canonical-nan) defines one canonical NaN bit pattern for `f32` and for `f64`.
+- **Unit value.** `()` is `UnitExpression` of type `unit`; `()` where another type is expected is refused with `E2001` ([The unit value](../spec/v1.0/types.md#the-unit-value)).
+- **`^` suffix.** The differentiable-literal suffix is removed from the lexical grammar and the lexical chapter.
+- **Casts.** `e as T` binds tighter than `*`, `/` and `%` and looser than a unary operator (`CastExpression`). A table gives every allowed cast and its bit-exact value; every other cast is refused with `E2016` ([Casts](../spec/v1.0/language.md#casts)).
+- **Unary operators.** `UnaryExpression` takes several unary operators, so `- -x` is derived as the precedence table states.
+- **Loop exits.** A loop exit needs its `;`, takes no label and no value, and outside a loop is refused with `E2401`. `loop` is not a keyword; `loop { }` is refused ([Loop exits](../spec/v1.0/language.md#loop-exits)).
+- **`let mut` and places.** `mut` is part of `LetStatement` (a contextual word). The left operand of an assignment is a place, and the root name of the place is declared with `let mut`; another left operand is refused with `E2402` ([Bindings and assignment](../spec/v1.0/language.md#bindings-and-assignment)). The sample sources that assign use `let mut`.
+- **Entry function.** `main` has no parameter and the result type `i64` or `unit` (written or omitted); another form is refused with `E2403`. The process status is the low 8 bits of the result ([Entry function](../spec/v1.0/language.md#entry-function)).
+- **Tuple index and range index.** `t.0` is the tuple index (`TupleIndexOperator`); a float literal `0.1` after `.` is read as two tuple indices, so `t.0.1` is `(t.0).1`. A wrong tuple index, and `t[0]` on a tuple, are refused with `E2404`. `a[1:3]` is the only slice form; `a[1..3]` is refused ([Tuple index](../spec/v1.0/language.md#tuple-index)).
+- **Compound assignment.** `%=`, `<<=`, `>>=`, `&=`, `|=` and `^=` are added; `x op= e` means `x = x op e` with the place evaluated once. The lexer reads the longest operator, so `<<=` and `>>=` are one token each.
+- **Form status and rows.** [Core v1 forms](../spec/v1.0/core-v1-forms.md) has the status "Core v1 refuses" and an informative "reference gap" mark with what was measured; no decided form is open. New error codes `E2401` to `E2404`, and the catalog entry `E2016` for an invalid cast. New rows in [`tests/conformance/syntax`](../tests/conformance/syntax/README.md) for both sides of each rule.
+
 ### Changed: the grammar marks the forms that are not in Core v1 (2026-11-24)
 
 - **Marks.** [`grammar-syntax.ebnf`](../spec/v1.0/grammar-syntax.ebnf) marks function types, function expressions, trait declarations, `dyn Trait`, type parameters on `struct`, `enum`, `trait` and `type`, and type arguments on user types as "NOT IN CORE v1". A conforming implementation refuses a marked form or documents it as an extension. A new chapter, [Core v1 forms](../spec/v1.0/core-v1-forms.md), lists the status of each form.
