@@ -20,15 +20,16 @@ limitations under the License.
 |-------|-------|
 | State | Draft (2026-11-24). Not yet accepted. The specification owner decided the questions of this draft on 2026-11-24 (see [Questions](#questions-for-the-specification-owner)). |
 | Number | Provisional. The specification owner assigns the final number. |
-| Changes | `grammar-syntax.ebnf` (`ModuleItem`, `ModuleDeclaration`, `ExportDeclaration` in the list form only, `ImportDeclaration`, `AttributeArg`), `language.md` (Modules and imports; attributes), `types.md` (a module block is a namespace; the text on transparent blocks goes), `versioning.md` (the `requires` attribute; the example of a version declaration becomes a `mind` block again, and the sentence that calls it an extension in Core v1 goes), `core-v1-forms.md` (the rows of the module items and of an attribute before an item), `errors.md` (`E2720` to `E2729`) |
+| Changes | `grammar-syntax.ebnf` (`ModuleItem`, `ModuleDeclaration`, `ExportDeclaration` in the list form only, `ImportDeclaration`, `AttributeArg`, `AttributedItem` without the function declaration), `language.md` (Modules and imports; attributes: the code `E2726` for the refusal of an attribute that the specification does not define), `types.md` (a module block is a namespace; the text on transparent blocks goes), `versioning.md` (the `requires` attribute; the example of a version declaration becomes a `mind` block again, and the sentence that calls it an extension in Core v1 goes), `core-v1-forms.md` (the rows of the module items and of an attribute before an item), `errors.md` (`E2720` to `E2729`) |
 | Depends on | [RFC 0024](./0024-impl-forms.md): `TraitDeclaration` and `ImplDeclaration` are listed in `ModuleItem` below, and a module block MAY hold them. |
 | Related | [RFC 0024](./0024-impl-forms.md) (visibility of methods), [RFC 0023](./0023-type-parameters-on-user-types.md) (the declaration name of a member of a module block) |
 
 ## Problem
 
-The `ModuleItem` of the syntax grammar lists six items. The candidate block adds `const`, `enum`, a
-module block, `use` and attributes. The text of the specification and the reference compiler use more
-forms than that, and they do not agree on their meaning.
+The `ModuleItem` of the syntax grammar lists six items. The candidate block adds `const`, `enum`, a module block, `use`
+and attributes before an item other than a function declaration (an attribute before a function declaration is part of
+Core v1, [Attributes](../../spec/v1.0/language.md#attributes)). The text of the specification and the reference compiler
+use more forms than that, and they do not agree on their meaning.
 
 Measured with the reference compiler v0.10.4 (`mindc check --no-fmt`, and `mindc build --backend native`):
 
@@ -69,7 +70,16 @@ ImportDeclaration   = "import" , ImportPath , [ "as" , Identifier ] , ";" ;
 ExportDeclaration   = "export" , "{" , Identifier , { "," , Identifier } , [ "," ] , "}" ;
 
 AttributeArg        = Identifier | Literal | Identifier , "=" , Literal ;
+
+AttributedItem      = Attribute , { Attribute } , AttributableItem ;
+AttributableItem    = TypeDeclaration | StructDeclaration | EnumDeclaration | ConstDeclaration
+                    | TraitDeclaration | ImplDeclaration | ModuleDeclaration | ImportDeclaration
+                    | ExportDeclaration | UseDeclaration ;
 ```
+
+An attribute before a function declaration is the `{ Attribute }` of `FunctionDeclaration`
+([Attributes](../../spec/v1.0/language.md#attributes)). `AttributedItem` takes every other item and no
+`AttributedItem`, so `#[a] fn f() { }` and `#[a] #[b] struct S { }` have one derivation each.
 
 `TraitDeclaration` and `ImplDeclaration` are the productions of [RFC 0024](./0024-impl-forms.md); the supertrait
 list is owned by [RFC 0027](./0027-function-generics.md). `ExportDeclaration` has one form, the list form
@@ -116,7 +126,10 @@ extension that [Language](../../spec/v1.0/language.md#executable-subset-status-i
    (language.md); this RFC makes the alias the only qualifier of that import.
 7. **Attributes.** An attribute is defined by a chapter of the specification, by its name and by the item that it
    stands before. The defined attributes are exactly those that a chapter defines by name and position. A search of
-   every file of the repository for the forms `#[` and `#![` finds two that a chapter defines:
+   every file of the repository for the forms `#[` and `#![` finds three that a chapter defines:
+   - `raw_memory`, with no argument or the one argument `sealed`, before a function declaration
+     ([Raw memory](../../spec/v1.0/language.md#raw-memory)). It is part of Core v1. A function of an `impl` block
+     ([RFC 0024](./0024-impl-forms.md)) is a function declaration too.
    - `requires`, with the key `mind_spec`, before the file module declaration `module m;`
      ([Versioning](../../spec/v1.0/versioning.md#in-source-code); rule 8 gives the rules for its argument).
    - `repr(C)`, with the one argument `C`, before a `struct` declaration. The FFI chapter defines its name, its
@@ -125,22 +138,32 @@ extension that [Language](../../spec/v1.0/language.md#executable-subset-status-i
      ([Struct layout attribute](../../spec/v1.0/ffi.md#struct-layout-attribute)).
      [MLIR Lowering](../../spec/v1.0/mlir-lowering.md) names such a struct a `#[repr(C)]` struct.
 
-   No attribute name is defined for a module block or for a function of an `impl` block. An attribute whose name is
-   not in the list, an attribute with another argument than the list gives (`#[repr(packed)]`), and an attribute
-   before an item for which its name is not defined (`#[repr(C)]` before a function) are refused with `E2726`. A
-   chapter or an RFC that defines an attribute adds it to the list.
+   No attribute name is defined for a module block. An attribute whose name is not in the list, an attribute with
+   another argument than the list gives (`#[repr(packed)]`), and an attribute before an item for which its name is
+   not defined (`#[repr(C)]` before a function) are refused with `E2726`. The name `raw_memory` is the one
+   exception: a use of it before another item or with another argument is refused with `E2502`
+   ([Raw memory](../../spec/v1.0/language.md#raw-memory)), and `E2726` does not apply to it.
+   [Attributes](../../spec/v1.0/language.md#attributes) refuses an attribute name that it does not define before a
+   function declaration and gives that refusal no code; this draft gives it `E2726`. A chapter or an RFC that defines
+   an attribute adds it to the list.
 
-   The other hits of the search define no attribute, so this rule refuses each of their names with `E2726`:
-   - The syntactic grammar, the lexical chapter and the language chapter write the general forms `#[name]` and
-     `#[name(arg, ...)]`: the syntax of an attribute, not a name.
+   The other hits of the search define no attribute:
+   - The syntactic grammar, the lexical chapter, the language chapter and the changelog (`docs/changelog.md`)
+     write the general forms `#[name]` and `#[name(arg, ...)]`: the syntax of an attribute, not a name.
+   - [Core v1 forms](../../spec/v1.0/core-v1-forms.md) and the conformance row `attribute_reject_unknown_name`
+     write `#[fast]`, a name that no chapter defines; this rule refuses it with `E2726`. The forms page and the
+     conformance row `rawmem_reject_attr_argument` write `#[raw_memory(open)]`, a use with another argument, which
+     keeps `E2502`.
    - [Future Extensions](../../spec/v1.0/future-extensions.md) writes `#[profile(default)]` and
      `#[profile(default | systems)]` in a design for a later edition and `#[cfg(profile = "ai")]` in a design that
-     it rejects, and it names `#![no_std]` as a feature of another language. It defines none of them.
+     it rejects, and it names `#![no_std]` as a feature of another language. It defines none of them, and this rule
+     refuses each of their names with `E2726`.
    - The example `examples/ffi/c_bindings.mind` writes `#[extern("C")]`, `#[export("C")]` and `#[unsafe]` before a
      function. The FFI and MLIR chapters write an external function as `extern "C"`, not as an attribute. The
      example is not a valid program under this RFC until a chapter or an RFC defines these names ([Open](#open)).
-   - The changelog (`docs/changelog.md`) names the compiler attributes `#[deterministic]`, `#[target(...)]` and
-     `#[q16]`, and `#[cfg(feature = "std-surface")]`, a gate in the source code of the compiler.
+   - The changelog names the compiler attributes `#[deterministic]`, `#[target(...)]` and `#[q16]`, and
+     `#[cfg(feature = "std-surface")]`, a gate in the source code of the compiler. This rule refuses each of their
+     names with `E2726`.
 8. **Version attribute.** In `#[requires(mind_spec = "M.N")]`, `mind_spec` is the only key. Its value is a string
    literal that holds a version `major.minor`: two decimal numbers joined by one `.`. An implementation compares the
    value with its own specification version. Another major, or the same major with a higher minor than its own, is
@@ -433,8 +456,10 @@ expected:
    The grammar changes to it, and another form is refused (rule 5, `E2725`).
 6. **Version attribute.** `mind_spec` is the only key. The value is parsed as `major.minor`. An implementation
    refuses another major and a higher minor than its own (`E2727`). An unknown key is refused (`E2728`) (rule 8).
-7. **Attribute on a module block and on a method.** No attribute name is defined for a module block or a method.
-   An attribute there is refused (`E2726`) until an RFC defines one (rule 7).
+7. **Attribute on a module block and on a method.** This draft defines no attribute name for a module block or a
+   method. The attribute `raw_memory`, which [Raw memory](../../spec/v1.0/language.md#raw-memory) defines before every
+   function declaration, stands before a method too. Another attribute there is refused (`E2726`) until an RFC
+   defines one (rule 7).
 8. **Code allocation.** The three codes are assigned, because they are free in the catalog: `E2720` (a name that is
    not unique in its namespace: two items of one namespace with the same name, or a module block whose qualified name
    equals the module path of a project module, rule 3), `E2721` (`module m;` not first or repeated), `E2722` (module
