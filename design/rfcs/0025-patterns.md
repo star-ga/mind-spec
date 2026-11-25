@@ -20,7 +20,7 @@ limitations under the License.
 |-------|-------|
 | State | Draft (2026-11-24). Not yet accepted. The specification owner decided the questions of this draft on 2026-11-24 (see [Questions](#questions-for-the-specification-owner)). |
 | Number | Provisional. The specification owner assigns the final number. |
-| Changes | `grammar-syntax.ebnf` (`Pattern`, `MatchArm`, record literal), `language.md` (new section on patterns; exhaustiveness; the sentence of Loop exits on `loop { ... }`), `types.md` (removes the dot spelling `Enum.Variant` of a variant), `errors.md` (`E2310`, `E2311`, `W2312`, `E2313`, `E2314`; the trigger of `E2001` also covers a pattern that does not fit the type of its scrutinee; the sentence on the code pattern adds the prefix `W` of a warning, with the category and number of an error code; the trigger of `E2405`, where a statement can start, the name `loop` directly followed by `{`, also covers that text where an expression can stand, when the program declares no struct `loop`; the trigger of `E2002` does not cover it, see [Record literal](#record-literal)) |
+| Changes | `grammar-syntax.ebnf` (`Pattern`, `MatchArm`, record literal), `language.md` (new section on patterns; exhaustiveness; the sentence of Loop exits on `loop { ... }`), `types.md` (the enum variant path `E::B`, which this RFC and RFC 0024 derive, is no longer an extension), `errors.md` (`E2310`, `E2311`, `W2312`, `E2313`, `E2314`; the trigger of `E2001` also covers a pattern that does not fit the type of its scrutinee; the sentence on the code pattern adds the prefix `W` of a warning, with the category and number of an error code; the trigger of `E2405`, where a statement can start, the name `loop` directly followed by `{`, also covers that text where an expression can stand, when the program declares no struct `loop`; the trigger of `E2002` does not cover it, see [Record literal](#record-literal)) |
 | Depends on | [RFC 0024](./0024-impl-forms.md) for the expression form `E::B` of a variant (its `AssociatedValue`); the base grammar has no `::` path in an expression. The patterns use the enum declaration of the candidate block. |
 | Related | [RFC 0023](./0023-type-parameters-on-user-types.md), [RFC 0024](./0024-impl-forms.md) |
 
@@ -61,9 +61,8 @@ Pattern          = IdentifierPattern
                  | VariantPattern
                  | RecordPattern ;
 
-(* The sign of a negative integer pattern is the Sign of IntegerLiteral: a pattern  *)
-(* stands where an operand can start, so "-1" is one token (lexical.md, "Literals"). *)
-LiteralPattern   = IntegerLiteral | BooleanLiteral | StringLiteral ;
+(* A "-" or "+" token before an integer literal: see "Sign of an integer pattern". *)
+LiteralPattern   = [ "-" | "+" ] , IntegerLiteral | BooleanLiteral | StringLiteral ;
 VariantPattern   = Identifier , "::" , Identifier , [ "(" , [ PatternList ] , ")" ] ;
 RecordPattern    = Identifier , "{" , [ FieldPatternList ] , "}" ;
 FieldPatternList = FieldPattern , { "," , FieldPattern } , [ "," ] ;
@@ -82,12 +81,25 @@ pattern (equality on floats in a pattern has no single meaning). The binding pat
 pattern `&p`, or-patterns (`1 | 2`), range patterns (`1..=3`) and `..` in a record pattern are not part of the
 language; none of them is derived.
 
+### Sign of an integer pattern
+
+A sign directly before the digits is part of an integer literal only where an operand can start
+([Literals](../../spec/v1.0/lexical.md#literals)). A pattern mostly stands at such a place (after `{`, `(`, `,`, `:`
+or a keyword), and there `-1` is one token, an `IntegerLiteral` with its `Sign`. The pattern of an arm that follows an
+arm with a block stands directly after `}`, and there a `-` or a `+` is a token of its own:
+`match x { 0 => { 1 } -1 => { 2 } _ => { 3 } }` has the tokens `}`, `-` and `1`. The optional sign token of
+`LiteralPattern` derives that pattern, and also `- 1`, with a space, at every position. A sign token applies to the
+integer literal after it as the sign of a literal does: `- L` is the pattern of the value of `L` with the opposite
+sign, and `+ L` is the pattern of the value of `L`. So `-1` and `- 1` are one pattern, `+1` and `+ 1` are the pattern
+`1`, and `- -1` is the pattern `1`. The rules of this RFC on a literal pattern apply to that value, so a pattern has
+the same meaning after `}` and after `,`.
+
 ### Variant path
 
 `E::B` is the only spelling of a variant, in a pattern (`VariantPattern`) and in an expression (`AssociatedValue` of
-[RFC 0024](./0024-impl-forms.md)). This RFC removes the dot spelling `Enum.Variant` from
-[Types](../../spec/v1.0/types.md#module-qualified-type-ownership). `E.B`, where `E` names an enum, is refused with
-`E2002`, and the message names `E::B`.
+[RFC 0024](./0024-impl-forms.md)). [Types](../../spec/v1.0/types.md#module-qualified-type-ownership) does not define
+the dot spelling `Enum.Variant` (it names `Table.Raw` a spelling that this specification does not define). `E.B`,
+where `E` names an enum, is refused with `E2002`, and the message names `E::B`.
 
 ### Tuple index
 
@@ -241,6 +253,25 @@ input:
 expected:
   status: success
   output: { result: { dtype: i64, shape: [], values: 5 } }
+```
+
+```yaml
+description: "A negative integer pattern after an arm with a block"
+input:
+  source: |
+    fn k(x: i64) -> i64 {
+        return match x {
+            0 => { 1 }
+            -1 => { 2 }
+            _ => { 3 }
+        };
+    }
+    fn main() -> i64 {
+        return k(-1);
+    }
+expected:
+  status: success
+  output: { result: { dtype: i64, shape: [], values: 2 } }
 ```
 
 ```yaml
