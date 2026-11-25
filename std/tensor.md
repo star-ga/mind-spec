@@ -136,14 +136,14 @@ identical seeds produce identical results (determinism across substrates).
 use std::tensor::{fft, ifft, zeros, ones}
 
 fn low_pass_filter(signal: Tensor, cutoff: i64) -> Tensor {
-    let spectrum = fft(signal)
-    let n = spectrum.shape[0]
-    let mask = zeros([n, 2])
+    let spectrum = fft(signal);
+    let n = spectrum.shape[0];
+    let mut mask = zeros([n, 2]);
     // Keep frequencies below cutoff
     for i in 0..cutoff {
-        mask[i] = ones([2])
-        mask[n - 1 - i] = ones([2])
+        mask[i] = ones([2]);
+        mask[n - 1 - i] = ones([2]);
     }
-    return ifft(spectrum * mask)
+    return ifft(spectrum * mask);
 }
 ```

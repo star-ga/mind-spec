@@ -40,20 +40,25 @@ Operators on the same level have equal precedence and are resolved by associativ
 |------------|----------|-------------|---------------|---------|
 | **1 (Highest)** | `()` `[]` `.` | Grouping, indexing, field access | Left-to-right | `f(x)`, `a[i]`, `x.field` |
 | **2** | Unary `-` `!` | Negation, logical NOT | Right-to-left | `-x`, `!flag` |
-| **3** | `*` `/` `%` `.*` `./` | Multiplication, division, remainder (elementwise `.*` `./`) | Left-to-right | `a * b`, `a % n` |
-| **4** | `<<` `>>` `&` `^` `\|` | Shift and bitwise operators (one level) | Left-to-right | `a << 2`, `x & mask` |
-| **5** | `+` `-` `.+` `.-` | Addition, subtraction (elementwise `.+` `.-`) | Left-to-right | `a + b`, `a - b` |
-| **6** | `==` `!=` `<` `>` `<=` `>=` | Comparison operators | Left-to-right | `a == b`, `x < y` |
-| **7** | `&&` | Logical AND | Left-to-right | `a && b` |
-| **8** | `\|\|` | Logical OR | Left-to-right | `a \|\| b` |
-| **9** | `=` `+=` `-=` `*=` `:=` | Assignment and compound assignment | Right-to-left | `x = y`, `x += 1` |
-| **10 (Lowest)** | `,` | Comma (sequence) | Left-to-right | `f(a, b, c)` |
+| **3** | `as` | Cast (`CastExpression`); the right operand is a type | Left-to-right | `a * b as f64` is `a * (b as f64)` |
+| **4** | `*` `/` `%` `.*` `./` | Multiplication, division, remainder (elementwise `.*` `./`) | Left-to-right | `a * b`, `a % n` |
+| **5** | `<<` `>>` `&` `^` `\|` | Shift and bitwise operators (one level) | Left-to-right | `a << 2`, `x & mask` |
+| **6** | `+` `-` `.+` `.-` | Addition, subtraction (elementwise `.+` `.-`) | Left-to-right | `a + b`, `a - b` |
+| **7** | `==` `!=` `<` `>` `<=` `>=` | Comparison operators | Left-to-right | `a == b`, `x < y` |
+| **8** | `&&` | Logical AND | Left-to-right | `a && b` |
+| **9** | `\|\|` | Logical OR | Left-to-right | `a \|\| b` |
+| **10** | `=` `+=` `-=` `*=` `/=` `%=` `<<=` `>>=` `&=` `\|=` `^=` | Assignment and compound assignment | Right-to-left | `x = y`, `x += 1`, `x <<= 2` |
+| **11 (Lowest)** | `,` | Comma (sequence) | Left-to-right | `f(a, b, c)` |
 
 > **Shift and bitwise operators bind tighter than `+` and `-`.** This differs from C and Rust,
 > where `+` and `-` bind tighter than shifts and bitwise operators. In MIND `0 - 17 >> 2` parses as
 > `0 - (17 >> 2)` and evaluates to `-4`; in C and Rust it is `(0 - 17) >> 2`, which is `-5`. Likewise
 > `a + b & c` is `a + (b & c)` in MIND. Write explicit parentheses whenever a shift or bitwise
 > operator meets `+` or `-` in one expression.
+
+A cast `e as T` binds tighter than `*`, `/` and `%` and looser than a unary operator: `a * b as f64` is
+`a * (b as f64)`, `-x as f64` is `(-x) as f64`, and `x as i64 as f64` is `(x as i64) as f64`. The type of
+`e as T` is `T`. [Casts](#casts) gives the casts that are allowed and their values.
 
 ### Precedence rules
 
@@ -91,9 +96,15 @@ let complex = a + b > c * d || flag;
 
 **Example 4: Assignment and compound assignment**
 ```mind
+let mut x = 0;
+let mut y = 0;
+let z = 1;
 x = y = z;
 // Parses as: x = (y = z)  (right-to-left)
 
+let mut a = 1;
+let b = 2;
+let c = 3;
 a += b * c;
 // Parses as: a = a + (b * c)  (compound assignment expands to assignment)
 ```
@@ -136,6 +147,9 @@ a - b - c  // Parses as (a - b) - c, NOT a - (b - c)
 
 **Right-associative assignment**:
 ```mind
+let mut a = 1;
+let mut b = 1;
+let mut c = 1;
 a = b = c = 0;  // Parses as a = (b = (c = 0))
 // All three variables assigned to 0
 ```
@@ -190,6 +204,49 @@ adds no operator.
   `while` conditions or as `match` guards: it treats only an integer 0 as false (compiler
   independence audit, finding 15, `docs/independence-audit-plan-20260925.md` in `star-ga/mind`). Its
   verdicts are therefore not evidence for this rule.
+
+### Floating-point remainder
+
+For two operands of the same type `f32` or `f64`, `a % b` is the truncated remainder and has that type. Its
+value is `a - n * b`, where `n` is the quotient `a / b` truncated toward zero to an integer, computed exactly:
+the result is the exact value and is never rounded. A nonzero result has the sign of `a`, and its magnitude is
+less than the magnitude of `b`. Operands of two different float types are a dtype mismatch
+([`E2004`](./errors.md#e2004-dtype-mismatch-in-binary-operation)).
+
+The special cases below are normative and complete for `f32` and `f64`. The first row that matches decides
+the result. "Canonical NaN" is the bit pattern of [Canonical NaN](./types.md#canonical-nan) for the type.
+
+| Row | Left operand `a` | Right operand `b` | `a % b` |
+|-----|------------------|-------------------|---------|
+| 1 | NaN | any value | canonical NaN |
+| 2 | any value | NaN | canonical NaN |
+| 3 | infinite | any value | canonical NaN |
+| 4 | finite | zero (`+0.0` or `-0.0`) | canonical NaN |
+| 5 | finite | infinite | `a` |
+| 6 | zero (`+0.0` or `-0.0`) | finite and not zero | `a` (the zero keeps its sign) |
+| 7 | finite and not zero | finite and not zero | the truncated remainder; a zero result has the sign of `a` |
+
+### Casts
+
+`e as T` (`CastExpression` of [`grammar-syntax.ebnf`](./grammar-syntax.ebnf)) converts the value of `e` to the
+type `T`, and its type is `T`. The rows below are the complete rule, and every row is bit-exact on every
+substrate. An integer type is `i32`, `i64`, or an integer type that an implementation adds as an extension,
+signed or unsigned. `N` is the width in bits of the target type. "Canonical NaN" is the bit pattern of
+[Canonical NaN](./types.md#canonical-nan) for `T`.
+
+| Row | Type of `e` | Type `T` | Value of `e as T` |
+|-----|-------------|----------|-------------------|
+| 1 | integer type | integer type | The value modulo 2^N: a signed `e` is sign-extended and an unsigned `e` is zero-extended, and the low `N` bits are the result, in two's complement for a signed `T`. `4294967297 as i32` is 1, and `2147483648 as i32` is -2147483648. |
+| 2 | integer type | `f32` or `f64` | The value rounded to the nearest value of `T`, ties to even. |
+| 3 | `f32` or `f64` | integer type | The value truncated toward zero. A value outside the range of `T`, an infinity too, gives the nearest bound of `T`. NaN gives 0. `2.9 as i64` is 2, `(0.0 - 2.9) as i64` is -2, and `1.0e30 as i32` is 2147483647. |
+| 4 | `f32` | `f64` | The same value, exact. NaN gives the canonical NaN. |
+| 5 | `f64` | `f32` | The value rounded to the nearest `f32`, ties to even. A value whose rounded magnitude is greater than the largest finite `f32` (an overflow) gives the infinity of its sign. NaN gives the canonical NaN. |
+| 6 | `bool` | integer type | `false` gives 0, and `true` gives 1. |
+| 7 | any type | the same type | The identity: the value of `e`, bit for bit. |
+
+Rows 1 and 7 give the same value for an integer type cast to itself. Every other cast MUST be refused at
+check time with [`E2016`](./errors.md#e2016-invalid-cast). An integer or a float has no cast to `bool`: the
+program writes a comparison, such as `x != 0`.
 
 ### Grammar reference
 
@@ -275,26 +332,120 @@ a literal, or an identifier bound to a literal (`#[requires(mind_spec = "1.2")]`
 `#`, `[name]`, is not an attribute; inside a block it reads as an array expression. The meaning of an
 attribute name is defined where the name is used; this chapter defines none.
 
+## Entry function
+
+The entry function of a program is the function named `main`. `main` MUST have no parameter, and its
+result type MUST be `i64` or `unit`. As for every function, the result type `unit` may be omitted or written:
+`fn main() -> i64 { ... }`, `fn main() { ... }` and `fn main() -> unit { ... }` are the forms. A `main` with a
+parameter or with another result type MUST be refused at check time with
+[`E2403`](./errors.md#e2403-invalid-entry-function). When `main` returns the `i64` value `v`, the process
+status is the low 8 bits of `v` in two's complement, read as an unsigned number from 0 to 255, on every
+substrate: the result 300 gives the status 44, and the result -1 gives the status 255. When the result type
+of `main` is `unit`, the process status is 0.
+
+## Bindings and assignment
+
+`let p = e;` binds the names of the pattern `p`. `let mut p = e;` binds every name of `p` as a mutable
+binding. A name that a `let` without `mut`, a parameter of a function or the pattern of a `for` binds is
+not mutable. A later `let` of the same name is a new binding and not an assignment, so
+`let x = 1; let x = 2;` is valid.
+
+The left operand of an assignment or of a compound assignment is a place: a name, or a chain of index,
+field and tuple-index accesses on a name (`x`, `a[i]`, `p.f`, `t.0`, `a[i].f.1`). The name at the start of
+the chain is the root of the place. An assignment or a compound assignment to a place needs the root name to
+be declared with `let mut`. A left operand that is not a place, or a place whose root is not mutable, MUST
+be refused at check time with [`E2402`](./errors.md#e2402-invalid-assignment-target): after
+`let a = [1, 2];`, the statement `a[0] = 5;` is refused.
+
+The compound assignment operators are `+=`, `-=`, `*=`, `/=`, `%=`, `<<=`, `>>=`, `&=`, `|=` and `^=`.
+`x op= e` means `x = x op e`, where `op` is the operator before the `=`, and the place `x` is evaluated once:
+in `a[f()] += 1` the call `f()` runs once. The rules of `op` for the types of its operands apply.
+
+## Loops
+
+`while c { ... }` and `for p in e { ... }` are expressions (`WhileExpression` and `ForExpression` of
+[`grammar-syntax.ebnf`](./grammar-syntax.ebnf)). A loop has the type `unit`, and its value is `()`
+([The unit value](./types.md#the-unit-value)): after `let u = while c { };`, `u` is `()`. A loop that
+stands as a statement is a [block-like statement](#block-like-statements) and takes no `;`.
+
+## Block-like statements
+
+The five forms `if`, `match`, a block, `while` and `for` may stand as a statement with no `;` after them
+(`BlockLikeStatement` of [`grammar-syntax.ebnf`](./grammar-syntax.ebnf)). Every other statement ends with its
+`;` ([Statement separators](#statement-separators)).
+
+**Reading rule.** Where a statement can start and the next token starts one of the five forms, the form is
+read as a `BlockLikeStatement` and ends at its closing brace (for an `if` with `else`, the closing brace of its
+last block); what follows starts a new statement. Two cases come before this rule:
+
+1. When the next token after that closing brace is `;`, the form and the `;` are an `ExpressionStatement`.
+   So `while c { };` is a program, and `if c { 1 } else { 2 };` discards the value of the `if`.
+2. When nothing but the closing brace of the enclosing block follows, the form is the tail `Expression` of
+   that block and gives the block its value: `fn f(c: bool) -> i64 { if c { 1 } else { 2 } }` returns 1 or 2.
+
+To use such a form as an operand at the start of a statement, the program writes parentheses:
+`(if c { 1 } else { 2 }) + x;`. Without them, `if c { 1 } else { 2 } - x;` is the statement
+`if c { 1 } else { 2 }` and then the statement `- x;`.
+
+**Unit rule.** A `BlockLikeStatement` that is not the tail MUST have the type `unit`; otherwise the source
+MUST be refused at check time with [`E2001`](./errors.md#e2001-type-mismatch). A value is discarded only by
+an `ExpressionStatement` with `;`. So `if c { 1 } else { 2 } return 0;` is refused, and
+`if c { 1 } else { 2 }; return 0;` is valid.
+
 ## Loop exits
 
-Inside the body of a `while` or a `for`, the statements `break` and `continue` end the innermost
-loop and start its next iteration, respectively. Neither takes a value or a label: no token of the
+Inside the body of a `while` or a `for`, the statements `break;` and `continue;` end the innermost
+loop and start its next iteration, respectively. A `break` or a `continue` that is not inside the body
+of a `while` or a `for` MUST be refused at check time with
+[`E2401`](./errors.md#e2401-loop-exit-outside-a-loop). A loop exit takes no value and no label, and its
+`;` is required ([Statement separators](#statement-separators)): no token of the
 [lexical grammar](./grammar-lexical.ebnf) starts with `'`, so `break 'a;` contains an invalid token and
-MUST be diagnosed. The words `break`, `continue` and `loop` are not in the keyword list of
-[Lexical Structure](./lexical.md#keywords); this edition does not reserve them. A source is read by the
-reading rule of [Words that the grammar spells out](#words-that-the-grammar-spells-out): where the grammar
-derives the source with a `LoopExitStatement`, the word is the loop exit, and a source with no such derivation
-uses the word as a name. `break - 1;` has a derivation with the loop exit `break` followed by the statement
-`- 1;`, so it means that. `break = 5;` has no derivation with the loop exit, because `=` starts no statement,
-so `break` is a name there: after `let break = 4;` the statement assigns 5 to that name. `let break = 4;
-return break;` is valid for the same reason. The range after `in` (`for i in a..b`) is not defined by the
-grammar; it is an extension.
+MUST be diagnosed, and `break 7;` has no derivation and MUST be refused. Core v1 has no `loop` statement:
+`loop` is a name, and `loop { ... }` is the name `loop` followed by a block with no `;` between them, which
+no rule derives. It MUST be refused at check time, and the diagnostic MUST say that Core v1 has no `loop`
+statement and name the form `while true { ... }`. The words `break`, `continue` and `loop` are not in the
+keyword list of [Lexical Structure](./lexical.md#keywords); this edition does not reserve them. A source is
+read by the reading rule of [Words that the grammar spells out](#words-that-the-grammar-spells-out): where
+the grammar derives the source with a `LoopExitStatement`, the word is the loop exit, and a source with no
+such derivation uses the word as a name. `break;` is the loop exit. `break - 1;` and `break = 5;` have no
+derivation with the loop exit, because the loop exit needs its `;` directly after the word, so `break` is a
+name there: after `let mut break = 4;`, the statement `break = 5;` assigns 5 to that name. In
+`while c { break }` the word is the tail expression of the body and so a name; the loop exit is `break;`.
+`let break = 4; return break;` is valid for the same reason. The range after `in` (`for i in a..b`) is not
+defined by the grammar; it is an extension.
+
+## Tuple index
+
+`e.N` (`TupleIndexOperator`) is the element `N` of the tuple `e`, counted from 0: after
+`let t = (4, 5);`, `t.0` is 4 and `t.1` is 5. `N` is a decimal integer literal with no sign and no prefix.
+Where the parser expects the `DecimalInteger` of a tuple index and the next token is a float literal of the
+form digits "." digits (no exponent, no suffix), the token is read as two tuple indices: `t.0.1` means
+`(t.0).1`. A float literal with an exponent is not read so: `t.0.1e0` is not derived. The type of `e` MUST be a tuple type and `N` MUST be less than its number of elements; otherwise the
+source MUST be refused at check time with [`E2404`](./errors.md#e2404-invalid-tuple-index). An index
+operator `e[i]` on a tuple has no meaning: when the type of `e` is a tuple type, `e[i]` MUST be refused with
+`E2404`, and the diagnostic MUST name the form `e.N`.
+
+`a[e1:e2]` (`SliceExpression`) is the only slice form. The grammar has no range index: `a[1..3]` is not
+derived, it MUST be refused at check time, and the diagnostic MUST name the slice form `a[1:3]`.
+
+## Statement separators
+
+The separators are the ones that [`grammar-syntax.ebnf`](./grammar-syntax.ebnf) writes. `;` is required after
+a `let`, after a `return`, after a loop exit and after an `ExpressionStatement`; a `BlockLikeStatement` takes
+none ([Block-like statements](#block-like-statements)). A `match` arm with an expression ends with `,`, the
+last arm too; an arm with a block takes none (`MatchArm`). Checking and building MUST refuse a source in
+which one of these separators is missing. A missing separator has no meaning in the language.
+
+A source formatter MAY read a source in which such a separator is missing and write it with the
+separator. That reading is a repair of the text that the formatter does before it writes the strict form;
+it does not make the source without the separator a program of the language, and a checker or a build
+MUST NOT accept that source.
 
 ## Words that the grammar spells out
 
 The syntactic grammar spells out words that are not keywords (`in`, `as`, `break`, `continue`, `const`,
-`enum`, `module`, `use`, `assert`, `diff`, `dyn`, `Tensor`, `tensor`, `dtype`, the primitive type names
-and `_`). [`grammar-lexical.ebnf`](./grammar-lexical.ebnf) lists them as `ContextualWord`: the lexer
+`enum`, `module`, `use`, `assert`, `mut`, `diff`, `dyn`, `Tensor`, `tensor`, `dtype`, the primitive type
+names and `_`). [`grammar-lexical.ebnf`](./grammar-lexical.ebnf) lists them as `ContextualWord`: the lexer
 produces each of them as an identifier, and this edition does not reserve them. A source is read by the
 derivation in which a rule of the syntactic grammar spells the word out, when such a derivation exists. A
 source with no such derivation reads the word as an identifier. This is the only rule for these words. The
@@ -308,6 +459,7 @@ rows give the verdict that the rule has for a source. The grammar does not look 
 | `let _ = 1;` | Two: a `WildcardPattern`, and an `IdentifierPattern` named `_`. | The wildcard |
 | `let x: i64 = 1;` | Two: the primitive type `i64`, and an `IdentifierType` named `i64`. | The primitive type |
 | `let in = 1; return in;` | One: the name `in` as an identifier. No rule spells the word out here. | The name `in` |
+| `let mut = 1;` | One: an `IdentifierPattern` named `mut`. A `let` that spells `mut` out needs a pattern after it. | The name `mut`, bound without `mut` |
 
 ## String escapes
 

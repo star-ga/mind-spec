@@ -35,6 +35,27 @@ The following forms are part of the core language:
 
 Implementations MAY extend the set of primitive types but MUST document the extensions.
 
+### The unit value
+
+The type `unit` has one value. Its expression is `()` (`UnitExpression` of
+[`grammar-syntax.ebnf`](./grammar-syntax.ebnf)), and the type of `()` is `unit`. A loop has the type `unit`
+and the value `()` ([Loops](./language.md#loops)). Where the context expects
+a type other than `unit` (an annotation, a parameter, a result type, an operand), `()` MUST be refused at check
+time with [`E2001`](./errors.md#e2001-type-mismatch): `let n: i64 = ();` is refused.
+
+### Canonical NaN
+
+`f32` and `f64` are the IEEE 754 binary32 and binary64 formats. Each has one canonical NaN: the quiet NaN
+with the sign bit 0 and all payload bits 0 except the quiet bit.
+
+| Type | Bit pattern of the canonical NaN |
+|------|----------------------------------|
+| `f32` | `0x7FC00000` |
+| `f64` | `0x7FF8000000000000` |
+
+Where a rule of this specification gives the canonical NaN as a result, the result MUST have exactly this
+bit pattern on every substrate. This section does not require any other operation to produce the canonical NaN.
+
 > **Compiler integration update, released in v0.10.3 (informative).** The reference
 > compiler source at `4fd65cfb` refuses an `iN` or `uN` annotation with `N`
 > greater than 64 (`i128`, `u128`, `i256`, ...) during checking. The refusal covers
