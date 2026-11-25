@@ -20,7 +20,7 @@ limitations under the License.
 |-------|-------|
 | State | Draft (2026-11-24). Not yet accepted. The specification owner decided the questions of this draft on 2026-11-24 (see [Questions](#questions-for-the-specification-owner)). |
 | Number | Provisional. The specification owner assigns the final number. |
-| Changes | `grammar-syntax.ebnf` (`Pattern`, `MatchArm`, record literal), `language.md` (new section on patterns; exhaustiveness), `types.md` (removes the dot spelling `Enum.Variant` of a variant), `errors.md` (`E2310`, `E2311`, `W2312`, `E2313`, `E2314`) |
+| Changes | `grammar-syntax.ebnf` (`Pattern`, `MatchArm`, record literal), `language.md` (new section on patterns; exhaustiveness; the sentence of Loop exits on `loop { ... }`), `types.md` (removes the dot spelling `Enum.Variant` of a variant), `errors.md` (`E2310`, `E2311`, `W2312`, `E2313`, `E2314`; the sentence on the code pattern adds the prefix `W` of a warning, with the category and number of an error code) |
 | Depends on | none. Enum variant patterns use the enum declaration of the candidate block. |
 | Related | [RFC 0023](./0023-type-parameters-on-user-types.md), [RFC 0024](./0024-impl-forms.md) (the variant path `E::B` in an expression) |
 
@@ -107,6 +107,13 @@ there is ambiguous. **Rule:** a record literal MUST NOT stand, unparenthesised, 
 `if`, `while`, `for … in` or `match`. In those positions an identifier followed by `{` always starts the
 block. A record literal in the head needs parentheses: `if (P { x: 1 }).x > 0 { … }`.
 This rule makes `if b { }` and `match x { }` valid, which the reference refuses today.
+
+**`loop { … }`.** [Loop exits](../../spec/v1.0/language.md#loop-exits) says that no rule derives the text
+`loop { ... }`. `loop` is not a keyword, so with `RecordLiteral` the texts `loop { }` and `loop { f: e }` derive as a
+record literal where an expression can stand. This RFC changes that sentence of Language: such a text is a record
+literal of a struct named `loop`. When the program declares no struct `loop`, the text MUST be refused at check time,
+and the diagnostic still says that Core v1 has no `loop` statement and names the form `while true { ... }`. A body
+with statements, such as `loop { x = 1; }`, has no derivation as before.
 
 ### For-loop pattern
 
