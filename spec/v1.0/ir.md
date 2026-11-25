@@ -164,6 +164,7 @@ as implementation-defined.
     - Duplicate axes are verification failures
     - Negative axis indices are supported: `-1` refers to the last axis, `-2` to second-to-last, etc.
       Internally normalized via `axis = axis + rank` when `axis < 0`
+  - **Empty axis**: the sum is 0 ([Empty axes](#empty-axes))
 - **`Mean(input, axes: [i32], keepdims: bool) -> ValueId`**
   - Computes the arithmetic mean of tensor elements along specified axes.
   - **Shape rules**: same as `Sum` (see above)
@@ -173,6 +174,15 @@ as implementation-defined.
     - NOT by the count of axes
     - Example: `Mean([2, 3, 4], axes=[1,2]) divides by 3*4=12`
   - **Verification**: same as `Sum`
+  - **Empty axis**: no value ([Empty axes](#empty-axes))
+
+#### Empty axes
+
+An axis of extent 0 that a reduction reduces is an **empty axis**. Over an empty axis `Sum` and the library function
+`sum` give 0, and the library function `prod` gives 1, at each position of the result. `Mean` and the library
+functions `mean`, `max` and `min` ([Reductions](./stdlib.md#reductions)) have no value over an empty axis: such a
+reduction MUST be refused at check time when the type gives the shape of the input, and makes the
+[defined stop](./memory.md#the-defined-stop) at run time otherwise.
 
 ### Shape manipulation
 
@@ -184,8 +194,9 @@ as implementation-defined.
     - Element count MUST be preserved: `product(input.shape) == product(new_shape)`
     - Every entry of `new_shape` other than the marker `-1` is a dimension and MUST NOT be negative; a
       dimension of size 0 is valid ([Index bounds](#index-bounds))
-    - Exactly one entry MAY be the marker `-1`, which is not a dimension: the dimension at its position is
-      computed as `product(input.shape) / product(other_dimensions)`
+    - Exactly one entry MAY be the marker `-1`, which is not a dimension: the dimension at its position is computed as
+      `product(input.shape) / product(other_dimensions)`; when another entry is 0, the dimension at the marker cannot be
+      computed, and the reshape MUST be refused with [`E3007`](./errors.md#e3007-element-count-mismatch)
     - Element count mismatch is a verification failure
 - **`Transpose(input, permutation: [i64]) -> ValueId`**
   - Permutes the dimensions of a tensor according to the given permutation.

@@ -27,8 +27,8 @@ class TypeSystem:
     """Minimal type environment for static validation.
 
     The prototype models a small subset of the specification: scalar and tensor
-    types with shape metadata. It enforces dtype compatibility, positive
-    dimensions, broadcasting for elementwise operations, and batched matmul
+    types with shape metadata. It enforces dtype compatibility, dimensions
+    that are not negative, broadcasting for elementwise operations, and batched matmul
     validation. Inputs are materialised directly into the Core IR module to keep
     value numbering deterministic.
     """
@@ -43,8 +43,8 @@ class TypeSystem:
             raise TypeError(f"Unknown dtype '{dtype}'")
 
     def validate_shape(self, shape: Sequence[int]) -> None:
-        if any(d <= 0 for d in shape):
-            raise ValueError("Shape dimensions must be positive integers")
+        if any(d < 0 for d in shape):
+            raise ValueError("Shape dimensions must not be negative; a dimension of size 0 is valid")
 
     def validate_tensor(self, tensor: TensorType) -> TensorType:
         self.ensure_known_dtype(tensor.dtype)

@@ -1,0 +1,22 @@
+# MIND Conformance Test: the mean over an empty axis
+# Specification reference: spec/v1.0/ir.md#empty-axes
+# Category: syntax
+# Profile: cpu
+
+description: "the axis 0 of t has the extent 0, the type gives the shape, and the mean has no value there"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn f(t: Tensor<f32, [0, 3]>) -> i64 {
+        let m = mean(t);
+        return 0;
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: error

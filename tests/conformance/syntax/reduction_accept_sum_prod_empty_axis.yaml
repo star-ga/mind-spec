@@ -1,0 +1,28 @@
+# MIND Conformance Test: a sum and a product over an empty axis
+# Specification reference: spec/v1.0/ir.md#empty-axes
+# Category: syntax
+# Profile: cpu
+
+description: "over an axis of extent 0 the sum is 0 and the product is 1"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn f(t: Tensor<f32, [0, 3]>) -> i64 {
+        let s = sum(t);
+        let p = prod(t);
+        return 0;
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0

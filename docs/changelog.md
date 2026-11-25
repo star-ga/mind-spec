@@ -16,6 +16,11 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   extent of the axis; every other one makes the defined stop at run time, and an implementation refuses no other index
   at check time (`a[2 + 2]` passes the check). The IR, Security and Memory model chapters and the trigger of `E3011` say
   this one sentence ([Index bounds](../spec/v1.0/ir.md#index-bounds)).
+- **Size-0 dimensions.** A reshape whose marker `-1` cannot be computed because another entry is 0 is refused
+  with `E3007`. Over an axis of extent 0 a sum is 0 and a product is 1; `max`, `min` and `mean` have no value
+  there and are refused at check time when the type gives the shape, else they make the defined stop
+  ([Empty axes](../spec/v1.0/ir.md#empty-axes)). The IR tool of the repository accepts a dimension of size 0,
+  and the reshape row of the IR verification rows names `E3007`.
 
 ### Changed: the memory model, containers, index bounds and attribute codes (2026-11-25)
 

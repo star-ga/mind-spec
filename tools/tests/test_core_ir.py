@@ -61,9 +61,12 @@ class TestCoreIRPipeline(unittest.TestCase):
         with self.assertRaises(TypeError):
             LanguageConstruct(expression, type_system=self.type_system).to_ir()
 
-    def test_rejects_non_positive_dimensions(self) -> None:
+    def test_rejects_negative_dimensions(self) -> None:
         with self.assertRaises(ValueError):
-            self.type_system.add_symbol("bad", TensorType("f32", (2, 0)))
+            self.type_system.add_symbol("bad", TensorType("f32", (2, -1)))
+
+    def test_accepts_zero_dimension(self) -> None:
+        self.type_system.add_symbol("empty", TensorType("f32", (2, 0)))
 
 
 if __name__ == "__main__":

@@ -469,7 +469,8 @@ Shape errors occur during shape inference, broadcasting, or shape validation.
 - **Example**: `E3006: Invalid dimension -1 in shape [3, -1, 5] at line 18, column 10`
 
 ### E3007: Element count mismatch
-- **Trigger**: Reshape preserves element count but new shape has different product
+- **Trigger**: Reshape preserves element count but new shape has different product, or a reshape whose marker `-1`
+  cannot be computed because another entry of the new shape is 0 ([Shape manipulation](./ir.md#shape-manipulation))
 - **Required context**: original shape, new shape, original count, new count
 - **Example**: `E3007: Reshape element count mismatch: [2, 3] (6 elements) to [2, 4] (8 elements) at line 10, column 5`
 

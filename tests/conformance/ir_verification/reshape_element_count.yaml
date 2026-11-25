@@ -4,7 +4,7 @@
 # Category: ir_verification
 # Profile: cpu
 
-description: "Reshape with mismatched element count produces E4003"
+description: "Reshape with mismatched element count produces E3007"
 category: ir_verification
 profile: cpu
 
@@ -18,5 +18,5 @@ input:
 expected:
   status: error
   error:
-    code: E4003
+    code: E3007
     message_contains: "Element count mismatch"

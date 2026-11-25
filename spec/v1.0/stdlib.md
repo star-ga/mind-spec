@@ -345,22 +345,22 @@ These functions map directly to IR operations from ir.md#shape-manipulation:
 - **`sum(input: Tensor<T>, axes: [i64] = all, keepdims: bool = false) -> Tensor<T>`**
   - Semantics: ir.md#reductions Sum
   - Default: sum over all axes (produces scalar)
-  - With axes: sum over specified axes
+  - With axes: sum over specified axes; the sum over an [empty axis](./ir.md#empty-axes) is 0
 
 - **`mean(input: Tensor<T>, axes: [i64] = all, keepdims: bool = false) -> Tensor<T>`**
   - Semantics: ir.md#reductions Mean
-  - Divides by product of reduced dimension extents
+  - Divides by product of reduced dimension extents; no value over an [empty axis](./ir.md#empty-axes)
 
 - **`max(input: Tensor<T>, axes: [i64] = all, keepdims: bool = false) -> Tensor<T>`**
-  - Element-wise maximum over specified axes
+  - Element-wise maximum over specified axes; no value over an [empty axis](./ir.md#empty-axes)
   - Not differentiable (use softmax for differentiable approximation)
 
 - **`min(input: Tensor<T>, axes: [i64] = all, keepdims: bool = false) -> Tensor<T>`**
-  - Element-wise minimum over specified axes
+  - Element-wise minimum over specified axes; no value over an [empty axis](./ir.md#empty-axes)
   - Not differentiable
 
 - **`prod(input: Tensor<T>, axes: [i64] = all, keepdims: bool = false) -> Tensor<T>`**
-  - Product of elements over specified axes
+  - Product of elements over specified axes; the product over an [empty axis](./ir.md#empty-axes) is 1
   - Differentiable: gradient computed via quotient rule
 
 ### Linear algebra
