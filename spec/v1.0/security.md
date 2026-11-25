@@ -50,11 +50,17 @@ This section says what the language checks.
   error of the program that the language does not refuse, and this specification gives the value of such a read no
   meaning. A `#[raw_memory(sealed)]` function states that it keeps no address; an implementation does not check
   that statement.
-- **Index functions stop**: an index function of the standard library that is not a raw memory function stops the
-  program when the index is outside the container ([Raw memory functions](./memory.md#raw-memory-functions)).
+- **Index functions stop**: an index function of the standard library that is not a raw memory function makes the
+  [defined stop](./memory.md#the-defined-stop) when the index is outside the container
+  ([Library functions that check](./memory.md#library-functions-that-check)).
+- **Index bounds**: an index or a slice bound outside its axis is refused at check time when the type gives the
+  extent and the index is a literal, and makes the defined stop at run time in every other case
+  ([Index bounds](./ir.md#index-bounds)).
+- **Containers**: a change of a container through a method call needs a `let mut` root, and no container handle
+  shows storage that the implementation released ([Records and containers](./memory.md#records-and-containers)).
 
-An implementation MUST refuse the sources that this list names at check time. This section claims no other check
-of memory use.
+An implementation MUST refuse at check time the sources that this list names as refused, and MUST make the
+defined stop where this list names it. This section claims no other check of memory use.
 
 ### Tensor safety
 
@@ -71,24 +77,25 @@ negative or greater than the extent. No bound is clamped, and no index counts fr
 size 0 is valid (an empty slice gives one); a negative dimension MUST be refused with
 [`E3006`](./errors.md#e3006-negative-dimension).
 
-An allocation of a tensor that fails is reported with [`E6004`](./errors.md#e6004-allocation-failure).
-
 **Numeric overflow**:
 - Integer arithmetic overflow behavior MUST be defined (wrap, saturate, or error)
+  ([Numeric precision](./stdlib.md#numeric-precision))
 - Floating-point operations follow IEEE 754 semantics (NaN propagation, infinities)
 - Implementations SHOULD warn on potential overflow in constant folding
 
 ### Runtime memory management
 
 **Allocation failures**:
-- Runtimes MUST handle allocation failures without undefined behavior
-- Out-of-memory conditions MUST surface as runtime errors (not crashes)
-- Partial allocations MUST be rolled back atomically
+- Allocation and release are implementation-defined and MUST NOT break the deterministic execution model
+  ([Responsibilities](./runtime.md#responsibilities))
+- An allocation of a tensor that fails is a runtime error,
+  [`E6004`](./errors.md#e6004-allocation-failure)
 
 **Resource limits**:
 - Implementations MAY enforce maximum tensor sizes, parameter counts, or memory budgets
 - Limits MUST be documented and queryable at runtime
-- Exceeding limits MUST result in deterministic errors (E4xxx)
+- Exceeding a limit of an allocation MUST result in the deterministic error
+  [`E6004`](./errors.md#e6004-allocation-failure)
 
 ## Determinism and reproducibility
 
@@ -105,6 +112,9 @@ For the **Q16.16 / exact-integer path** (Determinism Tier 3), implementations MU
 - The advertised CPU substrate set (x86 and ARM — the path proven by the cross-substrate bit-identity gate)
 
 This MUST is scoped to the Q16.16 / exact-integer path; cross-substrate **vector-reduction** `f32`/`f64` bit-identity is **not** claimed in general (see [performance.md](./performance.md) Tier 3 for the two fixed-order kernels that carry committed hashes). GPU and other-accelerator backends are roadmap; cross-substrate bit-identity to a GPU backend is not yet claimed or verified.
+
+These determinism rules cover a program that keeps the [address rules](./memory.md#address-validity); this
+specification gives the value of a read through an address that is not valid no meaning.
 
 Separately, **scalar** IEEE-754 `f64`/`f32` arithmetic (+ − × ÷ √) is lowered on the strict no-FMA path and is **bit-exact and run-to-run bit-identical** (across repeated runs on the same hardware/OS and across compiler versions within the same Core v1.x spec). Because these scalar operations are correctly-rounded under IEEE-754, cross-ISA scalar bit-identity (x86 == ARM) holds and is **verified on real hardware**: the `cross_substrate` gate confirms the scalar-`f64` arithmetic chain (`scalar-float-f64`) is byte-identical on x86_64 (AVX2) and ARM64 (NEON) (the gate's Lorenz workload, `lorenz-q16`, is integer Q16.16, not `f64`) — implementations MUST NOT introduce FMA-contraction, reassociation, or fast-math rewrites into this path, or substitute host library routines for user-defined functions (see [determinism.md](../../determinism.md) section 5). This scalar cross-ISA guarantee is scoped to scalar + − × ÷ √; general **vector-reduction** `f32`/`f64` bit-identity remains roadmap (see above). Two fixed-order strict `f32` kernels, a length-4093 dot product and a 64×64 matrix-vector product, carry committed matching AVX2 and NEON output hashes in the `cross_substrate` gate ([compiler RFC 0015 §5A.3](https://github.com/star-ga/mind/blob/main/docs/rfcs/0015-cross-substrate-bit-identity.md#5a3-committed-reference-hashes-the-load-bearing-constants), `c8efcf9a`); that is evidence for those two kernels, not a claim about other reductions. After v0.10.2 the gate also gained ten scalar-`f64` quantitative-finance workloads (`545ed80c`, `82e34947`; v0.10.3), each hashing one exported MIND kernel over eight fixed inputs, whose floating-point arithmetic is + − × ÷ and `sqrt` in fixed source order (some kernels also use comparisons, `max`, integer loop counts, and in the Monte Carlo kernel an integer LCG with integer-to-`f64` conversion), with committed equal AVX2 and NEON hashes whose NEON values the maintainers record as verified on aarch64 hardware. That is evidence for those programs only, on the compiled MLIR path only, and not for compiler-provided transcendentals.
 

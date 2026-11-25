@@ -27,6 +27,9 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   literal, and makes the defined stop with `E6001` at run time otherwise; no bound is clamped. A dimension of
   size 0 is valid, a negative one is refused (`E3006`, now "Negative dimension")
   ([Index bounds](../spec/v1.0/ir.md#index-bounds)). The IR and the Security chapters say the same sentence.
+- **Security chapter.** Every claim of a check names the rule of the chapter that makes it: the tensor bounds
+  and shape bullets are the index-bounds rule, the allocation bullets name `E6004` and the runtime rule, and the
+  determinism rules cover the programs that keep the address rules.
 
 ### Changed: raw memory, the string type, elementwise operands, the tensor constructor, slice bounds, literal types, cast and method readings (2026-11-25)
 
