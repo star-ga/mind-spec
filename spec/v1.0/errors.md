@@ -374,7 +374,8 @@ exclusivity analysis; those guarantees remain future work.
 
 ### E2501: Raw memory use outside a raw memory function
 
-- **Trigger**: a call of a raw memory function ([Raw memory](./memory.md#raw-memory)) in the body of a function
+- **Trigger**: a raw memory use, that is a call of a raw memory function or a region block where an implementation
+  provides one ([Raw memory](./memory.md#raw-memory)), in the body of a function
   that is not declared with `#[raw_memory]` or `#[raw_memory(sealed)]` and is not a function of the standard
   library.
 - **Required context**: the called function, the location of the call and the function that holds it, with the

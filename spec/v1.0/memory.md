@@ -48,8 +48,8 @@ record: after a push through another reference it shows the grown container, and
 ## Changing a container
 
 A method call that changes a container (`xs.push(v)`) is a change of the place `xs`
-([Bindings and assignment](./language.md#bindings-and-assignment)). The root name of that place must be declared
-with `let mut`, as for an assignment; otherwise the call MUST be refused at check time with
+([Bindings and assignment](./language.md#bindings-and-assignment)). The receiver must be a place whose root name is
+declared with `let mut`, as for an assignment; otherwise the call MUST be refused at check time with
 [`E2402`](./errors.md#e2402-invalid-assignment-target). A parameter is not mutable: a function changes a container
 that it receives through a binding such as `let mut w = p;`. A `push` stands as a statement or in the update
 `xs = xs.push(v)` of the same place; any other use MUST be refused at check time with
