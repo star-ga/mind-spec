@@ -41,4 +41,3 @@ The following tokens are reserved:
 ## 5. Literals
 - **Integers:** `123`, `0xFF`, `0b101`
 - **Floats:** `3.14`, `1.0e-4`
-- **Tangents:** `1.0^` (Differentiable literal)

@@ -54,6 +54,7 @@ ContextualWord = "i32" | "i64" | "f32" | "f64" | "bool" | "unit"
                | "Tensor" | "tensor" | "dtype" | "diff" | "dyn"
                | "in" | "as" | "break" | "continue" | "_"
                | "const" | "enum" | "module" | "use" | "assert"
+               | "mut"
                ;
 
 (* Literals *)
@@ -61,7 +62,6 @@ Literal = IntegerLiteral
         | FloatingPointLiteral
         | StringLiteral
         | BooleanLiteral
-        | DifferentiableLiteral
         ;
 
 (* Integer literals *)
@@ -82,6 +82,11 @@ FloatingPointLiteral = [ Sign ] , DecimalDigits , "." , DecimalDigits , [ Expone
 DecimalDigits = DecimalDigit , { DecimalDigit | "_" } ;
 Exponent = ( "e" | "E" ) , [ Sign ] , DecimalDigits ;
 
+(* A FloatingPointLiteral token with no Sign and no Exponent. The      *)
+(* syntactic grammar reads it as two tuple indices where it expects    *)
+(* the DecimalInteger of a tuple index (TupleIndexOperator).           *)
+TupleIndexPair = DecimalDigits , "." , DecimalDigits ;
+
 (* String literals *)
 StringLiteral = '"' , { StringCharacter | EscapeSequence } , '"' ;
 StringCharacter = ? any Unicode scalar value except '"', '\', newline ? ;
@@ -91,15 +96,15 @@ UnicodeEscape = "u" , "{" , HexDigit , { HexDigit } , "}" ;
 (* Boolean literals *)
 BooleanLiteral = "true" | "false" ;
 
-(* Differentiable literals *)
-DifferentiableLiteral = Literal , "^" ;
-
-(* Operators *)
+(* Operators. The lexer reads the longest operator that the text      *)
+(* spells: `<<=` is one token (not "<<" and "=", not "<" and "<="),   *)
+(* and `>>=` is one token (not ">>" and "=").                         *)
 Operator = "+" | "-" | "*" | "/" | "%"
          | "==" | "!=" | "<" | ">" | "<=" | ">="
          | "&&" | "||" | "!"
-         | "=" | "+=" | "-=" | "*=" | "/="
-         | "->" | "=>" | ":="
+         | "=" | "+=" | "-=" | "*=" | "/=" | "%="
+         | "<<=" | ">>=" | "&=" | "|=" | "^="
+         | "->" | "=>"
          | "." | "::" | "@"
          | "^" | "|" | "&" | "<<" | ">>"
          ;

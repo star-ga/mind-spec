@@ -126,10 +126,13 @@ Statement = LetStatement
           | ExpressionStatement
           | ReturnStatement
           | DeferStatement
+          | BlockLikeStatement
           | LoopExitStatement
           ;
 
-LetStatement = "let" , Pattern , [ ":" , Type ] , "=" , Expression , ";" ;
+(* "mut" makes every name of the pattern a mutable binding         *)
+(* (language.md, "Bindings and assignment").                       *)
+LetStatement = "let" , [ "mut" ] , Pattern , [ ":" , Type ] , "=" , Expression , ";" ;
 
 Pattern = IdentifierPattern
         | TuplePattern
@@ -147,23 +150,43 @@ ReturnStatement = "return" , [ Expression ] , ";" ;
 
 DeferStatement = "defer" , Block ;
 
+(* A block-like statement is one of the five forms if, match, block,  *)
+(* while and for, standing as a statement with no ";" after it. Where *)
+(* a statement can start and the next token starts one of the five    *)
+(* forms, the form is read as a BlockLikeStatement and ends at its    *)
+(* closing brace; what follows starts a new statement. A ";" directly *)
+(* after that brace makes the form an ExpressionStatement, and a form *)
+(* that only the closing brace of the enclosing block follows is the  *)
+(* tail Expression of that block. A BlockLikeStatement that is not    *)
+(* the tail has the type unit. language.md, "Block-like statements",  *)
+(* states these rules.                                                *)
+BlockLikeStatement = IfExpression
+                   | MatchExpression
+                   | BlockExpression
+                   | WhileExpression
+                   | ForExpression
+                   ;
+
 (* A loop exit is valid inside the body of a WhileExpression or a     *)
-(* ForExpression. It ends the innermost loop (break) or starts its    *)
-(* next iteration (continue). It takes no value and no label. The     *)
-(* semicolon is optional. The words are not reserved. A source is     *)
-(* read by the rule of ContextualWord in grammar-lexical.ebnf: where   *)
-(* the source has a derivation with a LoopExitStatement, the word is   *)
-(* the loop exit, and a source with no such derivation uses it as a    *)
-(* name. `break - 1;` has a derivation with the statement `break` and  *)
-(* then the statement `- 1;`. `break = 5;` has none, so `break` is a   *)
-(* name there.                                                         *)
-LoopExitStatement = ( "break" | "continue" ) , [ ";" ] ;
+(* ForExpression; elsewhere it is refused (language.md, "Loop exits").*)
+(* It ends the innermost loop (break) or starts its next iteration    *)
+(* (continue). It takes no value and no label, and its ";" is         *)
+(* required. The words are not reserved. A source is read by the rule *)
+(* of ContextualWord in grammar-lexical.ebnf: where the source has a  *)
+(* derivation with a LoopExitStatement, the word is the loop exit,    *)
+(* and a source with no such derivation uses it as a name. `break;`   *)
+(* is the loop exit. `break - 1;` and `break = 5;` have no such       *)
+(* derivation, so `break` is a name there.                            *)
+LoopExitStatement = ( "break" | "continue" ) , ";" ;
 
 (* Expressions *)
 Expression = AssignmentExpression ;
 
 AssignmentExpression = LogicalOrExpression , [ AssignmentOperator , AssignmentExpression ] ;
-AssignmentOperator = "=" | "+=" | "-=" | "*=" | "/=" | ":=" ;
+(* `x op= e` means `x = x op e`, with the place x evaluated once      *)
+(* (language.md, "Bindings and assignment").                         *)
+AssignmentOperator = "=" | "+=" | "-=" | "*=" | "/=" | "%="
+                   | "<<=" | ">>=" | "&=" | "|=" | "^=" ;
 
 LogicalOrExpression = LogicalAndExpression , { "||" , LogicalAndExpression } ;
 
@@ -175,10 +198,17 @@ ComparisonOperator = "==" | "!=" | "<" | ">" | "<=" | ">=" ;
 AdditiveExpression = MultiplicativeExpression , { AdditiveOperator , MultiplicativeExpression } ;
 AdditiveOperator = "+" | "-" ;
 
-MultiplicativeExpression = UnaryExpression , { MultiplicativeOperator , UnaryExpression } ;
+MultiplicativeExpression = CastExpression , { MultiplicativeOperator , CastExpression } ;
 MultiplicativeOperator = "*" | "/" | "%" ;
 
-UnaryExpression = [ UnaryOperator ] , PostfixExpression ;
+(* A cast binds tighter than "*", "/" and "%" and looser than a unary *)
+(* operator: `a * b as f64` is `a * (b as f64)`, and `-x as f64` is   *)
+(* `(-x) as f64`. Casts are left-associative. The casts that are      *)
+(* allowed and their values: language.md, "Casts".                    *)
+CastExpression = UnaryExpression , { "as" , Type } ;
+
+(* Unary operators are right-to-left: `- -x` is `-(-x)`.            *)
+UnaryExpression = { UnaryOperator } , PostfixExpression ;
 UnaryOperator = "-" | "!" ;
 
 PostfixExpression = PrimaryExpression , { PostfixOperator } ;
@@ -186,6 +216,7 @@ PostfixExpression = PrimaryExpression , { PostfixOperator } ;
 PostfixOperator = CallOperator
                 | IndexOperator
                 | FieldAccessOperator
+                | TupleIndexOperator
                 | MethodCallOperator
                 ;
 
@@ -197,15 +228,29 @@ IndexExpression = Expression
                 | SliceExpression
                 ;
 
+(* `a[e1:e2]` is the only slice form. The grammar has no range index: *)
+(* `a[1..3]` is not derived (language.md, "Tuple index").            *)
 SliceExpression = [ Expression ] , ":" , [ Expression ] , [ ":" , [ Expression ] ] ;
 
 FieldAccessOperator = "." , Identifier ;
+
+(* Tuple index `t.0`: the index is an IntegerLiteral token in the     *)
+(* DecimalInteger form, with no sign and no prefix. Where the parser  *)
+(* expects the DecimalInteger of a tuple index and the next token is  *)
+(* a float literal of the form digits "." digits (no exponent, no     *)
+(* suffix), the token is read as two tuple indices: `t.0.1` means     *)
+(* `(t.0).1`. The second alternative derives that token               *)
+(* (TupleIndexPair in grammar-lexical.ebnf).                          *)
+TupleIndexOperator = "." , DecimalInteger
+                   | "." , TupleIndexPair
+                   ;
 
 MethodCallOperator = "." , Identifier , "(" , [ ArgumentList ] , ")" ;
 
 (* Primary expressions *)
 PrimaryExpression = Literal
                   | Identifier
+                  | UnitExpression
                   | ParenthesizedExpression
                   | TupleExpression
                   | ArrayExpression
@@ -217,6 +262,9 @@ PrimaryExpression = Literal
                   | ForExpression
                   | FunctionExpression      (* NOT IN CORE v1 *)
                   ;
+
+(* The unit value. Its type is unit. *)
+UnitExpression = "(" , ")" ;
 
 ParenthesizedExpression = "(" , Expression , ")" ;
 
@@ -235,6 +283,7 @@ IfExpression = "if" , Expression , Block , [ "else" , ( IfExpression | Block ) ]
 MatchExpression = "match" , Expression , "{" , { MatchArm } , "}" ;
 MatchArm = Pattern , "=>" , ( Expression , "," | Block ) ;
 
+(* A loop is an expression of the type unit; its value is ().          *)
 WhileExpression = "while" , Expression , Block ;
 
 (* The expression after "in" is an ordinary Expression. This grammar has *)
@@ -294,8 +343,7 @@ AssertStatement = "assert" , Expression , [ "," , StringLiteral ] , [ ";" ]
                 | "assert" , "(" , Expression , "," , StringLiteral , ")" , [ ";" ]
                 ;
 
-(* Postfix cast.                                                *)
-AsCast          = Expression , "as" , Type ;
+(* The postfix cast `e as T` is CastExpression above.          *)
 
 (* Logical and bitwise binary operators (Phase 10.5 Tier-1).    *)
 LogicalOr       = Expression , "||" , Expression ;
@@ -306,13 +354,13 @@ BitwiseXor      = Expression , "^"  , Expression ;
 ShiftLeft       = Expression , "<<" , Expression ;
 ShiftRight      = Expression , ">>" , Expression ;
 
-(* Operator precedence (highest binds tightest, all left-assoc): *)
-(*   1. *  /                                                     *)
-(*   2. |  &  ^  <<  >>                                          *)
-(*   3. +  -                                                     *)
-(*   4. as       (postfix cast)                                  *)
-(*   5. == != < <= > >=                                          *)
-(*   6. &&                                                       *)
-(*   7. ||                                                       *)
-(* Reference implementation: mindc 0.2.5+ Pratt parser           *)
-(* (src/parser/mod.rs::parse_pratt).                             *)
+(* Operator precedence of the binary operators and the cast       *)
+(* (highest binds tightest, all left-assoc); the full table is in *)
+(* language.md, "Operator precedence and associativity":          *)
+(*   1. as       (postfix cast, below the unary operators)        *)
+(*   2. *  /  %                                                   *)
+(*   3. |  &  ^  <<  >>                                           *)
+(*   4. +  -                                                      *)
+(*   5. == != < <= > >=                                           *)
+(*   6. &&                                                        *)
+(*   7. ||                                                        *)

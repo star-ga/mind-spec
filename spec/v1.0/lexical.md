@@ -39,9 +39,18 @@ Tokens are classified as follows:
 1. **Identifiers** — sequences that begin with a letter or underscore followed by letters, digits, or
    underscores.
 2. **Keywords** — reserved words listed in [Keywords](#keywords).
-3. **Literals** — numeric, string, boolean, and differentiable literals as defined below.
-4. **Operators and punctuation** — symbols such as `+`, `->`, and `:=`, and the character `#` that
+3. **Literals** — numeric, string, and boolean literals as defined below.
+4. **Operators and punctuation** — symbols such as `+`, `->`, and `=>`, and the character `#` that
    starts an attribute (`#[name]`, [Attributes](./language.md#attributes)).
+
+The operators and the punctuation are the ones that `Operator` and `Punctuation` of
+[`grammar-lexical.ebnf`](./grammar-lexical.ebnf) list. The lexer reads the longest operator that the text
+spells (longest match): `x<<=1` holds the one token `<<=`, not `<<` and `=` and not `<` and `<=`, and
+`x>>=1` holds the one token `>>=`. So a type whose argument lists end directly before `=`, as in
+`let o: Option<Option<i64>>= p;`, ends with the token `>>=` and is not derived; write a space before `=`.
+
+MIND has no operator `:=`. The text `:=` is the two tokens `:` and `=`, no rule of the syntactic grammar
+puts `=` directly after `:`, and an implementation MUST refuse a source such as `x := 1;`.
 
 Whitespace and comments separate tokens but are otherwise discarded.
 
@@ -69,13 +78,15 @@ The syntactic grammar also spells out words that are not in this list; they are 
 
 - **Integer literals** consist of an optional sign followed by digits. Binary (`0b`), octal (`0o`),
   and hexadecimal (`0x`) prefixes are allowed.
-- **Floating-point literals** follow the grammar `<digits>.<digits>([eE][+-]?<digits>)?`.
+- **Floating-point literals** follow the grammar `<digits>.<digits>([eE][+-]?<digits>)?`. The lexer
+  reads one also after the token `.`: `t.0.1` is the tokens `t`, `.` and `0.1`, and the syntactic grammar
+  reads the token `0.1` as two tuple indices ([Tuple index](./language.md#tuple-index)).
 - **String literals** are enclosed in double quotes. The escape sequences are listed in
   [String escapes](./language.md#string-escapes); any other escape sequence MUST be diagnosed with
   [`E1004`](./errors.md#e1004-invalid-escape-sequence).
 - **Boolean literals** are `true` and `false`.
-- **Differentiable literals** MAY include tangent annotations using the `^` suffix (see
-  [Automatic differentiation](./autodiff.md)).
+- A literal has no suffix `^`. The character `^` is only the exclusive-or operator, so `1.0^;` is an
+  exclusive-or with no right operand and MUST be refused.
 
 ### Comments and whitespace
 
