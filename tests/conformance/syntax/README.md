@@ -138,3 +138,6 @@ implementation MAY accept or refuse those.
 | [`elementwise_accept_scalar_values`](./elementwise_accept_scalar_values.yaml) | accept, returns 24 | [Tensor operations](../../../spec/v1.0/language.md#tensor-operations): elementwise operators |
 | [`elementwise_accept_tensor_scalar`](./elementwise_accept_tensor_scalar.yaml) | accept | as above |
 | [`elementwise_reject_mixed_dtypes`](./elementwise_reject_mixed_dtypes.yaml) | reject, `E2004` | as above: operands of two different dtypes MUST be refused |
+| [`tensor_ctor_accept_shape_and_dtype`](./tensor_ctor_accept_shape_and_dtype.yaml) | accept | [Tensor operations](../../../spec/v1.0/language.md#tensor-operations): tensor constructor |
+| [`tensor_ctor_reject_no_cast`](./tensor_ctor_reject_no_cast.yaml) | reject, `E2016` | as above: no cast from the element type to the dtype |
+| [`tensor_ctor_reject_bool_without_dtype`](./tensor_ctor_reject_bool_without_dtype.yaml) | reject, `E2005` | as above: another element type MUST be refused |

@@ -1,0 +1,20 @@
+# MIND Conformance Test: without a dtype argument the element type is a dtype
+# Specification reference: spec/v1.0/language.md#tensor-operations
+# Category: syntax
+# Profile: cpu
+
+description: "bool is not a dtype"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let t = tensor(true);
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2005

@@ -151,7 +151,9 @@ Type errors occur during type checking and type inference.
 ### E2016: Invalid cast
 
 - **Trigger**: a cast `e as T` whose pair of types is not a row of the cast table
-  ([Casts](./language.md#casts)), for example an integer or a float cast to `bool`.
+  ([Casts](./language.md#casts)), for example an integer or a float cast to `bool`; or a tensor constructor
+  `tensor(e, dtype: D)` where the table gives no cast from the element type of `e` to `D`
+  ([Tensor operations](./language.md#tensor-operations)).
 - **Required context**: the type of `e`, the type `T` and the location, with the fix: for a cast to `bool`,
   the comparison `e != 0`.
 - **Example**: `E2016: no cast from 'i64' to 'bool'; write 'x != 0' at line 2, column 13`

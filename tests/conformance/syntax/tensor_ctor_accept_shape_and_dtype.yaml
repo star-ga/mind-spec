@@ -1,0 +1,24 @@
+# MIND Conformance Test: the shape and the dtype of tensor(e)
+# Specification reference: spec/v1.0/language.md#tensor-operations
+# Category: syntax
+# Profile: cpu
+
+description: "tensor([[1, 2], [3, 4]]) has the shape [2, 2] and the dtype i64; tensor(3, dtype: f32) converts 3 to f32"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let t = tensor([[1, 2], [3, 4]]);
+        let u = tensor(3, dtype: f32);
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0

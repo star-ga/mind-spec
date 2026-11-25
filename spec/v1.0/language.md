@@ -314,6 +314,15 @@ Surface syntax maps to the Core IR instruction set:
   [`E2004`](./errors.md#e2004-dtype-mismatch-in-binary-operation). On two scalar operands of one numeric type, the
   result is the value of the plain operator with that type: `a .* b` is `a * b`, `a ./ b` is `a / b`, `a .+ b` is
   `a + b`, and `a .- b` is `a - b`.
+- **Tensor constructor**: `tensor(e)` and `tensor(e, dtype: D)` (`TensorConstructor`) make a tensor from the
+  value of `e`. Its shape is the shape of `e`: a scalar `e` gives rank 0, and an array literal gives its
+  dimensions (`tensor([[1, 2], [3, 4]])` has the shape `[2, 2]`). With a dtype argument the dtype is `D`;
+  without one it is the type of a scalar `e` or the element type of an array `e`, which MUST be a dtype (`i32`,
+  `i64`, `f32` or `f64`); another element type, such as `bool`, MUST be refused at check time with
+  [`E2005`](./errors.md#e2005-invalid-dtype-for-operation). The dtype argument is not an expected type for `e`.
+  When `D` differs from the element type of `e`, each element is converted as `as` converts it where the
+  [cast table](#casts) gives a cast from that type to `D` (`tensor(3, dtype: f32)` holds `3.0`); where the table
+  gives no such cast, the constructor MUST be refused at check time with [`E2016`](./errors.md#e2016-invalid-cast).
 - **Reductions**: `sum(x, axes, keepdims)` and `mean(x, axes, keepdims)` lower to `Sum`/`Mean`.
 - **Shape ops**: `reshape`, `transpose`, `expand_dims`, and `squeeze` mirror their IR counterparts.
 - **Indexing**: slicing/index expressions lower to `Index`, `Slice`, or `Gather` depending on syntax.

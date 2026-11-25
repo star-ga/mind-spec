@@ -1,0 +1,20 @@
+# MIND Conformance Test: a dtype argument with no cast from the element type
+# Specification reference: spec/v1.0/language.md#tensor-operations
+# Category: syntax
+# Profile: cpu
+
+description: "the cast table has no cast from bool to f32"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let t = tensor(true, dtype: f32);
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2016
