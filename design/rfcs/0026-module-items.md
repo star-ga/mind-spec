@@ -479,14 +479,14 @@ expected:
 8. **Code allocation.** The three codes are assigned, because they are free in the catalog: `E2720` (a name that is not
    unique in its namespace: two items of one namespace with the same name, or a module block whose qualified name equals
    the module path of a project module, rule 3), `E2721` (`module m;` not first or repeated), `E2722` (module name
-   differs from the project). The decisions of questions 3 to 6 and the export rule (rule 4) need five more codes:
-   this draft proposes `E2723`, `E2724`, `E2725`, `E2728` and `E2729` from the same block, which the catalog does not
-   define; they are not yet assigned. Their labels: `E2723` (`pub` before an item, rule 5), `E2724` (a `static` item,
-   rule 5), `E2725` (an export in another form than the list form `export { … }`, rule 5), `E2728` (a well-formed
-   version attribute before `module m;` with another major, or the same major and a higher minor, rule 8) and `E2729`
-   (a name that the module declares and that stands twice in its export lists, rule 4).
-   `E2726` and `E2727` are not used: an invalid attribute, also a malformed version attribute or one before another
-   item, has the code `E2502` of the catalog (rule 7).
+   differs from the project). The decisions of questions 3 to 6 and the export rule (rule 4) need five more codes: this
+   draft proposes `E2723`, `E2724`, `E2725`, `E2728` and `E2729` from the same block, which the catalog does not define;
+   they are not yet assigned. Their labels: `E2723` (`pub` before an item, rule 5), `E2724` (a `static` item, rule 5),
+   `E2725` (an export in another form than the list form `export { … }`, rule 5), `E2728` (a well-formed version
+   attribute before `module m;` with another major, or the same major and a higher minor, rule 8) and `E2729` (a name
+   that the module declares and that stands twice in its export lists, rule 4). An invalid attribute, also a malformed
+   version attribute or one before another item, has the code `E2502` of the catalog (rule 7), so this draft gives it no
+   code of its own.
 
 ### Open
 

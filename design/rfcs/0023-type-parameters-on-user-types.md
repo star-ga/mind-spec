@@ -111,30 +111,33 @@ or infers them.
 7. A `struct` or `enum` MUST NOT contain itself by value: not directly, and not through the fields, payloads and type
    arguments of other types (a field of type `Option<Node<T>>` in `Node<T>` contains `Node<T>`).
    [Types](../../spec/v1.0/types.md#type-formation) refuses a struct that holds itself with `E2407` ("struct with no
-   layout"); this draft extends the meaning of "holds" there to the payloads of an enum and to the type arguments of an
-   instance, so a `struct` that contains itself in any of these ways is refused with `E2407`. An `enum` that contains
-   itself by value through no `struct` (`enum E { A(E), }`, or two enums that hold each other), and a `type`
-   declaration that names itself in its right-hand side, directly or through other aliases (`type L = Pair<L, i64>;`),
-   because the replacement of [Instance names](#instance-names) would not end, are refused with `E2040` ("declaration
-   contains itself"). Each such source gets one code. A cycle that passes through a `struct` and an `enum` is refused
-   with `E2407` at each `struct` of the cycle, and an `enum` of that cycle gets no second code:
-   `struct S { e: E, } enum E { A(S), }` is refused with `E2407` only. An alias that names itself is refused with
-   `E2040` only: its right-hand side is never formed, so no instance holds itself. A type that holds itself through a
-   pointer comes with a later RFC on an owning pointer type. [RFC 0027](./0027-function-generics.md) uses `E2040` for a
-   trait that names itself in its supertrait list.
+   layout"); this draft extends the meaning of "holds" there to the payloads of an enum and to the fields of an
+   instance, with its type arguments in place of its type parameters: an instance holds a type argument only where its
+   fields hold it by value, and a field of a container type holds no value of its element type, because a container
+   value is a handle ([Memory model](../../spec/v1.0/memory.md#records-and-containers)). A `struct` that contains itself
+   in any of these ways is refused with `E2407`. An `enum` that contains itself by value through no `struct`
+   (`enum E { A(E), }`, or two enums that hold each other), and a `type` declaration that names itself in its right-hand
+   side, directly or through other aliases (`type L = Pair<L, i64>;`), because the replacement of
+   [Instance names](#instance-names) would not end, are refused with `E2040` ("declaration contains itself"). Each such
+   source gets one code. A cycle that passes through a `struct` and an `enum` is refused with `E2407` at each `struct`
+   of the cycle, and an `enum` of that cycle gets no second code: `struct S { e: E, } enum E { A(S), }` is refused with
+   `E2407` only. An alias that names itself is refused with `E2040` only: its right-hand side is never formed, so no
+   instance holds itself. A type that holds itself through a pointer comes with a later RFC on an owning pointer type.
+   [RFC 0027](./0027-function-generics.md) uses `E2040` for a trait that names itself in its supertrait list.
 8. A type argument on a type without parameters is refused with the code of rule 4. (The reference
    v0.10.4 accepts `Box<i64>` for a `Box` without parameters; in Core v1 a type argument on a user-declared type
    has the status Not in Core v1.)
 9. The built-in types `Option<T>` and `Result<T, E>` follow the same rules, with one and with two parameters. A
-   `struct`, `enum`, `type` or `trait` declaration MUST NOT take a predeclared type name: a name of
-   `PrimitiveType` (`i32`, `i64`, `f32`, `f64`, `bool`, `unit`), `Tensor`, `Option`, `Result`, a container type of
-   [Types](../../spec/v1.0/types.md#type-formation) (`array`, `Vec`, `Map`, `String`), another type that the
-   [standard library](../../spec/v1.0/stdlib.md) declares (every entity of the standard library is available without
-   an import), or a predeclared bound of [RFC 0027](./0027-function-generics.md) (`Numeric`, `Integer`, `Float`).
-   Such a declaration is refused with `E2042` ("predeclared type or bound name"): `struct String { }` is refused. A
-   user type never shadows a predeclared one. A predeclared name is not an item of a namespace of the program, so
-   the duplicate-name rule of [RFC 0026](./0026-module-items.md) (rule 3, `E2720`) does not apply to it: each
-   declaration with a predeclared name is refused with `E2042` only.
+   `struct`, `enum`, `type` or `trait` declaration MUST NOT take a predeclared type name: a name of `PrimitiveType`
+   (`i32`, `i64`, `f32`, `f64`, `bool`, `unit`), `Tensor`, `Option`, `Result`, a container type of
+   [Types](../../spec/v1.0/types.md#type-formation) (`array`, `Map`, `String`, and `Vec`, the name that the signatures
+   of `std.vec` write for `array<i64>`), another type that the [standard library](../../spec/v1.0/stdlib.md) declares
+   (every entity of the standard library is available without an import), or a predeclared bound of
+   [RFC 0027](./0027-function-generics.md) (`Numeric`, `Integer`, `Float`). Such a declaration is refused with `E2042`
+   ("predeclared type or bound name"): `struct String { }` is refused. A user type never shadows a predeclared one. A
+   predeclared name is not an item of a namespace of the program, so the duplicate-name rule of
+   [RFC 0026](./0026-module-items.md) (rule 3, `E2720`) does not apply to it: each declaration with a predeclared name
+   is refused with `E2042` only.
 
 ## Instance names
 

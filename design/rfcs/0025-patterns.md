@@ -84,15 +84,16 @@ language; none of them is derived.
 ### Sign of an integer pattern
 
 A sign directly before the digits is part of an integer literal only where an operand can start
-([Literals](../../spec/v1.0/lexical.md#literals)). A pattern mostly stands at such a place (after `{`, `(`, `,`, `:`
-or a keyword), and there `-1` is one token, an `IntegerLiteral` with its `Sign`. The pattern of an arm that follows an
-arm with a block stands directly after `}`, and there a `-` or a `+` is a token of its own:
-`match x { 0 => { 1 } -1 => { 2 } _ => { 3 } }` has the tokens `}`, `-` and `1`. The optional sign token of
+([Literals](../../spec/v1.0/lexical.md#literals)). A pattern mostly stands at such a place (after `{`, `(`, `,`, `:` or
+a keyword), and there `-1` is one token, an `IntegerLiteral` with its `Sign`. The pattern of an arm that follows an arm
+with a block stands directly after the `}` of that block, which does not end a block-like statement
+([Block-like statements](../../spec/v1.0/language.md#block-like-statements)), and there a `-` or a `+` is a token of its
+own: `match x { 0 => { 1 } -1 => { 2 } _ => { 3 } }` has the tokens `}`, `-` and `1`. The optional sign token of
 `LiteralPattern` derives that pattern, and also `- 1`, with a space, at every position. A sign token applies to the
-integer literal after it as the sign of a literal does: `- L` is the pattern of the value of `L` with the opposite
-sign, and `+ L` is the pattern of the value of `L`. So `-1` and `- 1` are one pattern, `+1` and `+ 1` are the pattern
-`1`, and `- -1` is the pattern `1`. The rules of this RFC on a literal pattern apply to that value, so a pattern has
-the same meaning after `}` and after `,`.
+integer literal after it as the sign of a literal does: `- L` is the pattern of the value of `L` with the opposite sign,
+and `+ L` is the pattern of the value of `L`. So `-1` and `- 1` are one pattern, `+1` and `+ 1` are the pattern `1`, and
+`- -1` is the pattern `1`. The rules of this RFC on a literal pattern apply to that value, so a pattern has the same
+meaning after `}` and after `,`.
 
 ### Variant path
 
