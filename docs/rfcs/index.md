@@ -40,8 +40,8 @@ RFCs currently under discussion. See [Active Proposals](./active.md) for details
 | [RFC 0023](../../design/rfcs/0023-type-parameters-on-user-types.md) | Type parameters on `struct`, `enum`, `trait` and `type`, and type arguments on user types | Draft | — |
 | [RFC 0024](../../design/rfcs/0024-impl-forms.md) | `trait` and `impl` blocks: an implementation of a type, of a trait for a type, and associated items | Draft | — |
 | [RFC 0025](../../design/rfcs/0025-patterns.md) | Patterns, guards and the record literal | Draft | — |
-| [RFC 0026](../../design/rfcs/0026-module-items.md) | Module items: `module`, `export`, import alias, version attribute | Draft | — |
-| [RFC 0027](../../design/rfcs/0027-function-generics.md) | Function generics: several type parameters, bounds, supertraits, `where`, explicit type arguments | Draft | — |
+| [RFC 0026](../../design/rfcs/0026-module-items.md) | Module items: `module`, `export`, import alias, attributes, version attribute | Draft | — |
+| [RFC 0027](../../design/rfcs/0027-function-generics.md) | Function generics: several type parameters, bounds, predeclared numeric bounds, supertraits, `where`, explicit type arguments | Draft | — |
 
 ## Implemented RFCs
 

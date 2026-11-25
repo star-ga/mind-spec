@@ -17,7 +17,7 @@ limitations under the License.
 # Active Proposals
 
 > **Status:** Stable
-> **Last updated:** 2025-12-19
+> **Last updated:** 2026-11-24
 
 This page tracks RFCs that are currently under active discussion. Once an RFC
 reaches consensus, it moves to [Implemented RFCs](./implemented.md).
@@ -31,11 +31,13 @@ reaches consensus, it moves to [Implemented RFCs](./implemented.md).
 | [RFC 0023](../../design/rfcs/0023-type-parameters-on-user-types.md) | Type parameters on `struct`, `enum`, `trait` and `type`, and type arguments on user types | Draft |
 | [RFC 0024](../../design/rfcs/0024-impl-forms.md) | `trait` and `impl` blocks: an implementation of a type, of a trait for a type, and associated items | Draft |
 | [RFC 0025](../../design/rfcs/0025-patterns.md) | Patterns, guards and the record literal | Draft |
-| [RFC 0026](../../design/rfcs/0026-module-items.md) | Module items: `module`, `export`, import alias, version attribute | Draft |
-| [RFC 0027](../../design/rfcs/0027-function-generics.md) | Function generics: several type parameters, bounds, supertraits, `where`, explicit type arguments | Draft |
+| [RFC 0026](../../design/rfcs/0026-module-items.md) | Module items: `module`, `export`, import alias, attributes, version attribute | Draft |
+| [RFC 0027](../../design/rfcs/0027-function-generics.md) | Function generics: several type parameters, bounds, predeclared numeric bounds, supertraits, `where`, explicit type arguments | Draft |
 
-The open points that need a decision before an RFC are in the [decision notes](../../design/rfcs/decision-notes.md).
-The numbers are provisional.
+The specification owner decided the questions of these drafts on 2026-11-24; each draft lists the decided
+questions and the points that stay open. RFC 0023, RFC 0024 and RFC 0027 belong to one edition, Core v1.1. The
+[decision notes](../../design/rfcs/decision-notes.md) record the decisions on the points that the specification
+text did not decide. The numbers are provisional.
 
 New proposals are welcome! See the [RFC Process](../../design/rfc-process.md)
 for how to submit a proposal.
