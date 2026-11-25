@@ -1,0 +1,18 @@
+# MIND Conformance Test: a defer statement takes no ;
+# Specification reference: spec/v1.0/language.md#block-like-statements
+# Category: syntax
+# Profile: cpu
+
+description: "a defer statement ends at the closing brace of its block, so defer { }; is refused"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        defer { };
+        return 0;
+    }
+
+expected:
+  status: error

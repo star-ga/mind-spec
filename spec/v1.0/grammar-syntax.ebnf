@@ -148,6 +148,9 @@ ExpressionStatement = Expression , ";" ;
 
 ReturnStatement = "return" , [ Expression ] , ";" ;
 
+(* A defer statement ends at the closing brace of its block and takes  *)
+(* no ";": `defer { };` is not derived (language.md, "Block-like       *)
+(* statements").                                                       *)
 DeferStatement = "defer" , Block ;
 
 (* A block-like statement is one of the five forms if, match, block,  *)

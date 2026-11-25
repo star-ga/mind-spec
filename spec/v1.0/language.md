@@ -371,8 +371,9 @@ stands as a statement is a [block-like statement](#block-like-statements) and ta
 ## Block-like statements
 
 The five forms `if`, `match`, a block, `while` and `for` may stand as a statement with no `;` after them
-(`BlockLikeStatement` of [`grammar-syntax.ebnf`](./grammar-syntax.ebnf)). Every other statement ends with its
-`;` ([Statement separators](#statement-separators)).
+(`BlockLikeStatement` of [`grammar-syntax.ebnf`](./grammar-syntax.ebnf)). A `defer` statement takes no `;`
+either: it ends at the closing brace of its block (`DeferStatement`), so `defer { };` has no derivation and
+MUST be refused. Every other statement ends with its `;` ([Statement separators](#statement-separators)).
 
 **Reading rule.** Where a statement can start and the next token starts one of the five forms, the form is
 read as a `BlockLikeStatement` and ends at its closing brace (for an `if` with `else`, the closing brace of its
@@ -420,8 +421,9 @@ reason. The range after `in` (`for i in a..b`) is not defined by the grammar; it
 `let t = (4, 5);`, `t.0` is 4 and `t.1` is 5. `N` is a decimal integer literal with no sign and no prefix.
 Where the parser expects the `DecimalInteger` of a tuple index and the next token is a float literal of the
 form digits "." digits (no exponent, no suffix), the token is read as two tuple indices: `t.0.1` means
-`(t.0).1`. A float literal with an exponent is not read so: `t.0.1e0` is not derived. The type of `e` MUST be
-a tuple type and `N` MUST be less than its number of elements; otherwise the source MUST be refused at check
+`(t.0).1`. After an access dot, a float literal token with an exponent is not a tuple index, because only
+the form digits "." digits is read as two indices: a source such as `t.0.1e0` is not derived and MUST be
+refused. The type of `e` MUST be a tuple type and `N` MUST be less than its number of elements; otherwise the source MUST be refused at check
 time with [`E2404`](./errors.md#e2404-invalid-tuple-index). An index operator `e[i]` on a tuple has no
 meaning: when the type of `e` is a tuple type, `e[i]` MUST be refused with `E2404`, and the diagnostic MUST
 name the form `e.N`.
@@ -433,8 +435,8 @@ diagnostic MUST name the slice form `a[1:3]`.
 ## Statement separators
 
 The separators are the ones that [`grammar-syntax.ebnf`](./grammar-syntax.ebnf) writes. `;` is required after
-a `let`, after a `return`, after a loop exit and after an `ExpressionStatement`; a `BlockLikeStatement` takes
-none ([Block-like statements](#block-like-statements)). A `match` arm with an expression ends with `,`, the
+a `let`, after a `return`, after a loop exit and after an `ExpressionStatement`; a `BlockLikeStatement` and a
+`defer` statement take none ([Block-like statements](#block-like-statements)). A `match` arm with an expression ends with `,`, the
 last arm too; an arm with a block takes none (`MatchArm`). Checking and building MUST refuse a source in
 which one of these separators is missing. A missing separator has no meaning in the language.
 

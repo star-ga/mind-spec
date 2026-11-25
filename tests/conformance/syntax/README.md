@@ -77,6 +77,7 @@ implementation MAY accept or refuse those.
 | [`separator_reject_let_without_semicolon`](./separator_reject_let_without_semicolon.yaml) | reject | as above: a missing `;` MUST be refused |
 | [`separator_reject_expression_statement_without_semicolon`](./separator_reject_expression_statement_without_semicolon.yaml) | reject | as above |
 | [`separator_reject_match_arm_without_comma`](./separator_reject_match_arm_without_comma.yaml) | reject | as above: a missing `,` of an expression arm MUST be refused |
+| [`defer_reject_semicolon`](./defer_reject_semicolon.yaml) | reject | [Block-like statements](../../../spec/v1.0/language.md#block-like-statements): a `defer` statement takes no `;`, so `defer { };` MUST be refused |
 | [`tuple_index_accept`](./tuple_index_accept.yaml) | accept, returns 9 | `TupleIndexOperator` and [Tuple index](../../../spec/v1.0/language.md#tuple-index) |
 | [`tuple_index_accept_nested`](./tuple_index_accept_nested.yaml) | accept, returns 2 | as above: the float literal `0.1` after `.` is read as two tuple indices |
 | [`tuple_index_reject_float_with_exponent`](./tuple_index_reject_float_with_exponent.yaml) | reject | as above: a float literal with an exponent is not read as two tuple indices |

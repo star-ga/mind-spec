@@ -30,12 +30,12 @@ table and the grammar or a normative chapter differ, the grammar and the chapter
   requires it nor forbids it. A program that uses it is not a Core v1 program.
 - **Open**: the grammar derives the form and no sentence of this specification gives it a meaning.
 
-**Reference gap (informative).** The mark "reference gap" after a status records that the reference compiler
-v0.10.4 does not yet follow the status, and the words in parentheses say what was measured. The release binary
-was run on 2026-11-24 with `mindc check --no-fmt --no-lint` on each probe source, and with
-`mindc build --backend native` and a run of the image where the mark names the native backend or an image. A gap
-is work for the compiler; it does not change the status. A row without the mark makes no claim about the
-reference.
+**Reference verdict (informative).** The mark "reference gap" after a status records that the reference
+compiler v0.10.4 does not yet follow the status, the mark "reference conforms" records that it follows the
+status for the sources measured, and the words in parentheses say what was measured. The release binary was run
+on 2026-11-24 with `mindc check --no-fmt --no-lint` on each probe source, and with `mindc build --backend native`
+and a run of the image where the mark names the native backend or an image. A gap is work for the compiler; it
+does not change the status. A row without a mark makes no claim about the reference.
 
 | Form | Status |
 |------|--------|
@@ -44,7 +44,10 @@ reference.
 | `fn main() -> f64 { }`, `fn main(n: i64) -> i64 { }`: an entry function with another result type or a parameter | Core v1 refuses; reference gap (`mindc check` accepts both) |
 | `Tensor<dtype, [dims]>`, `(T, U)`, `[T; n]`, `diff T` | Core v1 |
 | `let x = e;`, `let x: T = e;`, `let _ = e;`, `let (a, b) = e;`, `let mut x = e;` | Core v1 |
-| `return e;`, `return;`, `defer { }` | Core v1 |
+| `let x = 1; let x = 2;`: a later `let` of the same name is a new binding ([Bindings and assignment](./language.md#bindings-and-assignment)) | Core v1; reference conforms (`mindc check` accepts it, and the image of `let x = 1; let x = 2; return x;` exits with the status 2) |
+| `return e;`, `return;` | Core v1 |
+| `defer { }` (no sentence of this specification gives a `defer` statement a meaning) | Open |
+| `defer { };`: a `;` after the block of a `defer` ([Block-like statements](./language.md#block-like-statements)) | Core v1 refuses; reference gap (`mindc check` accepts it) |
 | `a = b;`, `a += b;`, `a -= b;`, `a *= b;`, `a /= b;`, `a[i] = b;`, `t.0 = b;` where the root of the place is bound by `let mut` ([Bindings and assignment](./language.md#bindings-and-assignment)) | Core v1; reference gap (the native backend refuses `a[i] = b;` with `lane.source.index_store` and `t.0 = b;` as a struct field assignment) |
 | `a %= b;`, `a <<= b;`, `a >>= b;`, `a &= b;`, `a \|= b;`, `a ^= b;` where the root of `a` is bound by `let mut` | Core v1; reference gap (the native backend builds `%=` and refuses the other five) |
 | An assignment or a compound assignment to a place whose root is not declared with `let mut` (a `let` without `mut`, a parameter, a `for` pattern or a `match` arm binds it) | Core v1 refuses; reference gap (`mindc check` accepts `let x = 1; x = 2;`, `x += 1` on such an `x`, `let a = [1, 2, 3]; a[0] = 5;`, and an assignment to a parameter, to a `for` variable and to a `match` arm binding) |
@@ -65,7 +68,7 @@ reference.
 | `if a > b { } else { }`, `match e { x => y, }`, `match e { x => { y } }` | Core v1 |
 | `t[i]`, `t[a:b]`, `f(x)`, `x.m(a)`, `tensor(e)`, `tensor(e, dtype: f64)`, `(a, b)`, `[a, b]` | Core v1 |
 | `t.0`, `t.0.1` on a tuple ([Tuple index](./language.md#tuple-index)) | Core v1; reference gap (the native backend refuses tuples with `lane.source.tuple`) |
-| `t.0.1e0` (a float literal with an exponent after `.`) | Core v1 refuses |
+| `t.0.1e0` (a float literal with an exponent after an access dot, [Tuple index](./language.md#tuple-index)) | Core v1 refuses; reference conforms (`mindc check` refuses it with `E2002`, as the unknown identifier `e0`) |
 | `x.0` where `x` is not a tuple, `t.N` with `N` not less than the number of elements, `t[0]` on a tuple | Core v1 refuses; reference gap (`mindc check` accepts all three) |
 | `a[1..3]` (a range index) | Core v1 refuses; reference gap (`mindc check` accepts it) |
 | `()`, the value of type `unit` ([The unit value](./types.md#the-unit-value)) | Core v1; reference gap (the native backend refuses it with `lane.source.tuple`) |
