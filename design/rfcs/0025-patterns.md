@@ -20,9 +20,9 @@ limitations under the License.
 |-------|-------|
 | State | Draft (2026-11-24). Not yet accepted. The specification owner decided the questions of this draft on 2026-11-24 (see [Questions](#questions-for-the-specification-owner)). |
 | Number | Provisional. The specification owner assigns the final number. |
-| Changes | `grammar-syntax.ebnf` (`Pattern`, `MatchArm`, record literal), `language.md` (new section on patterns; exhaustiveness; the sentence of Loop exits on `loop { ... }`), `types.md` (removes the dot spelling `Enum.Variant` of a variant), `errors.md` (`E2310`, `E2311`, `W2312`, `E2313`, `E2314`; the sentence on the code pattern adds the prefix `W` of a warning, with the category and number of an error code) |
-| Depends on | none. Enum variant patterns use the enum declaration of the candidate block. |
-| Related | [RFC 0023](./0023-type-parameters-on-user-types.md), [RFC 0024](./0024-impl-forms.md) (the variant path `E::B` in an expression) |
+| Changes | `grammar-syntax.ebnf` (`Pattern`, `MatchArm`, record literal), `language.md` (new section on patterns; exhaustiveness; the sentence of Loop exits on `loop { ... }`), `types.md` (removes the dot spelling `Enum.Variant` of a variant), `errors.md` (`E2310`, `E2311`, `W2312`, `E2313`, `E2314`; the sentence on the code pattern adds the prefix `W` of a warning, with the category and number of an error code; the trigger of `E2405` also covers `loop { }` and `loop { f: e }` where an expression can stand, a record literal of a struct `loop` that the program does not declare, see [Record literal](#record-literal)) |
+| Depends on | [RFC 0024](./0024-impl-forms.md) for the expression form `E::B` of a variant (its `AssociatedValue`); the base grammar has no `::` path in an expression. The patterns use the enum declaration of the candidate block. |
+| Related | [RFC 0023](./0023-type-parameters-on-user-types.md), [RFC 0024](./0024-impl-forms.md) |
 
 ## Problem
 
@@ -96,9 +96,10 @@ This RFC does not change it; its plain forms use it. `t.i`, with `i` a `DecimalI
 reads component `i` of a tuple value, counted from 0. It needs a tuple type and an index below the arity of that
 type; otherwise it is refused with `E2404`. Where the parser expects the `DecimalInteger` of a tuple index and
 the next token is a float literal of the form digits "." digits (no exponent, no suffix), the token is read as two
-tuple indices: `t.0.1` means `(t.0).1`. After an access dot, a float literal token with an exponent is not a tuple
-index, because only the form digits "." digits is read as two indices: a source such as `t.0.1e0` is not derived and
-MUST be refused. `t[i]` on a tuple has no meaning and is refused with `E2404`, and the diagnostic names the form
+tuple indices: `t.0.1` means `(t.0).1`. After an access dot, a float literal token with an exponent or a suffix is
+not a tuple index, because only the form digits "." digits is read as two indices (the lexical grammar gives a float
+literal no suffix, so in Core v1 such a token has an exponent): a source such as `t.0.1e0` is not derived and MUST be
+refused. `t[i]` on a tuple has no meaning and is refused with `E2404`, and the diagnostic names the form
 `e.N`.
 
 ### Record literal
