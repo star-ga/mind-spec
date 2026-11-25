@@ -18,15 +18,16 @@ limitations under the License.
 
 This page lists points where the specification text did not decide the meaning of a form that it names. A note records
 the text, the behaviour of the reference compiler v0.10.4 (measured with `mindc check --no-fmt`, in the measurements of
-2026-11-25 also with `--no-lint`, and with `mindc build --backend native` where it is named), and the options. **A note
-does not give a meaning, except where it records a decision.** The specification owner decided DN-1 to DN-13 on
-2026-11-24 and DN-14 and DN-16 to DN-20 on 2026-11-25; each note records the decision in its **Decision** paragraph, and
-an RFC or an editorial change carries it into the normative text. DN-15 is reserved for the container model, and this
-page records no decision on it yet. The tables of options stay as the record of the choice. Each note ends with the
-status of its forms after the decision, in the words of [Core v1 form status](../../spec/v1.0/core-v1-forms.md); that
-page gives the same status to the same form. The status is **Open** only where the note says so. The paragraph **Text
-before the decision** records the specification text on which the decision was taken, as it stood before the change that
-carries the decision; its links lead to the place that now holds the decided rule.
+2026-11-25 also with `--no-lint`, and with `mindc build --backend native` or `mindc build --backend mlir` where it is
+named), and the options. **A note does not give a meaning, except where it records a decision.** The specification owner
+decided DN-1 to DN-13 on 2026-11-24 and DN-14 and DN-16 to DN-20 on 2026-11-25; each note records the decision in its
+**Decision** paragraph, and an RFC or an editorial change carries it into the normative text. DN-15 is reserved for the
+container model, and this page records no decision on it yet. The tables of options stay as the record of the choice.
+Each note ends with the status of its forms after the decision, in the words of [Core v1 form
+status](../../spec/v1.0/core-v1-forms.md); that page gives the same status to the same form. The status is **Open** only
+where the note says so. The paragraph **Text before the decision** records the specification text on which the decision
+was taken, as it stood before the change that carries the decision; its links lead to the place that now holds the
+decided rule.
 
 ## DN-1. The operator `:=`
 
@@ -57,7 +58,7 @@ examples of the lexical chapter; `x := e` is not part of the language. The text 
 no rule of the syntactic grammar puts `=` directly after `:`, and a source such as `x := 1;` is refused
 ([Lexical Structure](../../spec/v1.0/lexical.md#tokens)).
 
-**Form status.** `x := e`: Core v1 refuses. The reference refuses it too (`E1001`, measured above).
+**Form status.** `x := e`: Core v1 refuses.
 
 ## DN-2. `while` and `for` as expressions with a value
 
@@ -152,8 +153,7 @@ that separates it from the operator (for example, no whitespace and no operand t
 text and from the grammar (`DifferentiableLiteral`); `^` is only the exclusive-or operator, so `1.0^;` is an
 exclusive-or with no right operand and is refused ([Lexical Structure](../../spec/v1.0/lexical.md#literals)).
 
-**Form status.** `1.0^`: Core v1 refuses. The reference reads `1.0^` as the operator with a missing operand, which
-agrees with the decision.
+**Form status.** `1.0^`: Core v1 refuses.
 
 ## DN-6. Precedence of `as`
 
@@ -320,9 +320,10 @@ Core v1 refuses; reference gap (`mindc check` accepts both).
 **Text before the decision.** `LetStatement` and `ExpressionStatement` ended with `;`. A `MatchArm` with an
 expression ended with `,`.
 
-**Reference.** A missing `;` after `let` or after an expression statement, and a missing `,` after an
-expression arm of a `match`, are accepted. `mindc fmt` inserts the separators and plain `mindc check` then reports
-`fmt::drift` for the unformatted text.
+**Reference.** A missing `;` after `let` or after an expression statement, and a missing `,` after an expression arm of
+a `match`, are accepted. `mindc fmt` inserts the separators and plain `mindc check` then reports `fmt::drift` for the
+unformatted text. A block-like statement that is not the tail and whose type is not `unit` is accepted too: the measured
+source is `fn main() -> i64 { if true { 1 } else { 2 } return 0; }`, with `mindc check --no-fmt`.
 
 **Options.** Make the reference refuse these forms (after a period in which it warns), or relax the grammar.
 The first option changes programs that compile today.
@@ -354,19 +355,17 @@ strict form. The rules are these ([Block-like statements](../../spec/v1.0/langua
   check time with `E2001`. A value is discarded only by an `ExpressionStatement` with `;`.
 - A `match` arm with an expression ends with `,`, the last arm too. An arm with a block takes no `,`.
 
-**Form status.** `if c { }`, `match e { }`, a block, `while c { }` and `for v in xs { }` as statements with no `;`:
-Core v1; reference gap (`mindc check` refuses a block that holds a statement, `{ s = s + 1; }`, with `E1001`).
-`while c { };`: Core v1; reference gap (the native backend refuses `while c { ... };` as an unsupported construct
-and builds the same loop without the `;`).
-`if c { 1 } else { 2 }` and the other forms as the tail of a block, and a block as a value: Core v1; reference gap
-(`mindc check` refuses a block that holds a statement also as a value, with `E1001`, and the native backend refuses
-`let b = { 4 };` with `lane.source.set`). A block-like statement that is not the tail and whose type is not `unit`
-(`if c { 1 } else { 2 } return 0;`): Core v1 refuses; reference gap (`mindc check` accepts it). The measured source
-is `fn main() -> i64 { if true { 1 } else { 2 } return 0; }`, with `mindc check --no-fmt`. `defer { };`, a `;` after
-the block of a `defer`: Core v1 refuses; reference gap (`mindc check` accepts it). A missing `;` after a `let`, a
-`return`, a loop exit (`while c { break }`) or an expression statement, and a missing `,` after an expression arm of
-a `match`: Core v1 refuses; reference gap (`mindc check` accepts a missing `;` after a `let`, an expression
-statement, a `return` and a loop exit, and a missing `,`; it reads `while c { break }` as the loop exit).
+**Form status.** `if c { }`, `match e { }`, a block, `while c { }` and `for v in xs { }` as statements with no `;`: Core
+v1; reference gap (`mindc check` refuses a block that holds a statement, `{ s = s + 1; }`, with `E1001`).
+`while c { };`: Core v1; reference gap (the native backend refuses `while c { ... };` as an unsupported construct and
+builds the same loop without the `;`). `if c { 1 } else { 2 }` and the other forms as the tail of a block, and a block
+as a value: Core v1; reference gap (`mindc check` refuses a block that holds a statement also as a value, with `E1001`,
+and the native backend refuses `let b = { 4 };` with `lane.source.set`). A block-like statement that is not the tail and
+whose type is not `unit` (`if c { 1 } else { 2 } return 0;`): Core v1 refuses; reference gap (`mindc check` accepts it).
+`defer { };`, a `;` after the block of a `defer`: Core v1 refuses; reference gap (`mindc check` accepts it). A missing
+`;` after a `let`, a `return`, a loop exit (`while c { break }`) or an expression statement, and a missing `,` after an
+expression arm of a `match`: Core v1 refuses; reference gap (`mindc check` accepts a missing `;` after a `let`, an
+expression statement, a `return` and a loop exit, and a missing `,`; it reads `while c { break }` as the loop exit).
 
 ## DN-11. Tuple index and range index
 
@@ -475,9 +474,8 @@ and a call that gives one parameter two types with `E2001`. [RFC 0027](./0027-fu
 carries the rule into the normative text. No warning period comes before the error
 ([RFC 0027](./0027-function-generics.md), question 6).
 
-**Form status.** `fn f<T>(x: T) -> T { }`, a generic function, and so a call of it: Extension. The rule of this
-decision applies in the edition that adds function generics ([RFC 0027](./0027-function-generics.md)). The reference
-accepts the calls measured above.
+**Form status.** `fn f<T>(x: T) -> T { }`, a generic function, and so a call of it: Extension. The rule of this decision
+applies in the edition that adds function generics ([RFC 0027](./0027-function-generics.md)).
 
 ## DN-14. Raw memory and its mark
 
@@ -490,15 +488,21 @@ said that the surface language inherits the memory safety model of another langu
 a buffer overflow are refused before IR generation; no rule of the language did that. An attribute stood only in the
 "v1.1 candidate additions" block of the grammar, which `Module` does not reach.
 
-**Reference.** `mindc check` accepts every source of this note: a `#[raw_memory]` function that calls
-`__mind_load_i64`, called from a `#[raw_memory]` `main`; a `#[raw_memory(sealed)]` function that calls the
-intrinsics, called from an unmarked `main`; `vec_get` in an unmarked `main`; a call of `__mind_load_i64` in an
-unmarked function; a call of `vec_addr` in an unmarked `main`; a call of a `#[raw_memory]` function from an unmarked
-`main`; `#[raw_memory]` before a `struct`; `#[raw_memory(open)]` before a function; and `#[fast]` before a function.
-The native backend refuses each source with an attributed function with `lane.source.function_contract`, the source
-with `#[raw_memory]` before a `struct` with `lane.source.top_level`, and the sources that call `vec_get` and
-`vec_addr` with `lane.call.unknown`. It builds the source with the unmarked call of `__mind_load_i64`, and its image
-exits with the status 0.
+**Reference.** `mindc check` accepts every source of this note: a `#[raw_memory]` function that calls `__mind_load_i64`,
+called from a `#[raw_memory]` `main`; a `#[raw_memory(sealed)]` function that calls the intrinsics, called from an
+unmarked `main`; `vec_get` in an unmarked `main`; a call of `__mind_load_i64` in an unmarked function; a call of
+`vec_addr` in an unmarked `main`; a call of a `#[raw_memory]` function from an unmarked `main`; `#[raw_memory]` before a
+`struct`; `#[raw_memory(open)]` before a function; `#[fast]` before a function; `#[fast] struct S { a: i64, }`; and a
+call of each index function with an index outside its container: `vec_get(v, 5)` and `vec_get(v, -1)` with
+`v = vec_push(vec_new(), 7)`, `vec_set(v, 5, 1)`, `string_get_byte(s, 5)` with `let s: String = "ab";`, and
+`map_key_at(m, 5)` and `map_value_at(m, 5)` with `m = map_insert(map_new(), 1, 2)`. The native backend refuses each
+source with an attributed function with `lane.source.function_contract`, the source with `#[raw_memory]` before a
+`struct` with `lane.source.top_level`, the source with `#[fast]` before a `struct` in the same way, and the sources that
+call `vec_get`, `vec_addr` or another index function with `lane.call.unknown`. It builds the source with the unmarked
+call of `__mind_load_i64`, and its image exits with the status 0. The MLIR backend builds `#[fast] struct S { a: i64, }`
+and each source with an index outside the container, and no image stops: the image of `#[fast] struct S` exits with the
+status 0, `vec_get(v, 5)` with 33, `vec_get(v, -1)` with 49, `vec_set(v, 5, 1)` and `string_get_byte(s, 5)` with 0, and
+`map_key_at(m, 5)` and `map_value_at(m, 5)` with 49; with the index 0, `vec_get` gives 7 and `map_value_at` gives 2.
 
 **Options.** (A) Only a sentence on address validity. (B) An attribute on a function that allows raw memory uses in
 its body; a use elsewhere is refused at check time. (C) A block form with a new keyword. (D) Raw memory uses only in
@@ -525,9 +529,10 @@ attribute, while the library functions that give or take an address are raw memo
   use, and an implementation does not check the statement. The attribute `raw_memory` stands only directly before a
   function declaration and takes no argument or the one argument `sealed`; any other use MUST be refused at check
   time with `E2502`.
-- Attributes ([Attributes](../../spec/v1.0/language.md#attributes)). `FunctionDeclaration` takes
-  `{ Attribute }` before `fn`. An attribute before a function declaration is part of Core v1 when the specification
-  defines its name for that position; another name MUST be refused at check time.
+- Attributes ([Attributes](../../spec/v1.0/language.md#attributes)). `FunctionDeclaration` takes `{ Attribute }` before
+  `fn`. An attribute before a function declaration is part of Core v1 when the specification defines its name for that
+  position; another name MUST be refused at check time. Before another item, an attribute whose name the specification
+  does not define for that position MUST be refused at check time too (`#[fast] struct S { a: i64, }`).
 - The library is safe without the mark. A function of the standard library that is not a raw memory function is
   safe for every argument: no argument makes it read or write memory outside the storage that its containers own. An
   index function (`vec_get`, `vec_set`, `string_get_byte`, `map_key_at`, `map_value_at`) MUST stop the program when
@@ -539,14 +544,22 @@ attribute, while the library functions that give or take an address are raw memo
 - What a value of a container that a program keeps sees after a change of the container is the container model,
   which this decision does not decide.
 
-**Form status.** `#[raw_memory] fn f(p: i64) -> i64 { }`, `#[raw_memory(sealed)] fn g() -> i64 { }`: Core v1;
-reference gap (`mindc check` accepts both; the native backend refuses an attributed function with
+**Form status.** `#[raw_memory] fn f(p: i64) -> i64 { }`, `#[raw_memory(sealed)] fn g() -> i64 { }`: Core v1; reference
+gap (`mindc check` accepts both; the native backend refuses an attributed function with
 `lane.source.function_contract`). A call of a raw memory function in a function without the attribute, outside the
-standard library (`fn r(p: i64) -> i64 { return __mind_load_i64(p); }`, `vec_addr(v)` in an unmarked `main`, a call of
-a `#[raw_memory]` function from an unmarked `main`): Core v1 refuses; reference gap (`mindc check` accepts all three;
-the native backend builds the first, and its image exits with the status 0). `#[raw_memory] struct S { a: i64, }`,
+standard library (`fn r(p: i64) -> i64 { return __mind_load_i64(p); }`, `vec_addr(v)` in an unmarked `main`, a call of a
+`#[raw_memory]` function from an unmarked `main`): Core v1 refuses; reference gap (`mindc check` accepts all three; the
+native backend builds the first, and its image exits with the status 0). `#[raw_memory] struct S { a: i64, }`,
 `#[raw_memory(open)] fn f() { }`: Core v1 refuses; reference gap (`mindc check` accepts both). `#[fast] fn f() { }`:
-Core v1 refuses; reference gap (`mindc check` accepts it).
+Core v1 refuses; reference gap (`mindc check` accepts it). `#[repr(C)] struct S { a: i32, }`,
+`#[requires(mind_spec = "1.2")] module m;`: Extension. `#[fast] struct S { a: i64, }`: Core v1 refuses; reference gap
+(`mindc check` accepts it; the MLIR backend builds it and its image exits with the status 0). An index function of the
+standard library with an index outside its container (`let v = vec_push(vec_new(), 7); return vec_get(v, 5);`, and
+`vec_set`, `string_get_byte`, `map_key_at`, `map_value_at`): Core v1; the program stops as a false `assert` stops it,
+`E6001`; reference gap (`mindc check` accepts all five; the native backend refuses each with `lane.call.unknown`; the
+MLIR backend builds each and its image does not stop: `vec_get(v, 5)` exits with the status 33, `vec_get(v, -1)` 49,
+`vec_set(v, 5, 1)` 0, `string_get_byte(s, 5)` 0, `map_key_at(m, 5)` and `map_value_at(m, 5)` 49; with the index 0,
+`vec_get` gives 7 and `map_value_at` gives 2).
 
 **Codes.** [`E2501`](../../spec/v1.0/errors.md#e2501-raw-memory-use-outside-a-raw-memory-function) (raw memory use
 outside a raw memory function) and [`E2502`](../../spec/v1.0/errors.md#e2502-invalid-raw_memory-attribute) (invalid
@@ -557,10 +570,11 @@ not define has no code.
 
 ## DN-16. The string type
 
-**Text before the decision.** [Standard Library](../../spec/v1.0/stdlib.md) wrote the type of the message of `panic`
-as `string` (`panic(message: string) -> !`) and the keys of a map as `map<string, _>`, and it named the type of the
-module `std.string` `String`. No sentence made either name usable in a type position, and no sentence gave a string
-literal a type.
+**Text before the decision.** [Standard Library](../../spec/v1.0/stdlib.md) wrote the type of the message of `panic` as
+`string` (`panic(message: string) -> !`) and the keys of a map as `map<string, _>`, and it named the type of the module
+`std.string` `String`. [Tokenizer Format](../../spec/v1.0/tokenizer-format.md#encoding-api) wrote the text type of its
+functions as `str` (`encode(text: str) -> [u32]`). No sentence of the type rules made one of these names usable in a
+type position, and no sentence gave a string literal a type.
 
 **Reference.** `mindc check` accepts `fn echo(s: String) -> String { return s; }` with `let t: String = echo("a");`,
 it accepts `let n: i64 = "a";`, and it accepts `let s: string = "a";`. The native backend refuses the first source
@@ -570,12 +584,13 @@ with `lane.string.result`, the second with `lane.source.string` and the third wi
 (B) The name is `string`, a primitive type. (C) No name: a string literal stands only where a function of the
 standard library takes one.
 
-**Decision.** Option A, decided by the specification owner on 2026-11-25. The string type is `String`, the type of
-the module `std.string` of the standard library ([Type formation](../../spec/v1.0/types.md#type-formation)). Like
-every entity of the standard library, `String` is available without an import. A string literal has the type
-`String`, so `let s: String = "a";` is valid and `let n: i64 = "a";` MUST be refused at check time with `E2001`. The
-lower-case spelling leaves the text: [Standard Library](../../spec/v1.0/stdlib.md) writes
-`panic(message: String) -> !` and "a map whose keys are `String` values".
+**Decision.** Option A, decided by the specification owner on 2026-11-25. The string type is `String`, the type of the
+module `std.string` of the standard library ([Type formation](../../spec/v1.0/types.md#type-formation)). Like every
+entity of the standard library, `String` is available without an import. A string literal has the type `String`, so
+`let s: String = "a";` is valid and `let n: i64 = "a";` MUST be refused at check time with `E2001`. The lower-case
+spelling leaves the text: [Standard Library](../../spec/v1.0/stdlib.md) writes `panic(message: String) -> !` and "a map
+whose keys are `String` values", and [Tokenizer Format](../../spec/v1.0/tokenizer-format.md#encoding-api) writes
+`encode(text: String) -> [u32]` and the other functions of its encoding API with `String`.
 
 **Form status.** `fn echo(s: String) -> String { }`, `let t: String = "a";`: Core v1; reference gap (`mindc check`
 accepts it; the native backend refuses a `String` result with `lane.string.result`). `let n: i64 = "a";`: Core v1
@@ -647,8 +662,9 @@ the first with `E2003`, "unsupported call to `tensor`", and the second with `E10
 `E1001` and the second with `E2003`, not with `E2016` and `E2005`).
 
 **Codes.** [`E2005`](../../spec/v1.0/errors.md#e2005-invalid-dtype-for-operation) (invalid dtype for operation) and
-[`E2016`](../../spec/v1.0/errors.md#e2016-invalid-cast) (invalid cast) exist; their triggers now name the tensor
-constructor too.
+[`E2016`](../../spec/v1.0/errors.md#e2016-invalid-cast) (invalid cast) exist. The trigger of `E2016` names the tensor
+constructor. The trigger of `E2005` does not name it; its general words, an operation applied to an operand whose type
+or dtype the operation does not support, cover `tensor(true)`.
 
 ## DN-19. Slice bounds and step
 
