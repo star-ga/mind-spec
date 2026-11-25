@@ -71,9 +71,11 @@ attribute, while the library functions that give or take an address are raw memo
   of [raw memory functions](../../spec/v1.0/memory.md#raw-memory-functions) names, or a function declared with
   `#[raw_memory]`. An implementation that adds an external function as an extension treats one with a pointer type
   in its signature, or with the tag `unsafe fn`, as a raw memory function. A call of a raw memory function, and a
-  region block (DN-15), is a raw memory use. A raw memory use is allowed only in the body of a function declared
-  with `#[raw_memory]` or `#[raw_memory(sealed)]`, or in a function of the standard library. Any other raw memory
-  use MUST be refused at check time with `E2501`. `#[raw_memory(sealed)]` states that no parameter and no result of
+  region block (DN-15), is a raw memory use. A call of a raw memory function is allowed only in the body of a
+  function declared with `#[raw_memory]` or `#[raw_memory(sealed)]`, or in a function of the standard library. A
+  region block is allowed only in the body of a function declared with `#[raw_memory]` or `#[raw_memory(sealed)]`; a
+  function of the standard library also needs the attribute for a region block. Any other raw memory use MUST be
+  refused at check time with `E2501`. `#[raw_memory(sealed)]` states that no parameter and no result of
   the function carries an address and that the function keeps no address after it returns. A call of a sealed
   function is not a raw memory use. An implementation does not check this statement. The attribute `raw_memory`
   stands only directly before a function declaration and takes no argument or the one argument `sealed`. Any other
@@ -152,7 +154,9 @@ it refuses `xs[2]` after a call that pushes to a `let mut w = p;` copy of the pa
 in a function with and without `#[raw_memory]`; the native backend refuses the first with
 `lane.source.function_contract` and the second with `lane.source.region`, and the MLIR images exit with the status 0.
 The native backend refuses the array sources with `lane.type.array` or `lane.type.generic`, and the map and string
-sources with `lane.call.unknown`.
+sources with `lane.call.unknown`. It accepts `fn f(s: &[i64], xs: array<i64>) -> i64` that pushes 9 through
+`let mut w = xs;` and returns `s[2]`, called as `f(xs, xs)` on `let xs: array<i64> = [1, 2];`; the native backend
+refuses it with `lane.type.slice`, and the MLIR image exits with the status 9.
 
 **Options.** (A) Every container value is a handle to one record that changes in place, as a struct value is.
 (B) A push or an insert consumes the handle, and a use of the old handle is refused at check time. (C) Arrays and
@@ -166,25 +170,29 @@ makes a container (`vec_new`, `map_new`, `string_new`) create a new record. Bind
 keep the record; none of them copies the elements. `push`, the insert function of a map and the string push
 functions change the record in place, and a change through one reference is visible through every other reference to
 that record. A library function that changes a container and returns a container returns the handle that it
-received. Each evaluation of a string literal creates a new string record. A function that gives a part of a string
-(`string_slice`, `string_slice_from`) creates a new record with a copy of the bytes. A map keeps the bytes that a
-string key had when it was inserted.
+received. Each evaluation of a string literal creates a new string record; an implementation MAY share one read-only
+record when no change can reach it. A function that gives a part of a string (`string_slice_from`) creates a new
+record with a copy of the bytes. A map keeps the bytes that a string key had when it was inserted.
 
-- A slice made from a container at a call (a `&[T]` or `&mut [T]` parameter) refers to the container record: after
-  a push through another reference it shows the grown container, and it never shows released storage.
+- A slice parameter (`&[T]` or `&mut [T]`) is an extension: the Core v1 grammar does not derive it. Where an
+  implementation provides it, a slice made from a container at a call refers to the container record: after a push
+  through another reference it shows the grown container, and it never shows released storage.
 - [Changing a container](../../spec/v1.0/memory.md#changing-a-container). A method call that changes a container
   (`xs.push(v)`) is a change of the place `xs`. The receiver must be a place whose root name is declared with
   `let mut`, as for an assignment; otherwise the call MUST be refused at check time with `E2402`. A parameter is not
   mutable: a function changes a container that it receives through a binding such as `let mut w = p;`. A `push`
   stands as a statement or in the update `xs = xs.push(v)` of the same place; any other use MUST be refused at check
-  time with `E2300`.
+  time with `E2300`. These rules follow the type of the receiver; a method of the same name on a value that is not a
+  container is not affected.
 - When a container needs more storage, the implementation moves the elements to new storage and releases the old
   storage if the implementation allocated it. After that, no container handle shows the old storage. A function that
   releases a container explicitly (`vec_free`) is a raw memory function
   ([DN-14](#dn-14-raw-memory-and-its-mark)), because other references to the record can still exist.
 - [Region blocks](../../spec/v1.0/memory.md#region-blocks). A region block is a raw memory use: it stands only in the
-  body of a function declared with `#[raw_memory]` or `#[raw_memory(sealed)]`, and elsewhere it MUST be refused at
-  check time with `E2501`.
+  body of a function declared with `#[raw_memory]` or `#[raw_memory(sealed)]`, and a function of the standard library
+  also needs the attribute for it. Where a statement can start, the name `region` directly followed by `{` is a region
+  block; in the body of a function without that attribute it MUST be refused at check time with `E2501`, by every
+  implementation, also one that does not provide region blocks.
 
 These rules replace the sentences on a replacement owner handle and on a fresh `Map` in the types chapter and in
 the standard library chapter. No warning period comes before the refusals of this note.
@@ -206,16 +214,19 @@ backend builds both and their images exit with the status 0). `let ys = xs.push(
 receives the array `p`, and a read of `xs[2]` in the caller after the call: Core v1; reference gap (`mindc check`
 refuses `xs[2]` on `let xs: array<i64> = [1, 2];` with `E2621`, "index 2 out of bounds for array of length 2"; the
 native backend refuses it with `lane.type.generic`). `region { let s: String = "a"; }` in a function without the
-attribute `raw_memory`: Core v1 refuses; the code is `E2501`; reference gap (`mindc check` accepts it; the native
+attribute `raw_memory`, also in a function of the standard library and also where an implementation does not provide
+region blocks: Core v1 refuses; the code is `E2501`; reference gap (`mindc check` accepts it; the native
 backend refuses it with `lane.source.region`; the MLIR backend builds it and its image exits with the status 0).
 `region { let s: String = "a"; }` in a function declared with `#[raw_memory]`: Extension.
+`fn f(s: &[i64], xs: array<i64>) -> i64 { }`: Extension.
 
-**Codes.** No new code. [`E2402`](../../spec/v1.0/errors.md#e2402-invalid-assignment-target) (invalid assignment target)
-now names a method call that changes a container; the published catalog does not define `E2402`.
+**Codes.** No new code. [`E2402`](../../spec/v1.0/errors.md#e2402-invalid-target-of-a-change) (invalid target of a
+change) now names a method call that changes a container; the published catalog does not define `E2402`.
 [`E2300`](../../spec/v1.0/errors.md#e2300-collection-mutation-in-expression-position) (collection mutation in expression
 position) exists, and its trigger now says which push it refuses: a `push` that stands neither as a statement nor in the
 update of the same place. [`E2501`](../../spec/v1.0/errors.md#e2501-raw-memory-use-outside-a-raw-memory-function) names
-a region block too.
+a region block too, also in a function of the standard library and where an implementation does not provide region
+blocks.
 
 ## DN-16. The string type
 
@@ -408,16 +419,22 @@ and `ends` are clamped to 0 and that an empty slice produces size-0 dimensions.
 indexing operations MUST verify bounds at runtime, and that an out-of-bounds access MUST NOT return undefined values.
 [Tensor ranks and shapes](../../spec/v1.0/shapes.md#tensor-ranks-and-shapes) gave a shape as a sequence of positive
 integers, and the catalog heading of `E3006` was "Zero or negative dimension". No sentence said whether an index
-outside its axis is refused at check time, and the chapters did not agree on a dimension of size 0.
+outside its axis is refused at check time, and the chapters did not agree on a dimension of size 0. No sentence
+refused a negative length of a fixed array type.
 
-**Reference.** On `let a: [i64; 4] = [1, 2, 3, 4];`, `mindc check` refuses `a[4]` and `a[-1]` with `E2621`, "index 4
-out of bounds for array of length 4", and `a[1:5]`, `a[1:4]` with `a[2:2]`, and `a[-1:2]` with `E1001`, "expected `]`
-to close index expression"; it accepts `return a[3];`, and the native and the MLIR images exit with the status 4. It
-refuses `Tensor<f32, [-1, 3]>` in a parameter type with `E1001`, "expected dimension (integer or symbol)", and it
-accepts `Tensor<f32, [0, 3]>` there; the native backend refuses that source with `lane.type.tensor`, and the MLIR
-image exits with the status 0. It accepts `fn at(a: [i64; 4], i: i64) -> i64 { return a[i]; }` called with 5, and
-`xs[i]` with `let i: i64 = 5;` on `let xs: array<i64> = [1, 2];`; the native backend refuses both with
-`lane.type.array`, and the MLIR images do not stop: they exit with the status 77 and 33.
+**Reference.** On `let a: [i64; 4] = [1, 2, 3, 4];`, `mindc check` refuses `a[4]` and `a[-1]` with `E2621`, "index 4 out
+of bounds for array of length 4", and `a[1:5]`, `a[1:4]` with `a[2:2]`, and `a[-1:2]` with `E1001`, "expected `]` to
+close index expression"; it accepts `return a[3];`, and the native and the MLIR images exit with the status 4. It
+accepts `return a[2 + 2];` on that array, and the native and the MLIR images exit with the status 77; it refuses
+`return a[(4)];` with `E2621`, "index 4 out of bounds for array of length 4", the native backend builds that source and
+its image exits with the status 77, and the MLIR backend refuses it with `E2621`. It refuses `Tensor<f32, [-1, 3]>` in a
+parameter type with `E1001`, "expected dimension (integer or symbol)", and it accepts `Tensor<f32, [0, 3]>` there; the
+native backend refuses that source with `lane.type.tensor`, and the MLIR image exits with the status 0. It accepts
+`fn at(a: [i64; 4], i: i64) -> i64 { return a[i]; }` called with 5, and `xs[i]` with `let i: i64 = 5;` on
+`let xs: array<i64> = [1, 2];`; the native backend refuses both with `lane.type.array`, and the MLIR images do not stop:
+they exit with the status 77 and 33. It refuses `fn f(a: [i64; -1]) -> i64 { }` with `E1001`, "expected array length
+(positive integer)", and the native and the MLIR backends refuse it with `E1001`. It accepts `let a: [i64; 0] = [];`;
+the native backend refuses that source with `lane.source.array_element`, and the MLIR image exits with the status 0.
 
 **Options.** (A) No operation gives an undefined value: an index or a slice bound outside its axis is refused at
 check time when the check can know it, and makes the defined stop at run time in every other case; no bound is
@@ -433,6 +450,9 @@ it is negative or not less than the extent of the axis, and a slice bound when i
 extent. No bound is clamped, and no index counts from the end. A dimension of size 0 is valid (an empty slice gives
 one); a negative dimension MUST be refused with `E3006`. [Security](../../spec/v1.0/security.md#tensor-safety) says
 the same sentences, and the sentence that out-of-bounds indices MAY produce an undefined value leaves the text.
+[Types](../../spec/v1.0/types.md#fixed-array-literal-cardinality) says the same of the length `n` of a fixed array type
+`[T; n]`, the extent of its one axis: a length of 0 is valid, and a negative length (`[i64; -1]`) MUST be refused at
+check time with `E3006`.
 
 **Form status.** `let a: [i64; 4] = [1, 2, 3, 4];` and `a[4]`, `a[-1]` or `a[1:5]`: Core v1 refuses; the code is
 `E3011`; reference gap (`mindc check` refuses `a[4]` and `a[-1]` with `E2621`, "index 4 out of bounds for array of
@@ -441,7 +461,9 @@ length 4", and `a[1:5]` with `E1001`, "expected `]` to close index expression").
 "expected `]` to close index expression"; it accepts `Tensor<f32, [0, 3]>` in a parameter type, the native backend
 refuses that with `lane.type.tensor`, and the MLIR backend builds it and its image exits with the status 0).
 `Tensor<f32, [-1, 3]>`: Core v1 refuses; the code is `E3006`; reference gap (`mindc check` refuses it with `E1001`,
-"expected dimension (integer or symbol)"). `fn at(a: [i64; 4], i: i64) -> i64 { return a[i]; }` called with 5, and
+"expected dimension (integer or symbol)"). `fn f(a: [i64; -1]) -> i64 { }`: Core v1 refuses; the code is `E3006`;
+reference gap (`mindc check` refuses it with `E1001`, "expected array length (positive integer)", and the native and
+the MLIR backends refuse it with `E1001`). `fn at(a: [i64; 4], i: i64) -> i64 { return a[i]; }` called with 5, and
 `xs[i]` with `i = 5` on an `array<i64>` of two elements: Core v1; the program makes the
 [defined stop](../../spec/v1.0/memory.md#the-defined-stop) with `E6001`; reference gap (`mindc check` accepts both;
 the native backend refuses both with `lane.type.array`; the MLIR backend builds both and their images do not stop:
@@ -449,6 +471,7 @@ they exit with the status 77 and 33).
 
 **Codes.** [`E3011`](../../spec/v1.0/errors.md#e3011-index-outside-its-axis) (index outside its axis) is new; the
 published catalog defines no code for it. [`E3006`](../../spec/v1.0/errors.md#e3006-negative-dimension) exists, and
-its heading "Zero or negative dimension" is now "Negative dimension".
+its heading "Zero or negative dimension" is now "Negative dimension". Its trigger now names a negative length of a
+fixed array type too, and says that the marker `-1` of a reshape is not a dimension.
 [`E6001`](../../spec/v1.0/errors.md#e6001-out-of-bounds-index) (out-of-bounds index) exists, and its trigger now names
 an index or a slice bound outside its axis at run time.
