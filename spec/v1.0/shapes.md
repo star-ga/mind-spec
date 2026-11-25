@@ -31,7 +31,8 @@ Shapes and dtypes are **device-agnostic**: the same rules apply to the CPU basel
 
 Formally, a shape is a finite sequence of integers that are not negative. A dimension of size 0 is valid (an
 empty slice gives one); a negative dimension MUST be refused at check time with
-[`E3006`](./errors.md#e3006-negative-dimension) ([Index bounds](./ir.md#index-bounds)):
+[`E3006`](./errors.md#e3006-negative-dimension), and a negative dimension that is known only at run time makes
+the defined stop, whose diagnostic names `E3006` ([Index bounds](./ir.md#index-bounds)):
 
 ```text
 Shape = [d_0, d_1, ..., d_{n-1}]   where each d_i ∈ ℕ (0 included)
@@ -40,9 +41,11 @@ Rank(Shape) = n
 
 Core v1 does not define symbolic or unknown dimensions in the base profile.
 Implementations may extend the shape system, but conformance is defined for
-fully-known shapes.
+fully-known shapes. A dimension that a program computes at run time (for example an
+argument of a constructor function) is a value, not a symbolic dimension.
 
-The verifier rejects tensors with a negative dimension. Scalars remain
+The verifier rejects tensors with a negative dimension; a negative dimension that
+is known only at run time makes the defined stop. Scalars remain
 rank-0 tensors with an empty `[]` shape and therefore have no dimension to
 check.
 
