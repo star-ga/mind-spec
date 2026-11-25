@@ -13,6 +13,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { makeIsPublished, rewriteDocsPage } = require('./site-links');
 
 const repoRoot = path.resolve(__dirname, '..');
 const srcDir = path.join(repoRoot, 'docs');
@@ -52,7 +53,7 @@ fs.cpSync(normativeDir, path.join(outDir, 'spec'), { recursive: true });
 // pages link to with `../../` paths. Without them the published artifact
 // carries dangling internal links. Each is required: a missing chapter is a
 // broken link in the published navigation, not an optional extra.
-for (const rel of [
+const rootFiles = [
   'STATUS.md',
   'determinism.md',
   'design/rfc-process.md',
@@ -66,7 +67,8 @@ for (const rel of [
   'design/rfcs/0027-function-generics.md',
   'design/rfcs/decision-notes.md',
   'std/tensor.md',
-]) {
+];
+for (const rel of rootFiles) {
   const src = path.join(repoRoot, rel);
   if (!fs.existsSync(src)) fail(`${rel} is missing — spec/ chapters link to it`);
   fs.mkdirSync(path.dirname(path.join(outDir, rel)), { recursive: true });
@@ -84,6 +86,25 @@ if (!fs.existsSync(syntaxRowsSrc) || !fs.statSync(syntaxRowsSrc).isDirectory()) 
   fail(`${syntaxRowsRel} is missing — spec/ chapters link to it`);
 }
 fs.cpSync(syntaxRowsSrc, path.join(outDir, syntaxRowsRel), { recursive: true });
+
+// docs/ is published one level higher than in the repository. A link of a docs/ page that leaves docs/ for a file
+// published above (spec/, the root files, the syntax rows) is rewritten to the published place
+// (tools/site-links.js), as the root chapters lose their `docs/` prefix above.
+const isPublished = makeIsPublished(rootFiles);
+const rewritePages = (dir) => {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      rewritePages(full);
+    } else if (entry.isFile() && entry.name.endsWith('.md')) {
+      const rel = path.relative(srcDir, full).split(path.sep).join('/');
+      const body = fs.readFileSync(full, 'utf8');
+      const published = rewriteDocsPage(body, rel, isPublished);
+      if (published !== body) fs.writeFileSync(path.join(outDir, rel), published);
+    }
+  }
+};
+rewritePages(srcDir);
 
 let fileCount = 0;
 const walk = (dir) => {
