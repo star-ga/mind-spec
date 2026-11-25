@@ -68,6 +68,7 @@ does not change the status. A row without a mark makes no claim about the refere
 | `if a > b { } else { }`, `match e { x => y, }`, `match e { x => { y } }` | Core v1 |
 | `t[i]`, `f(x)`, `x.m(a)`, `tensor(e)`, `tensor(e, dtype: f64)`, `(a, b)`, `[a, b]` | Core v1 |
 | `t[a:b]`, the slice form ([Tuple index](./language.md#tuple-index)) | Core v1; reference gap (`mindc check` refuses `let b = a[1:3];` on the array `[1, 2, 3, 4]` with `E1001`, "expected `]` to close index expression") |
+| `a[:e2]`, `a[e1:]`, `a[:]`, `a[e1:e2:e3]`: the other forms of `SliceExpression` ([Tuple index](./language.md#tuple-index)) | Open |
 | `t.0`, `t.0.1` on a tuple ([Tuple index](./language.md#tuple-index)) | Core v1; reference gap (the native backend refuses tuples with `lane.source.tuple`) |
 | `t.0.1e0` (a float literal with an exponent after an access dot, [Tuple index](./language.md#tuple-index)) | Core v1 refuses; reference conforms (`mindc check` refuses it with `E2002`, as the unknown identifier `e0`) |
 | `x.0` where `x` is not a tuple, `t.N` with `N` not less than the number of elements, `t[0]` on a tuple | Core v1 refuses; reference gap (`mindc check` accepts all three) |
@@ -75,7 +76,7 @@ does not change the status. A row without a mark makes no claim about the refere
 | `()`, the value of type `unit` ([The unit value](./types.md#the-unit-value)) | Core v1; reference gap (the native backend refuses it with `lane.source.tuple`) |
 | `()` where another type is expected (`let n: i64 = ();`) | Core v1 refuses; reference gap (`mindc check` accepts it, also as an argument for an `i64` parameter) |
 | `a % b` on two `f32` or two `f64` operands ([Floating-point remainder](./language.md#floating-point-remainder)) | Core v1; reference gap (the native backend refuses it with `lane.type.mismatch`) |
-| `a % b` and `a %= b` with an `f32` and an `f64` operand | Core v1 refuses; reference gap (`mindc check` accepts both) |
+| `a % b` and `a %= b` with an `f32` and an `f64` operand ([Floating-point remainder](./language.md#floating-point-remainder)) | Core v1 refuses; reference gap (`mindc check` accepts both) |
 | The precedence of `as`: `a * b as f64` is `a * (b as f64)` ([Operator precedence](./language.md#operator-precedence-and-associativity)) | Core v1 |
 | `e as T` for a pair of types of the cast table ([Casts](./language.md#casts)) | Core v1; reference gap (the native backend refuses `i64 as i32` and `i32 as i64` with `lane.type.int_width`, `f64 as i32` and `f64 as f32` with `lane.source.cast`, and `f32 as f64` with `lane.type.non_f64_float`) |
 | A cast that the table does not list (`1 as bool`, `true as f64`) | Core v1 refuses; reference gap (`mindc check` accepts `true as f64`; it refuses a cast to `bool` with `E2016`) |
@@ -94,3 +95,4 @@ does not change the status. A row without a mark makes no claim about the refere
 | `for i in a..b { }` | Extension |
 | `fn f<T>(x: T) -> T { }`, `import a.b as c;` | Extension |
 | `module m;`, `pub fn f() { }`, `impl S { }` | Extension |
+| `#[repr(C)] struct S { a: i32, }`, `#[requires(mind_spec = "1.2")] module m;`: an attribute before an item (`AttributedItem`, which `Module` does not reach; [Attributes](./language.md#attributes)) | Extension |

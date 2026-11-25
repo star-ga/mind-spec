@@ -248,8 +248,10 @@ IndexExpression = Expression
                 | SliceExpression
                 ;
 
-(* `a[e1:e2]` is the only slice form. The grammar has no range index: *)
-(* `a[1..3]` is not derived (language.md, "Tuple index").            *)
+(* `a[e1:e2]` is the only slice form that this edition defines; the *)
+(* other forms of SliceExpression have no meaning in this edition.  *)
+(* The grammar has no range index: `a[1..3]` is not derived         *)
+(* (language.md, "Tuple index").                                    *)
 SliceExpression = [ Expression ] , ":" , [ Expression ] , [ ":" , [ Expression ] ] ;
 
 FieldAccessOperator = "." , Identifier ;

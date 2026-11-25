@@ -210,8 +210,8 @@ adds no operator.
 For two operands of the same type `f32` or `f64`, `a % b` is the truncated remainder and has that type. Its
 value is `a - n * b`, where `n` is the quotient `a / b` truncated toward zero to an integer, computed exactly:
 the result is the exact value and is never rounded. A nonzero result has the sign of `a`, and its magnitude is
-less than the magnitude of `b`. Operands of two different float types are a dtype mismatch
-([`E2004`](./errors.md#e2004-dtype-mismatch-in-binary-operation)).
+less than the magnitude of `b`. Operands of two different float types are a dtype mismatch and MUST be
+refused at check time with [`E2004`](./errors.md#e2004-dtype-mismatch-in-binary-operation).
 
 The special cases below are normative and complete for `f32` and `f64`. The first row that matches decides
 the result. "Canonical NaN" is the bit pattern of [Canonical NaN](./types.md#canonical-nan) for the type.
@@ -446,14 +446,17 @@ The range after `in` (`for i in a..b`) is not defined by the grammar; it is an e
 `let t = (4, 5);`, `t.0` is 4 and `t.1` is 5. `N` is a decimal integer literal with no sign and no prefix.
 Where the parser expects the `DecimalInteger` of a tuple index and the next token is a float literal of the
 form digits "." digits (no exponent, no suffix), the token is read as two tuple indices: `t.0.1` means
-`(t.0).1`. After an access dot, a float literal token with an exponent is not a tuple index, because only
-the form digits "." digits is read as two indices: a source such as `t.0.1e0` is not derived and MUST be
+`(t.0).1`. After an access dot, a float literal token with an exponent or a suffix is not a tuple index,
+because only the form digits "." digits is read as two indices (the lexical grammar gives a float literal no
+suffix, so in Core v1 such a token has an exponent): a source such as `t.0.1e0` is not derived and MUST be
 refused. The type of `e` MUST be a tuple type and `N` MUST be less than its number of elements; otherwise the source MUST be refused at check
 time with [`E2404`](./errors.md#e2404-invalid-tuple-index). An index operator `e[i]` on a tuple has no
 meaning: when the type of `e` is a tuple type, `e[i]` MUST be refused with `E2404`, and the diagnostic MUST
 name the form `e.N`.
 
-`a[e1:e2]` (`SliceExpression`) is the only slice form. It lowers to the `Slice` operation of
+`a[e1:e2]` (`SliceExpression`) is the only slice form that this edition defines. `SliceExpression` also derives
+`a[:e2]`, `a[e1:]`, `a[:]` and `a[e1:e2:e3]`, and no sentence of this specification gives them a meaning.
+`a[e1:e2]` lowers to the `Slice` operation of
 [Core IR](./ir.md#indexing-and-slicing), which takes the elements from the index `e1` up to, and not
 including, the index `e2`: `a[1:3]` takes the elements 1 and 2. The grammar has no range index: `a[1..3]` is
 not derived, it MUST be refused at check time with [`E2406`](./errors.md#e2406-range-index), and the
