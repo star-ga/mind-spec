@@ -20,7 +20,7 @@ limitations under the License.
 |-------|-------|
 | State | Draft (2026-11-24). Not yet accepted. The specification owner decided the questions of this draft on 2026-11-24 (see [Questions](#questions-for-the-specification-owner)). |
 | Number | Provisional. The specification owner assigns the final number. |
-| Changes | `grammar-syntax.ebnf` (`Pattern`, `MatchArm`, record literal, the tuple index of [decision note DN-11](./decision-notes.md#dn-11-tuple-index-and-range-index)), `language.md` (new section on patterns; exhaustiveness), `types.md` (removes the dot spelling `Enum.Variant` of a variant), `errors.md` (`E2310`, `E2311`, `W2312`, `E2313`, `E2314`) |
+| Changes | `grammar-syntax.ebnf` (`Pattern`, `MatchArm`, record literal), `language.md` (new section on patterns; exhaustiveness), `types.md` (removes the dot spelling `Enum.Variant` of a variant), `errors.md` (`E2310`, `E2311`, `W2312`, `E2313`, `E2314`) |
 | Depends on | none. Enum variant patterns use the enum declaration of the candidate block. |
 | Related | [RFC 0023](./0023-type-parameters-on-user-types.md), [RFC 0024](./0024-impl-forms.md) (the variant path `E::B` in an expression) |
 
@@ -73,9 +73,6 @@ RecordLiteral    = Identifier , "{" , [ FieldInitList ] , "}" ;
 FieldInitList    = FieldInit , { "," , FieldInit } , [ "," ] ;
 FieldInit        = Identifier , ":" , Expression ;
 PrimaryExpression = … | RecordLiteral ;
-
-FieldAccessOperator = "." , ( Identifier | TupleIndex ) ;
-TupleIndex       = DecimalInteger ;
 ```
 
 `FieldPattern = Identifier` alone binds the field to a variable of the same name. A float literal is not a
@@ -93,12 +90,14 @@ language; none of them is derived.
 ### Tuple index
 
 The tuple index is the form that [decision note DN-11](./decision-notes.md#dn-11-tuple-index-and-range-index)
-decides; this RFC carries its grammar, because its plain forms use it. `t.i`, with `i` a `DecimalInteger` without a
-sign, reads component `i` of a tuple value, counted from 0. It needs a tuple type and an index below the arity of
-that type; otherwise it is refused with `E2404`. Where the parser expects the `DecimalInteger` of a tuple index and
+decides. The normative text has it (`TupleIndexOperator` of
+[`grammar-syntax.ebnf`](../../spec/v1.0/grammar-syntax.ebnf), [Tuple index](../../spec/v1.0/language.md#tuple-index)).
+This RFC does not change it; its plain forms use it. `t.i`, with `i` a `DecimalInteger` with no sign and no prefix,
+reads component `i` of a tuple value, counted from 0. It needs a tuple type and an index below the arity of that
+type; otherwise it is refused with `E2404`. Where the parser expects the `DecimalInteger` of a tuple index and
 the next token is a float literal of the form digits "." digits (no exponent, no suffix), the token is read as two
-tuple indices: `t.0.1` means `(t.0).1`. `t[i]` on a tuple has no meaning and is refused with `E2404`, and the message
-names the form `t.0`.
+tuple indices: `t.0.1` means `(t.0).1`. `t[i]` on a tuple has no meaning and is refused with `E2404`, and the
+diagnostic names the form `e.N`.
 
 ### Record literal
 
@@ -155,7 +154,7 @@ Every form in this RFC has a plain form in the existing core.
 **For-loop pattern.** `for P in c { B }` is `for e in c { let P = e; B }` with `e` fresh. With a tuple
 pattern: `for (a, b) in c { B }` is `for e in c { let (a, b) = e; B }`.
 
-**Match.** `match s { p1 if g1 => a1, p2 => a2 }` is an `if` chain on a fresh binding `t = s`:
+**Match.** `match s { p1 if g1 => a1, p2 => a2, }` is an `if` chain on a fresh binding `t = s`:
 `if test(p1, t) { bind(p1, t); if g1 { a1 } else { next } } else { next }`, where `next` is the rest
 of the chain and the last `next` is a trap (no value reaches it after rule 4). `test` compares a literal,
 compares the discriminant of an enum, or is `true` for an identifier, `_` and a record pattern; `bind` is the
@@ -359,10 +358,10 @@ expected:
 
 | Part | Work | Size |
 |------|------|------|
-| Front end, parser | `for` takes a `Pattern`; the typed tuple `let`; guard; literal, variant and record patterns; the record literal and the head rule; the tuple index and its lexing rule. The reference keeps two front ends in step; both change. | medium |
+| Front end, parser | `for` takes a `Pattern`; the typed tuple `let`; guard; literal, variant and record patterns; the record literal and the head rule; the tuple index and its reading rule. The reference keeps two front ends in step; both change. | medium |
 | Front end, checker | pattern typing; irrefutable positions; exhaustiveness (a usefulness check over the constructors of the scrutinee type); duplicate bindings; the final-arm rule; five new diagnostics | large |
 | Front end, desugaring | the four plain forms above | medium |
-| Native lowering | `for` over a fixed array is an indexed `while`, which the lane builds today. A tuple pattern is a replacement of one tuple by scalars (no tuple value crosses a call). An integer or wildcard `match` is an `if` chain, which the lane builds. A variant `match` needs the enum admission of RFC 0023. | medium, in steps |
+| Native lowering | `for` over a fixed array is an indexed `while`, which the native backend builds today. A tuple pattern is a replacement of one tuple by scalars (no tuple value crosses a call). An integer or wildcard `match` is an `if` chain, which the native backend builds. A variant `match` needs the enum admission of RFC 0023. | medium, in steps |
 | Tests | the rows above; one desugar-parity row for each plain form; the mutation row that removes the exhaustiveness arm | medium |
 
 ## Questions for the specification owner
@@ -378,7 +377,8 @@ expected:
    ([Variant path](#variant-path)).
 5. **Float and `String` literal patterns.** A `String` literal pattern is allowed. A float literal pattern is not.
 6. **Record pattern with `..`.** Not here. It comes with the later RFC of question 3.
-7. **Tuple index.** The grammar defines `t.0` ([decision note DN-11](./decision-notes.md#dn-11-tuple-index-and-range-index)).
+7. **Tuple index.** The grammar defines `t.0` ([decision note DN-11](./decision-notes.md#dn-11-tuple-index-and-range-index),
+   [Tuple index](../../spec/v1.0/language.md#tuple-index)).
    `t[0]` on a tuple is not defined. The plain form of the tuple `let` uses the tuple index.
 8. **Codes.** The proposed codes are assigned, because they are free in the catalog: `E2310` (refutable pattern in
    `let` or `for`), `E2311` (`match` not exhaustive), `W2312` (arm that no value can reach), `E2313` (name bound

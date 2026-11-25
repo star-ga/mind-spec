@@ -102,7 +102,7 @@ or infers them.
    payload of type `unit` has size 0 and no storage.
 7. A `struct` or `enum` MUST NOT contain itself by value: not directly, and not through the fields, payloads and
    type arguments of other types (a field of type `Option<Node<T>>` in `Node<T>` contains `Node<T>`). A violation is
-   refused with `E2040` ("type contains itself"). A type that holds itself through a pointer comes with a later RFC
+   refused with `E2040` ("declaration contains itself"). A type that holds itself through a pointer comes with a later RFC
    on an owning pointer type. [RFC 0027](./0027-function-generics.md) uses the same code for a trait that names
    itself in its supertrait list.
 8. A type argument on a type without parameters is refused with the code of rule 4. (The reference
@@ -421,8 +421,9 @@ The desugaring is the oracle for the equality test. No other oracle is needed fo
 4. **Recursive types.** Containment by value stays refused (rule 7). A type that holds itself through a pointer
    comes with a later RFC on an owning pointer type.
 5. **Marker parameters.** An unused type parameter is refused with `E2041` (rule 3).
-6. **Codes.** `E2038` (wrong number of type arguments), `E2039` (duplicate type parameter), `E2040` (type
-   contains itself), `E2041` (unused type parameter) and `E2042` (predeclared type name) are assigned to this draft.
+6. **Codes.** `E2038` (wrong number of type arguments), `E2039` (duplicate type parameter), `E2040`
+   (declaration contains itself: a type by value here, a trait in its own supertrait list in RFC 0027), `E2041`
+   (unused type parameter) and `E2042` (predeclared type name) are assigned to this draft.
    The published catalog does not define any of them.
 7. **Defaults and const parameters.** There are no defaults (`struct Box<T = i64>`). Const parameters (`[T; N]`
    with a named `N`) get their own RFC, because shapes need them.

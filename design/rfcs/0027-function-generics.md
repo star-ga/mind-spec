@@ -21,7 +21,7 @@ limitations under the License.
 | State | Draft (2026-11-24). Not yet accepted. The specification owner decided the questions of this draft on 2026-11-24 (see [Questions](#questions-for-the-specification-owner)). |
 | Number | Provisional. The specification owner assigns the final number. |
 | Edition | Core v1.1, one edition together with [RFC 0023](./0023-type-parameters-on-user-types.md) and [RFC 0024](./0024-impl-forms.md). |
-| Changes | `grammar-syntax.ebnf` (`FunctionTypeParameters` replaced by `GenericParameters`; `WhereClause`, `GenericFunctionRef`, the supertrait list of `TraitDeclaration` and the bounds of `TraitType` added; `TraitBounds` and `TraitBound` unmarked), `types.md` (Generics in Core v1, Traits and generics, the predeclared numeric bounds), `errors.md` |
+| Changes | `grammar-syntax.ebnf` (`FunctionTypeParameters` replaced by `GenericParameters`; `WhereClause`, `GenericFunctionRef`, the supertrait list of `TraitDeclaration` and the bounds of `TraitType` added; `TraitBounds` and `TraitBound` unmarked), `types.md` (Traits and generics, Type inference, the predeclared numeric bounds), `errors.md` (the trigger of `E2701` also covers a bound and a supertrait that name no declared trait) |
 | Owns | Bounds, the `where` clause, explicit type arguments at a call, **supertraits** (`trait B: A`), the predeclared numeric bounds and the bounds of an associated type. No other draft defines them. |
 | Depends on | [RFC 0024](./0024-impl-forms.md) (a bound names a trait; the meaning of a method call on a bounded value). The plain parameter list and the instance names of [RFC 0023](./0023-type-parameters-on-user-types.md) are used here. |
 | Related | [RFC 0023](./0023-type-parameters-on-user-types.md), [RFC 0025](./0025-patterns.md) |
@@ -121,9 +121,8 @@ so `f::<_, i64>(x)` is not derived.
    have the type `T`: `x + 1` is refused with `E2001`, and `x + (1 as T)` is valid. An arithmetic or bitwise
    operator gives a `T`, and a comparison gives a `bool`. In each instance an operator has the meaning that it has
    for the argument type, `%` on a float included
-   ([decision note DN-3](./decision-notes.md#dn-3-the-remainder-operator-on-floating-point-values)), and a cast has the
-   meaning that the cast rule of [decision note DN-6](./decision-notes.md#dn-6-precedence-of-as) gives for the two
-   types of the instance. The standard
+   ([Floating-point remainder](../../spec/v1.0/language.md#floating-point-remainder)), and a cast has the meaning
+   that the cast rule ([Casts](../../spec/v1.0/language.md#casts)) gives for the two types of the instance. The standard
    library signatures that use `Numeric` and `Float` ([Standard Library](../../spec/v1.0/stdlib.md)) name these
    bounds.
 5. **Inference.** At a call `f(args)` each type parameter is bound from the types of the arguments by
