@@ -39,19 +39,19 @@ Out of scope:
 This section says what the language checks.
 
 - **No pointer type**: the language has no pointer type and no null value. An address is an `i64` value that only a
-  raw memory function gives or takes ([Raw memory](./language.md#raw-memory)).
+  raw memory function gives or takes ([Raw memory](./memory.md#raw-memory)).
 - **Raw memory is marked**: a call of a raw memory function stands only in a function declared with
   `#[raw_memory]` or `#[raw_memory(sealed)]`, or in a function of the standard library. Any other call MUST be
   refused at check time with [`E2501`](./errors.md#e2501-raw-memory-use-outside-a-raw-memory-function), and a wrong
   use of the attribute with [`E2502`](./errors.md#e2502-invalid-raw_memory-attribute).
 - **The address rules are not checked**: in a raw memory function the program keeps the
-  [address rules](./stdlib.md#address-validity). An implementation does not have to detect a read or a write
+  [address rules](./memory.md#address-validity). An implementation does not have to detect a read or a write
   through an address that is not valid, so a use after a free or a write outside a buffer in such a function is an
   error of the program that the language does not refuse, and this specification gives the value of such a read no
   meaning. A `#[raw_memory(sealed)]` function states that it keeps no address; an implementation does not check
   that statement.
 - **Index functions stop**: an index function of the standard library that is not a raw memory function stops the
-  program when the index is outside the container ([Raw memory functions](./stdlib.md#raw-memory-functions)).
+  program when the index is outside the container ([Raw memory functions](./memory.md#raw-memory-functions)).
 
 An implementation MUST refuse the sources that this list names at check time. This section claims no other check
 of memory use.

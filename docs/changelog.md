@@ -9,15 +9,24 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed: the memory model, containers, index bounds and attribute codes (2026-11-25)
+
+- **Memory model.** A new chapter [Memory model](../spec/v1.0/memory.md) holds raw memory, the attribute
+  `raw_memory`, address validity and the list of the raw memory functions (moved from the Surface language and
+  the Standard library chapters), the checks of the index functions of the library, and one definition of the
+  defined stop of a failed check, which the other chapters link. The list of raw memory functions names the group
+  intrinsics of the lowering. The determinism item of the library conformance list covers the programs that keep
+  the address rules.
+
 ### Changed: raw memory, the string type, elementwise operands, the tensor constructor, slice bounds, literal types, cast and method readings (2026-11-25)
 
 - **Raw memory.** An address from a buffer function is valid until the next operation that can grow, shrink or free
   the buffer, and an address from `__mind_alloc` until it is freed or reallocated; the determinism rule of the
   standard library covers the programs that keep these rules
-  ([Address validity](../spec/v1.0/stdlib.md#address-validity)).
+  ([Address validity](../spec/v1.0/memory.md#address-validity)).
   The functions that take or give an address are listed as raw memory functions; a call of one stands only in a
   function declared with `#[raw_memory]` or `#[raw_memory(sealed)]`, or in the standard library, else `E2501`; a wrong
-  use of the attribute is `E2502` ([Raw memory](../spec/v1.0/language.md#raw-memory)). An attribute before a function
+  use of the attribute is `E2502` ([Raw memory](../spec/v1.0/memory.md#raw-memory)). An attribute before a function
   declaration is in the Core v1 grammar; an attribute name that the specification does not define for its position is
   refused, before a function declaration and before another item. An index function of the library stops the program
   when the index is outside the container; the form status page gives the measured reference gap. The Security

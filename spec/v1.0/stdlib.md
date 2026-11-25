@@ -57,7 +57,8 @@ shipped by the reference implementation.
 ### Control flow and assertions
 
 - **`assert(condition: bool) -> unit`**
-  - Aborts execution with a diagnostic if `condition` is `false`
+  - Aborts execution with a diagnostic if `condition` is `false`: the
+    [defined stop](./memory.md#the-defined-stop)
   - Diagnostic MUST include source location (file, line, column)
   - Implementations MAY include the condition text in the diagnostic
 
@@ -490,47 +491,10 @@ not an `(addr, offset)` pair:
 > expose a narrower set, but the pure-MIND `std` modules as shipped in v0.10.0
 > use `__mind_load_i8` (e.g. `std/map.mind`'s string-key byte comparison).
 
-### Address validity
+### Address validity and raw memory functions
 
-An address that a function gives for the storage of a buffer (`vec_addr`, `string_addr`, `map_keys_addr`,
-`map_vals_addr`, `vec_zeroed`) is valid until the next operation that can grow, shrink or free that buffer. An
-address from `__mind_alloc` or `__mind_realloc` is valid until it is passed to `__mind_free` or `__mind_realloc`. A
-read or a write through an address that is not valid, and a read of memory that the program did not write after the
-allocation, is an error of the program. An implementation does not have to detect it, and this specification gives
-the value of such a read no meaning.
-
-Determinism rule: an implementation MAY return different concrete addresses across runs, but a program written
-against these intrinsics that keeps the address rules above MUST observe the same logical behaviour byte-for-byte
-given identical inputs. The rule makes no statement about a program that breaks an address rule.
-
-### Raw memory functions
-
-These functions of the standard library take or give an address. Each is a raw memory function
-([Raw memory](./language.md#raw-memory)): a call of one is allowed only in a function declared with
-`#[raw_memory]` or `#[raw_memory(sealed)]`, or in a function of the standard library.
-
-| Function | Takes or gives |
-| --- | --- |
-| `__mind_alloc`, `__mind_realloc` | give an address (`__mind_realloc` also takes one) |
-| `__mind_free` | takes an address and frees its region |
-| `__mind_load_i8`, `__mind_load_i16`, `__mind_load_i32`, `__mind_load_i64` | take an address |
-| `__mind_store_i8`, `__mind_store_i16`, `__mind_store_i32`, `__mind_store_i64` | take an address |
-| `__mind_read`, `__mind_write` | take the address of a buffer |
-| `vec_addr`, `string_addr`, `map_keys_addr`, `map_vals_addr`, `vec_zeroed` | give the address of a buffer |
-| `vec_free` | frees the storage of a container, which other values of the container can still reach |
-| `print_bytes`, `eprint_bytes`, `read_stdin_bytes`, `file_read`, `file_write` | take the address of a buffer |
-
-An intrinsic that an implementation adds beyond this chapter and that takes or gives an address is a raw memory
-function too, for example `__mind_open`, which takes the address of a path, and `__mind_argv`, which gives an
-address.
-
-A function of the standard library that is not a raw memory function is safe for every argument: no argument makes
-it read or write memory outside the storage that its containers own. An index function
-(`vec_get`, `vec_set`, `string_get_byte`, `map_key_at`, `map_value_at`) MUST stop the program when the index is not
-less than the length of the container or is negative: the program stops as a false `assert` stops it
-([Control flow and assertions](#control-flow-and-assertions)), and the diagnostic names
-[`E6001`](./errors.md#e6001-out-of-bounds-index). A form of an index function that does not check the index has its
-own name and is declared with `#[raw_memory]`; this chapter names no such form.
+The address rules of these intrinsics, the list of the raw memory functions and the checks of the index
+functions of the standard library are in [Memory model](./memory.md#raw-memory).
 
 ### Four pure-MIND modules
 
@@ -825,7 +789,8 @@ Conforming implementations MUST:
 1. **Provide all functions listed**: No omissions permitted for Core v1 conformance
 2. **Match semantics**: Behavior MUST align with referenced IR operations and autodiff rules
 3. **Report errors consistently**: Use error codes from errors.md where applicable
-4. **Preserve determinism**: Same inputs MUST produce same outputs. Scalar IEEE-754 arithmetic (+ − × ÷ √) and integer/Q16.16 operations are **bit-exact** (zero tolerance) on the strict path; the numeric-tolerance allowance below applies only to transcendental functions and vector/SIMD reductions, whose cross-substrate bit-identity is on the roadmap.
+4. **Preserve determinism**: Same inputs MUST produce same outputs for a program that keeps the address rules
+   of [Address validity](./memory.md#address-validity). Scalar IEEE-754 arithmetic (+ − × ÷ √) and integer/Q16.16 operations are **bit-exact** (zero tolerance) on the strict path; the numeric-tolerance allowance below applies only to transcendental functions and vector/SIMD reductions, whose cross-substrate bit-identity is on the roadmap.
 5. **Document extensions**: Any additional functions MUST be clearly marked as extensions
 
 Implementations MAY:

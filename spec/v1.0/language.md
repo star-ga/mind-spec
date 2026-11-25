@@ -383,7 +383,7 @@ block it reads as an array expression.
 
 In Core v1 an attribute stands directly before a function declaration (`FunctionDeclaration`). An attribute before a
 function declaration is part of Core v1 when this specification defines its name for that position. This chapter
-defines `#[raw_memory]` and `#[raw_memory(sealed)]` ([Raw memory](#raw-memory)). An attribute before a function
+defines `#[raw_memory]` and `#[raw_memory(sealed)]` ([Raw memory](./memory.md#raw-memory)). An attribute before a function
 declaration whose name this specification does not define for that position MUST be refused at check time.
 
 An attribute before another item (`AttributedItem` in the "v1.1 candidate additions" block of the grammar, which
@@ -395,27 +395,8 @@ for example `#[fast] struct S { a: i64, }`.
 
 ## Raw memory
 
-An address is an `i64` value that a raw memory function gives or takes. A **raw memory function** is a function that
-the list of [raw memory functions](./stdlib.md#raw-memory-functions) of the standard library names, or a function
-declared with `#[raw_memory]`. An implementation that adds an external function as an extension treats one with a
-pointer type in its signature, or with the tag `unsafe fn`, as a raw memory function. A call of a raw memory
-function is a **raw memory use**.
-
-A raw memory use is allowed only in the body of a function declared with `#[raw_memory]` or `#[raw_memory(sealed)]`,
-or in a function of the standard library. Any other raw memory use MUST be refused at check time with
-[`E2501`](./errors.md#e2501-raw-memory-use-outside-a-raw-memory-function).
-
-`#[raw_memory(sealed)]` states that no parameter and no result of the function carries an address and that the
-function keeps no address after it returns. A call of a sealed function is not a raw memory use. An implementation
-does not check this statement.
-
-The attribute `raw_memory` stands only directly before a function declaration and takes no argument or the one
-argument `sealed`. Any other use of the attribute `raw_memory`, before another item or with another argument, MUST be
-refused at check time with [`E2502`](./errors.md#e2502-invalid-raw_memory-attribute).
-
-In a raw memory function the program keeps the [address rules](./stdlib.md#address-validity). An implementation does
-not have to detect a read or a write through an address that is not valid, and this specification gives the value
-of such a read no meaning.
+Raw memory, the attribute `raw_memory` and its refusals are defined in
+[Memory model](./memory.md#raw-memory).
 
 ## Entry function
 

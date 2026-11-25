@@ -1,5 +1,5 @@
 # MIND Conformance Test: vec_addr is a raw memory function
-# Specification reference: spec/v1.0/language.md#raw-memory
+# Specification reference: spec/v1.0/memory.md#raw-memory
 # Category: syntax
 # Profile: cpu
 

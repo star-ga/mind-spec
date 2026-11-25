@@ -70,6 +70,8 @@ Core v1 is organised into the following pillars:
     SBOM generation (SPDX/CycloneDX), and policy enforcement.
 16. **Core v1 Forms** ([`core-v1-forms.md`](./core-v1-forms.md)) — forms of the surface grammar with their
     status in Core v1 (core, not in Core v1, extension, open).
+17. **Memory Model** ([`memory.md`](./memory.md)) — container records and their storage, raw memory, address
+    validity, region blocks and the defined stop of a failed check.
 
 Legacy chapters such as [`lexical.md`](./lexical.md) and [`types.md`](./types.md) remain available for
 background on the broader language but are not required for Core v1 conformance.

@@ -376,7 +376,7 @@ exclusivity analysis; those guarantees remain future work.
 
 ### E2501: Raw memory use outside a raw memory function
 
-- **Trigger**: a call of a raw memory function ([Raw memory](./language.md#raw-memory)) in the body of a function
+- **Trigger**: a call of a raw memory function ([Raw memory](./memory.md#raw-memory)) in the body of a function
   that is not declared with `#[raw_memory]` or `#[raw_memory(sealed)]` and is not a function of the standard
   library.
 - **Required context**: the called function, the location of the call and the function that holds it, with the
@@ -388,7 +388,7 @@ exclusivity analysis; those guarantees remain future work.
 ### E2502: Invalid raw_memory attribute
 
 - **Trigger**: the attribute `raw_memory` before an item that is not a function declaration, or with an argument
-  other than none or the one argument `sealed` ([Raw memory](./language.md#raw-memory)).
+  other than none or the one argument `sealed` ([Raw memory](./memory.md#raw-memory)).
 - **Required context**: the attribute, its location and the item after it, with the fix: `#[raw_memory]` or
   `#[raw_memory(sealed)]` directly before a function declaration.
 - **Example**: `E2502: 'raw_memory' stands only before a function declaration at line 1, column 1`
@@ -572,7 +572,7 @@ E6xxx errors occur during backend execution or while producing a runnable artifa
 
 ### E6001: Out-of-bounds index
 - **Trigger**: Index or Gather operation accesses invalid position, or an index function of the standard library
-  gets an index outside its container ([Raw memory functions](./stdlib.md#raw-memory-functions))
+  gets an index outside its container ([Raw memory functions](./memory.md#raw-memory-functions))
 - **Required context**: operation, indices, tensor shape
 - **Example**: `E6001: Index out of bounds: [2, 5] for shape [3, 4]`
 

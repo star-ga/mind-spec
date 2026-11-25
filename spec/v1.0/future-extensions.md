@@ -18,9 +18,6 @@ limitations under the License.
 
 This chapter documents forward-looking considerations for domain-specific extensions to the MIND language and standard library. These are **informative** (not normative) and represent planned or potential features that maintain compatibility with Core v1 while extending its capabilities for specialized applications.
 
-The code blocks of this chapter show proposed syntax. The Core v1 grammar does not derive them, so they are
-written as text and are not MIND sources of this edition.
-
 ## Purpose
 
 Future extensions allow MIND to evolve beyond the Core v1 baseline while maintaining:
