@@ -665,6 +665,7 @@ error[E3001]: Broadcasting failed at dimension 1
 Implementations SHOULD provide structured error data suitable for tooling:
 
 ```rust
+// Not MIND source: the shape of the error data of an implementation, written in Rust
 struct CompilerError {
     code: ErrorCode,        // E.g., E3001
     message: String,

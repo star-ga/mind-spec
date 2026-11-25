@@ -24,13 +24,15 @@ Essential utilities included in every MIND program.
 > function-based one in [`spec/v1.0/stdlib.md`](../spec/v1.0/stdlib.md) (`io` module + `std.io`).
 
 ## IO
-```
+```text
+// Not Core v1: a proposed macro form; the language has no macros
 macro print!(fmt: &[u8], args...)
 ```
 Prints to stdout.
 
 ## Panic
-```
+```text
+// Not Core v1: a proposed macro form; the language has no macros
 macro panic!(msg: &[u8]) -> !
 ```
 Terminates the program immediately.
