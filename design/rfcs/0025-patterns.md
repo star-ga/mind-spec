@@ -18,11 +18,11 @@ limitations under the License.
 
 | Field | Value |
 |-------|-------|
-| State | Draft (2026-11-24). Not yet accepted. |
+| State | Draft (2026-11-24). Not yet accepted. The specification owner decided the questions of this draft on 2026-11-24 (see [Questions](#questions-for-the-specification-owner)). |
 | Number | Provisional. The specification owner assigns the final number. |
-| Changes | `grammar-syntax.ebnf` (`Pattern`, `MatchArm`, record literal), `language.md` (new section on patterns), `errors.md` |
+| Changes | `grammar-syntax.ebnf` (`Pattern`, `MatchArm`, record literal, the tuple index of [decision note DN-11](./decision-notes.md#dn-11-tuple-index-and-range-index)), `language.md` (new section on patterns; exhaustiveness), `types.md` (removes the dot spelling `Enum.Variant` of a variant), `errors.md` (`E2310`, `E2311`, `W2312`, `E2313`, `E2314`) |
 | Depends on | none. Enum variant patterns use the enum declaration of the candidate block. |
-| Related | [RFC 0023](./0023-type-parameters-on-user-types.md), [RFC 0024](./0024-impl-forms.md) |
+| Related | [RFC 0023](./0023-type-parameters-on-user-types.md), [RFC 0024](./0024-impl-forms.md) (the variant path `E::B` in an expression) |
 
 ## Problem
 
@@ -73,10 +73,32 @@ RecordLiteral    = Identifier , "{" , [ FieldInitList ] , "}" ;
 FieldInitList    = FieldInit , { "," , FieldInit } , [ "," ] ;
 FieldInit        = Identifier , ":" , Expression ;
 PrimaryExpression = … | RecordLiteral ;
+
+FieldAccessOperator = "." , ( Identifier | TupleIndex ) ;
+TupleIndex       = DecimalInteger ;
 ```
 
 `FieldPattern = Identifier` alone binds the field to a variable of the same name. A float literal is not a
-pattern (equality on floats in a pattern has no single meaning).
+pattern (equality on floats in a pattern has no single meaning). The binding pattern `x @ p`, the reference
+pattern `&p`, or-patterns (`1 | 2`), range patterns (`1..=3`) and `..` in a record pattern are not part of the
+language; none of them is derived.
+
+### Variant path
+
+`E::B` is the only spelling of a variant, in a pattern (`VariantPattern`) and in an expression (`AssociatedValue` of
+[RFC 0024](./0024-impl-forms.md)). This RFC removes the dot spelling `Enum.Variant` from
+[Types](../../spec/v1.0/types.md#module-qualified-type-ownership). `E.B`, where `E` names an enum, is refused with
+`E2002`, and the message names `E::B`.
+
+### Tuple index
+
+The tuple index is the form that [decision note DN-11](./decision-notes.md#dn-11-tuple-index-and-range-index)
+decides; this RFC carries its grammar, because its plain forms use it. `t.i`, with `i` a `DecimalInteger` without a
+sign, reads component `i` of a tuple value, counted from 0. It needs a tuple type and an index below the arity of
+that type; otherwise it is refused with `E2404`. Where the parser expects the `DecimalInteger` of a tuple index and
+the next token is a float literal of the form digits "." digits (no exponent, no suffix), the token is read as two
+tuple indices: `t.0.1` means `(t.0).1`. `t[i]` on a tuple has no meaning and is refused with `E2404`, and the message
+names the form `t.0`.
 
 ### Record literal
 
@@ -99,23 +121,23 @@ A loop that needs an index and a value uses a library function that yields pairs
    arity. A literal pattern needs a scrutinee of the type of the literal (`i64`-family, `bool`, `String`).
    A variant pattern needs a scrutinee of the named enum and the payload arity of that variant. A record
    pattern needs a scrutinee of the named `struct`, and every field it names MUST exist.
-2. **Bindings.** A name is bound at most once in one pattern (proposed `E2313`). A binding has the type of the
+2. **Bindings.** A name is bound at most once in one pattern (`E2313`). A binding has the type of the
    part of the scrutinee that it matches. Its scope depends on the position of the pattern:
    in a `match` arm it is the guard and the arm body, and nowhere else; in a `let` it is the rest of the
    enclosing block, from the end of the `let` statement; in a `for` it is the body of the loop.
 3. **Irrefutable positions.** The pattern of a `let` and of a `for` MUST be
    irrefutable: an identifier, `_`, a tuple of irrefutable patterns, or a record pattern whose field
-   patterns are irrefutable. A refutable pattern there is refused (proposed `E2310`).
+   patterns are irrefutable. A refutable pattern there is refused with `E2310`.
 4. **Exhaustiveness.** The arms of a `match` MUST cover every value of the scrutinee type. An arm with a
    guard does not count toward coverage. A `bool` needs both literals or a catch-all arm. An integer or
    string scrutinee needs a catch-all arm (`_` or an identifier). An enum needs every variant or a
-   catch-all arm. A missing case is refused (proposed `E2311`). An arm that no value can reach is a warning
-   (proposed `W2312`), not an error.
-5. **Variant against binding.** An unguarded bare identifier arm that is not the final arm and whose name is a
-   variant of the scrutinee's enum is refused with `E2301` (the existing rule of the
-   [Error Catalog](../../spec/v1.0/errors.md#e2301-non-final-enum-variant-binding-collision); this draft does
-   not widen it: an arm with a guard, `A if g => …`, is not refused). A bare identifier as the final arm is a catch-all binding, even when its name is a variant
-   name; the reference accepts it (open question 9).
+   catch-all arm. A missing case is an error, refused with `E2311`. An arm that no value can reach is a warning
+   (`W2312`), not an error.
+5. **Variant against binding.** An unguarded arm whose pattern is a bare identifier equal to the name of a variant
+   of the scrutinee's enum is refused. When the arm is not the final arm, the code is `E2301` (the existing rule of
+   the [Error Catalog](../../spec/v1.0/errors.md#e2301-non-final-enum-variant-binding-collision)). When it is the
+   final arm, the code is `E2314`. The message names the variant pattern `E::A` and the rename of the binding. An
+   arm with a guard, `A if g => …`, is a binding and is not refused.
 6. **Guards.** A guard is an `Expression` of type `bool`. It MAY read the bindings of its pattern. It MUST
    NOT assign. It MAY call a function; the effects of the call happen when the guard runs (rule 7).
 7. **Order.** The arms are tried from the first to the last. For one arm the pattern is tested first, and the
@@ -127,8 +149,8 @@ A loop that needs an index and a value uses a library function that yields pairs
 
 Every form in this RFC has a plain form in the existing core.
 
-**Tuple `let`.** `let (a, b) = e;` is `let t = e; let a = t[0]; let b = t[1];` where `t` is a fresh name and
-`t[i]` reads component `i` of a tuple value.
+**Tuple `let`.** `let (a, b) = e;` is `let t = e; let a = t.0; let b = t.1;` where `t` is a fresh name and
+`t.i` is the tuple index.
 
 **For-loop pattern.** `for P in c { B }` is `for e in c { let P = e; B }` with `e` fresh. With a tuple
 pattern: `for (a, b) in c { B }` is `for e in c { let (a, b) = e; B }`.
@@ -148,7 +170,9 @@ bytes of the program with the plain form written out.
 
 ## Proposed conformance rows
 
-Proposals. The reference refuses the first two accept rows today.
+Proposals. The reference refuses the first two accept rows today. The codes `E2310`, `E2311`, `W2312`, `E2313`
+and `E2314` are the codes of this draft; `E2001`, `E2002` and `E2301` exist, and `E2404` is the code of the tuple index
+([decision note DN-11](./decision-notes.md#dn-11-tuple-index-and-range-index)).
 
 ```yaml
 description: "A tuple pattern as the for-loop variable destructures each element"
@@ -158,7 +182,7 @@ input:
   source: |
     fn main() -> i64 {
         let xs = [(1, 2), (3, 4)];
-        let s = 0;
+        let mut s = 0;
         for (a, b) in xs {
             s = s + a * b;
         }
@@ -180,6 +204,45 @@ input:
 expected:
   status: success
   output: { result: { dtype: i64, shape: [], values: 3 } }
+```
+
+```yaml
+description: "A tuple index of a tuple index reads two components"
+input:
+  source: |
+    fn main() -> i64 {
+        let t = ((1, 2), 3);
+        return t.0.1 + t.1;
+    }
+expected:
+  status: success
+  output: { result: { dtype: i64, shape: [], values: 5 } }
+```
+
+```yaml
+description: "A tuple index at the arity of the tuple is refused"
+input:
+  source: |
+    fn main() -> i64 {
+        let t = (1, 2);
+        return t.2;
+    }
+expected:
+  status: error
+  error: { code: E2404, message_contains: "tuple" }
+```
+
+```yaml
+description: "The index operator on a tuple is refused"
+input:
+  source: |
+    fn main() -> i64 {
+        let t = (1, 2);
+        return t[0];
+    }
+expected:
+  status: error
+  error: { code: E2404, message_contains: "tuple" }
 ```
 
 ```yaml
@@ -231,6 +294,19 @@ expected:
 ```
 
 ```yaml
+description: "A refutable pattern in a let is refused"
+input:
+  source: |
+    fn main() -> i64 {
+        let 1 = 1;
+        return 0;
+    }
+expected:
+  status: error
+  error: { code: E2310, message_contains: "refutable" }
+```
+
+```yaml
 description: "A name bound twice in one pattern is refused"
 input:
   source: |
@@ -241,6 +317,28 @@ input:
 expected:
   status: error
   error: { code: E2313, message_contains: "bound twice" }
+```
+
+```yaml
+description: "A final bare identifier arm with the name of a variant is refused"
+input:
+  source: |
+    enum E {
+        A,
+        B,
+    }
+    fn k(e: E) -> i64 {
+        return match e {
+            E::A => 1,
+            B => 2,
+        };
+    }
+    fn main() -> i64 {
+        return 0;
+    }
+expected:
+  status: error
+  error: { code: E2314, message_contains: "E::B" }
 ```
 
 ```yaml
@@ -261,28 +359,34 @@ expected:
 
 | Part | Work | Size |
 |------|------|------|
-| Front end, parser | `for` takes a `Pattern`; the typed tuple `let`; guard; literal, variant and record patterns; the record literal and the head rule. The reference keeps two front ends in step; both change. | medium |
-| Front end, checker | pattern typing; irrefutable positions; exhaustiveness (a usefulness check over the constructors of the scrutinee type); duplicate bindings; four new diagnostics | large |
+| Front end, parser | `for` takes a `Pattern`; the typed tuple `let`; guard; literal, variant and record patterns; the record literal and the head rule; the tuple index and its lexing rule. The reference keeps two front ends in step; both change. | medium |
+| Front end, checker | pattern typing; irrefutable positions; exhaustiveness (a usefulness check over the constructors of the scrutinee type); duplicate bindings; the final-arm rule; five new diagnostics | large |
 | Front end, desugaring | the four plain forms above | medium |
 | Native lowering | `for` over a fixed array is an indexed `while`, which the lane builds today. A tuple pattern is a replacement of one tuple by scalars (no tuple value crosses a call). An integer or wildcard `match` is an `if` chain, which the lane builds. A variant `match` needs the enum admission of RFC 0023. | medium, in steps |
 | Tests | the rows above; one desugar-parity row for each plain form; the mutation row that removes the exhaustiveness arm | medium |
 
-## Open questions for the specification owner
+## Questions for the specification owner
 
-1. **Exhaustiveness (rule 4).** [Language](../../spec/v1.0/language.md) says that exhaustiveness checking is "still
-   maturing", and the reference accepts a `match` that omits a case. Is the rule an error from the first
-   edition that accepts this RFC, or a warning for one edition?
-2. **Binding and reference patterns.** The binding patterns of this draft are the identifier, the tuple and the
-   record pattern (`let`, `for` and `match`). `x @ p` (bind the whole and match the part) and `&p` are refused
-   today and are not in this RFC. Wanted?
-3. **Or-patterns and ranges** (`1 | 2`, `1..=3`): not here. Wanted?
-4. **Variant path spelling.** `E::B` (this draft) and the dot form `E.B` that [Types](../../spec/v1.0/types.md)
-   mentions for visible enums: is one spelling enough?
-5. **Float and `String` literal patterns.** The draft allows a `String` literal and no float. Keep?
-6. **Record pattern with `..`** (ignore the other fields): not here.
-7. **Tuple index.** `t.0` is accepted by the reference and is not in the grammar. The plain form of the tuple
-   `let` uses `t[i]` on a tuple, which the grammar does not give a meaning for either. Should the grammar
-   define `t.0` or `t[0]` on a tuple, or should the plain form use a primitive that is not source syntax?
-8. **Codes.** `E2310`, `E2311`, `E2313` and `W2312` are proposals. The owner assigns them.
-9. **A variant name as the final arm.** `match x { n => 1, }` with a variant `n` binds the name (rule 5). A
-   warning for a final bare identifier that equals a variant name would catch a typo; add it?
+### Decided by the specification owner (2026-11-24)
+
+1. **Exhaustiveness (rule 4).** A non-exhaustive `match` is an error (`E2311`) from the first edition that
+   accepts this RFC. There is no warning edition.
+2. **Binding and reference patterns.** `x @ p` and `&p` are not part of the language.
+3. **Or-patterns and ranges.** `1 | 2` and `1..=3` are not in this RFC. One later RFC holds them, together with
+   `..` in a record pattern (question 6).
+4. **Variant path spelling.** `E::B` is the only variant path. The dot form leaves the Types text
+   ([Variant path](#variant-path)).
+5. **Float and `String` literal patterns.** A `String` literal pattern is allowed. A float literal pattern is not.
+6. **Record pattern with `..`.** Not here. It comes with the later RFC of question 3.
+7. **Tuple index.** The grammar defines `t.0` ([decision note DN-11](./decision-notes.md#dn-11-tuple-index-and-range-index)).
+   `t[0]` on a tuple is not defined. The plain form of the tuple `let` uses the tuple index.
+8. **Codes.** The proposed codes are assigned, because they are free in the catalog: `E2310` (refutable pattern in
+   `let` or `for`), `E2311` (`match` not exhaustive), `W2312` (arm that no value can reach), `E2313` (name bound
+   twice). Question 9 takes `E2314` from the same block.
+9. **A variant name as the final arm.** A final bare identifier arm whose name equals a variant of the matched
+   enum is an error with its own code, `E2314`, not a warning (rule 5).
+
+### Open
+
+- **Record patterns that omit fields.** Rule 1 lets a record pattern name some of the fields of the `struct`.
+  Whether it MUST name every field while `..` is not in the language is not decided.
