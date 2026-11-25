@@ -47,10 +47,11 @@ Measured with the reference compiler v0.10.4 (`mindc check --no-fmt`, and `mindc
 | `#[requires(mind_spec = "1.2")]` before `module m;` (the example of [Versioning](../../spec/v1.0/versioning.md#in-source-code)) | `E1001`, ``unexpected `#`, expected an expression`` (1:1) | not reached |
 | `#[name("x")]` (a string argument) | `E1001`, ``unexpected `#`, expected an expression`` | not reached |
 
-[Types](../../spec/v1.0/types.md) states that an inline module block is today "a transparent syntax
-container": its declarations are flattened into the file, and the block does not create a module-table
-owner. The text of [Language](../../spec/v1.0/language.md#module-qualified-references) gives a qualifier
-rule for imports and none for blocks. The grammar's `ModuleBlock` needs braces, and the version example uses
+[Types](../../spec/v1.0/types.md#module-qualified-type-ownership) states that inline module blocks "are transparent
+syntax containers in the current parser": a project loader flattens the declarations of a block into the file, and
+the block does not create a module-table owner. The text of
+[Language](../../spec/v1.0/language.md#module-qualified-references) gives a qualifier rule for imports and none for
+blocks. The grammar's `ModuleBlock` needs braces, and the version example uses
 `module my_program;` without them.
 
 ## Grammar change
@@ -88,9 +89,17 @@ extension that [Language](../../spec/v1.0/language.md#executable-subset-status-i
    of [Language](../../spec/v1.0/language.md#module-qualified-references) applied to a block. A block is not
    flattened into the file in any edition: two blocks with members of the same name are two namespaces.
 3. **Names.** Two items of one namespace MUST NOT have the same name. A module block and a function of
-   the same enclosing namespace MUST NOT have the same name. A violation is refused with `E2720`.
+   the same enclosing namespace MUST NOT have the same name. The qualified name of a module block is the module
+   path of its file module, then the names of the blocks around it, outermost first, then its own name, joined by
+   `.` (the declaration name `D` of [RFC 0023](./0023-type-parameters-on-user-types.md#instance-names)). In a
+   project, the qualified name of a module block MUST NOT equal the module path of a module of the project: a block
+   `defs` in the file module `nested` and the project module `nested.defs` would give the one name
+   `nested.defs.Color` to two declarations, and the reference `nested.defs.Color` would have two meanings. A
+   violation of this rule is refused with `E2720`.
 4. **Export.** `export` is the only visibility mechanism. An item is visible to another module only if it is
-   exported. `export { f, g }` exports the named items of the module in which it stands. An export of a name that
+   exported. A module block is a namespace of its module and not another module: a member of a block is visible in
+   the whole module that holds the block, by its qualified name (rule 2), with no export. `export { f, g }` exports
+   the named items of the module in which it stands. An export of a name that
    is not declared in that module is refused with `E2002`. One name exported twice is a warning. A method and an
    associated item are exported with their type ([RFC 0024](./0024-impl-forms.md), rule 10), and an export list
    does not name them.
@@ -103,16 +112,26 @@ extension that [Language](../../spec/v1.0/language.md#executable-subset-status-i
 6. **Import alias.** `import a.b as c;` binds the qualifier `c` and not `b`. The reference registers both
    (language.md); this RFC makes the alias the only qualifier of that import.
 7. **Attributes.** An attribute is defined by a chapter of the specification, by its name and by the item that it
-   stands before. The attributes defined are exactly these:
+   stands before. The defined attributes are exactly those that a chapter defines by name and position. A search of
+   every file of the specification for the form `#[` finds two that a chapter defines:
    - `requires`, with the key `mind_spec`, before the file module declaration `module m;`
      ([Versioning](../../spec/v1.0/versioning.md#in-source-code); rule 8 gives the rules for its argument).
+   - `repr(C)`, with the one argument `C`, before a `struct` declaration. The layout of the struct follows the C
+     layout rules of [FFI](../../spec/v1.0/ffi.md#abi-stability-guarantees), and
+     [MLIR Lowering](../../spec/v1.0/mlir-lowering.md) names such a struct a `#[repr(C)]` struct.
 
-   [FFI](../../spec/v1.0/ffi.md#abi-stability-guarantees) and [MLIR Lowering](../../spec/v1.0/mlir-lowering.md) write
-   `#[repr(C)]`. The first uses it to describe the C layout rule by the spelling of another language, and the second
-   names a `#[repr(C)]` struct as a kind of type; neither defines an attribute of MIND with a position, so `repr` is
-   not in the list. No attribute name is defined for a module block or for a function of an `impl` block. An attribute
-   whose name is not in the list, and an attribute before an item for which its name is not defined, are refused with
-   `E2726`. A chapter or an RFC that defines an attribute adds it to the list.
+   [Future Extensions](../../spec/v1.0/future-extensions.md) shows `#[profile(...)]` and `#![no_std]` as proposals for a
+   later edition; it does not define them. No attribute name is defined for a module block or for a function of an
+   `impl` block. An attribute whose name is not in the list, an attribute with another argument than the list gives
+   (`#[repr(packed)]`), and an attribute before an item for which its name is not defined (`#[repr(C)]` before a
+   function) are refused with `E2726`. A chapter or an RFC that defines an attribute adds it to the list.
+
+   Other attribute names in the repository are not defined, so this rule refuses them with `E2726`: the example
+   [`examples/ffi/c_bindings.mind`](../../examples/ffi/c_bindings.mind) writes `#[extern("C")]`, `#[export("C")]` and
+   `#[unsafe]` before a function, and the [changelog](../../docs/changelog.md) names the compiler attributes
+   `#[deterministic]`, `#[target(...)]` and `#[q16]`. The FFI and MLIR chapters write an external function as
+   `extern "C"`, not as an attribute. The example is not a valid program under this RFC until a chapter or an RFC
+   defines these names ([Open](#open)).
 8. **Version attribute.** In `#[requires(mind_spec = "M.N")]`, `mind_spec` is the only key. Its value is a string
    literal that holds a version `major.minor`: two decimal numbers joined by one `.`. An implementation compares the
    value with its own specification version. Another major, or the same major with a higher minor than its own, is
@@ -151,7 +170,8 @@ that the project loader reads. `export { f, g }` has no desugaring: it marks `f`
 ## Proposed conformance rows
 
 Proposals. The reference accepts the text `module app;` and refuses the version attribute (measured above).
-The other rows were not measured. The codes `E2720` to `E2728` are the codes of this draft; `E2002` exists.
+The other rows were not measured. The codes `E2720` to `E2722` are assigned to this draft, `E2723` to `E2728` are
+proposed by it, and `E2002` exists.
 
 ```yaml
 description: "A file module declaration and a module block"
@@ -317,6 +337,38 @@ expected:
 ```
 
 ```yaml
+description: "repr(C) before a struct is a defined attribute"
+input:
+  source: |
+    #[repr(C)]
+    struct P {
+        x: i64,
+        y: i64,
+    }
+    fn main() -> i64 {
+        return 0;
+    }
+expected:
+  status: success
+```
+
+```yaml
+description: "repr(C) before a function is refused"
+input:
+  source: |
+    #[repr(C)]
+    fn f() -> i64 {
+        return 1;
+    }
+    fn main() -> i64 {
+        return 0;
+    }
+expected:
+  status: error
+  error: { code: E2726, message_contains: "repr" }
+```
+
+```yaml
 description: "Two modules with the same name in one namespace are refused"
 input:
   source: |
@@ -357,13 +409,17 @@ expected:
    refuses another major and a higher minor than its own (`E2727`). An unknown key is refused (`E2728`) (rule 8).
 7. **Attribute on a module block and on a method.** No attribute name is defined for a module block or a method.
    An attribute there is refused (`E2726`) until an RFC defines one (rule 7).
-8. **Code allocation.** The codes are assigned, because they are free in the catalog: `E2720` (duplicate name in
-   one namespace), `E2721` (`module m;` not first or repeated), `E2722` (module name differs from the project).
-   The decisions of questions 3 to 7 take `E2723` to `E2728` from the same block.
+8. **Code allocation.** The three codes are assigned, because they are free in the catalog: `E2720` (duplicate
+   name in one namespace), `E2721` (`module m;` not first or repeated), `E2722` (module name differs from the
+   project). The decisions of questions 3 to 7 need six more codes: this draft proposes `E2723` to `E2728` from the
+   same block, which the catalog does not define; they are not yet assigned.
 
 ### Open
 
-- **`repr(C)` on a struct.** The FFI chapter states the C layout rule of a struct and defines no attribute for it.
-  Until a chapter defines the name and its position, `#[repr(C)]` is refused with `E2726`.
+- **FFI attribute names of the example.** Whether the FFI chapter defines `extern("C")`, `export("C")` and `unsafe`
+  as attributes is not decided. Until a chapter or an RFC defines them, they are refused with `E2726` (rule 7).
+- **Export of a module block.** Whether an export list can make the members of a module block visible to another
+  module (for example by naming the block) is not decided.
+- **Code of the duplicate export warning.** Rule 4 makes a name exported twice a warning. Its code is not assigned.
 - **`requires` before another item.** This edition defines `requires` only before `module m;` (rule 7). Whether it
   MAY stand before another item is not decided; until then it is refused there with `E2726`.
