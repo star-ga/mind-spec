@@ -17,11 +17,13 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   defined stop of a failed check, which the other chapters link. The list of raw memory functions names the group
   intrinsics of the lowering. The determinism item of the library conformance list covers the programs that keep
   the address rules.
-- **Containers.** A value of `array<T>`, `Vec`, `Map` or `String` is a container record with identity, as a struct
-  value is; `push`, `map_insert` and the string push functions change the record in place, and an alias sees the
-  change. A method call that changes a container needs a `let mut` root (`E2402`); a push stands as a statement
-  or in `xs = xs.push(v)` (`E2300`). The sentences of the replacement-owner and fresh-map model are replaced
-  ([Records and containers](../spec/v1.0/memory.md#records-and-containers)). A region block is a raw memory use.
+- **Containers.** A value of `array<T>`, `Vec`, `Map` or `String` is a container record with identity, as a struct value
+  is; `push`, `map_insert` and the string push functions change the record in place, and an alias sees the change. A
+  method call that changes a container needs a `let mut` root (`E2402`); a push stands as a statement or in
+  `xs = xs.push(v)` (`E2300`). The sentences of the replacement-owner and fresh-map model are replaced
+  ([Records and containers](../spec/v1.0/memory.md#records-and-containers)). A region block is a raw memory use: it
+  stands only in a function declared with `#[raw_memory]` or `#[raw_memory(sealed)]` (a function of the standard library
+  also needs the attribute for it), else `E2501`, also where an implementation does not provide region blocks.
 - **Index bounds.** No operation of the language gives an undefined value. An index or a slice bound outside its
   axis is refused at check time with the new code `E3011` when the type gives the extent and the index is a
   literal, and makes the defined stop with `E6001` at run time otherwise; no bound is clamped. A dimension of

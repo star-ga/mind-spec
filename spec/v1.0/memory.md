@@ -70,9 +70,11 @@ implementation that adds an external function as an extension treats one with a 
 with the tag `unsafe fn`, as a raw memory function. A call of a raw memory function, and a
 [region block](#region-blocks), is a **raw memory use**.
 
-A raw memory use is allowed only in the body of a function declared with `#[raw_memory]` or `#[raw_memory(sealed)]`,
-or in a function of the standard library. Any other raw memory use MUST be refused at check time with
-[`E2501`](./errors.md#e2501-raw-memory-use-outside-a-raw-memory-function).
+A call of a raw memory function is allowed only in the body of a function declared with `#[raw_memory]` or
+`#[raw_memory(sealed)]`, or in a function of the standard library. A region block is allowed only in the body of a
+function declared with `#[raw_memory]` or `#[raw_memory(sealed)]`; a function of the standard library also needs the
+attribute for a region block ([Region blocks](#region-blocks)). Any other raw memory use MUST be refused at check time
+with [`E2501`](./errors.md#e2501-raw-memory-use-outside-a-raw-memory-function).
 
 `#[raw_memory(sealed)]` states that no parameter and no result of the function carries an address and that the
 function keeps no address after it returns. A call of a sealed function is not a raw memory use. An implementation
@@ -125,11 +127,13 @@ address.
 
 ## Region blocks
 
-A region block (`region { ... }`) releases, at its end, the storage that was allocated in it, while references to
-that storage can still exist. The Core v1 grammar does not derive it; an implementation MAY provide it as an
-extension. A region block is a raw memory use: it stands only in the body of a function declared with
-`#[raw_memory]` or `#[raw_memory(sealed)]`, and elsewhere it MUST be refused at check time with
-[`E2501`](./errors.md#e2501-raw-memory-use-outside-a-raw-memory-function).
+A region block (`region { ... }`) releases, at its end, the storage that was allocated in it, while references to that
+storage can still exist. The Core v1 grammar does not derive it; an implementation MAY provide it as an extension. A
+region block is a raw memory use: it stands only in the body of a function declared with `#[raw_memory]` or
+`#[raw_memory(sealed)]`, and a function of the standard library also needs the attribute for it. Where a statement can
+start, the name `region` directly followed by `{` is a region block; in the body of a function without that attribute it
+MUST be refused at check time with [`E2501`](./errors.md#e2501-raw-memory-use-outside-a-raw-memory-function), by every
+implementation, also one that does not provide region blocks.
 
 ## Library functions that check
 
