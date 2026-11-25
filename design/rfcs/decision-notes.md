@@ -17,16 +17,16 @@ limitations under the License.
 # Decision Notes (Informative)
 
 This page lists points where the specification text did not decide the meaning of a form that it names. A note records
-the text, the behaviour of the reference compiler v0.10.4 (measured with `mindc check --no-fmt`, and
-`mindc build --backend native` where it is named), and the options. **A note does not give a meaning, except where it
-records a decision.** The specification owner decided DN-1 to DN-13 on 2026-11-24 and DN-14 and DN-16 to DN-20 on
-2026-11-25; each note records the decision in its **Decision** paragraph, and an RFC or an editorial change carries it
-into the normative text. DN-15 is reserved for the container model, and this page records no decision on it yet. The
-tables of options stay as the record of the choice. Each note ends with the status of its forms after the decision, in
-the words of [Core v1 form status](../../spec/v1.0/core-v1-forms.md); that page gives the same status to the same form.
-The status is **Open** only where the note says so. The paragraph **Text before the decision** records the specification
-text on which the decision was taken, as it stood before the change that carries the decision; its links lead to the
-place that now holds the decided rule.
+the text, the behaviour of the reference compiler v0.10.4 (measured with `mindc check --no-fmt`, in the measurements of
+2026-11-25 also with `--no-lint`, and with `mindc build --backend native` where it is named), and the options. **A note
+does not give a meaning, except where it records a decision.** The specification owner decided DN-1 to DN-13 on
+2026-11-24 and DN-14 and DN-16 to DN-20 on 2026-11-25; each note records the decision in its **Decision** paragraph, and
+an RFC or an editorial change carries it into the normative text. DN-15 is reserved for the container model, and this
+page records no decision on it yet. The tables of options stay as the record of the choice. Each note ends with the
+status of its forms after the decision, in the words of [Core v1 form status](../../spec/v1.0/core-v1-forms.md); that
+page gives the same status to the same form. The status is **Open** only where the note says so. The paragraph **Text
+before the decision** records the specification text on which the decision was taken, as it stood before the change that
+carries the decision; its links lead to the place that now holds the decided rule.
 
 ## DN-1. The operator `:=`
 
