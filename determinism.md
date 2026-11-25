@@ -266,8 +266,8 @@ There is no implicit `rand()` reading hidden global state. Randomness is always
 seeded and explicit:
 
 ```mind
-let rng = Random(seed = 42)
-let x   = rng.normal(shape = [1024])   // same seed ⇒ same tensor, every run
+let seed = 42;
+let x = randn([1024], seed);   // same seed ⇒ same tensor, every run
 ```
 
 The generator is **counter-based** (Philox / Threefry), keyed by

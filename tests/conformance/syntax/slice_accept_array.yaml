@@ -1,0 +1,24 @@
+# MIND Conformance Test: a[1:3] is the slice form
+# Specification reference: spec/v1.0/language.md#tuple-index
+# Category: syntax
+# Profile: cpu
+
+description: "a[1:3] is the slice form beside the refused range index a[1..3]; the program returns 0"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let a = [1, 2, 3, 4];
+        let b = a[1:3];
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0

@@ -98,6 +98,7 @@ implementation MAY accept or refuse those.
 | [`tuple_index_reject_not_a_tuple`](./tuple_index_reject_not_a_tuple.yaml) | reject, `E2404` | as above |
 | [`tuple_index_reject_bracket`](./tuple_index_reject_bracket.yaml) | reject, `E2404` | as above: `t[0]` on a tuple has no meaning |
 | [`range_index_reject`](./range_index_reject.yaml) | reject, `E2406` | as above: `a[1..3]` MUST be refused |
+| [`slice_accept_array`](./slice_accept_array.yaml) | accept, returns 0 | `SliceExpression` and [Tuple index](../../../spec/v1.0/language.md#tuple-index): `a[1:3]` is the slice form |
 | [`unit_value_accept`](./unit_value_accept.yaml) | accept, returns 0 | `UnitExpression` and [The unit value](../../../spec/v1.0/types.md#the-unit-value) |
 | [`unit_value_reject_other_type`](./unit_value_reject_other_type.yaml) | reject, `E2001` | as above: `()` where another type is expected MUST be refused |
 | [`unit_value_reject_argument`](./unit_value_reject_argument.yaml) | reject, `E2001` | as above |

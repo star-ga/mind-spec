@@ -133,17 +133,19 @@ identical seeds produce identical results (determinism across substrates).
 
 ### Example: Frequency-domain filtering
 ```mind
-use std::tensor::{fft, ifft, zeros, ones}
+import std.tensor;
 
 fn low_pass_filter(signal: Tensor, cutoff: i64) -> Tensor {
-    let spectrum = fft(signal);
+    let spectrum = tensor.fft(signal);
     let n = spectrum.shape[0];
-    let mut mask = zeros([n, 2]);
+    let mut mask = tensor.zeros([n, 2]);
     // Keep frequencies below cutoff
-    for i in 0..cutoff {
-        mask[i] = ones([2]);
-        mask[n - 1 - i] = ones([2]);
+    let mut i = 0;
+    while i < cutoff {
+        mask[i] = tensor.ones([2]);
+        mask[n - 1 - i] = tensor.ones([2]);
+        i = i + 1;
     }
-    return ifft(spectrum * mask);
+    return tensor.ifft(spectrum * mask);
 }
 ```

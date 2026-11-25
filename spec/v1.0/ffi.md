@@ -26,8 +26,23 @@ The FFI is **feature-gated** (enabled via `--features=ffi-c` compiler flag) and 
 
 - **Within minor versions** (v1.x → v1.y): ABI is **stable** (no recompilation required)
 - **Across major versions** (v1.x → v2.x): ABI MAY change (recompilation required)
-- **Struct layout**: Follows C layout rules (`#[repr(C)]` in Rust)
+- **Struct layout**: a struct with the attribute `#[repr(C)]` has the layout that
+  [Struct layout attribute](#struct-layout-attribute) defines
 - **Calling convention**: Uses platform default C convention (cdecl on x86, AAPCS on ARM)
+
+### Struct layout attribute
+
+- **Name and position.** `#[repr(C)]` is the attribute name `repr` with the one argument `C` (`Attribute` of
+  [`grammar-syntax.ebnf`](./grammar-syntax.ebnf)). It stands directly before a `struct` declaration
+  (`AttributedItem`). This chapter defines `repr` with no other argument and at no other position.
+- **Meaning.** The struct has a fixed layout in memory. (1) The fields are stored in the order in which the
+  declaration lists them. (2) The first field starts at offset 0, and every other field starts at the lowest
+  offset that is not lower than the end of the field before it and is a multiple of the alignment of its type.
+  (3) The alignment of the struct is the largest alignment of its fields. (4) The size of the struct is the end
+  of its last field, rounded up to a multiple of its alignment. A struct with no fields has the size 0 and the
+  alignment 1. The size and the alignment of a primitive type are the ones of [Primitive types](#primitive-types).
+- **Example.** `#[repr(C)] struct P { a: i32, b: f32, }` has `a` at offset 0 and `b` at offset 4, the
+  alignment 4 and the size 8.
 
 ## C API fundamentals
 

@@ -25,7 +25,8 @@ with the reference notes in
 
 The following forms are part of the core language:
 
-- **Primitive types**: `i32`, `f64`, `bool`, `unit`.
+- **Primitive types**: `i32`, `i64`, `f32`, `f64`, `bool`, `unit` (`PrimitiveType` of
+  [`grammar-syntax.ebnf`](./grammar-syntax.ebnf)).
 - **Composite types**: tuples `(T1, T2, ...)`, arrays `[T; n]`, and structs defined via `struct`.
 - **Function types**: `(T1, ..., Tn) -> U` *(not in Core v1; specified for a later edition)*.
 - **Trait objects**: `dyn Trait` for traits marked as object-safe *(not in Core v1; specified for a

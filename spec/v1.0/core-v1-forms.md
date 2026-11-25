@@ -66,7 +66,8 @@ does not change the status. A row without a mark makes no claim about the refere
 | `loop { }`: `loop` is a name, and a block follows it with no `;` | Core v1 refuses; reference gap (`mindc check` accepts it; with an empty block the native build also builds it, and the image runs on past it: `loop { } return 7;` exits with the status 7) |
 | A missing `;` after a `let`, a `return`, a loop exit (`while c { break }`) or an expression statement; a missing `,` after an expression arm of a `match` ([Statement separators](./language.md#statement-separators)) | Core v1 refuses; reference gap (`mindc check` accepts a missing `;` after a `let`, an expression statement, a `return` and a loop exit, and a missing `,`; it reads `while c { break }` as the loop exit) |
 | `if a > b { } else { }`, `match e { x => y, }`, `match e { x => { y } }` | Core v1 |
-| `t[i]`, `t[a:b]`, `f(x)`, `x.m(a)`, `tensor(e)`, `tensor(e, dtype: f64)`, `(a, b)`, `[a, b]` | Core v1 |
+| `t[i]`, `f(x)`, `x.m(a)`, `tensor(e)`, `tensor(e, dtype: f64)`, `(a, b)`, `[a, b]` | Core v1 |
+| `t[a:b]`, the slice form ([Tuple index](./language.md#tuple-index)) | Core v1; reference gap (`mindc check` refuses `let b = a[1:3];` on the array `[1, 2, 3, 4]` with `E1001`, "expected `]` to close index expression") |
 | `t.0`, `t.0.1` on a tuple ([Tuple index](./language.md#tuple-index)) | Core v1; reference gap (the native backend refuses tuples with `lane.source.tuple`) |
 | `t.0.1e0` (a float literal with an exponent after an access dot, [Tuple index](./language.md#tuple-index)) | Core v1 refuses; reference conforms (`mindc check` refuses it with `E2002`, as the unknown identifier `e0`) |
 | `x.0` where `x` is not a tuple, `t.N` with `N` not less than the number of elements, `t[0]` on a tuple | Core v1 refuses; reference gap (`mindc check` accepts all three) |

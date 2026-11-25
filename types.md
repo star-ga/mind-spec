@@ -26,7 +26,7 @@ MIND is a statically typed language with a focus on tensor operations and safety
 ## Tensor Type
 Tensors are the core primitive, defined by a data type and a shape.
 ```mind
-let image: tensor<f32[3, 224, 224]>;
+let image: Tensor<f32, [3, 224, 224]> = zeros([3, 224, 224]);
 ```
 
 ## Fixed-size arrays

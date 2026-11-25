@@ -210,10 +210,10 @@ While MIND avoids explicit performance annotations, users can influence performa
 **Memory layout**:
 ```mind
 // Prefer row-major for CPU matmul (cache-friendly)
-let a: tensor<f32[m, k]> = ...;  // Row-major by default
+let a: Tensor<f32, [m, k]> = zeros([m, k]);  // Row-major by default
 
 // Prefer NHWC for GPU conv (Tensor Core-friendly)
-let x: tensor<f32[batch, height, width, channels]> = ...;
+let x: Tensor<f32, [batch, height, width, channels]> = zeros([batch, height, width, channels]);
 ```
 
 **Fusion-friendly patterns**:

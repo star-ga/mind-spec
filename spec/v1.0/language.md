@@ -453,8 +453,10 @@ time with [`E2404`](./errors.md#e2404-invalid-tuple-index). An index operator `e
 meaning: when the type of `e` is a tuple type, `e[i]` MUST be refused with `E2404`, and the diagnostic MUST
 name the form `e.N`.
 
-`a[e1:e2]` (`SliceExpression`) is the only slice form. The grammar has no range index: `a[1..3]` is not
-derived, it MUST be refused at check time with [`E2406`](./errors.md#e2406-range-index), and the
+`a[e1:e2]` (`SliceExpression`) is the only slice form. It lowers to the `Slice` operation of
+[Core IR](./ir.md#indexing-and-slicing), which takes the elements from the index `e1` up to, and not
+including, the index `e2`: `a[1:3]` takes the elements 1 and 2. The grammar has no range index: `a[1..3]` is
+not derived, it MUST be refused at check time with [`E2406`](./errors.md#e2406-range-index), and the
 diagnostic MUST name the slice form `a[1:3]`.
 
 ## Statement separators
