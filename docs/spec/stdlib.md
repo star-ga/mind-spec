@@ -69,18 +69,18 @@ behaviour of the core set.
 
 ## Math
 
-The `math` module exposes scalar operations over `i32`, `i64`, `f32`, and `f64`. Functions MUST
-signal domain errors using `Result` rather than panicking (e.g., `sqrt(-1.0)` returns an error).
+The `math` module exposes scalar operations over `i32`, `i64`, `f32`, and `f64`. The floating-point
+functions follow IEEE 754 (e.g., `sqrt(-1.0)` is NaN and `log(0.0)` is negative infinity).
 Where applicable, implementations SHOULD provide differentiable overloads that match the rules in
 [Automatic Differentiation](../../spec/v1.0/autodiff.md).
 
 | Function | Signature | Behaviour |
 | -------- | --------- | --------- |
 | `abs(x)` | `(i32 | i64 | f32 | f64) -> same` | Returns the absolute value of `x`. Differentiable for floating-point inputs. |
-| `sqrt(x)` | `(f32 | f64) -> Result<same, DomainError>` | Computes the principal square root. Domain errors occur for `x < 0`. |
+| `sqrt(x)` | `(f32 | f64) -> same` | Computes the principal square root; NaN for `x < 0` (IEEE 754). |
 | `sin(x)` / `cos(x)` | `(f32 | f64) -> same` | Trigonometric functions operating on radians. |
 | `exp(x)` | `(f32 | f64) -> same` | Exponential function. |
-| `log(x)` | `(f32 | f64) -> Result<same, DomainError>` | Natural logarithm; domain errors occur for `x <= 0`. |
+| `log(x)` | `(f32 | f64) -> same` | Natural logarithm; negative infinity for 0 and the canonical NaN for `x < 0` (IEEE 754). |
 
 Implementations MAY extend `math` with additional functions (e.g., `tanh`, `atan2`) provided their
 semantics are well-defined and documented.

@@ -163,28 +163,28 @@ Scalar mathematical functions. When applied to tensors, these operate elementwis
   - Supported dtypes: f32, f64
   - Semantics: matches exp() from ir.md#activation-and-elementwise-unary-operations
 
-- **`log<T: Float>(x: T) -> Result<T, DomainError>`**
-  - Natural logarithm: `ln(x)`
+- **`log<T: Float>(x: T) -> T`**
+  - Natural logarithm: `ln(x)`; it follows IEEE 754: the logarithm of 0 is negative infinity, and the logarithm of a
+    negative number is the [canonical NaN](./types.md#canonical-nan)
   - Differentiable: ∂log/∂x = 1/x
   - Supported dtypes: f32, f64
-  - Domain: x > 0; returns Err(DomainError) for x ≤ 0
   - Semantics: matches log() from ir.md#activation-and-elementwise-unary-operations
 
-- **`log2<T: Float>(x: T) -> Result<T, DomainError>`**
+- **`log2<T: Float>(x: T) -> T`**
   - Base-2 logarithm: log₂(x)
   - Differentiable: ∂log2/∂x = 1/(x ln(2))
-  - Domain: x > 0
+  - IEEE 754, as `log`: the logarithm of 0 is negative infinity, and of a negative number the canonical NaN
 
-- **`log10<T: Float>(x: T) -> Result<T, DomainError>`**
+- **`log10<T: Float>(x: T) -> T`**
   - Base-10 logarithm: log₁₀(x)
   - Differentiable: ∂log10/∂x = 1/(x ln(10))
-  - Domain: x > 0
+  - IEEE 754, as `log`: the logarithm of 0 is negative infinity, and of a negative number the canonical NaN
 
-- **`sqrt<T: Float>(x: T) -> Result<T, DomainError>`**
+- **`sqrt<T: Float>(x: T) -> T`**
   - Square root: √x
   - Differentiable: ∂sqrt/∂x = 1/(2√x)
   - Supported dtypes: f32, f64
-  - Domain: x ≥ 0; returns Err(DomainError) for x < 0
+  - IEEE 754: the square root of a number below 0 is NaN, as section 2 of [`determinism.md`](../../determinism.md) says
 
 - **`pow<T: Float>(base: T, exponent: T) -> T`**
   - Power function: `base` to the power `exponent`
@@ -208,15 +208,15 @@ Scalar mathematical functions. When applied to tensors, these operate elementwis
   - Differentiable: ∂tan/∂x = sec²(x) = 1/cos²(x)
   - Supported dtypes: f32, f64
 
-- **`asin<T: Float>(x: T) -> Result<T, DomainError>`**
+- **`asin<T: Float>(x: T) -> T`**
   - Arcsine (radians)
   - Differentiable: ∂asin/∂x = 1/√(1-x²)
-  - Domain: -1 ≤ x ≤ 1
+  - IEEE 754: for x less than -1 or greater than 1 the result is NaN
 
-- **`acos<T: Float>(x: T) -> Result<T, DomainError>`**
+- **`acos<T: Float>(x: T) -> T`**
   - Arccosine (radians)
   - Differentiable: ∂acos/∂x = -1/√(1-x²)
-  - Domain: -1 ≤ x ≤ 1
+  - IEEE 754: for x less than -1 or greater than 1 the result is NaN
 
 - **`atan<T: Float>(x: T) -> T`**
   - Arctangent (radians)

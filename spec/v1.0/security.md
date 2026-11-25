@@ -83,7 +83,7 @@ slice gives one); a negative dimension MUST be refused with [`E3006`](./errors.m
 negative dimension that is known only at run time makes the defined stop, whose diagnostic names `E3006`.
 
 **Numeric overflow**:
-- Integer overflow wraps in two's complement, and a division or a remainder by zero gives 0
+- Integer overflow wraps in two's complement, and an integer division or remainder by zero gives 0
   ([Numeric precision](./stdlib.md#numeric-precision))
 - Floating-point operations follow IEEE 754 semantics (NaN propagation, infinities)
 - Implementations SHOULD warn on potential overflow in constant folding

@@ -621,9 +621,9 @@ E6xxx errors occur during backend execution or while producing a runnable artifa
 - **Required context**: operation, operands (summary), result
 
 ### E6006: Invalid numeric value
-- **Trigger**: Operation produces NaN or Inf when not expected
+- **Trigger**: no operation of Core v1: a floating-point operation gives the value that IEEE 754 gives, NaN and the
+  infinities included ([Exponential and logarithmic](./stdlib.md#exponential-and-logarithmic))
 - **Required context**: operation, operands (summary)
-- **Example**: `E6006: Log produced NaN for input value -1.0`
 
 ### E6007: Execution timeout
 - **Trigger**: Operation exceeded allowed execution time

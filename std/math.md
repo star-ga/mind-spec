@@ -27,9 +27,9 @@ The `std::math` module provides essential mathematical functions and constants.
 ### `sqrt`
 ```text
 // Not Core v1 source: a signature with no body, as an API list
-fn sqrt(x: f64) -> Result<f64, DomainError>
+fn sqrt(x: f64) -> f64
 ```
-Computes the non-negative square root. Returns error if x < 0.
+Computes the non-negative square root. It follows IEEE 754: the result is NaN if x < 0.
 
 ### `tanh`
 ```text

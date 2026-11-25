@@ -23,8 +23,11 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   and the reshape row of the IR verification rows names `E3007`.
 - **Integer arithmetic.** The standard library and Security chapters give the rule of section 1 of
   [`determinism.md`](https://github.com/star-ga/mind-spec/blob/main/determinism.md): integer overflow wraps in two's
-  complement, and a division or a remainder by zero gives 0; `E6005` has no trigger in Core v1. `Log(x)` follows IEEE
-  754: the logarithm of 0 is negative infinity and of a negative number the canonical NaN.
+  complement, and an integer division or remainder by zero gives 0; `E6005` has no trigger in Core v1. `Log(x)` follows
+  IEEE 754: the logarithm of 0 is negative infinity and of a negative number the canonical NaN. The library functions
+  `log`, `log2`, `log10`, `sqrt`, `asin` and `acos` follow IEEE 754 too and give a value of their type, not a
+  `Result` ([Exponential and logarithmic](../spec/v1.0/stdlib.md#exponential-and-logarithmic)); `E6006` has no
+  trigger in Core v1.
 - **Maps, loops, vectors and the defined stop.** `map_get` of a key that the map does not hold gives 0, and
   `map_contains_key` tests for a key. A `for` loop over a container reads the length one time, at its start;
   added elements are not visited, and an element that is no longer there makes the defined stop
