@@ -35,10 +35,10 @@ function rewriteDocsPage(body, pageRel, isPublished) {
       }
       if (fenced) return line;
       return line.replace(LINK, (whole, target) => {
-        if (!target.startsWith(leave) || target.startsWith(`${leave}../`)) return whole;
+        if (!target.startsWith(leave)) return whole;
         const rest = target.slice(leave.length);
         const file = path.posix.normalize(rest.split('#')[0]);
-        if (file === '.' || file.startsWith('../') || !isPublished(file)) return whole;
+        if (!isPublished(file)) return whole;
         return `](${stay}${rest})`;
       });
     })

@@ -20,6 +20,8 @@ CASES = [
     # stays inside docs/, or leaves the repository: unchanged
     ("rfcs/a.md", "[x](../design/compiler.md) [y](./active.md)", "[x](../design/compiler.md) [y](./active.md)"),
     ("rfcs/a.md", "[x](../../../spec/v1.0/ir.md)", "[x](../../../spec/v1.0/ir.md)"),
+    # a link inside docs/ whose rest, after as many characters as the prefix that leaves docs/, names a published file
+    ("rfcs/a.md", "[x](sub/a/spec/v1.0/ir.md)", "[x](sub/a/spec/v1.0/ir.md)"),
     # a fenced code block is not changed
     ("rfcs/a.md", "```text\n[x](../../spec/v1.0/ir.md)\n```", "```text\n[x](../../spec/v1.0/ir.md)\n```"),
 ]
