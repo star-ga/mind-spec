@@ -20,7 +20,7 @@ limitations under the License.
 |-------|-------|
 | State | Draft (2026-11-24). Not yet accepted. The specification owner decided the questions of this draft on 2026-11-24 (see [Questions](#questions-for-the-specification-owner)). |
 | Number | Provisional. The specification owner assigns the final number. |
-| Changes | `grammar-syntax.ebnf` (`Pattern`, `MatchArm`, record literal), `language.md` (new section on patterns; exhaustiveness; the sentence of Loop exits on `loop { ... }`), `types.md` (removes the dot spelling `Enum.Variant` of a variant), `errors.md` (`E2310`, `E2311`, `W2312`, `E2313`, `E2314`; the sentence on the code pattern adds the prefix `W` of a warning, with the category and number of an error code; the trigger of `E2405` also covers `loop { }` and `loop { f: e }` where an expression can stand, a record literal of a struct `loop` that the program does not declare, see [Record literal](#record-literal)) |
+| Changes | `grammar-syntax.ebnf` (`Pattern`, `MatchArm`, record literal), `language.md` (new section on patterns; exhaustiveness; the sentence of Loop exits on `loop { ... }`), `types.md` (removes the dot spelling `Enum.Variant` of a variant), `errors.md` (`E2310`, `E2311`, `W2312`, `E2313`, `E2314`; the trigger of `E2001` also covers a pattern that does not fit the type of its scrutinee; the sentence on the code pattern adds the prefix `W` of a warning, with the category and number of an error code; the trigger of `E2405`, where a statement can start, the name `loop` directly followed by `{`, also covers that text where an expression can stand, when the program declares no struct `loop`; the trigger of `E2002` does not cover it, see [Record literal](#record-literal)) |
 | Depends on | [RFC 0024](./0024-impl-forms.md) for the expression form `E::B` of a variant (its `AssociatedValue`); the base grammar has no `::` path in an expression. The patterns use the enum declaration of the candidate block. |
 | Related | [RFC 0023](./0023-type-parameters-on-user-types.md), [RFC 0024](./0024-impl-forms.md) |
 
@@ -109,15 +109,21 @@ The head of `if`, `while`, `for … in` and `match` is an `Expression` followed 
 there is ambiguous. **Rule:** a record literal MUST NOT stand, unparenthesised, in the head expression of
 `if`, `while`, `for … in` or `match`. In those positions an identifier followed by `{` always starts the
 block. A record literal in the head needs parentheses: `if (P { x: 1 }).x > 0 { … }`.
-This rule makes `if b { }` and `match x { }` valid, which the reference refuses today.
+This rule makes `if b { }` and `match x { }` derived, which the reference refuses today; with the name `loop` it
+keeps `let loop = false; while loop { } return 3;` valid, as [Loop exits](../../spec/v1.0/language.md#loop-exits)
+says.
 
-**`loop { … }`.** [Loop exits](../../spec/v1.0/language.md#loop-exits) says that no rule derives the text
-`loop { ... }`. `loop` is not a keyword, so with `RecordLiteral` the texts `loop { }` and `loop { f: e }` derive as a
-record literal where an expression can stand. This RFC changes that sentence of Language: such a text is a record
-literal of a struct named `loop`. When the program declares no struct `loop`, the text MUST be refused at check time
-with `E2405` ([No loop statement](../../spec/v1.0/errors.md#e2405-no-loop-statement)), and the diagnostic still says
-that Core v1 has no `loop` statement and names the form `while true { ... }`. A body with statements, such as
-`loop { x = 1; }`, has no derivation as before, and it keeps `E2405`. `loop` stays a name, not a keyword.
+**`loop { … }`.** [Loop exits](../../spec/v1.0/language.md#loop-exits) refuses with `E2405` the name `loop`
+directly followed by `{` where a statement can start, because no rule derives it there. `loop` is not a keyword, so
+with `RecordLiteral` the texts `loop { }` and `loop { f: e }` derive as a record literal of a struct named `loop`,
+where a statement can start (followed by `;`) and where an expression can stand. This RFC changes that sentence of
+Language: when the program declares a struct `loop`, such a text is its record literal; when it declares none, the
+name `loop` directly followed by `{` MUST be refused at check time with `E2405`
+([No loop statement](../../spec/v1.0/errors.md#e2405-no-loop-statement)) where a statement can start and where an
+expression can stand, and not with `E2002`, and the diagnostic still says that Core v1 has no `loop` statement and
+names the form `while true { ... }`. A body with statements, such as `loop { x = 1; }`, has no derivation as before,
+and it keeps `E2405`. In the head of `if`, `while`, `for … in` and `match` the name `loop` is a name and the `{`
+starts the block (the rule above). `loop` stays a name, not a keyword.
 
 ### For-loop pattern
 
@@ -130,7 +136,9 @@ A loop that needs an index and a value uses a library function that yields pairs
 1. **Typing.** A pattern has the type of its scrutinee. A tuple pattern needs a tuple type of the same
    arity. A literal pattern needs a scrutinee of the type of the literal (`i64`-family, `bool`, `String`).
    A variant pattern needs a scrutinee of the named enum and the payload arity of that variant. A record
-   pattern needs a scrutinee of the named `struct`, and every field it names MUST exist.
+   pattern needs a scrutinee of the named `struct`, and every field it names MUST exist. A pattern that does not fit
+   the type of its scrutinee (a tuple pattern of another arity, a tuple pattern over a value that is not a tuple) is
+   refused with `E2001` (type mismatch).
 2. **Bindings.** A name is bound at most once in one pattern (`E2313`). A binding has the type of the
    part of the scrutinee that it matches. Its scope depends on the position of the pattern:
    in a `match` arm it is the guard and the arm body, and nowhere else; in a `let` it is the rest of the
