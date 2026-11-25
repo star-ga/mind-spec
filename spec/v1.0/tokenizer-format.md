@@ -154,28 +154,28 @@ The tokenizer auto-detects special tokens from `added_tokens`:
 
 ## Encoding API
 
-### `encode(text: str) -> [u32]`
+### `encode(text: String) -> [u32]`
 
 Encodes text to a sequence of token IDs. Does NOT add BOS/EOS.
 
-### `encode_with_special(text: str, add_bos: bool, add_eos: bool) -> [u32]`
+### `encode_with_special(text: String, add_bos: bool, add_eos: bool) -> [u32]`
 
 Encodes with optional BOS/EOS wrapping.
 
-### `decode(ids: [u32]) -> str`
+### `decode(ids: [u32]) -> String`
 
 Decodes token IDs back to text. Skips BOS/EOS/PAD tokens.
 Reverses the byte-to-Unicode mapping to produce valid UTF-8.
 
-### `decode_token(id: u32) -> str`
+### `decode_token(id: u32) -> String`
 
 Decodes a single token (for streaming output).
 
-### `count_tokens(text: str) -> u32`
+### `count_tokens(text: String) -> u32`
 
 Returns exact token count (runs full encode).
 
-### `estimate_tokens(text: str) -> u32`
+### `estimate_tokens(text: String) -> u32`
 
 Returns approximate token count without encoding (~1 token per 3.5 chars).
 

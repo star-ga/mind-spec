@@ -18,9 +18,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   The functions that take or give an address are listed as raw memory functions; a call of one stands only in a
   function declared with `#[raw_memory]` or `#[raw_memory(sealed)]`, or in the standard library, else `E2501`; a wrong
   use of the attribute is `E2502` ([Raw memory](../spec/v1.0/language.md#raw-memory)). An attribute before a function
-  declaration is in the Core v1 grammar; an attribute name that the specification does not define is refused. An index
-  function of the library stops the program when the index is outside the container. The Security chapter says only
-  what the language checks ([Security](../spec/v1.0/security.md#core-language-safety)).
+  declaration is in the Core v1 grammar; an attribute name that the specification does not define for its position is
+  refused, before a function declaration and before another item. An index function of the library stops the program
+  when the index is outside the container; the form status page gives the measured reference gap. The Security
+  chapter says only what the language checks ([Security](../spec/v1.0/security.md#core-language-safety)).
 - **The string type.** Its name is `String`, available without an import; a string literal has this type
   ([Type formation](../spec/v1.0/types.md#type-formation)). The lower-case spelling left the signatures.
 - **Elementwise operators.** `.*`, `./`, `.+` and `.-` follow the operand rule of the arithmetic operators; on two
@@ -41,7 +42,9 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   layout"). The triggers of `E2002`, `E2005`, `E2016` and `E2032` cover every sentence that names them.
 - **Samples.** Every code block of a published page is MIND source with the tag `mind`, or text whose first line says
   that the form is not Core v1. Math notation is written as text, not as code. The FFI chapter no longer holds an
-  observation of the reference compiler.
+  observation of the reference compiler (the C API of a generated header and the reference implementation section
+  are removed). The reference runtime status of the Runtime chapter and the audit history of the Security chapter
+  moved to the status page ([Documentation Status](../STATUS.md)).
 
 ### Changed: loop exit keywords, bitwise and shift operators, closing angle, elementwise tokens (2026-11-24)
 

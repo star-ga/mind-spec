@@ -319,11 +319,15 @@ does not itself establish validation of a cryptographic module.
 In Rust implementations:
 - **Panics are bugs**: Normal errors MUST use `Result<T, E>`, not `panic!`
 - Panics MAY occur for unrecoverable internal invariant violations
-- Panics MUST NOT be observable as undefined behavior (memory safety still holds)
+- Panics MUST NOT be observable as undefined behavior: a panic leaves the memory safety of the implementation
+  itself intact
 
 In other language implementations:
-- Equivalent exception/error handling semantics MUST preserve memory safety
+- Equivalent exception/error handling semantics MUST preserve the memory safety of the implementation itself
 - Unhandled exceptions SHOULD terminate cleanly (no resource leaks, corrupted state)
+
+These rules are about the implementation. What the language checks in a MIND program is
+[Core language safety](#core-language-safety).
 
 ## Security advisories and disclosure
 

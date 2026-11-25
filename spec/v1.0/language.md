@@ -580,7 +580,7 @@ The escape sequences of a string literal are `\n`, `\r`, `\t`, `\0`, `\\`, `\'`,
 
 MIND has no macros. A form such as `println!("x")`, `vec![1, 2]` or `panic!("x")` is not a macro
 call and is not part of the language. Use the function form, for example the
-`print_bytes` function of [Standard Library](./stdlib.md).
+`println` and `panic` functions of [Standard Library](./stdlib.md).
 
 ## Modules and imports
 
