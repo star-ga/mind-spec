@@ -20,7 +20,7 @@ limitations under the License.
 |-------|-------|
 | State | Draft (2026-11-24). Not yet accepted. The specification owner decided the questions of this draft on 2026-11-24 (see [Questions](#questions-for-the-specification-owner)). |
 | Number | Provisional. The specification owner assigns the final number. |
-| Changes | `grammar-syntax.ebnf` (`ModuleItem`, `ModuleDeclaration`, `ExportDeclaration` in the list form only, `ImportDeclaration`, `AttributeArg`), `language.md` (Modules and imports; attributes), `types.md` (a module block is a namespace; the text on transparent blocks goes), `versioning.md` (the `requires` attribute), `errors.md` (`E2720` to `E2728`) |
+| Changes | `grammar-syntax.ebnf` (`ModuleItem`, `ModuleDeclaration`, `ExportDeclaration` in the list form only, `ImportDeclaration`, `AttributeArg`), `language.md` (Modules and imports; attributes), `types.md` (a module block is a namespace; the text on transparent blocks goes), `versioning.md` (the `requires` attribute), `errors.md` (`E2720` to `E2729`) |
 | Depends on | [RFC 0024](./0024-impl-forms.md): `TraitDeclaration` and `ImplDeclaration` are listed in `ModuleItem` below, and a module block MAY hold them. |
 | Related | [RFC 0024](./0024-impl-forms.md) (visibility of methods), [RFC 0023](./0023-type-parameters-on-user-types.md) (the declaration name of a member of a module block) |
 
@@ -100,7 +100,8 @@ extension that [Language](../../spec/v1.0/language.md#executable-subset-status-i
    exported. A module block is a namespace of its module and not another module: a member of a block is visible in
    the whole module that holds the block, by its qualified name (rule 2), with no export. `export { f, g }` exports
    the named items of the module in which it stands. An export of a name that
-   is not declared in that module is refused with `E2002`. One name exported twice is a warning. A method and an
+   is not declared in that module is refused with `E2002`. A name that stands twice in the export lists of one
+   module, in one list or in two, is refused with `E2729`; no warning comes first. A method and an
    associated item are exported with their type ([RFC 0024](./0024-impl-forms.md), rule 10), and an export list
    does not name them.
 5. **Forms that are not in the language.** The grammar does not derive them, and a check refuses each one with
@@ -116,8 +117,9 @@ extension that [Language](../../spec/v1.0/language.md#executable-subset-status-i
    every file of the specification for the form `#[` finds two that a chapter defines:
    - `requires`, with the key `mind_spec`, before the file module declaration `module m;`
      ([Versioning](../../spec/v1.0/versioning.md#in-source-code); rule 8 gives the rules for its argument).
-   - `repr(C)`, with the one argument `C`, before a `struct` declaration. The layout of the struct follows the C
-     layout rules of [FFI](../../spec/v1.0/ffi.md#abi-stability-guarantees), and
+   - `repr(C)`, with the one argument `C`, before a `struct` declaration. The FFI chapter defines its name, its
+     position and its meaning, the layout of the struct in memory
+     ([Struct layout attribute](../../spec/v1.0/ffi.md#struct-layout-attribute)), and
      [MLIR Lowering](../../spec/v1.0/mlir-lowering.md) names such a struct a `#[repr(C)]` struct.
 
    [Future Extensions](../../spec/v1.0/future-extensions.md) shows `#[profile(...)]` and `#![no_std]` as proposals for a
@@ -127,8 +129,8 @@ extension that [Language](../../spec/v1.0/language.md#executable-subset-status-i
    function) are refused with `E2726`. A chapter or an RFC that defines an attribute adds it to the list.
 
    Other attribute names in the repository are not defined, so this rule refuses them with `E2726`: the example
-   [`examples/ffi/c_bindings.mind`](../../examples/ffi/c_bindings.mind) writes `#[extern("C")]`, `#[export("C")]` and
-   `#[unsafe]` before a function, and the [changelog](../../docs/changelog.md) names the compiler attributes
+   `examples/ffi/c_bindings.mind` of the repository writes `#[extern("C")]`, `#[export("C")]` and `#[unsafe]` before a
+   function, and the changelog of the repository (`docs/changelog.md`) names the compiler attributes
    `#[deterministic]`, `#[target(...)]` and `#[q16]`. The FFI and MLIR chapters write an external function as
    `extern "C"`, not as an attribute. The example is not a valid program under this RFC until a chapter or an RFC
    defines these names ([Open](#open)).
@@ -140,8 +142,8 @@ extension that [Language](../../spec/v1.0/language.md#executable-subset-status-i
 
 ## Meaning as a desugaring
 
-**Module block.** A module block is a prefix on the names of its members. The item name of a member is its
-qualified spelling, as in the declaration name `D` of [RFC 0023](./0023-type-parameters-on-user-types.md#instance-names):
+**Module block.** A module block is a prefix on the names of its members. The item name of a member is its qualified
+spelling, as in the declaration name `D` of [RFC 0023](./0023-type-parameters-on-user-types.md#instance-names):
 
 ```mind
 module m {
@@ -170,7 +172,7 @@ that the project loader reads. `export { f, g }` has no desugaring: it marks `f`
 ## Proposed conformance rows
 
 Proposals. The reference accepts the text `module app;` and refuses the version attribute (measured above).
-The other rows were not measured. The codes `E2720` to `E2722` are assigned to this draft, `E2723` to `E2728` are
+The other rows were not measured. The codes `E2720` to `E2722` are assigned to this draft, `E2723` to `E2729` are
 proposed by it, and `E2002` exists.
 
 ```yaml
@@ -251,6 +253,23 @@ input:
 expected:
   status: error
   error: { code: E2725, message_contains: "export {" }
+```
+
+```yaml
+description: "A name that stands twice in the export lists of one module is refused"
+input:
+  source: |
+    fn area() -> i64 {
+        return 1;
+    }
+    fn main() -> i64 {
+        return 0;
+    }
+    export { area }
+    export { area }
+expected:
+  status: error
+  error: { code: E2729, message_contains: "area" }
 ```
 
 ```yaml
@@ -391,7 +410,7 @@ expected:
 | Front end, parser | `module m;`; the list form of `export`; import alias; the attribute argument `key = literal` and string literals | small |
 | Front end, resolver | a real namespace for a module block (the reference flattens a block today); the qualifier rule for members; the export rule; the refusals of rule 5; the attribute and version rules | medium |
 | Front end, desugaring | the prefixed names | small |
-| Native lowering | none after the prefixing. The native lane refuses every module item (`lane.source.top_level`); the prefixed form is plain functions, so the work is the admission of `module`, `import … as` and `export` items. | small to medium |
+| Native lowering | none after the prefixing. The native backend refuses every module item (`lane.source.top_level`); the prefixed form is plain functions, so the work is the admission of `module`, `import … as` and `export` items. | small to medium |
 | Tests | rows above; parity of the module block against the written-out form | small |
 
 ## Questions for the specification owner
@@ -409,10 +428,12 @@ expected:
    refuses another major and a higher minor than its own (`E2727`). An unknown key is refused (`E2728`) (rule 8).
 7. **Attribute on a module block and on a method.** No attribute name is defined for a module block or a method.
    An attribute there is refused (`E2726`) until an RFC defines one (rule 7).
-8. **Code allocation.** The three codes are assigned, because they are free in the catalog: `E2720` (duplicate
-   name in one namespace), `E2721` (`module m;` not first or repeated), `E2722` (module name differs from the
-   project). The decisions of questions 3 to 7 need six more codes: this draft proposes `E2723` to `E2728` from the
-   same block, which the catalog does not define; they are not yet assigned.
+8. **Code allocation.** The three codes are assigned, because they are free in the catalog: `E2720` (a name that is
+   not unique in its namespace: two items of one namespace with the same name, or a module block whose qualified name
+   equals the module path of a project module, rule 3), `E2721` (`module m;` not first or repeated), `E2722` (module
+   name differs from the project). The decisions of questions 3 to 7 and the export rule (rule 4) need seven more
+   codes: this draft proposes `E2723` to `E2729` from the same block, which the catalog does not define; they are not
+   yet assigned. `E2729` is a name that stands twice in the export lists of one module.
 
 ### Open
 
@@ -420,6 +441,5 @@ expected:
   as attributes is not decided. Until a chapter or an RFC defines them, they are refused with `E2726` (rule 7).
 - **Export of a module block.** Whether an export list can make the members of a module block visible to another
   module (for example by naming the block) is not decided.
-- **Code of the duplicate export warning.** Rule 4 makes a name exported twice a warning. Its code is not assigned.
 - **`requires` before another item.** This edition defines `requires` only before `module m;` (rule 7). Whether it
   MAY stand before another item is not decided; until then it is refused there with `E2726`.
