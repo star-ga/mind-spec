@@ -37,9 +37,14 @@ MAY share one read-only record when no change can reach it. A function that give
 (`string_slice_from`) creates a new record with a copy of the bytes. A map keeps the bytes that a string key had when it
 was inserted.
 
-On a value `xs` of type `array<T>`, `xs[i]` is the element `i`, counted from 0, and `xs.push(v)` appends the value
-`v` of type `T` to the record and has the value `xs`. An index outside the container is the case of
-[Index bounds](./ir.md#index-bounds).
+On a value `xs` of type `array<T>`, `xs[i]` is the element `i`, counted from 0, and `xs.push(v)` appends the value `v`
+of type `T` to the record and has the value `xs`. An index outside the container is the case of
+[Index bounds](./ir.md#index-bounds). An index or a slice bound that is outside its axis MUST be refused at check time
+with [`E3011`](./errors.md#e3011-index-outside-its-axis) exactly when it is an integer literal with its sign
+([Literals](./lexical.md#literals)), with or without parentheses around it (one pair or more), and the type gives the
+extent of the axis; every other index or slice bound that is outside its axis makes the
+[defined stop](#the-defined-stop) at run time with [`E6001`](./errors.md#e6001-out-of-bounds-index), and an
+implementation refuses no other index or slice bound at check time.
 
 A slice parameter (`&[T]` or `&mut [T]`,
 [Slice call implementation boundary](./types.md#slice-call-implementation-boundary)) is an extension: the Core v1

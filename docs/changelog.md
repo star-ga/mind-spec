@@ -9,6 +9,14 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed: check-time index bounds, empty axes, integer arithmetic, loops and the defined stop (2026-11-25)
+
+- **Index bounds known at check time.** An index or a slice bound outside its axis is refused at check time with `E3011`
+  exactly when it is an integer literal with its sign, with or without parentheses around it, and the type gives the
+  extent of the axis; every other one makes the defined stop at run time, and an implementation refuses no other index
+  at check time (`a[2 + 2]` passes the check). The IR, Security and Memory model chapters and the trigger of `E3011` say
+  this one sentence ([Index bounds](../spec/v1.0/ir.md#index-bounds)).
+
 ### Changed: the memory model, containers, index bounds and attribute codes (2026-11-25)
 
 - **Memory model.** A new chapter [Memory model](../spec/v1.0/memory.md) holds raw memory, the attribute

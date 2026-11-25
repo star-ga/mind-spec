@@ -1,0 +1,27 @@
+# MIND Conformance Test: an index variable outside its axis passes the check
+# Specification reference: spec/v1.0/ir.md#index-bounds
+# Category: syntax
+# Profile: cpu
+
+description: "a[i] with i = 4 is not an integer literal: the check accepts it, and g is not called"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn g(a: [i64; 4]) -> i64 {
+        let i = 4;
+        return a[i];
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0
