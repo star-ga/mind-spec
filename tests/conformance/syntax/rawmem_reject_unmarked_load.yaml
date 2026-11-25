@@ -1,0 +1,23 @@
+# MIND Conformance Test: a raw memory use in a function without the mark
+# Specification reference: spec/v1.0/language.md#raw-memory
+# Category: syntax
+# Profile: cpu
+
+description: "read_at calls __mind_load_i64 and is not marked"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn read_at(p: i64) -> i64 {
+        return __mind_load_i64(p);
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2501

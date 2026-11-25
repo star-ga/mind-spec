@@ -1,0 +1,24 @@
+# MIND Conformance Test: a function with #[raw_memory] is a raw memory function
+# Specification reference: spec/v1.0/language.md#raw-memory
+# Category: syntax
+# Profile: cpu
+
+description: "the unmarked main calls the marked function give"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    #[raw_memory]
+    fn give(p: i64) -> i64 {
+        return p;
+    }
+
+    fn main() -> i64 {
+        return give(1);
+    }
+
+expected:
+  status: error
+  error:
+    code: E2501

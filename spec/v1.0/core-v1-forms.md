@@ -100,4 +100,8 @@ does not change the status. A row without a mark makes no claim about the refere
 | `for i in a..b { }` | Extension |
 | `fn f<T>(x: T) -> T { }`, `import a.b as c;` | Extension |
 | `module m;`, `pub fn f() { }`, `impl S { }` | Extension |
-| `#[repr(C)] struct S { a: i32, }`, `#[requires(mind_spec = "1.2")] module m;`: an attribute before an item (`AttributedItem`, which `Module` does not reach; [Attributes](./language.md#attributes)) | Extension |
+| `#[repr(C)] struct S { a: i32, }`, `#[requires(mind_spec = "1.2")] module m;`: an attribute before an item that is not a function declaration (`AttributedItem`, which `Module` does not reach; [Attributes](./language.md#attributes)) | Extension |
+| `#[raw_memory] fn f(p: i64) -> i64 { }`, `#[raw_memory(sealed)] fn g() -> i64 { }` ([Raw memory](./language.md#raw-memory)) | Core v1; reference gap (`mindc check` accepts both; the native backend refuses an attributed function with `lane.source.function_contract`) |
+| A call of a raw memory function in a function without the attribute, outside the standard library (`fn r(p: i64) -> i64 { return __mind_load_i64(p); }`, `vec_addr(v)` in an unmarked `main`, a call of a `#[raw_memory]` function from an unmarked `main`) | Core v1 refuses; reference gap (`mindc check` accepts all three; the native backend builds the first, and its image exits with the status 0) |
+| `#[raw_memory] struct S { a: i64, }`, `#[raw_memory(open)] fn f() { }`: the attribute `raw_memory` before another item or with another argument | Core v1 refuses; reference gap (`mindc check` accepts both) |
+| `#[fast] fn f() { }`: an attribute name that this specification does not define, before a function declaration ([Attributes](./language.md#attributes)) | Core v1 refuses; reference gap (`mindc check` accepts it) |

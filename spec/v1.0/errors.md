@@ -362,6 +362,26 @@ exclusivity analysis; those guarantees remain future work.
 - **Example**: `E2407: field 'b' of repr(C) struct 'Q' has the type '(i32, i32)' with no layout at line 4, column 5`
 - **Check/build contract**: checking and artifact-producing builds MUST refuse the same source with `E2407`.
 
+### E2501: Raw memory use outside a raw memory function
+
+- **Trigger**: a call of a raw memory function ([Raw memory](./language.md#raw-memory)) in the body of a function
+  that is not declared with `#[raw_memory]` or `#[raw_memory(sealed)]` and is not a function of the standard
+  library.
+- **Required context**: the called function, the location of the call and the function that holds it, with the
+  fix: declare that function with `#[raw_memory]`, or with `#[raw_memory(sealed)]` when no parameter and no result
+  of it carries an address.
+- **Example**: `E2501: '__mind_load_i64' is raw memory; mark 'read_at' with #[raw_memory] at line 2, column 12`
+- **Check/build contract**: checking and artifact-producing builds MUST refuse the same source with `E2501`.
+
+### E2502: Invalid raw_memory attribute
+
+- **Trigger**: the attribute `raw_memory` before an item that is not a function declaration, or with an argument
+  other than none or the one argument `sealed` ([Raw memory](./language.md#raw-memory)).
+- **Required context**: the attribute, its location and the item after it, with the fix: `#[raw_memory]` or
+  `#[raw_memory(sealed)]` directly before a function declaration.
+- **Example**: `E2502: 'raw_memory' stands only before a function declaration at line 1, column 1`
+- **Check/build contract**: checking and artifact-producing builds MUST refuse the same source with `E2502`.
+
 ### E2701: Impl of an undeclared trait
 
 - **Trigger**: an `impl Trait for Type` block names a trait that no `trait` declaration declares.
@@ -539,7 +559,8 @@ Autodiff errors occur during gradient computation.
 E6xxx errors occur during backend execution or while producing a runnable artifact.
 
 ### E6001: Out-of-bounds index
-- **Trigger**: Index or Gather operation accesses invalid position
+- **Trigger**: Index or Gather operation accesses invalid position, or an index function of the standard library
+  gets an index outside its container ([Raw memory functions](./stdlib.md#raw-memory-functions))
 - **Required context**: operation, indices, tensor shape
 - **Example**: `E6001: Index out of bounds: [2, 5] for shape [3, 4]`
 

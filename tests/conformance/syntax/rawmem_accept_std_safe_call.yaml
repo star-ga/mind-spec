@@ -1,0 +1,18 @@
+# MIND Conformance Test: a library function that is not a raw memory function needs no mark
+# Specification reference: spec/v1.0/stdlib.md#raw-memory-functions
+# Category: syntax
+# Profile: cpu
+
+description: "vec_new, vec_push and vec_get are not raw memory functions, so the unmarked main may call them"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let v = vec_push(vec_new(), 7);
+        return vec_get(v, 0);
+    }
+
+expected:
+  status: success

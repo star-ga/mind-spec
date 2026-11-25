@@ -1,0 +1,32 @@
+# MIND Conformance Test: a raw memory use in a function with #[raw_memory]
+# Specification reference: spec/v1.0/language.md#raw-memory
+# Category: syntax
+# Profile: cpu
+
+description: "main and load_at are marked; the program stores 9 and reads it back"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    #[raw_memory]
+    fn load_at(p: i64) -> i64 {
+        return __mind_load_i64(p);
+    }
+
+    #[raw_memory]
+    fn main() -> i64 {
+        let p = __mind_alloc(8);
+        let s = __mind_store_i64(p, 9);
+        let v = load_at(p);
+        let f = __mind_free(p);
+        return v;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 9

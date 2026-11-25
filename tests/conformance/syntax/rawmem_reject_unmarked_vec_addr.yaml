@@ -1,0 +1,21 @@
+# MIND Conformance Test: vec_addr is a raw memory function
+# Specification reference: spec/v1.0/language.md#raw-memory
+# Category: syntax
+# Profile: cpu
+
+description: "the unmarked main calls vec_addr"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let v = vec_new();
+        let p = vec_addr(v);
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2501

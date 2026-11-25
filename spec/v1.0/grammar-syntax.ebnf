@@ -36,8 +36,19 @@ ModuleItem = FunctionDeclaration
            | ExportDeclaration
            ;
 
-(* Function declarations *)
-FunctionDeclaration = "fn" , Identifier , "(" , [ ParameterList ] , ")" , [ "->" , Type ] , Block ;
+(* Function declarations. An attribute may stand directly before a   *)
+(* function declaration. Only the attributes that the specification *)
+(* defines by name for this position are part of Core v1 (language.md,*)
+(* "Attributes"); any other attribute name is refused.               *)
+FunctionDeclaration = { Attribute } , "fn" , Identifier , "(" , [ ParameterList ] , ")" , [ "->" , Type ] , Block ;
+
+(* Attribute (`#[name]`, `#[name(arg, ...)]`). The spelling starts    *)
+(* with "#". The form `[name]` without the "#" is not an attribute.   *)
+(* An argument is an identifier, a literal, or a name bound to a      *)
+(* literal (`#[requires(mind_spec = "1.2")]`).                        *)
+Attribute       = "#" , "[" , Identifier , [ "(" , [ AttributeArgList ] , ")" ] , "]" ;
+AttributeArgList = AttributeArg , { "," , AttributeArg } ;
+AttributeArg    = Identifier | Literal | Identifier , "=" , Literal ;
 
 ParameterList = Parameter , { "," , Parameter } , [ "," ] ;
 Parameter = Identifier , ":" , Type ;
@@ -362,14 +373,9 @@ ModuleBlock     = "module" , Identifier , "{" , { ModuleItem } , "}" ;
 (* Use-clause (lightweight import).                             *)
 UseDeclaration  = "use" , ImportPath , [ ";" ] ;
 
-(* Attribute on items (`#[name]`, `#[name(arg, ...)]`). The spelling *)
-(* starts with "#". The form `[name]` without the "#" is not an      *)
-(* attribute. An argument is an identifier, a literal, or a name     *)
-(* bound to a literal (`#[requires(mind_spec = "1.2")]`).            *)
-Attribute       = "#" , "[" , Identifier , [ "(" , [ AttributeArgList ] , ")" ] , "]" ;
-AttributeArgList = AttributeArg , { "," , AttributeArg } ;
+(* Attributes before an item other than a function declaration     *)
+(* (Attribute: FunctionDeclaration above).                           *)
 AttributedItem  = Attribute , { Attribute } , ModuleItem ;
-AttributeArg    = Identifier | Literal | Identifier , "=" , Literal ;
 
 (* Runtime assertion (no return value).                         *)
 (* Additive, targeted for specification 1.7.0. In the            *)

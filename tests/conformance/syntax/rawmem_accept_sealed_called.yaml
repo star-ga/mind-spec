@@ -1,0 +1,31 @@
+# MIND Conformance Test: a call of a sealed function is not a raw memory use
+# Specification reference: spec/v1.0/language.md#raw-memory
+# Category: syntax
+# Profile: cpu
+
+description: "stored_five is sealed, so the unmarked main may call it; the program returns 5"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    #[raw_memory(sealed)]
+    fn stored_five() -> i64 {
+        let p = __mind_alloc(8);
+        let s = __mind_store_i64(p, 5);
+        let v = __mind_load_i64(p);
+        let f = __mind_free(p);
+        return v;
+    }
+
+    fn main() -> i64 {
+        return stored_five();
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 5
