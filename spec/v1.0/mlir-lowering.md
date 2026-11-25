@@ -52,7 +52,7 @@ that ships with the public compiler. The rules cover only the stable, publicly i
 - Lowering produces deterministic MLIR textual IR suitable for snapshot testing and downstream
   consumption. Minor changes may occur between MIND versions but are stable within a release.
 - Core v1 MLIR lowering rules target the CPU backend. Any GPU-specific MLIR dialects or pipelines are
-  experimental and outside the scope of this chapter (see [Runtime](./runtime.md#gpu-backends-open-core-not-production-shipped)).
+  experimental and outside the scope of this chapter (see [Runtime](./runtime.md#devices-and-backends)).
 
 ## Lowering patterns
 

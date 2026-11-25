@@ -88,75 +88,10 @@ The layout of a primitive type in a `#[repr(C)]` struct is the rule of
 [Struct layout attribute](#struct-layout-attribute). This chapter does not define which primitive types a generated
 C header names.
 
-#### Tensor descriptors
+#### Tensor descriptors and function signatures
 
-The reference compiler (v0.10.0) emits the following C API (feature: `ffi-c`):
-
-```c
-// Data type enumeration (reference compiler v0.10.0)
-typedef enum {
-    MIND_I32 = 0,
-    MIND_F32 = 1,
-} MindDType;
-
-// Shape descriptor
-typedef struct {
-    uint32_t rank;              // Number of dimensions
-    const uint64_t* dims;       // Array of dimension sizes [d0, d1, ..., dN]
-} MindShape;
-
-// Tensor descriptor for FFI boundary
-typedef struct {
-    MindDType dtype;            // Data type enum
-    MindShape shape;            // Shape descriptor
-    void* data;                 // Pointer to contiguous data buffer
-    uint64_t byte_len;          // Total byte length of data buffer
-} MindTensor;
-
-// I/O descriptor (pairs a name with a tensor)
-typedef struct {
-    const char* name;           // Name of input or output
-    MindTensor tensor;          // The tensor data
-} MindIO;
-
-// Model metadata
-typedef struct {
-    uint32_t inputs_len;        // Number of inputs
-    uint32_t outputs_len;       // Number of outputs
-    const char* model_name;     // Name of the model
-    uint64_t model_version;     // Model version
-} MindModelMeta;
-```
-
-#### Function signatures
-
-The reference compiler (v0.10.0) generates the following core FFI functions:
-
-```c
-// Get model metadata
-int mind_model_meta(MindModelMeta* out);
-
-// Get model input/output descriptors
-int mind_model_io(
-    MindIO* inputs_out, uint32_t cap_inputs,
-    MindIO* outputs_out, uint32_t cap_outputs
-);
-
-// Run inference
-int mind_infer(
-    const MindIO* inputs, uint32_t inputs_len,
-    MindIO* outputs, uint32_t outputs_len
-);
-
-// Memory management
-void* mind_alloc(uint64_t size);
-void mind_free(void* p);
-
-// Error handling
-const char* mind_last_error(void);
-```
-
-**Return values**: Functions return 0 on success, negative values on error. Error details are available via `mind_last_error()`.
+This chapter does not list the tensor descriptor types and the functions of a generated header. A function
+reports an error as [Error handling](#error-handling) says.
 
 ## Memory management
 
@@ -547,26 +482,7 @@ Planned FFI improvements:
 - **Go bindings**: Via CGo for Go-based services
 - **Async API**: Non-blocking execution with callbacks/futures
 
-## Reference implementation C API
-
-The MIND compiler (feature flag: `--features ffi-c`) generates a stable C FFI interface. The reference implementation (`star-ga/mind-runtime`) provides an open-core C API for model execution and memory management.
-
-### Core API (open-core)
-
-The minimum stable API (as of v0.10.0) consists of:
-- 6 exported functions (lifecycle + memory + inference + errors)
-- 2 enumeration types (data types, model metadata)
-- 4 struct types (shape, tensor, I/O descriptor, model metadata)
-
-### Memory semantics
-
-- **Tensor storage**: Heap-allocated via `mind_alloc()`
-- **Allocation**: Caller-managed; zero-initialization is not guaranteed
-- **Deallocation**: Caller must call `mind_free()` on all allocations
-- **Memory layout**: Row-major (C-style contiguous)
-- **Data pointer lifetime**: Caller retains ownership; buffers must remain valid for the duration of API calls
-
-### Numerical tolerances
+## Numerical tolerances
 
 Conformance tests use appropriate precision for each data type:
 - `f32` operations: single-precision floating-point semantics

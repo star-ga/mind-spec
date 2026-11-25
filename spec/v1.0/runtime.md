@@ -98,67 +98,10 @@ this specification. Implementations MAY optimise freely provided they preserve t
   target (e.g. `BackendTarget::Gpu`) is unavailable or feature-gated, and MUST apply the stable
   error semantics described above for the GPU profile.
 
-## Reference implementation status (`star-ga/mind-runtime`)
-
-### CPU backend (shipped, open-core)
-
-The reference runtime (`star-ga/mind-runtime`) v0.2.x provides a stable CPU backend:
-
-- **Status**: Shipped with open-core license
-- **Features**: Core tensor operations, error handling, memory management
-- **Platforms**: Linux, macOS, Windows (x86-64, ARM64)
-- **API**: C FFI under `--features ffi` with 17-symbol ABI and audit-hardened code
-
-### GPU backends (open-core, not production-shipped)
-
-Advanced GPU backends are available under the commercial license:
-
-| Backend | Status | Platforms |
-|---------|--------|-----------|
-| **CUDA** | Open-core | NVIDIA GPUs with CUDA 12+ |
-| **Metal** | Open-core | macOS 10.15+ / iOS 13+ |
-| **ROCm/HIP** | Open-core | AMD GPUs with ROCm 5.0+ |
-| **WebGPU** | Open-core | Cross-platform (browsers, native) |
-
-> **Note**: GPU backends are distributed under commercial terms. CPU backend is sufficient for
-> many use cases. **Cross-substrate bit-identical determinism across CPU/GPU/accelerators is a
-> roadmap goal, not a shipped guarantee.**
-
-### Tensor constraints
-
-Tensors in the reference runtime MUST satisfy these constraints:
-
-| Constraint | Requirement |
-|------------|-------------|
-| Dtype | `i32`, `f32` (additional types planned for future releases) |
-| Alignment | 4-byte alignment required (element count must be multiple of 4 for GPU) |
-
-Tensors that violate these constraints are rejected at allocation time.
-
-### Core operations
-
-The reference runtime supports:
-- **Reductions**: `sum`, `mean` (scalar output)
-- **Elementwise**: `add`, `mul`, `relu`
-- **Linear algebra**: `matmul`, `dot` (CPU; GPU available under commercial license)
-- **Shape ops**: `reshape`, `transpose`
-
-Additional operations planned for future releases.
-- **WebGPU**: Chrome 113+, Firefox 120+, Safari 17+ (production)
-- **LLVM version**: 18 (for JIT adapter)
-- **Rust version**: 1.73+ (minimum)
-
-### Integer overflow handling
-
-The runtime uses different strategies based on context:
-
-- **Checked arithmetic**: Used for user-controlled inputs (shapes, axes); returns `ExecError::InvalidArg` on overflow
-- **Saturating arithmetic**: Used for stride calculations; saturates to `usize::MAX`
-- **Wrapping arithmetic**: Used for safe reverse-indexing in `broadcast_shape()`
-
 ## Distributed execution
 
-The reference runtime provides production-grade distributed training primitives:
+This section is informative. It describes distributed training parts that a runtime can provide; Core v1 does
+not require them.
 
 ### Transport layer
 
@@ -245,7 +188,8 @@ Pipeline execution overlaps forward and backward passes across micro-batches for
 
 ## Model serving
 
-The reference runtime provides production-grade model serving infrastructure:
+This section is informative. It describes model serving parts that a runtime can provide; Core v1 does not
+require them.
 
 ### Model export
 
