@@ -20,7 +20,7 @@ limitations under the License.
 |-------|-------|
 | State | Draft (2026-11-24). Not yet accepted. The specification owner decided the questions of this draft on 2026-11-24 (see [Questions](#questions-for-the-specification-owner)). |
 | Number | Provisional. The specification owner assigns the final number. |
-| Changes | `grammar-syntax.ebnf` (`ModuleItem`, `ModuleDeclaration`, `ExportDeclaration` in the list form only, `ImportDeclaration`, `AttributeArg`), `language.md` (Modules and imports; attributes), `types.md` (a module block is a namespace; the text on transparent blocks goes), `versioning.md` (the `requires` attribute), `errors.md` (`E2720` to `E2729`) |
+| Changes | `grammar-syntax.ebnf` (`ModuleItem`, `ModuleDeclaration`, `ExportDeclaration` in the list form only, `ImportDeclaration`, `AttributeArg`), `language.md` (Modules and imports; attributes), `types.md` (a module block is a namespace; the text on transparent blocks goes), `versioning.md` (the `requires` attribute; the example of a version declaration becomes a `mind` block again, and the sentence that calls it an extension in Core v1 goes), `core-v1-forms.md` (the rows of the module items and of an attribute before an item), `errors.md` (`E2720` to `E2729`) |
 | Depends on | [RFC 0024](./0024-impl-forms.md): `TraitDeclaration` and `ImplDeclaration` are listed in `ModuleItem` below, and a module block MAY hold them. |
 | Related | [RFC 0024](./0024-impl-forms.md) (visibility of methods), [RFC 0023](./0023-type-parameters-on-user-types.md) (the declaration name of a member of a module block) |
 
@@ -86,7 +86,9 @@ extension that [Language](../../spec/v1.0/language.md#executable-subset-status-i
    name, and the declaration only names the file.
 2. **Module block.** `module m { … }` introduces the namespace `m` inside the enclosing module. A member
    `f` of `m` is referred to as `m.f` from outside the block and as `f` inside it. This is the qualifier rule
-   of [Language](../../spec/v1.0/language.md#module-qualified-references) applied to a block. A block is not
+   of [Language](../../spec/v1.0/language.md#module-qualified-references) applied to a block. The rule is for a name
+   in an expression: a type position takes one identifier (`IdentifierType`), so a type of a block is named only
+   inside the block in this draft ([Open](#open)). A block is not
    flattened into the file in any edition: two blocks with members of the same name are two namespaces.
 3. **Names.** Two items of one namespace MUST NOT have the same name. A module block and a function of
    the same enclosing namespace MUST NOT have the same name. The qualified name of a module block is the module
@@ -114,26 +116,31 @@ extension that [Language](../../spec/v1.0/language.md#executable-subset-status-i
    (language.md); this RFC makes the alias the only qualifier of that import.
 7. **Attributes.** An attribute is defined by a chapter of the specification, by its name and by the item that it
    stands before. The defined attributes are exactly those that a chapter defines by name and position. A search of
-   every file of the specification for the form `#[` finds two that a chapter defines:
+   every file of the repository for the forms `#[` and `#![` finds two that a chapter defines:
    - `requires`, with the key `mind_spec`, before the file module declaration `module m;`
      ([Versioning](../../spec/v1.0/versioning.md#in-source-code); rule 8 gives the rules for its argument).
    - `repr(C)`, with the one argument `C`, before a `struct` declaration. The FFI chapter defines its name, its
-     position and its meaning, the layout of the struct in memory
-     ([Struct layout attribute](../../spec/v1.0/ffi.md#struct-layout-attribute)), and
+     position and its meaning: the layout of the struct in memory, the field types that have a layout, and the
+     refusal of another field type with `E2407`
+     ([Struct layout attribute](../../spec/v1.0/ffi.md#struct-layout-attribute)).
      [MLIR Lowering](../../spec/v1.0/mlir-lowering.md) names such a struct a `#[repr(C)]` struct.
 
-   [Future Extensions](../../spec/v1.0/future-extensions.md) shows `#[profile(...)]` and `#![no_std]` as proposals for a
-   later edition; it does not define them. No attribute name is defined for a module block or for a function of an
-   `impl` block. An attribute whose name is not in the list, an attribute with another argument than the list gives
-   (`#[repr(packed)]`), and an attribute before an item for which its name is not defined (`#[repr(C)]` before a
-   function) are refused with `E2726`. A chapter or an RFC that defines an attribute adds it to the list.
+   No attribute name is defined for a module block or for a function of an `impl` block. An attribute whose name is
+   not in the list, an attribute with another argument than the list gives (`#[repr(packed)]`), and an attribute
+   before an item for which its name is not defined (`#[repr(C)]` before a function) are refused with `E2726`. A
+   chapter or an RFC that defines an attribute adds it to the list.
 
-   Other attribute names in the repository are not defined, so this rule refuses them with `E2726`: the example
-   `examples/ffi/c_bindings.mind` of the repository writes `#[extern("C")]`, `#[export("C")]` and `#[unsafe]` before a
-   function, and the changelog of the repository (`docs/changelog.md`) names the compiler attributes
-   `#[deterministic]`, `#[target(...)]` and `#[q16]`. The FFI and MLIR chapters write an external function as
-   `extern "C"`, not as an attribute. The example is not a valid program under this RFC until a chapter or an RFC
-   defines these names ([Open](#open)).
+   The other hits of the search define no attribute, so this rule refuses each of their names with `E2726`:
+   - The syntactic grammar, the lexical chapter and the language chapter write the general forms `#[name]` and
+     `#[name(arg, ...)]`: the syntax of an attribute, not a name.
+   - [Future Extensions](../../spec/v1.0/future-extensions.md) writes `#[profile(default)]` and
+     `#[profile(default | systems)]` in a design for a later edition and `#[cfg(profile = "ai")]` in a design that
+     it rejects, and it names `#![no_std]` as a feature of another language. It defines none of them.
+   - The example `examples/ffi/c_bindings.mind` writes `#[extern("C")]`, `#[export("C")]` and `#[unsafe]` before a
+     function. The FFI and MLIR chapters write an external function as `extern "C"`, not as an attribute. The
+     example is not a valid program under this RFC until a chapter or an RFC defines these names ([Open](#open)).
+   - The changelog (`docs/changelog.md`) names the compiler attributes `#[deterministic]`, `#[target(...)]` and
+     `#[q16]`, and `#[cfg(feature = "std-surface")]`, a gate in the source code of the compiler.
 8. **Version attribute.** In `#[requires(mind_spec = "M.N")]`, `mind_spec` is the only key. Its value is a string
    literal that holds a version `major.minor`: two decimal numbers joined by one `.`. An implementation compares the
    value with its own specification version. Another major, or the same major with a higher minor than its own, is
@@ -441,5 +448,10 @@ expected:
   as attributes is not decided. Until a chapter or an RFC defines them, they are refused with `E2726` (rule 7).
 - **Export of a module block.** Whether an export list can make the members of a module block visible to another
   module (for example by naming the block) is not decided.
+- **Qualified type names.** [Types](../../spec/v1.0/types.md#module-qualified-type-ownership) writes a type of a
+  block as `defs.Color`, but `IdentifierType` and `TraitRef` take one identifier, so no type position derives
+  `m.T`. How a type or a trait of a block is named from outside the block is not decided; a later change that adds
+  qualified names to these productions decides it, also for the head of an impl
+  ([RFC 0024](./0024-impl-forms.md#open)).
 - **`requires` before another item.** This edition defines `requires` only before `module m;` (rule 7). Whether it
   MAY stand before another item is not decided; until then it is refused there with `E2726`.
