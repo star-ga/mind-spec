@@ -29,8 +29,8 @@ limitations under the License.
 
 The syntax grammar defines `TypeParameters` on `struct`, `enum`, `trait` and `type`, and type arguments
 with several entries on any named type (`IdentifierType = Identifier , [ "<" , TypeList , ">" ]`).
-[Core v1 form status](../../spec/v1.0/core-v1-forms.md) marks these forms NOT IN CORE v1, because
-the reference compiler v0.10.4 does not implement them. A program therefore cannot declare a pair, an
+The grammar marks these parts "NOT IN CORE v1", and [Core v1 form status](../../spec/v1.0/core-v1-forms.md) gives
+the forms the status Not in Core v1. A program therefore cannot declare a pair, an
 optional value, a result with two types or a container of its own element type. The standard library
 has `Option<T>` and `Result<T, E>`, and no user can write a type of the same kind.
 
@@ -71,7 +71,9 @@ uses it in the head of an `impl`. This draft removes the productions `TypeParame
 current grammar: a type parameter of a declaration is a plain name, and a bound on it is not part of this edition
 ([RFC 0027](./0027-function-generics.md) defines the bounds of a function parameter only). The supertrait list of
 `TraitDeclaration` (`trait B: A`) is owned by RFC 0027, which adds `[ ":" , TraitBounds ]` to the `TraitDeclaration`
-production above. `FunctionTypeParameters` (one unbounded name) is unchanged here; RFC 0027 replaces it.
+production above. The grammar has no type parameter on a function (`FunctionDeclaration`; the form `fn f<T>` is an
+extension, [Core v1 forms](../../spec/v1.0/core-v1-forms.md)); RFC 0027 adds `[ GenericParameters ]` to
+`FunctionDeclaration`.
 
 Lexing: the token `>>` ends two nested argument lists in `Pair<Box<i64>>`. A parser MUST split `>>` into two
 `>` tokens while it reads `TypeArguments` or `TypeParameterList`. Elsewhere `>>` is the shift operator.
@@ -106,7 +108,8 @@ or infers them.
    on an owning pointer type. [RFC 0027](./0027-function-generics.md) uses the same code for a trait that names
    itself in its supertrait list.
 8. A type argument on a type without parameters is refused with the code of rule 4. (The reference
-   v0.10.4 accepts `Box<i64>` for a `Box` without parameters; Core v1 would refuse it.)
+   v0.10.4 accepts `Box<i64>` for a `Box` without parameters; in Core v1 a type argument on a user-declared type
+   has the status Not in Core v1.)
 9. The built-in types `Option<T>` and `Result<T, E>` follow the same rules, with one and with two parameters. A
    `struct`, `enum`, `type` or `trait` declaration MUST NOT take a predeclared type name: a name of
    `PrimitiveType` (`i32`, `i64`, `f32`, `f64`, `bool`, `unit`), `Tensor`, `Option`, `Result`, or a predeclared
@@ -124,7 +127,10 @@ identifier of the program. No identifier spelling is reserved for it, in the lex
 and by the names of the module blocks around it ([RFC 0026](./0026-module-items.md)), outermost first, each one
 followed by `.`. For a manifest project the module path is the full module path of
 [Types](../../spec/v1.0/types.md#module-qualified-type-ownership) (`nested.defs.Color`). A single source without a
-project has no module path: `struct Pt` in the block `geo` has `D` = `geo.Pt`.
+project has no module path: `struct Pt` in the block `geo` has `D` = `geo.Pt`. `D` is unique in a program: two
+items of one namespace have different names, and the qualified name of a module block never equals the module path
+of a module of the project ([RFC 0026](./0026-module-items.md), rule 3). So two different declarations have two
+different `D`, and two different instances have two different instance names.
 
 **Canonical spelling of a type.** `C(T)` is written without a space, except the one space after `diff`:
 
@@ -282,7 +288,7 @@ expected:
 
 ```yaml
 # reject 3: an alias used without its arguments
-description: "A parametrised alias that is not applied in full is refused"
+description: "A parameterised alias that is not applied in full is refused"
 input:
   source: |
     type Wrap<T> = T;
