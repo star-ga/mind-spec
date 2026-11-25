@@ -50,15 +50,16 @@ spells (longest match): `x<<=1` holds the one token `<<=`, not `<<` and `=` and 
 ([Operator precedence](./language.md#operator-precedence-and-associativity)) are one token each, so `a.*b`
 holds the token `.*` and is not a field access.
 
-**Closing angle.** Where the syntactic grammar expects the `>` that closes a list in angle brackets
-(`CloseAngle` of [`grammar-syntax.ebnf`](./grammar-syntax.ebnf): the type arguments of a type and the type
-parameters of a declaration) and the next token starts with `>` (`>>`, `>=` or `>>=`), the first `>` is that
-closing token, and the rest of the token is read again as a token: `>>` gives `>` and `>`, `>=` gives `>` and
+**Closing angle.** Where the syntactic grammar expects the `>` that closes a type-argument list
+(`CloseAngle` of [`grammar-syntax.ebnf`](./grammar-syntax.ebnf): the type arguments of `Tensor<...>` and of a
+named type such as `Option<...>`) and the next token starts with `>` (`>>`, `>=` or `>>=`), the first `>` is
+that closing token, and the rest of the token is read again as a token: `>>` gives `>` and `>`, `>=` gives `>` and
 `=`, and `>>=` gives `>` and `>=`. So `let o: Option<Option<i64>>= p;` is derived: the first `>` of `>>=`
 closes the inner list, the rest `>=` gives the `>` that closes the outer list, and `=` is left. A `>` closes
 only a list that is open: in `let o: Option<i64>>= p;` the first `>` closes the list, `>=` is left where the
 `let` needs `=`, and the source MUST be refused. Everywhere else longest match decides, so `x >>= 1` holds
-the one token `>>=`.
+the one token `>>=`, and the `>` that closes the type parameters of a declaration is not read so:
+`type X<T>= T;` holds the token `>=` and is not derived.
 
 MIND has no operator `:=`. The text `:=` is the two tokens `:` and `=`, no rule of the syntactic grammar
 puts `=` directly after `:`, and an implementation MUST refuse a source such as `x := 1;`.

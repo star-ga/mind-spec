@@ -48,7 +48,7 @@ Parameter = Identifier , ":" , Type ;
 (* TypeParameters, TypeParameter, TraitBounds and TraitBound below.     *)
 TypeDeclaration = "type" , Identifier , [ TypeParameters ] , "=" , Type , ";" ;
 
-TypeParameters = "<" , TypeParameter , { "," , TypeParameter } , [ "," ] , CloseAngle ;
+TypeParameters = "<" , TypeParameter , { "," , TypeParameter } , [ "," ] , ">" ;
 TypeParameter = Identifier , [ ":" , TraitBounds ] ;
 
 TraitBounds = TraitBound , { "+" , TraitBound } ;
@@ -92,8 +92,10 @@ Type = PrimitiveType
 
 PrimitiveType = "i32" | "i64" | "f32" | "f64" | "bool" | "unit" ;
 
-(* Closing angle. CloseAngle is the ">" that closes a list in angle    *)
-(* brackets. Where the parser expects it and the next token starts     *)
+(* Closing angle. CloseAngle is the ">" that closes a type-argument    *)
+(* list (TensorType, IdentifierType). The ">" that closes the type     *)
+(* parameters of a declaration (TypeParameters) is not a CloseAngle.   *)
+(* Where the parser expects a CloseAngle and the next token starts     *)
 (* with ">" (">>", ">=", ">>="), the first ">" is the CloseAngle and   *)
 (* the rest of the token is read again as a token: ">>" gives ">" and  *)
 (* ">", ">=" gives ">" and "=", ">>=" gives ">" and ">=" (lexical.md,  *)
