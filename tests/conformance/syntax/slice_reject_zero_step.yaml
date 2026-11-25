@@ -10,7 +10,7 @@ profile: cpu
 input:
   source: |
     fn main() -> i64 {
-        let a = [1, 2, 3, 4];
+        let a: [i64; 4] = [1, 2, 3, 4];
         let e = a[0:4:0];
         return 0;
     }

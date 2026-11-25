@@ -10,7 +10,7 @@ profile: cpu
 input:
   source: |
     fn main() -> i64 {
-        let xs = [1, 2];
+        let xs: array<i64> = [1, 2];
         let mut s = 0;
         if s == 0 {
             s = s + 1;

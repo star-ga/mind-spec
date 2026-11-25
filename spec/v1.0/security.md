@@ -43,8 +43,9 @@ This section says what the language checks.
 - **Raw memory is marked**: a call of a raw memory function stands only in a function declared with `#[raw_memory]` or
   `#[raw_memory(sealed)]`, or in a function of the standard library. Any other call MUST be refused at check time with
   [`E2501`](./errors.md#e2501-raw-memory-use-outside-a-raw-memory-function), and a wrong use of the attribute with
-  [`E2502`](./errors.md#e2502-invalid-attribute). A region block stands only in a function declared with the attribute
-  (a function of the standard library also needs it), else `E2501` ([Region blocks](./memory.md#region-blocks)).
+  [`E2502`](./errors.md#e2502-invalid-attribute); a function whose attribute `E2502` refuses gets no `E2501`. A region
+  block stands only in a function declared with the attribute (a function of the standard library also needs it), else
+  `E2501` ([Region blocks](./memory.md#region-blocks)).
 - **The address rules are not checked**: in a raw memory function the program keeps the
   [address rules](./memory.md#address-validity). An implementation does not have to detect a read or a write
   through an address that is not valid, so a use after a free or a write outside a buffer in such a function is an
@@ -56,8 +57,9 @@ This section says what the language checks.
   ([Library functions that check](./memory.md#library-functions-that-check)).
 - **Index bounds**: an index or a slice bound outside its axis is refused at check time or makes the defined stop
   at run time, by the rule of [Index bounds](./ir.md#index-bounds) (in [Tensor safety](#tensor-safety) below).
-- **Containers**: a change of a container through a method call needs a `let mut` root, and no container handle
-  shows storage that the implementation released ([Records and containers](./memory.md#records-and-containers)).
+- **Containers**: a change of a container through a method call needs a `let mut` root, and outside a raw memory use no
+  container handle shows storage that the implementation released
+  ([Records and containers](./memory.md#records-and-containers)).
 
 An implementation MUST refuse at check time the sources that this list names as refused, and MUST make the
 defined stop where this list names it. This section claims no other check of memory use.

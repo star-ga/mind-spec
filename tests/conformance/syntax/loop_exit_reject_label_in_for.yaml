@@ -10,7 +10,7 @@ profile: cpu
 input:
   source: |
     fn main() -> i64 {
-        let xs = [1, 2, 3];
+        let xs: array<i64> = [1, 2, 3];
         for i in xs {
             break 'a;
         };

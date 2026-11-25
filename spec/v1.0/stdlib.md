@@ -69,7 +69,8 @@ shipped by the reference implementation.
     `assert(cond, "message")`. The parenthesised spelling is an additive form
     targeted for specification 1.7.0 (reference compiler commit `487dd5c7`,
     released in v0.10.3); this does not declare that specification release.
-  - Aborts execution if `condition` is `false`, and the diagnostic SHOULD surface `message`
+  - Aborts execution if `condition` is `false` (the [defined stop](./memory.md#the-defined-stop)), and the
+    diagnostic SHOULD surface `message`
   - In the parenthesised spelling, a pair whose second element is a string
     literal is the condition and the message, not a tuple. A tuple is not a
     `bool`, so a tuple-typed condition is ill-typed under the signatures above.

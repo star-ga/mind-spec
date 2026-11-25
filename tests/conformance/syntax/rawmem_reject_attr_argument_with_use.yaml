@@ -1,0 +1,24 @@
+# MIND Conformance Test: a raw memory use in a function whose attribute E2502 refuses
+# Specification reference: spec/v1.0/memory.md#raw-memory
+# Category: syntax
+# Profile: cpu
+
+description: "raw_memory takes no argument but sealed; the call in the body gets no E2501, and the source gets the one code E2502"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    #[raw_memory(open)]
+    fn f(p: i64) -> i64 {
+        return __mind_load_i64(p);
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2502

@@ -68,7 +68,8 @@ on a value that is not a container is not affected.
 When a container needs more storage, the implementation moves the elements to new storage and releases the old
 storage if the implementation allocated it. After that, no container handle shows the old storage. A function that
 releases a container explicitly (`vec_free`) is a [raw memory function](#raw-memory-functions), because other
-references to the record can still exist.
+references to the record can still exist. A use of a container after its explicit release is an error of the
+program, as a read or a write through an address that is not valid ([Address validity](#address-validity)).
 
 ## Raw memory
 
@@ -91,7 +92,9 @@ does not check this statement.
 The attribute `raw_memory` stands only directly before a function declaration and takes no argument or the one
 argument `sealed` ([Attributes](./language.md#attributes)). Any other use of the attribute `raw_memory`, before
 another item or with another argument, MUST be refused at check time with
-[`E2502`](./errors.md#e2502-invalid-attribute).
+[`E2502`](./errors.md#e2502-invalid-attribute). A function whose attribute `raw_memory` `E2502` refuses gets no
+`E2501`: a raw memory use in its body, a call or a region block, is not refused with `E2501`, and the source gets
+the one code `E2502`.
 
 In a raw memory function the program keeps the [address rules](#address-validity). An implementation does not have
 to detect a read or a write through an address that is not valid, and this specification gives the value of such a
@@ -141,7 +144,8 @@ region block is a raw memory use: it stands only in the body of a function decla
 `#[raw_memory(sealed)]`, and a function of the standard library also needs the attribute for it. Where a statement can
 start, the name `region` directly followed by `{` is a region block; in the body of a function without that attribute it
 MUST be refused at check time with [`E2501`](./errors.md#e2501-raw-memory-use-outside-a-raw-memory-function), by every
-implementation, also one that does not provide region blocks.
+implementation, also one that does not provide region blocks, except in a function whose attribute `raw_memory`
+`E2502` refuses ([Raw memory](#raw-memory)).
 
 ## Library functions that check
 

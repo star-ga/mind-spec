@@ -382,7 +382,8 @@ exclusivity analysis; those guarantees remain future work.
   `#[raw_memory(sealed)]` ([Raw memory](./memory.md#raw-memory)): a call of a raw memory function, except in a
   function of the standard library; or a region block, that is where a statement can start the name `region`
   directly followed by `{` ([Region blocks](./memory.md#region-blocks)), also in a function of the standard
-  library and also where an implementation does not provide region blocks.
+  library and also where an implementation does not provide region blocks; not in the body of a function whose
+  attribute `raw_memory` `E2502` refuses, which gets the one code `E2502`.
 - **Required context**: the called function or the region block, its location and the function that holds it, with the
   fix: declare that function with `#[raw_memory]`, or with `#[raw_memory(sealed)]` when no parameter and no result of it
   carries an address.
