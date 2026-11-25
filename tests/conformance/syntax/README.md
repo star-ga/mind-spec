@@ -133,3 +133,5 @@ implementation MAY accept or refuse those.
 | [`rawmem_reject_attr_on_struct`](./rawmem_reject_attr_on_struct.yaml) | reject, `E2502` | as above: another use of the attribute MUST be refused |
 | [`rawmem_reject_attr_argument`](./rawmem_reject_attr_argument.yaml) | reject, `E2502` | as above |
 | [`attribute_reject_unknown_name`](./attribute_reject_unknown_name.yaml) | reject | [Attributes](../../../spec/v1.0/language.md#attributes): an attribute name that the specification does not define MUST be refused |
+| [`string_type_accept_named`](./string_type_accept_named.yaml) | accept | [Type formation](../../../spec/v1.0/types.md#type-formation): the string type `String` |
+| [`string_type_reject_literal_as_integer`](./string_type_reject_literal_as_integer.yaml) | reject, `E2001` | as above: a string literal has the type `String` |

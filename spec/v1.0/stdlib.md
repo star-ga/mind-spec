@@ -107,7 +107,7 @@ shipped by the reference implementation.
   > there; on v0.10.2 write `assert cond, "message"`. This note does not change
   > the published v0.10.2 artifact.
 
-- **`panic(message: string) -> !`**
+- **`panic(message: String) -> !`**
   - Terminates execution immediately with the given message
   - Return type `!` (never) indicates this function does not return
   - Message MUST be surfaced to the user/host environment
@@ -564,7 +564,9 @@ so this resolution is the default behaviour of a shipped `mindc`; building with
   > **Planned (not yet shipped).** A tail-removing `vec_pop` is on the roadmap
   > but is **not** present in the reference implementation as of v0.10.0.
 
-- **`std.string`** — UTF-8 `String` shaped as `Vec<u8>`. The container stores
+- **`std.string`** — UTF-8 `String` shaped as `Vec<u8>`. The type is named `String`; like every entity of the
+  standard library it is available without an import, and a string literal has this type
+  ([Type formation](./types.md#type-formation)). The container stores
   raw bytes; UTF-8 well-formedness is a documented invariant the producer
   MUST uphold. The reference implementation (mindc v0.10.0, `std/string.mind`)
   ships: `string_new`, `string_push_byte`, `string_push_str`, `string_push_i`,
@@ -593,7 +595,7 @@ so this resolution is the default behaviour of a shipped `mindc`; building with
   `map_new`, `map_insert`, `map_get`, `map_contains_key`, `map_len`,
   `map_cap`, `map_key_at`, `map_value_at`, `map_get_str`,
   `map_contains_key_str`. The `_str` variants compare String **key contents**
-  (byte equality) rather than i64 handle identity, for `map<string, _>`.
+  (byte equality) rather than i64 handle identity, for a map whose keys are `String` values.
   `map_insert` is currently insert-at-tail (append) semantics; it does not
   yet update an existing key's value in place. Two accessor helpers
   `map_keys_addr` / `map_vals_addr` expose the opaque array base addresses.

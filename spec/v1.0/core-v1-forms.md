@@ -91,6 +91,8 @@ does not change the status. A row without a mark makes no claim about the refere
 | `let o: Option<i64>>= p;`: a `>` that closes no open list | Core v1 refuses; reference conforms (`mindc check` refuses it with `E1001`) |
 | `a .* b`, `a ./ b`, `a .+ b`, `a .- b`: the elementwise operators of [Operator precedence](./language.md#operator-precedence-and-associativity) (no sentence gives their operand rules) | Open |
 | `1.0^` (a literal with the suffix `^`, [Lexical Structure](./lexical.md#literals)) | Core v1 refuses |
+| `fn echo(s: String) -> String { }`, `let t: String = "a";`: the string type `String`, the type of a string literal ([Type formation](./types.md#type-formation)) | Core v1; reference gap (`mindc check` accepts it; the native backend refuses a `String` result with `lane.string.result`) |
+| `let n: i64 = "a";`: a string literal where another type is expected | Core v1 refuses; reference gap (`mindc check` accepts it) |
 | String escapes `\n \r \t \0 \\ \' \"` and `\u{HEX}` ([String escapes](./language.md#string-escapes)) | Core v1 |
 | `trait T { }` | Not in Core v1 |
 | `type X<T> = T;`, `struct S<T> { }` | Not in Core v1 |

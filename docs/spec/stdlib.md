@@ -51,7 +51,7 @@ behaviour of the core set.
 | Symbol | Signature | Notes |
 | ------ | --------- | ----- |
 | `assert(cond: bool)` | `()->` | Aborts evaluation with a diagnostic if `cond` is `false`. Diagnostics SHOULD include the source span. |
-| `panic(msg: string)` | `()->` | Terminates execution immediately. Implementations SHOULD surface the panic message to the host environment. |
+| `panic(msg: String)` | `()->` | Terminates execution immediately. Implementations SHOULD surface the panic message to the host environment. |
 
 ### Optional and error-aware types
 

@@ -1,0 +1,27 @@
+# MIND Conformance Test: the string type is String
+# Specification reference: spec/v1.0/types.md#type-formation
+# Category: syntax
+# Profile: cpu
+
+description: "String names the string type with no import, and a string literal has that type"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn echo(s: String) -> String {
+        return s;
+    }
+
+    fn main() -> i64 {
+        let t: String = echo("a");
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0

@@ -33,6 +33,10 @@ The following forms are part of the core language:
   later edition — see [Traits and generics](#traits-and-generics))*.
 - **Differentiable wrappers**: `diff T` identifies values that participate in differentiation (see
   [Automatic differentiation](./autodiff.md)).
+- **The string type**: `String`, the type of the module `std.string` of the
+  [standard library](./stdlib.md#four-pure-mind-modules). Like every entity of the standard library, `String` is
+  available without an import. A string literal has the type `String`, so `let s: String = "a";` is valid and
+  `let n: i64 = "a";` MUST be refused at check time with [`E2001`](./errors.md#e2001-type-mismatch).
 
 Implementations MAY extend the set of primitive types but MUST document the extensions.
 

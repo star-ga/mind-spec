@@ -1,0 +1,20 @@
+# MIND Conformance Test: a string literal has the type String
+# Specification reference: spec/v1.0/types.md#type-formation
+# Category: syntax
+# Profile: cpu
+
+description: "a string literal where an i64 is expected"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let n: i64 = "a";
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2001
