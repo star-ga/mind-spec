@@ -1,0 +1,20 @@
+# MIND Conformance Test: a sign after the closing brace of a block that is an operand
+# Specification reference: spec/v1.0/lexical.md#literals
+# Category: syntax
+# Profile: cpu
+
+description: "after the } of a block that is an operand the sign is an operator, and 9223372036854775808 is outside the range of i64"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let y = { 1 } -9223372036854775808;
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2408

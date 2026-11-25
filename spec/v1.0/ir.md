@@ -254,7 +254,9 @@ reduction MUST be refused at check time when the type gives the shape of the inp
     - Length mismatch or zero steps are verification failures
   - **Runtime behaviour**:
     - Bounds: [Index bounds](#index-bounds)
-    - Negative `steps` (reverse slicing) are NOT supported; steps MUST be positive
+    - Negative `steps` (reverse slicing) are NOT supported; steps MUST be positive. A negative step that is known only
+      at run time makes the [defined stop](./memory.md#the-defined-stop), whose diagnostic names
+      [`E4008`](./errors.md#e4008-invalid-slice-step)
     - Empty slices (where ends\[i\] ≤ starts\[i\] for positive step) produce size-0 dimensions
 - **`Gather(input, indices: tensor<i32|i64>) -> ValueId`**
   - Gathers elements from input using an index tensor.
@@ -283,7 +285,8 @@ implementation refuses no other index or slice bound at check time. On `a: [i64;
 refused at check time, and `a[2 + 2]` and `a[i]` with `i = 4` pass the check and make the defined stop. An index is
 outside its axis when it is negative or not less than the extent of the axis, and a slice bound when it is negative or
 greater than the extent. No bound is clamped, and no index counts from the end. A dimension of size 0 is valid (an empty
-slice gives one); a negative dimension MUST be refused with [`E3006`](./errors.md#e3006-negative-dimension).
+slice gives one); a negative dimension MUST be refused with [`E3006`](./errors.md#e3006-negative-dimension), and a
+negative dimension that is known only at run time makes the defined stop, whose diagnostic names `E3006`.
 
 ### Linear and tensor algebra
 

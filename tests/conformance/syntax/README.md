@@ -177,5 +177,11 @@ implementation MAY accept or refuse those.
 | [`literal_sign_accept_i32_min`](./literal_sign_accept_i32_min.yaml) | accept | [Literals](../../../spec/v1.0/lexical.md#literals): a sign directly before the digits is part of the literal where an operand can start |
 | [`literal_sign_accept_minus_after_name`](./literal_sign_accept_minus_after_name.yaml) | accept, returns 2 | as above: after an identifier the sign is an operator |
 | [`literal_sign_reject_below_i32_min`](./literal_sign_reject_below_i32_min.yaml) | reject, `E2408` | as above: the sign is part of the literal, and the literal is outside the range of `i32` |
+| [`literal_sign_accept_after_block_statement`](./literal_sign_accept_after_block_statement.yaml) | accept, returns 0 | [Literals](../../../spec/v1.0/lexical.md#literals): after the `}` that ends a block-like statement the sign is part of the literal |
+| [`literal_sign_reject_after_block_operand`](./literal_sign_reject_after_block_operand.yaml) | reject, `E2408` | as above: after any other `}` the sign is an operator, and the literal is outside the range of `i64` |
+| [`map_get_accept_missing_key`](./map_get_accept_missing_key.yaml) | accept, returns 5 | [Four pure-MIND modules](../../../spec/v1.0/stdlib.md#four-pure-mind-modules): `map_get` of a key that the map does not hold gives 0 |
+| [`for_accept_length_read_once`](./for_accept_length_read_once.yaml) | accept, returns 2 | [Loops](../../../spec/v1.0/language.md#loops): a `for` loop over a container reads the length one time, at its start |
+| [`set_accept_with_mut_root`](./set_accept_with_mut_root.yaml) | accept, returns 5 | [Records and containers](../../../spec/v1.0/memory.md#records-and-containers): `xs.set(i, v)` replaces the element `i` |
+| [`set_reject_root_not_mut`](./set_reject_root_not_mut.yaml) | reject, `E2402` | [Changing a container](../../../spec/v1.0/memory.md#changing-a-container): `xs.set(i, v)` needs a `let mut` root |
 | [`slice_accept_double_colon_step`](./slice_accept_double_colon_step.yaml) | accept | [Tuple index](../../../spec/v1.0/language.md#tuple-index): inside an index bracket the token `::` is read as two `:` |
 | [`slice_reject_three_colons`](./slice_reject_three_colons.yaml) | reject | as above: `a[:::2]` is not derived |

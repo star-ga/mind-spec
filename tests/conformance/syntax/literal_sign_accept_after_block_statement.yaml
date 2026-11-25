@@ -1,0 +1,25 @@
+# MIND Conformance Test: a sign after the closing brace of a block-like statement
+# Specification reference: spec/v1.0/lexical.md#literals
+# Category: syntax
+# Profile: cpu
+
+description: "after the } that ends the if statement an operand can start, so -9223372036854775808 is one literal that i64 can hold"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let x = 1;
+        if x > 0 { }
+        -9223372036854775808;
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0

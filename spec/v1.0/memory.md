@@ -23,7 +23,8 @@ container follows the same rule.
 
 ## Records and containers
 
-The container types are `array<T>`, the type `Vec` of `std.vec`, the type `Map` of `std.map` and `String`
+The container types are `array<T>`, which is the type of the vector record of `std.vec` (its signatures write `Vec`
+for `array<i64>`), the type `Map` of `std.map` and `String`
 ([Four pure-MIND modules](./stdlib.md#four-pure-mind-modules)). A value of a container type denotes a container
 record with identity, as a value of a struct type does. An array literal where an `array<T>` is expected, a string
 literal, and a library function that makes a container (`vec_new`, `map_new`, `string_new`) create a new record.
@@ -34,11 +35,11 @@ reference is visible through every other reference to that record. A library fun
 returns a container returns the handle that it received (`vec_push`, `map_insert`, `string_push_byte`,
 `string_push_str`, `string_push_i`). Each evaluation of a string literal creates a new string record; an implementation
 MAY share one read-only record when no change can reach it. A function that gives a part of a string
-(`string_slice_from`) creates a new record with a copy of the bytes. A map keeps the bytes that a string key had when it
-was inserted.
+(`string_slice_from`) creates a new record with a copy of the bytes.
 
 On a value `xs` of type `array<T>`, `xs[i]` is the element `i`, counted from 0, and `xs.push(v)` appends the value `v`
-of type `T` to the record and has the value `xs`. An index outside the container is the case of
+of type `T` to the record and has the value `xs`. `xs.set(i, v)` replaces the element `i` with the value `v` of type
+`T`. An index outside the container is the case of
 [Index bounds](./ir.md#index-bounds). An index or a slice bound that is outside its axis MUST be refused at check time
 with [`E3011`](./errors.md#e3011-index-outside-its-axis) exactly when it is an integer literal with its sign
 ([Literals](./lexical.md#literals)), with or without parentheses around it (one pair or more), and the type gives the
@@ -54,7 +55,7 @@ storage.
 
 ## Changing a container
 
-A method call that changes a container (`xs.push(v)`) is a change of the place `xs`
+A method call that changes a container (`xs.push(v)`, `xs.set(i, v)`) is a change of the place `xs`
 ([Bindings and assignment](./language.md#bindings-and-assignment)). The receiver must be a place whose root name is
 declared with `let mut`, as for an assignment; otherwise the call MUST be refused at check time with
 [`E2402`](./errors.md#e2402-invalid-target-of-a-change). A parameter is not mutable: a function changes a container
@@ -155,8 +156,12 @@ own name and is declared with `#[raw_memory]`; this specification names no such 
 
 The defined stop is how a program ends when a check of the language or of the standard library fails at run time:
 an index function outside its container, an index or a slice bound outside its axis
-([Index bounds](./ir.md#index-bounds)), and a false `assert`
+([Index bounds](./ir.md#index-bounds)), a `for` loop that reaches an element that is no longer there
+([Loops](./language.md#loops)), a negative dimension or a negative slice step that is known only at run time
+([Index bounds](./ir.md#index-bounds), [Indexing and slicing](./ir.md#indexing-and-slicing)), a reduction with no
+value over an empty axis ([Empty axes](./ir.md#empty-axes)), and a false `assert`
 ([Control flow and assertions](./stdlib.md#control-flow-and-assertions)). At the defined stop the program ends at
 the failed check: no later step of the program runs and `main` returns no value. The implementation writes a
-diagnostic with the source location and, where the check has a code, that code; the process status is not 0. The stop is
-at the same step of the program on every substrate.
+diagnostic with the source location and, where the check has a code, that code. The process ends with one exit
+status, not 0, that is the same for every cause of the stop and on every substrate. The stop is at the same step of
+the program on every substrate.

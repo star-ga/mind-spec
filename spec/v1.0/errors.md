@@ -464,7 +464,8 @@ Shape errors occur during shape inference, broadcasting, or shape validation.
 - **Trigger**: a shape that contains a negative dimension
   ([Tensor ranks and shapes](./shapes.md#tensor-ranks-and-shapes)), or a fixed array type `[T; n]` whose
   length `n` is negative ([Fixed-array literal cardinality](./types.md#fixed-array-literal-cardinality)); a
-  dimension or a length of 0 is valid, and the marker `-1` of a reshape is not a dimension
+  dimension or a length of 0 is valid, and the marker `-1` of a reshape is not a dimension; a negative dimension that
+  is known only at run time makes the [defined stop](./memory.md#the-defined-stop), whose diagnostic names this code
 - **Required context**: shape, invalid dimension index, value
 - **Example**: `E3006: Invalid dimension -1 in shape [3, -1, 5] at line 18, column 10`
 
@@ -537,7 +538,8 @@ Verification errors occur during IR verification before execution or optimizatio
 - **Example**: `E4007: Slice %8 starts/ends/steps length mismatch: 3/3/2 for rank-3 tensor`
 
 ### E4008: Invalid slice step
-- **Trigger**: Slice step is zero
+- **Trigger**: Slice step is zero; a negative step that is known only at run time makes the
+  [defined stop](./memory.md#the-defined-stop), whose diagnostic names this code
 - **Required context**: ValueId, dimension, step value
 - **Example**: `E4008: Slice %10 has zero step at dimension 1`
 

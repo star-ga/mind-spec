@@ -1,0 +1,24 @@
+# MIND Conformance Test: set on an array with a let mut root
+# Specification reference: spec/v1.0/memory.md#records-and-containers
+# Category: syntax
+# Profile: cpu
+
+description: "xs.set(0, 5) replaces the element 0 with 5"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let mut xs: array<i64> = [1, 2];
+        xs.set(0, 5);
+        return xs[0];
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 5

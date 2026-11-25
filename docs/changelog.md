@@ -25,6 +25,15 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   [`determinism.md`](https://github.com/star-ga/mind-spec/blob/main/determinism.md): integer overflow wraps in two's
   complement, and a division or a remainder by zero gives 0; `E6005` has no trigger in Core v1. `Log(x)` follows IEEE
   754: the logarithm of 0 is negative infinity and of a negative number the canonical NaN.
+- **Maps, loops, vectors and the defined stop.** `map_get` of a key that the map does not hold gives 0, and
+  `map_contains_key` tests for a key. A `for` loop over a container reads the length one time, at its start;
+  added elements are not visited, and an element that is no longer there makes the defined stop
+  ([Loops](../spec/v1.0/language.md#loops)). `array<T>` is the type of the vector record of `std.vec`, and
+  `xs.set(i, v)` needs a `let mut` root as `push` does. The defined stop ends the process with one exit status,
+  the same for every cause and on every substrate; a negative dimension or slice step that is known only at
+  run time makes the defined stop with the code of the fault (`E3006`, `E4008`). After the `}` that ends a
+  block-like statement a sign is part of the literal. The sentence on string keys of a map is removed until a
+  function inserts a `String` key.
 
 ### Changed: the memory model, containers, index bounds and attribute codes (2026-11-25)
 

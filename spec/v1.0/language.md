@@ -437,6 +437,12 @@ in `a[f()] += 1` the call `f()` runs once. The rules of `op` for the types of it
 ([The unit value](./types.md#the-unit-value)): after `let u = while c { };`, `u` is `()`. A loop that
 stands as a statement is a [block-like statement](#block-like-statements) and takes no `;`.
 
+A `for` loop over a container ([Records and containers](./memory.md#records-and-containers)) reads the length of
+the container one time, at the start of the loop. For each index from 0 to that length minus 1, in order, one
+iteration binds the pattern to the element at that index. Elements that are added during the loop are not visited,
+and an element that is no longer there when its iteration starts makes the [defined stop](./memory.md#the-defined-stop)
+of an index outside the container, with [`E6001`](./errors.md#e6001-out-of-bounds-index).
+
 ## Block-like statements
 
 The five forms `if`, `match`, a block, `while` and `for` may stand as a statement with no `;` after them

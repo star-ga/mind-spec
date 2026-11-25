@@ -1,0 +1,23 @@
+# MIND Conformance Test: map_get of a key that the map does not hold
+# Specification reference: spec/v1.0/stdlib.md#four-pure-mind-modules
+# Category: syntax
+# Profile: cpu
+
+description: "the map holds no pair with the key 7, so map_get gives 0"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let m = map_insert(map_new(), 1, 10);
+        return map_get(m, 7) + 5;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 5

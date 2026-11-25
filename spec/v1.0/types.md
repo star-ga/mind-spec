@@ -33,7 +33,8 @@ The following forms are part of the core language:
   later edition — see [Traits and generics](#traits-and-generics))*.
 - **Differentiable wrappers**: `diff T` identifies values that participate in differentiation (see
   [Automatic differentiation](./autodiff.md)).
-- **Container types**: `array<T>`, `Vec`, `Map` and `String`. A value of one of them is a container record
+- **Container types**: `array<T>` (the vector record of `std.vec`, whose signatures write `Vec` for `array<i64>`), `Map`
+  and `String`. A value of one of them is a container record
   ([Memory model](./memory.md#records-and-containers)).
 - **The string type**: `String`, the type of the module `std.string` of the
   [standard library](./stdlib.md#four-pure-mind-modules). Like every entity of the standard library, `String` is

@@ -1,0 +1,28 @@
+# MIND Conformance Test: a for loop over an array that grows
+# Specification reference: spec/v1.0/language.md#loops
+# Category: syntax
+# Profile: cpu
+
+description: "the loop reads the length 2 one time, at its start, and does not visit the pushed elements"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let mut xs: array<i64> = [1, 2];
+        let mut n = 0;
+        for v in xs {
+            xs.push(v);
+            n = n + 1;
+        }
+        return n;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 2

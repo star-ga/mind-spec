@@ -95,11 +95,13 @@ The syntactic grammar also spells out words that are not in this list; they are 
 
 - **Integer literals** consist of an optional sign followed by digits. Binary (`0b`), octal (`0o`),
   and hexadecimal (`0x`) prefixes are allowed.
-- **Sign.** A `-` or `+` directly before the digits of an integer or floating-point literal, with no character
-  between, is part of the literal only where an operand can start: at the start of an expression, after an
-  operator, after `(`, `[`, `{`, `,`, `;`, `=` or `:`, or after a keyword. After an identifier, a literal, `)`,
-  `]` or `}` it is an operator. So `a-1` is a subtraction, and `let m: i32 = -2147483648;` holds the one literal
-  `-2147483648`, which `i32` can hold.
+- **Sign.** A `-` or `+` directly before the digits of an integer or floating-point literal, with no character between,
+  is part of the literal only where an operand can start: at the start of an expression, after an operator, after `(`,
+  `[`, `{`, `,`, `;`, `=` or `:`, after a keyword, or after the `}` that ends a block-like statement
+  ([Block-like statements](./language.md#block-like-statements)). After an identifier, a literal, `)`, `]` or any other
+  `}` it is an operator. So `a-1` is a subtraction, `if x > 0 { }` followed by `-1;` holds the literal `-1`, `{ 1 } -1`
+  as an operand is a subtraction, and `let m: i32 = -2147483648;` holds the one literal `-2147483648`, which `i32` can
+  hold.
 - **Floating-point literals** follow the grammar `<digits>.<digits>([eE][+-]?<digits>)?`. The lexer
   reads one also after the token `.`: `t.0.1` is the tokens `t`, `.` and `0.1`, and the syntactic grammar
   reads the token `0.1` as two tuple indices ([Tuple index](./language.md#tuple-index)).

@@ -1,0 +1,21 @@
+# MIND Conformance Test: set on an array whose root is not mutable
+# Specification reference: spec/v1.0/memory.md#changing-a-container
+# Category: syntax
+# Profile: cpu
+
+description: "xs.set(0, 5) changes the container, and xs is bound by let without mut"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let xs: array<i64> = [1, 2];
+        xs.set(0, 5);
+        return xs[0];
+    }
+
+expected:
+  status: error
+  error:
+    code: E2402

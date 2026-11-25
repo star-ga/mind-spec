@@ -77,7 +77,8 @@ implementation refuses no other index or slice bound at check time. On `a: [i64;
 refused at check time, and `a[2 + 2]` and `a[i]` with `i = 4` pass the check and make the defined stop. An index is
 outside its axis when it is negative or not less than the extent of the axis, and a slice bound when it is negative or
 greater than the extent. No bound is clamped, and no index counts from the end. A dimension of size 0 is valid (an empty
-slice gives one); a negative dimension MUST be refused with [`E3006`](./errors.md#e3006-negative-dimension).
+slice gives one); a negative dimension MUST be refused with [`E3006`](./errors.md#e3006-negative-dimension), and a
+negative dimension that is known only at run time makes the defined stop, whose diagnostic names `E3006`.
 
 **Numeric overflow**:
 - Integer overflow wraps in two's complement, and a division or a remainder by zero gives 0
