@@ -1,9 +1,9 @@
-# MIND Conformance Test: a range index a[1..3] is not a form of the language
+# MIND Conformance Test: a range index a[1..3] is refused with E2406
 # Specification reference: spec/v1.0/language.md#tuple-index
 # Category: syntax
 # Profile: cpu
 
-description: "a[1..3] is refused; the slice form is a[1:3]"
+description: "a[1..3] is refused with E2406; the slice form is a[1:3]"
 category: syntax
 profile: cpu
 
@@ -17,3 +17,5 @@ input:
 
 expected:
   status: error
+  error:
+    code: E2406

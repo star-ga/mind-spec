@@ -427,7 +427,8 @@ meaning: when the type of `e` is a tuple type, `e[i]` MUST be refused with `E240
 name the form `e.N`.
 
 `a[e1:e2]` (`SliceExpression`) is the only slice form. The grammar has no range index: `a[1..3]` is not
-derived, it MUST be refused at check time, and the diagnostic MUST name the slice form `a[1:3]`.
+derived, it MUST be refused at check time with [`E2406`](./errors.md#e2406-range-index), and the
+diagnostic MUST name the slice form `a[1:3]`.
 
 ## Statement separators
 

@@ -334,6 +334,16 @@ exclusivity analysis; those guarantees remain future work.
 - **Example**: `E2405: Core v1 has no 'loop' statement; write 'while true { ... }' at line 2, column 5`
 - **Check/build contract**: checking and artifact-producing builds MUST refuse the same source with `E2405`.
 
+### E2406: Range index
+
+- **Trigger**: an index operator whose index is two expressions with `..` between them (the form `a[1..3]`),
+  which no rule of the grammar derives. `a[e1:e2]` is the only slice form
+  ([Tuple index](./language.md#tuple-index)).
+- **Required context**: the index expression and its location, with the fix: the slice form, for example
+  `a[1:3]`.
+- **Example**: `E2406: a range is not an index; write the slice 'a[1:3]' at line 3, column 15`
+- **Check/build contract**: checking and artifact-producing builds MUST refuse the same source with `E2406`.
+
 ### E2701: Impl of an undeclared trait
 
 - **Trigger**: an `impl Trait for Type` block names a trait that no `trait` declaration declares.
