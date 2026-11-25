@@ -22,9 +22,8 @@ names. A note records the text, the behaviour of the reference compiler v0.10.4 
 does not give a meaning, except where it records a decision.** The specification owner decided every point on
 2026-11-24; each note records the decision in its **Decision** paragraph, and an RFC or an editorial change carries
 it into the normative text. The tables of options stay as the record of the choice. Each note ends with the status
-of its forms after the decision; the change that carries the decision brings
-[Core v1 form status](../../spec/v1.0/core-v1-forms.md) to the same status. The status is **Open** only where the
-note says so.
+of its forms after the decision, in the words of [Core v1 form status](../../spec/v1.0/core-v1-forms.md); that page
+gives the same status to the same form. The status is **Open** only where the note says so.
 
 ## DN-1. The operator `:=`
 
@@ -45,14 +44,16 @@ No sentence says what `x := e` means, and no example uses it.
 | B. Define `x := e` as `x = e` | Two spellings of one assignment. The formatter needs a rule for which one it writes. |
 | C. Define `x := e` as "declare and assign" (a new binding when `x` is unbound) | Changes the scope rules: an assignment can introduce a name. Needs a rule for a name that exists in an outer scope. |
 
-**Rows.** `colon_assign_*` in [`tests/conformance/syntax`](../../tests/conformance/syntax/README.md) record the
-reference behaviour (kind `reference-observed`).
+**Rows.** [`colon_assign_reject`](../../tests/conformance/syntax/colon_assign_reject.yaml) in
+[`tests/conformance/syntax`](../../tests/conformance/syntax/README.md) gives the verdict of the decision.
 
 **Decision.** Option A, decided by the specification owner on 2026-11-24. `:=` is removed from
 `AssignmentOperator`, from the `Operator` list of the lexical grammar, from the precedence table and from the token
-examples of the lexical chapter; `x := e` is not part of the language.
+examples of the lexical chapter; `x := e` is not part of the language. The text `:=` is the two tokens `:` and `=`,
+no rule of the syntactic grammar puts `=` directly after `:`, and a source such as `x := 1;` is refused
+([Lexical Structure](../../spec/v1.0/lexical.md#tokens)).
 
-**Form status.** Not in the language: Core v1 refuses `x := e`. The reference refuses it too.
+**Form status.** `x := e`: Core v1 refuses. The reference refuses it too (`E1001`, measured above).
 
 ## DN-2. `while` and `for` as expressions with a value
 
@@ -68,13 +69,16 @@ a value form of `break` that the grammar does not have.
 
 **Decision.** Option B, decided by the specification owner on 2026-11-24. This replaces the first decision of this
 note, which was option A. `while` and `for` stay in `PrimaryExpression`, and a loop has the type `unit` and the value
-`()` ([DN-4](#dn-4-the-unit-value)). The reason is that the rule for block-like statements
-([DN-10](#dn-10-separators-that-the-grammar-requires-and-the-reference-does-not)) is then one rule for five forms
-(`if`, `match`, a block, `while` and `for`), and no production of the published grammar is removed, so a program that
-the published grammar derives, such as `while c { };`, stays valid.
+`()` ([DN-4](#dn-4-the-unit-value)): after `let u = while c { };`, `u` is `()`. A loop that stands as a statement is a
+block-like statement and takes no `;` ([Loops](../../spec/v1.0/language.md#loops)). The reason is that the rule for
+block-like statements ([DN-10](#dn-10-separators-that-the-grammar-requires-and-the-reference-does-not)) is then one
+rule for five forms (`if`, `match`, a block, `while` and `for`), and no production of the published grammar is
+removed, so a program that the published grammar derives, such as `while c { };`, stays valid.
 
-**Form status.** Core v1: a loop has the type `unit`. Reference gap: the reference refuses a loop where a value
-stands (`E2002`, measured above).
+**Form status.** `while c { }` and `for v in xs { }`, loops of the type `unit`: Core v1. A loop as a value
+(`let u = while c { };`): Core v1; reference gap (`mindc check` refuses it with `E2002`, as an unknown identifier
+`while` or `for`). `while c { };`, a loop with `;`: Core v1; reference gap (the native backend refuses
+`while c { ... };` as an unsupported construct and builds the same loop without the `;`).
 
 ## DN-3. The remainder operator on floating-point values
 
@@ -93,12 +97,15 @@ NaN, because the result must be bit-identical on every substrate.
 truncated remainder `a - n * b`, where `n` is `a / b` truncated toward zero; the result is exact and has the sign of
 `a`. The special cases are normative: an infinite `a` or a zero `b` gives NaN; a finite `a` with an infinite `b`
 gives `a`; a zero `a` with a `b` that is not zero and not NaN gives `a` with its sign; any NaN operand gives NaN.
-This NaN is the canonical NaN: [Types](../../spec/v1.0/types.md) has none, so this change defines one bit pattern
-for each float type, `0x7FC00000` for `f32` and `0x7FF8000000000000` for `f64` (sign bit clear, quiet bit set, other
-payload bits clear).
+This NaN is the canonical NaN of [Types](../../spec/v1.0/types.md#canonical-nan), which this decision adds: one bit
+pattern for each float type, `0x7FC00000` for `f32` and `0x7FF8000000000000` for `f64` (sign bit clear, quiet bit
+set, other payload bits clear). Operands of two different float types are a dtype mismatch (`E2004`).
+[Floating-point remainder](../../spec/v1.0/language.md#floating-point-remainder) gives the rule and its table of
+special cases.
 
-**Form status.** Core v1 for `%` on integers and on floats. `%` on floats is a reference gap: the native backend
-refuses it with `lane.type.mismatch`.
+**Form status.** `a % b` on two `f32` or two `f64` operands: Core v1; reference gap (the
+native backend refuses it with `lane.type.mismatch`). `a % b` and `a %= b` with an `f32` and an `f64` operand:
+Core v1 refuses; reference gap (`mindc check` accepts both).
 
 ## DN-4. The unit value
 
@@ -116,10 +123,12 @@ a result type is the only way to produce no value.
 
 **Decision.** Option A, decided by the specification owner on 2026-11-24. The production
 `UnitExpression = "(" , ")"` gives the value `()` of type `unit`; the check refuses `()` where another type is
-expected.
+expected (an annotation, a parameter, a result type, an operand) with `E2001`
+([The unit value](../../spec/v1.0/types.md#the-unit-value)).
 
-**Form status.** Core v1, reference gap: the reference accepts `let n: i64 = ();`, and the native backend refuses
-`()`.
+**Form status.** `()`, the value of type `unit`: Core v1; reference gap (the native backend refuses it with
+`lane.source.tuple`). `()` where another type is expected (`let n: i64 = ();`): Core v1 refuses; reference gap
+(`mindc check` accepts it, also as an argument for an `i64` parameter).
 
 ## DN-5. The `^` suffix of a differentiable literal
 
@@ -135,10 +144,11 @@ practice (measured with v0.10.4).
 that separates it from the operator (for example, no whitespace and no operand to the right).
 
 **Decision.** Option A, decided by the specification owner on 2026-11-24. The `^` suffix is removed from the lexical
-text and from the grammar (`DifferentiableLiteral`); `^` is only the exclusive-or operator.
+text and from the grammar (`DifferentiableLiteral`); `^` is only the exclusive-or operator, so `1.0^;` is an
+exclusive-or with no right operand and is refused ([Lexical Structure](../../spec/v1.0/lexical.md#literals)).
 
-**Form status.** Not in the language. The reference reads `1.0^` as the operator with a missing operand, which agrees
-with the decision.
+**Form status.** `1.0^`: Core v1 refuses. The reference reads `1.0^` as the operator with a missing operand, which
+agrees with the decision.
 
 ## DN-6. Precedence of `as`
 
@@ -154,26 +164,31 @@ sources disagree for an expression such as `a * b as f64`. The reference refuses
 **Options.** (A) Keep the reference and change the comment. (B) Keep the comment and change the reference.
 Either choice changes the meaning of existing programs that mix `as` with `*`, `/`, `+` or `-`.
 
-**Decision.** Option A, decided by the specification owner on 2026-11-24. `as` binds tighter than `*`: the comment
-of the grammar is corrected, and the precedence table of Language gets a row for `as`. `a * b as f64` is
-`a * (b as f64)`. The cast itself is defined too: `e as T` is a `CastExpression` of the grammar, and its result has
-the type `T`. The rule is the same on every substrate, bit for bit:
+**Decision.** Option A, decided by the specification owner on 2026-11-24. `as` binds tighter than `*`, `/` and `%`
+and looser than a unary operator: the comment of the grammar is corrected, and the precedence table of Language gets
+a row for `as`. `a * b as f64` is `a * (b as f64)`, and `-x as f64` is `(-x) as f64`. The cast itself is defined
+too: `e as T` is a `CastExpression` of the grammar, and its result has the type `T`. The rule is the same on every
+substrate, bit for bit ([Casts](../../spec/v1.0/language.md#casts)):
 
 1. Integer to integer: the value modulo 2^N of the width N of the target. A signed source is sign-extended, and an
    unsigned source is zero-extended.
 2. Integer to float: round to nearest, ties to even.
-3. Float to integer: truncate toward zero. A value outside the range of the target gives the nearest bound of the
-   target. NaN gives 0.
-4. `f32` to `f64`: exact. `f64` to `f32`: round to nearest, ties to even; an overflow gives the infinity of that
-   sign; NaN gives the canonical NaN of [DN-3](#dn-3-the-remainder-operator-on-floating-point-values).
+3. Float to integer: truncate toward zero. A value outside the range of the target, an infinity too, gives the
+   nearest bound of the target. NaN gives 0.
+4. `f32` to `f64`: exact, and NaN gives the canonical NaN. `f64` to `f32`: round to nearest, ties to even; an
+   overflow gives the infinity of that sign; NaN gives the canonical NaN
+   ([Canonical NaN](../../spec/v1.0/types.md#canonical-nan)).
 5. `bool` to integer: `false` is 0 and `true` is 1.
 6. A cast to the same type is the identity.
 
-Every other cast is refused at check time as a type error (`E2001`). A cast of an integer or a float to `bool` is
-refused too: the program writes a comparison.
+Every other cast is refused at check time with `E2016` (invalid cast). A cast of an integer or a float to `bool` is
+refused too: the program writes a comparison, such as `x != 0`.
 
-**Form status.** Core v1: the precedence of `as` and the cast rule. The reference agrees on the precedence. Its
-cast results are measured row by row, and each difference is a reference gap.
+**Form status.** The precedence of `as` (`a * b as f64` is `a * (b as f64)`): Core v1. `e as T` for a pair of types
+of the cast table: Core v1; reference gap (the native backend refuses `i64 as i32` and `i32 as i64` with
+`lane.type.int_width`, `f64 as i32` and `f64 as f32` with `lane.source.cast`, and `f32 as f64` with
+`lane.type.non_f64_float`). A cast that the table does not list (`1 as bool`, `true as f64`): Core v1 refuses;
+reference gap (`mindc check` accepts `true as f64`; it refuses a cast to `bool` with `E2016`).
 
 ## DN-7. Loop exits outside a loop, `loop`, labels and values
 
@@ -190,14 +205,18 @@ as `break` followed by `7;`.
 production and a rule that it only ends with a `break`. (C) Add labels and a value to `break`. These options
 are independent.
 
-**Decision.** Decided by the specification owner on 2026-11-24, one answer for each option. (A) Yes: a loop exit
-outside a loop is refused at check time. (B) No: `loop` is not a keyword in Core v1, and the text `loop { … }` is
-refused at check time with a key. (C) No: Core v1 has no labels and no value form of `break`; a later RFC may add
-them.
+**Decision.** Decided by the specification owner on 2026-11-24, one answer for each option
+([Loop exits](../../spec/v1.0/language.md#loop-exits)). (A) Yes: a loop exit outside a loop is refused at check time
+with `E2401`. (B) No: `loop` is not a keyword in Core v1, and the text `loop { … }` is refused at check time; the
+diagnostic says that Core v1 has no `loop` statement and names the form `while true { … }`. (C) No: Core v1 has no
+labels and no value form of `break`; a later RFC may add them. `break 'a;` holds an invalid token, and `break 7;`
+has no derivation; both are refused. The words `break`, `continue` and `loop` are not reserved: where no derivation
+reads the word as a loop exit, it is a name.
 
-**Form status.** `break` and `continue` in a loop are Core v1. Core v1 refuses a loop exit outside a loop and the
-text `loop { … }`: reference gap, because `mindc check --no-fmt` accepts both. Labels and `break` with a value are
-not in Core v1.
+**Form status.** `break;` and `continue;` in the body of a loop: Core v1. `break;` and `continue;` outside the body
+of every loop: Core v1 refuses; reference gap (`mindc check` accepts both). `break 'a;`, `continue 'a;` (a label)
+and `break 7;` (a value): Core v1 refuses; reference gap (`mindc check` accepts `break 7;`). `loop { }`: Core v1
+refuses; reference gap (`mindc check` accepts it).
 
 ## DN-8. `let mut` and assignment to a binding
 
@@ -215,11 +234,19 @@ The sample sources in [FFI](../../spec/v1.0/ffi.md) use `let mut`.
 (`let mut x = e;`). An assignment or a compound assignment to a place needs the root name of the place to be
 declared with `let mut`. A place is a name, or a chain of index, field and tuple-index accesses on a name, so
 `a[i] = e;`, `p.x = e;` and `t.0 = e;` need `let mut a`, `let mut p` and `let mut t`. A parameter and the variable of a
-`for` are not mutable. An assignment to a name that is not mutable is refused. The reference enforces it together with
-its type-check work and a sweep of the dependent sources; until then it is a known gap.
+`for` are not mutable. A left operand that is not a place, or a place whose root is not mutable, is refused at check
+time with `E2402` ([Bindings and assignment](../../spec/v1.0/language.md#bindings-and-assignment)). A later `let` of
+the same name is a new binding and not an assignment. The reference enforces the rule together with its type-check
+work and a sweep of the dependent sources; until then it is a known gap.
 
-**Form status.** Core v1 (`let mut`), reference gap: the reference accepts an assignment to a binding without
-`mut`, and to a parameter.
+**Form status.** `let mut x = e;`: Core v1. `a = b;`, `a += b;`, `a[i] = b;` and `t.0 = b;`, where the root of the
+place is bound by `let mut`: Core v1; reference gap (the native backend refuses `a[i] = b;` with
+`lane.source.index_store` and `t.0 = b;` as a struct field assignment). An assignment or a compound assignment to a
+place whose root a `let` without `mut`, a parameter or a `for` pattern binds: Core v1 refuses; reference gap
+(`mindc check` accepts `let x = 1; x = 2;`, `x += 1` on such an `x`, `let a = [1, 2, 3]; a[0] = 5;`, and an
+assignment to a parameter and to a `for` variable). An assignment whose
+left operand is not a place (`x + 1 = 3;`): Core v1 refuses; reference gap (`mindc check` refuses it with `E1001`,
+not `E2402`).
 
 ## DN-9. The result type of the entry function
 
@@ -233,10 +260,15 @@ time, or define how each other result type becomes a process status.
 
 **Decision.** Decided by the specification owner on 2026-11-24. `main` has no parameter, and its result type is
 `i64` or `unit`. As for every function, the type `unit` MAY be omitted or written (`fn main() { }` and
-`fn main() -> unit { }` are the same). Another result type is refused at check time. The process status is the low
-8 bits of the `i64` on every substrate, and status 0 when the result type is `unit`.
+`fn main() -> unit { }` are the same). A `main` with a parameter or with another result type is refused at check
+time with `E2403` ([Entry function](../../spec/v1.0/language.md#entry-function)). The process status is the low 8
+bits of the `i64` in two's complement, read as an unsigned number from 0 to 255, on every substrate (the result 300
+gives the status 44, and the result -1 gives 255), and status 0 when the result type is `unit`.
 
-**Form status.** Core v1, reference gap: `mindc check --no-fmt` accepts `fn main() -> f64`.
+**Form status.** `fn main() -> i64 { }`, `fn main() { }` and `fn main() -> unit { }`: Core v1; reference gap (the
+native backend refuses `fn main() -> unit` with `lane.type.named`, and the image of `fn main() { let x = 1; }` exits
+with the status 1, and with 7 for `let x = 7;`, not 0). `fn main() -> f64 { }` and `fn main(n: i64) -> i64 { }`:
+Core v1 refuses; reference gap (`mindc check` accepts both).
 
 ## DN-10. Separators that the grammar requires and the reference does not
 
@@ -251,13 +283,14 @@ expression arm of a `match`, are accepted. `mindc fmt` inserts the separators an
 The first option changes programs that compile today.
 
 This note is about the separators only. A keyword used as a name, a raw line feed in a string, and the tokens
-`1e3`, `1i64`, `1.2.3`, `0XFF` and `'a'` are not open: the normative text forbids them
-([Lexical Structure](../../spec/v1.0/lexical.md)) and [Core v1 form status](../../spec/v1.0/core-v1-forms.md)
-lists them as "Core v1 refuses, reference gap".
+`1e3`, `1i64`, `1.2.3`, `0XFF` and `'a'` are not open: the lexical rules of
+[Lexical Structure](../../spec/v1.0/lexical.md) and [`grammar-lexical.ebnf`](../../spec/v1.0/grammar-lexical.ebnf)
+give them no derivation.
 
 **Decision.** Decided by the specification owner on 2026-11-24. `check` and `build` refuse a missing `;` and a
 missing `,` of a `match` arm, with no warning period. The formatter MAY read the tolerant form, and it writes the
-strict form. The rules are these.
+strict form. The rules are these ([Block-like statements](../../spec/v1.0/language.md#block-like-statements) and
+[Statement separators](../../spec/v1.0/language.md#statement-separators)).
 
 - `;` is required after `let`, after `return`, after a loop exit and after an `ExpressionStatement`.
 - A block-like statement takes no `;`. The five block-like forms are `if`, `match`, a block, `while` and `for`.
@@ -265,16 +298,26 @@ strict form. The rules are these.
   ForExpression` as a form of `Statement`, with no terminator. A formatted MIND source writes these forms without
   `;`, and the published grammar could not derive that.
 - Reading rule. Where a statement can start and the next token starts one of the five forms, the form is read as a
-  `BlockLikeStatement` and ends at its closing brace. What follows starts a new statement. When nothing but the
-  closing brace of the enclosing block follows, the form is the tail `Expression` of that block and gives the block
-  its value. To use such a form as an operand at the start of a statement, the program writes parentheses.
-- Typing. A `BlockLikeStatement` that is not the tail MUST have the type `unit`. A value is discarded only by an
-  `ExpressionStatement` with `;`.
-- A `match` arm with an expression ends with `,`. An arm with a block takes no `,`.
+  `BlockLikeStatement` and ends at its closing brace (for an `if` with `else`, the closing brace of its last block).
+  What follows starts a new statement. When the next token after that closing brace is `;`, the form and the `;` are
+  an `ExpressionStatement`, so `while c { };` is a program. When nothing but the closing brace of the enclosing block
+  follows, the form is the tail `Expression` of that block and gives the block its value. To use such a form as an
+  operand at the start of a statement, the program writes parentheses.
+- Typing. A `BlockLikeStatement` that is not the tail MUST have the type `unit`; otherwise the source is refused at
+  check time with `E2001`. A value is discarded only by an `ExpressionStatement` with `;`.
+- A `match` arm with an expression ends with `,`, the last arm too. An arm with a block takes no `,`.
 
-**Form status.** Core v1 refuses a missing `;` and a missing `,` of a `match` arm: reference gap. Core v1 also
-refuses a block-like statement that is not the tail and has a type other than `unit`: reference gap, because
-`fn main() -> i64 { if true { 1 } else { 2 } return 0; }` is accepted by `mindc check --no-fmt`.
+**Form status.** `if c { }`, `match e { }`, a block, `while c { }` and `for v in xs { }` as statements with no `;`:
+Core v1; reference gap (`mindc check` refuses a block that holds a statement, `{ s = s + 1; }`, with `E1001`).
+`while c { };`: Core v1; reference gap (the native backend refuses `while c { ... };` as an unsupported construct
+and builds the same loop without the `;`).
+`if c { 1 } else { 2 }` and the other forms as the tail of a block, and a block as a value: Core v1; reference gap
+(`mindc check` refuses a block that holds a statement also as a value, with `E1001`, and the native backend refuses
+`let b = { 4 };` with `lane.source.set`). A block-like statement that is not the tail and whose type is not `unit`
+(`if c { 1 } else { 2 } return 0;`): Core v1 refuses; reference gap (`mindc check` accepts it). The measured source
+is `fn main() -> i64 { if true { 1 } else { 2 } return 0; }`, with `mindc check --no-fmt`. A missing `;` after a `let`, a `return`, a loop exit or
+an expression statement, and a missing `,` after an expression arm of a `match`: Core v1 refuses; reference gap
+(`mindc check` accepts a missing `;` after a `let`, an expression statement and a `return`, and a missing `,`).
 
 ## DN-11. Tuple index and range index
 
@@ -287,16 +330,21 @@ tuple, `t.5` on a pair and `t[0]` on a tuple. The native backend refuses a tuple
 a tuple type; and decide whether `a[1..3]` is the same as the slice form `a[1:3]` of the grammar or is removed.
 See also [RFC 0025](./0025-patterns.md), question 7.
 
-**Decision.** Decided by the specification owner on 2026-11-24. The grammar gets the tuple index: `.` and a decimal
-integer literal without sign or suffix (`t.0`); it needs a tuple type and an index below its arity.
+**Decision.** Decided by the specification owner on 2026-11-24. The grammar gets the tuple index
+(`TupleIndexOperator`, [Tuple index](../../spec/v1.0/language.md#tuple-index)): `.` and a decimal integer literal with
+no sign, no prefix and no suffix (`t.0`). The type of `t` must be a tuple type and the index must be less than its
+number of elements; otherwise the source is refused at check time with `E2404`.
 Where the parser expects the `DecimalInteger` of a tuple index and the next token is a float literal of the form
 digits "." digits (no exponent, no suffix), the token is read as two tuple indices: `t.0.1` means `(t.0).1`.
-[RFC 0025](./0025-patterns.md#tuple-index) carries the production and states the same rule in the same words. `a[1:3]` is the only slice form: `a[1..3]` is
-refused at check time, and the message names the slice form. `t[0]` on a tuple has no meaning.
+A float literal with an exponent is not read so: `t.0.1e0` is not derived. [RFC 0025](./0025-patterns.md#tuple-index)
+states the same rule in the same words. `t[0]` on a tuple has no meaning: it is refused with `E2404`, and the
+diagnostic names the form `e.N`. `a[1:3]` is the only slice form: `a[1..3]` is refused at check time, and the
+diagnostic names the slice form `a[1:3]`.
 
-**Form status.** Core v1 for `t.1`, reference gap: the native backend refuses a tuple. Core v1 refuses `t.5` on a
-pair and `t[0]` on a tuple (`E2404`), and refuses `a[1..3]`: reference gap, because `mindc check --no-fmt` accepts all
-three.
+**Form status.** `t.0` and `t.0.1` on a tuple: Core v1; reference gap (the native backend refuses tuples with
+`lane.source.tuple`). `t.0.1e0`: Core v1 refuses. `x.0` where `x` is not a tuple, `t.N` with `N` not less than the
+number of elements, and `t[0]` on a tuple: Core v1 refuses; reference gap (`mindc check` accepts all three).
+`a[1..3]`: Core v1 refuses; reference gap (`mindc check` accepts it).
 
 ## DN-12. Compound assignment operators
 
@@ -310,11 +358,12 @@ refuse them.
 
 **Decision.** Decided by the specification owner on 2026-11-24: add `%=`, `<<=`, `>>=`, `&=`, `|=` and `^=` to
 `AssignmentOperator` and to the lexical operator list. `x op= e` means `x = x op e`, with the place `x` evaluated
-once.
+once: in `a[f()] += 1` the call `f()` runs once
+([Bindings and assignment](../../spec/v1.0/language.md#bindings-and-assignment)). The lexer reads the longest
+operator, so `<<=` and `>>=` are one token each ([Lexical Structure](../../spec/v1.0/lexical.md#tokens)).
 
-**Form status.** Each compound operator has the status of its operator: `%=` is Core v1, and `<<=`, `>>=`, `&=`,
-`|=` and `^=` belong to the v1.1 candidate block with the bitwise and shift operators. Reference gap: the native
-backend refuses these five without a key.
+**Form status.** `a %= b;`, `a <<= b;`, `a >>= b;`, `a &= b;`, `a |= b;` and `a ^= b;` where the root of `a` is
+bound by `let mut`: Core v1; reference gap (the native backend builds `%=` and refuses the other five).
 
 ## DN-13. A generic call whose type argument is not fixed
 
@@ -334,8 +383,11 @@ reach the result. (C) Refuse the first kind until an explicit type argument at a
 ([RFC 0027](./0027-function-generics.md)).
 
 **Decision.** Option A, decided by the specification owner on 2026-11-24. The compiler is deterministic and
-explicit: no implicit default type is chosen. The change that carries this decision adds the rule to [Types](../../spec/v1.0/types.md#type-inference).
-The reference accepts these calls, and [Core v1 form status](../../spec/v1.0/core-v1-forms.md) lists that as a
-gap. No warning period comes before the error ([RFC 0027](./0027-function-generics.md), question 6).
+explicit: no implicit default type is chosen. A call whose type argument no argument fixes is refused with `E2003`,
+and a call that gives one parameter two types with `E2001`. [RFC 0027](./0027-function-generics.md) (rules 5 and 9)
+carries the rule into the normative text. No warning period comes before the error
+([RFC 0027](./0027-function-generics.md), question 6).
 
-**Form status.** Core v1 refuses, reference gap.
+**Form status.** `fn f<T>(x: T) -> T { }`, a generic function, and so a call of it: Extension. The rule of this
+decision applies in the edition that adds function generics ([RFC 0027](./0027-function-generics.md)). The reference
+accepts the calls measured above.
