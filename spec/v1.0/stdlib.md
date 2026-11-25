@@ -297,7 +297,7 @@ These functions map directly to IR operations from ir.md#shape-manipulation:
 - **`reshape(input: Tensor<T>, new_shape: [i64]) -> Tensor<T>`**
   - Semantics: ir.md#shape-manipulation Reshape
   - Element count MUST be preserved
-  - Exactly one entry MAY be the marker `-1`, which is not a dimension (Reshape of [Core IR](./ir.md#shape-manipulation))
+  - Exactly one entry MAY be the marker `-1`, which is not a dimension ([Reshape](./ir.md#shape-manipulation))
 
 - **`transpose(input: Tensor<T>, axes: [i64] = infer) -> Tensor<T>`**
   - Semantics: ir.md#shape-manipulation Transpose
