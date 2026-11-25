@@ -84,6 +84,8 @@ implementation MAY accept or refuse those.
 | [`bitwise_reject_mixed_types`](./bitwise_reject_mixed_types.yaml) | reject, `E2004` | as above: the operands of `&` have the same integer type |
 | [`bitwise_reject_bool_operand`](./bitwise_reject_bool_operand.yaml) | reject, `E2005` | as above: an operand that is not of an integer type MUST be refused |
 | [`shift_reject_float_operand`](./shift_reject_float_operand.yaml) | reject, `E2005` | as above |
+| [`closing_angle_accept_nested_type_arguments`](./closing_angle_accept_nested_type_arguments.yaml) | accept, returns 0 | `CloseAngle` and [Tokens](../../../spec/v1.0/lexical.md#tokens): the first `>` of `>>=` closes a type argument list |
+| [`closing_angle_reject_extra_angle`](./closing_angle_reject_extra_angle.yaml) | reject | as above: after the list closes, `>=` is left where the `let` needs `=` |
 | [`separator_accept_strict_form`](./separator_accept_strict_form.yaml) | accept, returns 7 | [Statement separators](../../../spec/v1.0/language.md#statement-separators) |
 | [`separator_reject_let_without_semicolon`](./separator_reject_let_without_semicolon.yaml) | reject | as above: a missing `;` MUST be refused |
 | [`separator_reject_expression_statement_without_semicolon`](./separator_reject_expression_statement_without_semicolon.yaml) | reject | as above |

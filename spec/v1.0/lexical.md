@@ -46,8 +46,19 @@ Tokens are classified as follows:
 The operators and the punctuation are the ones that `Operator` and `Punctuation` of
 [`grammar-lexical.ebnf`](./grammar-lexical.ebnf) list. The lexer reads the longest operator that the text
 spells (longest match): `x<<=1` holds the one token `<<=`, not `<<` and `=` and not `<` and `<=`, and
-`x>>=1` holds the one token `>>=`. So a type whose argument lists end directly before `=`, as in
-`let o: Option<Option<i64>>= p;`, ends with the token `>>=` and is not derived; write a space before `=`.
+`x>>=1` holds the one token `>>=`. The elementwise operators `.*`, `./`, `.+` and `.-`
+([Operator precedence](./language.md#operator-precedence-and-associativity)) are one token each, so `a.*b`
+holds the token `.*` and is not a field access.
+
+**Closing angle.** Where the syntactic grammar expects the `>` that closes a list in angle brackets
+(`CloseAngle` of [`grammar-syntax.ebnf`](./grammar-syntax.ebnf): the type arguments of a type and the type
+parameters of a declaration) and the next token starts with `>` (`>>`, `>=` or `>>=`), the first `>` is that
+closing token, and the rest of the token is read again as a token: `>>` gives `>` and `>`, `>=` gives `>` and
+`=`, and `>>=` gives `>` and `>=`. So `let o: Option<Option<i64>>= p;` is derived: the first `>` of `>>=`
+closes the inner list, the rest `>=` gives the `>` that closes the outer list, and `=` is left. A `>` closes
+only a list that is open: in `let o: Option<i64>>= p;` the first `>` closes the list, `>=` is left where the
+`let` needs `=`, and the source MUST be refused. Everywhere else longest match decides, so `x >>= 1` holds
+the one token `>>=`.
 
 MIND has no operator `:=`. The text `:=` is the two tokens `:` and `=`, no rule of the syntactic grammar
 puts `=` directly after `:`, and an implementation MUST refuse a source such as `x := 1;`.

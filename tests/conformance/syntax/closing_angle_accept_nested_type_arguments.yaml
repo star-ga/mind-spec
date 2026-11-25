@@ -1,0 +1,27 @@
+# MIND Conformance Test: the first > of >>= closes a type argument list
+# Specification reference: spec/v1.0/lexical.md#tokens
+# Category: syntax
+# Profile: cpu
+
+description: "in Option<Option<i64>>= p the token >>= gives the two closing > and =; the program returns 0"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn first(p: Option<Option<i64>>) -> i64 {
+        let o: Option<Option<i64>>= p;
+        return 0;
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0

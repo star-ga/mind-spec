@@ -1,0 +1,22 @@
+# MIND Conformance Test: a > that closes no list is left after the type
+# Specification reference: spec/v1.0/lexical.md#tokens
+# Category: syntax
+# Profile: cpu
+
+description: "in Option<i64>>= p the first > closes the list and >= is left where the let needs =; the source is refused"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn first(p: Option<i64>) -> i64 {
+        let o: Option<i64>>= p;
+        return 0;
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: error

@@ -99,7 +99,11 @@ BooleanLiteral = "true" | "false" ;
 
 (* Operators. The lexer reads the longest operator that the text      *)
 (* spells: `<<=` is one token (not "<<" and "=", not "<" and "<="),   *)
-(* and `>>=` is one token (not ">>" and "=").                         *)
+(* `>>=` is one token (not ">>" and "="), and `.*` is one token (not  *)
+(* "." and "*"). Closing angle: where the syntactic grammar expects   *)
+(* the ">" of CloseAngle and the next token starts with ">" (">>",    *)
+(* ">=", ">>="), the first ">" is that token and the rest of the      *)
+(* token is read again as a token (lexical.md, "Tokens").             *)
 Operator = "+" | "-" | "*" | "/" | "%"
          | "==" | "!=" | "<" | ">" | "<=" | ">="
          | "&&" | "||" | "!"
@@ -108,6 +112,7 @@ Operator = "+" | "-" | "*" | "/" | "%"
          | "->" | "=>"
          | "." | "::" | "@"
          | "^" | "|" | "&" | "<<" | ">>"
+         | ".*" | "./" | ".+" | ".-"
          ;
 
 (* Punctuation *)
