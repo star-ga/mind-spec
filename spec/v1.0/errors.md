@@ -345,6 +345,15 @@ exclusivity analysis; those guarantees remain future work.
 - **Example**: `E2406: a range is not an index; write the slice 'a[1:3]' at line 3, column 15`
 - **Check/build contract**: checking and artifact-producing builds MUST refuse the same source with `E2406`.
 
+### E2407: Field type with no layout in a repr(C) struct
+
+- **Trigger**: a struct with the attribute `#[repr(C)]` that has a field whose type has no layout in
+  [Struct layout attribute](./ffi.md#struct-layout-attribute) (for example `unit`, a tuple or a tensor), or that
+  holds itself, directly or through the fields of other structs.
+- **Required context**: the struct, the field and its type, with the fix: a field type of that list.
+- **Example**: `E2407: field 'b' of repr(C) struct 'Q' has the type '(i32, i32)' with no layout at line 4, column 5`
+- **Check/build contract**: checking and artifact-producing builds MUST refuse the same source with `E2407`.
+
 ### E2701: Impl of an undeclared trait
 
 - **Trigger**: an `impl Trait for Type` block names a trait that no `trait` declaration declares.

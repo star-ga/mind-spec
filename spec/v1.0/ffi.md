@@ -40,9 +40,29 @@ The FFI is **feature-gated** (enabled via `--features=ffi-c` compiler flag) and 
   offset that is not lower than the end of the field before it and is a multiple of the alignment of its type.
   (3) The alignment of the struct is the largest alignment of its fields. (4) The size of the struct is the end
   of its last field, rounded up to a multiple of its alignment. A struct with no fields has the size 0 and the
-  alignment 1. The size and the alignment of a primitive type are the ones of [Primitive types](#primitive-types).
-- **Example.** `#[repr(C)] struct P { a: i32, b: f32, }` has `a` at offset 0 and `b` at offset 4, the
-  alignment 4 and the size 8.
+  alignment 1. The size and the alignment of a field type are the ones of the table below.
+- **Field types.** The type of every field is `bool`, `i32`, `i64`, `f32` or `f64`, an array type `[T; n]` whose
+  element type `T` is one of these field types, or a struct type that has the attribute `#[repr(C)]`. A struct
+  with the attribute MUST be refused at check time with
+  [`E2407`](./errors.md#e2407-field-type-with-no-layout-in-a-reprc-struct) when one of its fields has another
+  type (`unit`, a tuple, a tensor, `diff T`, `Option` or `Result`, a struct without the attribute, or a
+  primitive type that an implementation adds as an extension), and when it holds itself, directly or through
+  the fields of other structs. The layout is the same on every substrate.
+- **Examples.** `#[repr(C)] struct P { a: i32, b: f32, }` has `a` at offset 0 and `b` at offset 4, the
+  alignment 4 and the size 8. `#[repr(C)] struct Q { a: bool, b: i64, c: [i32; 3], }` has `a` at offset 0,
+  `b` at offset 8 and `c` at offset 16; `c` ends at 28, the alignment is 8, and the size is 32.
+
+| Field type | Size in bytes | Alignment in bytes |
+|------------|---------------|--------------------|
+| `bool` | 1 | 1 |
+| `i32`, `f32` | 4 | 4 |
+| `i64`, `f64` | 8 | 8 |
+| `[T; n]` | `n` times the size of `T` | the alignment of `T` |
+| a struct with `#[repr(C)]` | its size by this rule | its alignment by this rule |
+
+A `bool` is the byte 0 for `false` and the byte 1 for `true`. `i32` and `i64` are in two's complement, and
+`f32` and `f64` are the IEEE 754 binary32 and binary64 formats ([Canonical NaN](./types.md#canonical-nan)).
+The element `i` of an array starts at `i` times the size of `T` from the start of the array.
 
 ## C API fundamentals
 
@@ -63,6 +83,10 @@ Generated headers include:
 ### Type mapping
 
 #### Primitive types
+
+This list is informative and defines no layout: it records which primitive types the reference compiler exports
+through the C header. The layout of a `#[repr(C)]` struct is the rule of
+[Struct layout attribute](#struct-layout-attribute).
 
 As observed at compiler v0.10.2, and unchanged in the generated C header of v0.10.4 (`MindDType`), the reference compiler exports these primitive types via FFI:
 
