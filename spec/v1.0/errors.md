@@ -144,6 +144,15 @@ Type errors occur during type checking and type inference.
 - **Required context**: function name, expected arity, actual arity, call location
 - **Example**: `E2007: Function 'matmul' expects 2 arguments, found 3 at line 18, column 12`
 
+### E2016: Invalid cast
+
+- **Trigger**: a cast `e as T` whose pair of types is not a row of the cast table
+  ([Casts](./language.md#casts)), for example an integer or a float cast to `bool`.
+- **Required context**: the type of `e`, the type `T` and the location, with the fix: for a cast to `bool`,
+  the comparison `e != 0`.
+- **Example**: `E2016: no cast from 'i64' to 'bool'; write 'x != 0' at line 2, column 13`
+- **Check/build contract**: checking and artifact-producing builds MUST refuse the same source with `E2016`.
+
 ### E2026: Numeric scalar used as a known struct
 
 - **Implementation status**: released in v0.10.3 (compiler `24897697`) for
@@ -277,6 +286,44 @@ exclusivity analysis; those guarantees remain future work.
 - **Check/build contract**: checking and artifact-producing builds MUST refuse
   the same source with `E2301`; a refused build MUST terminate as a user error
   and leave no artifact.
+
+### E2401: Loop exit outside a loop
+
+- **Trigger**: a `break` or a `continue` that is not inside the body of a `while` or a `for`
+  ([Loop exits](./language.md#loop-exits)).
+- **Required context**: the word and its source location, with the fix: move the statement into the body of a
+  loop, or remove it.
+- **Example**: `E2401: 'break' is not inside a while or a for loop at line 2, column 5`
+- **Check/build contract**: checking and artifact-producing builds MUST refuse the same source with `E2401`.
+
+### E2402: Invalid assignment target
+
+- **Trigger**: an assignment or a compound assignment whose left operand is not a place, or is a place whose
+  root name is bound by a `let` without `mut`, by a parameter, or by the pattern of a `for`
+  ([Bindings and assignment](./language.md#bindings-and-assignment)).
+- **Required context**: the left operand, the location of the assignment and, for a place, the location of
+  the binding of its root, with the fix: declare the root with `let mut`, or assign to a place.
+- **Example**: `E2402: cannot assign to 'x', which is not declared with 'let mut', at line 3, column 5`
+- **Check/build contract**: checking and artifact-producing builds MUST refuse the same source with `E2402`.
+
+### E2403: Invalid entry function
+
+- **Trigger**: the entry function `main` has a parameter, or a result type other than `i64` and `unit`
+  ([Entry function](./language.md#entry-function)).
+- **Required context**: the location of `main`, the parameter or the result type that is not allowed, and the
+  fix: no parameter, and the result type `i64` or `unit` (written or omitted).
+- **Example**: `E2403: the entry function 'main' must return i64 or unit, found 'f64' at line 1, column 14`
+- **Check/build contract**: checking and artifact-producing builds MUST refuse the same source with `E2403`.
+
+### E2404: Invalid tuple index
+
+- **Trigger**: a tuple index `e.N` where the type of `e` is not a tuple type, or where `N` is not less than the
+  number of elements of the tuple; or an index operator `e[i]` where the type of `e` is a tuple type
+  ([Tuple index](./language.md#tuple-index)).
+- **Required context**: the expression, its type and the location, with the fix: an index `e.N` with `N`
+  from 0 to the number of elements minus 1, written with `.` for a tuple.
+- **Example**: `E2404: a tuple is indexed with '.N', not '[i]': write 't.0' at line 3, column 12`
+- **Check/build contract**: checking and artifact-producing builds MUST refuse the same source with `E2404`.
 
 ### E2701: Impl of an undeclared trait
 
