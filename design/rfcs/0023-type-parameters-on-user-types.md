@@ -21,7 +21,7 @@ limitations under the License.
 | State | Draft (2026-11-24). Not yet accepted. The specification owner decided the questions of this draft on 2026-11-24 (see [Questions](#questions-for-the-specification-owner)). |
 | Number | Provisional. The specification owner assigns the final number. |
 | Edition | Core v1.1, one edition together with [RFC 0027](./0027-function-generics.md) and [RFC 0024](./0024-impl-forms.md). The order of the work is free. |
-| Changes | `grammar-syntax.ebnf` (replaces `TypeParameters` and `TypeParameter` by the plain `TypeParameterList` on four declarations and unmarks it, adds `TypeArguments` and `TraitRef`), `types.md` (type parameters, instance names), `errors.md` (five codes: `E2038` to `E2042` assigned to this RFC) |
+| Changes | `grammar-syntax.ebnf` (replaces `TypeParameters` and `TypeParameter` by the plain `TypeParameterList` on four declarations and unmarks it, adds `TypeArguments` and `TraitRef`), `types.md` (type parameters, instance names; a struct also holds itself through an enum payload and the type arguments of an instance), `errors.md` (five codes: `E2038` to `E2042` assigned to this RFC) |
 | Depends on | none. Bounds, supertraits and `where` are in [RFC 0027](./0027-function-generics.md), not here. |
 | Related | [RFC 0025](./0025-patterns.md) (record literal), [RFC 0024](./0024-impl-forms.md) (methods of a generic type; `impl` of a trait that has parameters), [RFC 0027](./0027-function-generics.md), [RFC 0026](./0026-module-items.md) (module blocks in a declaration name) |
 
@@ -108,11 +108,15 @@ or infers them.
 6. A type argument is any `Type`, `unit` included. Aggregate types, arrays and tensors are allowed. A field or a
    payload of type `unit` has size 0 and no storage.
 7. A `struct` or `enum` MUST NOT contain itself by value: not directly, and not through the fields, payloads and type
-   arguments of other types (a field of type `Option<Node<T>>` in `Node<T>` contains `Node<T>`). A `type` declaration
-   MUST NOT name itself in its right-hand side, directly or through other aliases (`type L = Pair<L, i64>;`), because
-   the replacement of [Instance names](#instance-names) would not end. A violation is refused with `E2040` ("declaration
-   contains itself"). A type that holds itself through a pointer comes with a later RFC on an owning pointer type.
-   [RFC 0027](./0027-function-generics.md) uses the same code for a trait that names itself in its supertrait list.
+   arguments of other types (a field of type `Option<Node<T>>` in `Node<T>` contains `Node<T>`).
+   [Types](../../spec/v1.0/types.md#type-formation) refuses a struct that holds itself with `E2407` ("struct with no
+   layout"); this draft extends the meaning of "holds" there to the payloads of an enum and to the type arguments of an
+   instance, so a `struct` that contains itself in any of these ways is refused with `E2407`. An `enum` that contains
+   itself by value, and a `type` declaration that names itself in its right-hand side, directly or through other aliases
+   (`type L = Pair<L, i64>;`), because the replacement of [Instance names](#instance-names) would not end, are refused
+   with `E2040` ("declaration contains itself"). A type that holds itself through a pointer comes with a later RFC on an
+   owning pointer type. [RFC 0027](./0027-function-generics.md) uses `E2040` for a trait that names itself in its
+   supertrait list.
 8. A type argument on a type without parameters is refused with the code of rule 4. (The reference
    v0.10.4 accepts `Box<i64>` for a `Box` without parameters; in Core v1 a type argument on a user-declared type
    has the status Not in Core v1.)
@@ -340,7 +344,7 @@ expected:
 
 ```yaml
 # reject 4: self containment by value
-description: "A struct that contains itself by value is refused"
+description: "A generic struct that contains itself by value is refused"
 input:
   source: |
     struct Node<T> {
@@ -352,7 +356,7 @@ input:
     }
 expected:
   status: error
-  error: { code: E2040, message_contains: "contains itself" }
+  error: { code: E2407, message_contains: "Node" }
 ```
 
 ```yaml
@@ -478,12 +482,13 @@ The desugaring is the oracle for the equality test. No other oracle is needed fo
    normative, because the name is part of the artifact bytes ([Instance names](#instance-names)). No spelling is
    reserved in the lexical chapter. An alias, with or without parameters, is replaced by its right-hand side applied to
    its arguments before the scheme is applied, as a type parameter is; an alias is never an instance.
-4. **Recursive types.** Containment by value stays refused (rule 7). A type that holds itself through a pointer
-   comes with a later RFC on an owning pointer type.
+4. **Recursive types.** Containment by value stays refused (rule 7): a struct with `E2407` of
+   [Types](../../spec/v1.0/types.md#type-formation), an enum and an alias with `E2040`. A type that holds itself
+   through a pointer comes with a later RFC on an owning pointer type.
 5. **Marker parameters.** An unused type parameter is refused with `E2041` (rule 3).
 6. **Codes.** `E2038` (wrong number of type arguments), `E2039` (duplicate type parameter), `E2040`
-   (declaration contains itself: a type by value or an alias in its right-hand side here, a trait in its own
-   supertrait list in RFC 0027), `E2041`
+   (declaration contains itself: an enum by value or an alias in its right-hand side here, a trait in its own
+   supertrait list in RFC 0027; a struct that holds itself keeps `E2407` of the catalog), `E2041`
    (unused type parameter) and `E2042` (predeclared type or bound name) are assigned to this draft.
    The published catalog does not define any of them.
 7. **Defaults and const parameters.** There are no defaults (`struct Box<T = i64>`). Const parameters (`[T; N]`
