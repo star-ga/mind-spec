@@ -21,7 +21,7 @@ limitations under the License.
 | State | Draft (2026-11-24). Not yet accepted. The specification owner decided the questions of this draft on 2026-11-24 (see [Questions](#questions-for-the-specification-owner)). |
 | Number | Provisional. The specification owner assigns the final number. |
 | Edition | Core v1.1, one edition together with [RFC 0023](./0023-type-parameters-on-user-types.md) and [RFC 0024](./0024-impl-forms.md). |
-| Changes | `grammar-syntax.ebnf` (`FunctionDeclaration` gets `[ GenericParameters ]` and `[ WhereClause ]`; `GenericParameters`, `WhereClause`, `GenericFunctionRef`, the supertrait list of `TraitDeclaration` and the bounds of `TraitType` added; `TraitBounds` and `TraitBound` unmarked), `types.md` (Traits and generics, Type inference, the predeclared numeric bounds), `errors.md` (the trigger of `E2701` also covers a bound and a supertrait that name no declared trait) |
+| Changes | `grammar-syntax.ebnf` (`FunctionDeclaration` gets `[ GenericParameters ]` and `[ WhereClause ]`; `GenericParameters`, `WhereClause`, `GenericFunctionRef`, the supertrait list of `TraitDeclaration` and the bounds of `TraitType` added; `TraitBounds` and `TraitBound` unmarked), `types.md` (Traits and generics, Type inference, the predeclared numeric bounds), `errors.md` (the trigger of `E2701` also covers a bound and a supertrait that name no declared trait; the new code `E2716`) |
 | Owns | Bounds, the `where` clause, explicit type arguments at a call, **supertraits** (`trait B: A`), the predeclared numeric bounds and the bounds of an associated type. No other draft defines them. |
 | Depends on | [RFC 0024](./0024-impl-forms.md) (a bound names a trait; the meaning of a method call on a bounded value). The plain parameter list and the instance names of [RFC 0023](./0023-type-parameters-on-user-types.md) are used here. |
 | Related | [RFC 0023](./0023-type-parameters-on-user-types.md), [RFC 0025](./0025-patterns.md) |
@@ -59,7 +59,7 @@ Measured with the reference compiler v0.10.4 (`mindc check --no-fmt`):
 FunctionDeclaration = "fn" , Identifier , [ GenericParameters ] , "(" , [ ParameterList ] , ")" ,
                       [ "->" , Type ] , [ WhereClause ] , Block ;
 
-GenericParameters   = "<" , GenericParameter , { "," , GenericParameter } , [ "," ] , ">" ;
+GenericParameters   = "<" , GenericParameter , { "," , GenericParameter } , [ "," ] , CloseAngle ;
 GenericParameter    = Identifier , [ ":" , TraitBounds ] ;
 TraitBounds         = TraitBound , { "+" , TraitBound } ;
 TraitBound          = TraitRef ;
@@ -71,12 +71,14 @@ GenericFunctionRef  = Identifier , "::" , TypeArguments ;
 PrimaryExpression   = … | GenericFunctionRef ;
 ```
 
-`FunctionDeclaration` of the grammar has no type parameter today; this RFC adds `[ GenericParameters ]` to it, so in
-the edition of this RFC `fn f<T>(x: T) -> T { }` is part of the language and no longer an extension. `GenericParameters` does not touch the `TypeParameterList` of
-[RFC 0023](./0023-type-parameters-on-user-types.md): the type parameters of `struct`, `enum`, `trait`, `type` and of
-an `impl` block stay plain names, and this edition has no bound on them (rule 14). The `where` clause is added
-to `FunctionDeclaration` only. `TraitRef` and `TypeArguments` are the productions of RFC 0023, and the `>>` rule of
-RFC 0023 applies inside `GenericParameters` too. `where` is already in the keyword list.
+`FunctionDeclaration` of the grammar has no type parameter today; this RFC adds `[ GenericParameters ]` to it, so in the
+edition of this RFC `fn f<T>(x: T) -> T { }` is part of the language and no longer an extension. `GenericParameters`
+does not touch the `TypeParameterList` of [RFC 0023](./0023-type-parameters-on-user-types.md): the type parameters of
+`struct`, `enum`, `trait`, `type` and of an `impl` block stay plain names, and this edition has no bound on them (rule
+14). The `where` clause is added to `FunctionDeclaration` only. `TraitRef` and `TypeArguments` are the productions of
+RFC 0023. `GenericParameters` ends with `CloseAngle`, so the closing angle rule of
+[Lexical Structure](../../spec/v1.0/lexical.md#tokens) applies to it too, as to `TypeArguments`: `id::<Box<i64>>(b)`
+ends two lists. `where` is already in the keyword list.
 
 The supertrait list is a bound on the implementing type, and a bound on an associated type is a bound on the type
 that an impl gives to it. Both are added to the productions of RFC 0023 and [RFC 0024](./0024-impl-forms.md):
@@ -87,12 +89,12 @@ TraitDeclaration    = "trait" , Identifier , [ TypeParameterList ] , [ ":" , Tra
 TraitType           = "type" , Identifier , [ ":" , TraitBounds ] , ";" ;
 ```
 
-A `GenericFunctionRef` MUST be followed at once by a `CallOperator`: `id::<i64>(5)` is a call, and `id::<i64>`
-alone is refused (a function is not a value in Core v1, [`E2037`](../../spec/v1.0/errors.md#e2037-function-name-used-as-a-value)).
-The spelling `id<i64>(5)` is not part of the grammar, because `<` is the comparison operator. The token `::` is
-already in the operator list; `Identifier "::" "<"` cannot be read as the variant path or the associated item
-path of [RFC 0024](./0024-impl-forms.md), which have an identifier after `::`. A placeholder `_` is not a `Type`,
-so `f::<_, i64>(x)` is not derived.
+A `GenericFunctionRef` MUST be followed at once by a `CallOperator`: `id::<i64>(5)` is a call, and `id::<i64>` alone is
+refused (a function is not a value in Core v1,
+[`E2037`](../../spec/v1.0/errors.md#e2037-function-name-used-as-a-value)). The spelling `id<i64>(5)` is not part of the
+grammar, because `<` is the comparison operator. The token `::` is already in the operator list; `Identifier "::" "<"`
+cannot be read as the variant path or the associated item path of [RFC 0024](./0024-impl-forms.md), which have an
+identifier after `::`. A placeholder `_` is not a `Type`, so `f::<_, i64>(x)` is not derived.
 
 ## Static rules
 
@@ -106,7 +108,7 @@ so `f::<_, i64>(x)` is not derived.
 3. **What a bounded value can do.** A value of type `T` with the bound `B` supports the method calls
    `x.m(args)` where `m` is a method of `B`. An operator is defined on a value of type `T` only through a
    predeclared numeric bound (rule 4). Traits that a program declares for operators come in a later RFC. A call of a
-   method that no bound declares is refused (rule 8).
+   method that no bound declares is refused with `E2716` (rule 8).
 4. **Predeclared numeric bounds.** `Numeric`, `Integer` and `Float` are predeclared trait names. Each one is a
    closed set of the numeric primitive types of [Types](../../spec/v1.0/types.md#type-formation) and of
    `PrimitiveType`:
@@ -114,15 +116,19 @@ so `f::<_, i64>(x)` is not derived.
    | Bound | Set of types | A value of type `T` with the bound supports |
    |-------|--------------|----------------------------------------------|
    | `Numeric` | `i32`, `i64`, `f32`, `f64` | unary `-`; `+`, `-`, `*`, `/`, `%`; `==`, `!=`, `<`, `<=`, `>`, `>=`; the compound assignments `+=`, `-=`, `*=`, `/=`, `%=`; a cast `e as T` from a numeric primitive type, and a cast `x as U` to a numeric primitive type `U` |
-   | `Integer` | `i32`, `i64` | what `Numeric` supports, and `&`, `\|`, `^`, `<<`, `>>` with their compound assignments `&=`, `\|=`, `^=`, `<<=`, `>>=` |
+   | `Integer` | `i32`, `i64` | what `Numeric` supports, and `&`, `\|`, `^`, `<<`, `>>` with their compound assignments `&=`, `\|=`, `^=`, `<<=`, `>>=`, with the rules of [Bitwise and shift operators](../../spec/v1.0/language.md#bitwise-and-shift-operators) |
    | `Float` | `f32`, `f64` | what `Numeric` supports |
 
    A set holds the types of its row and no other type: a program cannot add one (an `impl` of a predeclared bound is
    refused with `E2701`, [RFC 0024](./0024-impl-forms.md) rule 7), and a declaration cannot take one of the three
    names (`E2042`, [RFC 0023](./0023-type-parameters-on-user-types.md) rule 9). A bound is satisfied by a type of
    its set, and a parameter with the bound `Integer` or `Float` satisfies a bound `Numeric`. Both operands of a
-   binary operator, and the two sides of a compound assignment, MUST have the same type `T`. A literal does not
-   have the type `T`: `x + 1` is refused with `E2001`, and `x + (1 as T)` is valid. An arithmetic or bitwise
+   binary operator, and the two sides of a compound assignment, MUST have the same type `T`, except the right
+   operand of `<<` and `>>` (and of `<<=` and `>>=`): it is the shift count and MAY have any integer type, as
+   [Bitwise and shift operators](../../spec/v1.0/language.md#bitwise-and-shift-operators) gives. A literal does not
+   have the type `T`: `x + 1` is refused with `E2001`, and `x + (1 as T)` is valid. The elementwise operators `.*`,
+   `./`, `.+` and `.-` are not in the table: the specification gives no operand rule for them, and their status is
+   Open ([Core v1 forms](../../spec/v1.0/core-v1-forms.md)). An arithmetic or bitwise
    operator gives a `T`, and a comparison gives a `bool`. In each instance an operator has the meaning that it has
    for the argument type, `%` on a float included
    ([Floating-point remainder](../../spec/v1.0/language.md#floating-point-remainder)), and a cast has the meaning
@@ -140,8 +146,9 @@ so `f::<_, i64>(x)` is not derived.
    parameter gets MUST have an `impl` of the trait ([RFC 0024](./0024-impl-forms.md), rule 6), or, for a
    predeclared bound, be a type of its set. A bound that is not satisfied is refused with `E2006` (trait bound not
    satisfied, existing).
-8. **Method on a type parameter.** A call `x.m(args)` where `x` has a type parameter type and no bound declares
-   `m` is refused with `E2006`. (A call on a type that is known resolves by RFC 0024, rule 8.)
+8. **Method on a type parameter.** A call `x.m(args)` where `x` has a type parameter type and no bound of that
+   parameter declares `m` (directly or through a supertrait, rule 12) is refused with `E2716`. (A call on a type that
+   is known resolves by RFC 0024, rule 8.)
 9. **Compatibility.** Core v1 has no generic function: `fn id<T>(x: T) -> T` is an extension
    ([Core v1 forms](../../spec/v1.0/core-v1-forms.md)). Under this RFC it has the meaning: one parameter, no bound,
    inferred at each call. A program that uses the extension and whose calls fix every type argument by an argument
@@ -177,7 +184,8 @@ so `f::<_, i64>(x)` is not derived.
 **Codes.** `E2001`, `E2002`, `E2003` and `E2006` exist. `E2038`, `E2039`, `E2040` and `E2042` are the codes of
 [RFC 0023](./0023-type-parameters-on-user-types.md); this draft uses them as RFC 0023 defines them, and `E2040` for a
 trait that names itself in its supertrait list. `E2701` and `E2712` are the codes of [RFC 0024](./0024-impl-forms.md).
-This draft adds no code.
+This draft proposes one code, `E2716`: a method call on a value of a type parameter whose bounds declare no such
+method (rule 8). It is free in the catalog, and it is the next code after the codes of RFC 0024.
 
 ## Meaning as a desugaring
 
@@ -332,6 +340,24 @@ input:
 expected:
   status: error
   error: { code: E2006, message_contains: "implement" }
+```
+
+```yaml
+description: "A method that no bound of the type parameter declares is refused"
+input:
+  source: |
+    trait Zero {
+        fn zero(s: Self) -> i64;
+    }
+    fn one<T: Zero>(a: T) -> i64 {
+        return a.size();
+    }
+    fn main() -> i64 {
+        return 0;
+    }
+expected:
+  status: error
+  error: { code: E2716, message_contains: "size" }
 ```
 
 ```yaml
@@ -526,7 +552,7 @@ expected:
 | Front end, parser | `GenericParameters` with bounds (the reference parses a list of names and stops at `:`); the `where` clause; `Identifier :: TypeArguments` before a call; the bounds of `TraitType`. Both front ends change. | small |
 | Front end, checker | inference by structural matching (one binding per parameter); the conflict and the unfixed-parameter errors; bound lookup in the impl table of RFC 0024 and in the sets of the predeclared bounds; operators and method calls on a bounded value; associated types with bounds; `E2038`, `E2039` | large |
 | Front end, desugaring | instance collection with the instance names of RFC 0023; a bounded method call becomes the call of the impl function in each instance | medium |
-| Native lowering | none after the pass. The native lane refuses every generic function today (`lane.source.function_contract`); the instances are plain functions. | medium (prerequisite: the lane admits the plain forms that the instances use) |
+| Native lowering | none after the pass. The native backend refuses every generic function today (`lane.source.function_contract`); the instances are plain functions. | medium (prerequisite: the native backend admits the plain forms that the instances use) |
 | Tests | rows above; a parity row (the equality test of RFC 0023); a determinism row for the instance order | small |
 
 ## Questions for the specification owner
@@ -544,9 +570,11 @@ expected:
 6. **Unfixed argument (rule 5).** Option A of DN-13 is decided, and no release warns first (rule 9).
 7. **Defaults and const parameters.** As [RFC 0023](./0023-type-parameters-on-user-types.md), question 7: no
    defaults; const parameters get their own RFC.
-8. **Code allocation (settled).** `E2001`, `E2002`, `E2003` and `E2006` exist. `E2038` to `E2042` are
+8. **Code allocation.** `E2001`, `E2002`, `E2003` and `E2006` exist. `E2038` to `E2042` are
    assigned to RFC 0023 by the specification owner; this draft uses them as RFC 0023
-   defines them, and `E2040` for a trait that names itself in its supertrait list. It adds no code.
+   defines them, and `E2040` for a trait that names itself in its supertrait list. A call of a method that no bound
+   declares gets its own code, `E2716` (rule 8), not `E2006`: `E2006` is a bound that a type does not satisfy, and
+   rule 8 is a method that no bound declares. `E2716` is proposed by this draft and not yet assigned.
 
 Bounds on an associated type (rule 13) come here by the decision of [RFC 0024](./0024-impl-forms.md), question 7.
 
