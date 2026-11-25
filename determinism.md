@@ -235,8 +235,8 @@ Fixed-reduction-order kernels are the active work (Phase 13.6). 📋
 MIND separates two math modes:
 
 - **`strict_math` (default).** The compiler may not rewrite floating-point in ways
-  that change the observable result: **no** `x * 0 → 0` (because `NaN * 0 = NaN`,
-  `Inf * 0 = NaN`), **no** reassociation, **no** FMA-contraction. NaN, Inf, and
+  that change the observable result: **no** `x * 0 → 0` (because NaN \* 0 = NaN,
+  Inf \* 0 = NaN), **no** reassociation, **no** FMA-contraction. NaN, Inf, and
   rounding are preserved exactly.
 - **`fast_math` (opt-in).** Permits those rewrites; the spec labels the result
   non-deterministic.

@@ -65,7 +65,7 @@ provide complete mathematical formulations for each Core v1 operation.
 ### Notation
 
 - ∇\_y L: upstream gradient (gradient of loss L with respect to output y)
-- `∂y/∂x`: local derivative (derivative of output y with respect to input x)
+- ∂y/∂x: local derivative (derivative of output y with respect to input x)
 - ∇\_x L = ∇\_y L · ∂y/∂x: downstream gradient via chain rule
 - ⊙: elementwise (Hadamard) product
 - `shape(x)`: shape of tensor x
@@ -202,7 +202,7 @@ provide complete mathematical formulations for each Core v1 operation.
   - Gradient: ∇\_x L = -∇\_y L
 
 - **`Exp: y = exp(x)`**
-  - Forward: `y = eˣ`
+  - Forward: y = eˣ
   - Local derivative: ∂y/∂x = eˣ = y
   - Gradient: ∇\_x L = ∇\_y L ⊙ y
   - Multiply upstream gradient by forward output (efficient: reuse forward result)
