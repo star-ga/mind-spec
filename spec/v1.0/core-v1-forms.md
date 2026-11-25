@@ -33,7 +33,7 @@ table and the grammar or a normative chapter differ, the grammar and the chapter
 **Reference verdict (informative).** The mark "reference gap" after a status records that the reference
 compiler v0.10.4 does not yet follow the status, the mark "reference conforms" records that it follows the
 status for the sources measured, and the words in parentheses say what was measured. The release binary was run
-on 2026-11-24 with `mindc check --no-fmt --no-lint` on each probe source, and with `mindc build --backend native`
+on 2026-11-25 with `mindc check --no-fmt --no-lint` on each probe source, and with `mindc build --backend native`
 and a run of the image where the mark names the native backend or an image. A gap is work for the compiler; it
 does not change the status. A row without a mark makes no claim about the reference.
 

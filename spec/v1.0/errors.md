@@ -656,7 +656,7 @@ Error codes in this catalog are **stable across Core v1 versions**:
 ## Reference implementation (`star-ga/mind`) (informative)
 
 The headings of this catalog define the codes; this section defines nothing. It lists the codes where the
-reference compiler v0.10.4 differs from the catalog, each as a reference gap, measured on 2026-11-24 with the
+reference compiler v0.10.4 differs from the catalog, each as a reference gap, measured on 2026-11-25 with the
 release binary (`mindc check --no-fmt --no-lint` on a probe source, or the command that the row names).
 
 | Code | Catalog | Measured in the reference | Probe |
@@ -664,6 +664,7 @@ release binary (`mindc check --no-fmt --no-lint` on a probe source, or the comma
 | `E1001` | Invalid UTF-8 sequence | The code of a parse error: ``unexpected `;`, expected an expression`` | `return 1 +;` |
 | `E1001` | Invalid UTF-8 sequence | A source with an ill-formed UTF-8 sequence is refused with no code: `stream did not contain valid UTF-8` | the bytes `0xFF 0xFE` in a name |
 | `E2101` | No entry; a broadcasting failure is `E3001` | The code of a broadcasting failure: ``cannot broadcast shapes (3,4) and (3,5) for `+` `` | `a + b` with `Tensor<f32, [3, 4]>` and `Tensor<f32, [3, 5]>` |
+| `E3003` | Dimension mismatch | A `matmul` whose contracting dimensions differ is accepted with no code (exit status 0) | `matmul(a, b)` with `a: Tensor<f32, [2, 3]>` and `b: Tensor<f32, [4, 2]>` |
 | `E4001` | SSA violation (use before definition) | The code of an autodiff failure: `function 'f' not found in module (only 'main' is supported)` | `mindc FILE --autodiff --func f --emit-grad-ir` |
 
 No probe of this measurement reached `E3001`, `E4002` or `E4003`: `--autodiff` without `--func` is refused with
