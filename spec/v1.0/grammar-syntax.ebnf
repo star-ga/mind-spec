@@ -225,20 +225,39 @@ MultiplicativeOperator = "*" | "/" | "%" | ".*" | "./" ;
 (* operator: `a * b as f64` is `a * (b as f64)`, and `-x as f64` is   *)
 (* `(-x) as f64`. Casts are left-associative. The casts that are      *)
 (* allowed and their values: language.md, "Casts".                    *)
+(* Reading rule for the type of a cast: a primitive type name ends    *)
+(* the type, so `x as i64 < y` compares the cast with y. After any    *)
+(* other type name (an Identifier of IdentifierType, also after       *)
+(* "diff"), a "<" opens the type-argument list of IdentifierType and  *)
+(* is never a ComparisonOperator; CloseAngle closes the list. So      *)
+(* `x as Option<y>> z` is `(x as Option<y>) > z`, and the statement   *)
+(* `x as Option < y;` has no reading: the list is not closed. To      *)
+(* compare a cast to such a type by "<", write parentheses:           *)
+(* `(x as T) < y`.                                                    *)
 CastExpression = UnaryExpression , { "as" , Type } ;
 
 (* Unary operators are right-to-left: `- -x` is `-(-x)`.            *)
 UnaryExpression = { UnaryOperator } , PostfixExpression ;
 UnaryOperator = "-" | "!" ;
 
-PostfixExpression = PrimaryExpression , { PostfixOperator } ;
+(* A CallOperator never directly follows a FieldAccessOperator, so   *)
+(* `x.m(a)` has one derivation: the method call (MethodCallOperator). *)
+(* A call of a function value that a field holds is written           *)
+(* `(x.m)(a)`. FieldAccessChain is one or more field accesses and the *)
+(* index, tuple index or method call that follows them; field         *)
+(* accesses at the end of the expression are the last part of         *)
+(* PostfixExpression.                                                 *)
+PostfixExpression = PrimaryExpression , { PostfixOperator } , { FieldAccessOperator } ;
 
 PostfixOperator = CallOperator
                 | IndexOperator
-                | FieldAccessOperator
                 | TupleIndexOperator
                 | MethodCallOperator
+                | FieldAccessChain
                 ;
+
+FieldAccessChain = FieldAccessOperator , { FieldAccessOperator } ,
+                   ( IndexOperator | TupleIndexOperator | MethodCallOperator ) ;
 
 CallOperator = "(" , [ ArgumentList ] , ")" ;
 ArgumentList = Expression , { "," , Expression } , [ "," ] ;

@@ -1,0 +1,18 @@
+# MIND Conformance Test: x.m(a) is a method call
+# Specification reference: spec/v1.0/language.md#field-access-and-method-calls
+# Category: syntax
+# Profile: cpu
+
+description: "o.unwrap_or(0) is a method call on an Option<i64>"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let o: Option<i64> = Some(4);
+        return o.unwrap_or(0);
+    }
+
+expected:
+  status: success

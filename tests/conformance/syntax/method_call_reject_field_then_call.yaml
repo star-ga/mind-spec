@@ -1,0 +1,18 @@
+# MIND Conformance Test: (x.m)(a) calls the value of a field
+# Specification reference: spec/v1.0/language.md#field-access-and-method-calls
+# Category: syntax
+# Profile: cpu
+
+description: "(o.unwrap_or)(0) is a field access and a call; Option<i64> has no field unwrap_or"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let o: Option<i64> = Some(4);
+        return (o.unwrap_or)(0);
+    }
+
+expected:
+  status: error

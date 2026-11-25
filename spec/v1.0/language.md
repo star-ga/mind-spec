@@ -269,6 +269,14 @@ signed or unsigned. `N` is the width in bits of the target type. "Canonical NaN"
 | 6 | `bool` | integer type | `false` gives 0, and `true` gives 1. |
 | 7 | any type | the same type | The identity: the value of `e`, bit for bit, except that a NaN gives the canonical NaN. |
 
+**Reading rule for the type of a cast.** A primitive type name ends the type of a cast: `x as i64 < y` is the
+comparison of `x as i64` with `y`. After any other type name, a `<` opens a type-argument list (the type reading
+wins), and the rule of [Tokens](./lexical.md#tokens) for the closing angle closes it. So `x as Option<y>> z` is the
+cast `x as Option<y>` compared by `>` with `z`, and `let b = x as Option < y;` has no reading and MUST be refused,
+because the list that the `<` opens is not closed.
+To compare a cast to a type that is not a primitive type by `<`, a program writes
+parentheses: `(x as T) < y`.
+
 A cast that the table does not list MUST be refused at check time with
 [`E2016`](./errors.md#e2016-invalid-cast). An integer or a float has no cast to `bool`: the program writes a
 comparison, such as `x != 0`. Rows 1 and 7 give the same value for an integer type cast to itself. Every cast
@@ -464,6 +472,16 @@ lowers to the `Slice` operation of [Core IR](./ir.md#indexing-and-slicing), whic
 an index operator whose index is two expressions with `..` between them, such as `a[1..3]`, is not derived; it MUST be
 refused at check time with [`E2406`](./errors.md#e2406-range-index), and the diagnostic MUST name the slice form
 `a[1:3]`.
+
+## Field access and method calls
+
+`x.f` (`FieldAccessOperator`) is the field `f` of the value `x`. `x.m(a)` (`MethodCallOperator`) is a method call: it
+calls the method `m` of the type of `x` with the receiver `x` and the arguments `a`, for example `o.unwrap_or(0)` on an
+`Option<i64>` ([`core` module](./stdlib.md#pattern-matching-support)). When `x` is an import qualifier, `x.m(a)` is the
+call of the member `m` of that module ([Module-qualified references](#module-qualified-references)). A call operator
+never directly follows a field access (`PostfixExpression` of [`grammar-syntax.ebnf`](./grammar-syntax.ebnf)), so
+`x.m(a)` has one derivation, the method call. A call of a function value that a field holds is written `(x.m)(a)`.
+A field access `x.f` whose `f` is not a field of the type of `x` MUST be refused at check time.
 
 ## Statement separators
 
