@@ -192,7 +192,7 @@ provide complete mathematical formulations for each Core v1 operation.
 
 - **`Relu: y = Relu(x) = max(0, x)`**
   - Forward: `y[i] = x[i] if x[i] > 0 else 0`
-  - Local derivative: ∂y/∂x = 1 if x > 0 else 0 (undefined at x=0; implementations typically use 0)
+  - Local derivative: ∂y/∂x = 1 if x > 0 else 0 (the value at x = 0 is 0)
   - Gradient: ∇\_x L = ∇\_y L ⊙ (x > 0)
   - Multiply upstream gradient by indicator function of positive inputs
 

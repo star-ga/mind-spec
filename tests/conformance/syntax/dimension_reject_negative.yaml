@@ -1,0 +1,23 @@
+# MIND Conformance Test: a negative dimension of a tensor type
+# Specification reference: spec/v1.0/ir.md#index-bounds
+# Category: syntax
+# Profile: cpu
+
+description: "the shape [-1, 3] has a negative dimension"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn f(t: Tensor<f32, [-1, 3]>) -> i64 {
+        return 0;
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E3006

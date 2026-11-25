@@ -451,10 +451,11 @@ Shape errors occur during shape inference, broadcasting, or shape validation.
 - **Required context**: operation, axis list, duplicate axis
 - **Example**: `E3005: Sum has duplicate axis 1 in axes [0, 1, 1] at line 12, column 15`
 
-### E3006: Zero or negative dimension
-- **Trigger**: Shape contains dimension ≤ 0 (except for scalars with shape [])
+### E3006: Negative dimension
+- **Trigger**: a shape that contains a negative dimension
+  ([Tensor ranks and shapes](./shapes.md#tensor-ranks-and-shapes)); a dimension of size 0 is valid
 - **Required context**: shape, invalid dimension index, value
-- **Example**: `E3006: Invalid dimension 0 in shape [3, 0, 5] at line 18, column 10`
+- **Example**: `E3006: Invalid dimension -1 in shape [3, -1, 5] at line 18, column 10`
 
 ### E3007: Element count mismatch
 - **Trigger**: Reshape preserves element count but new shape has different product
@@ -475,6 +476,13 @@ Shape errors occur during shape inference, broadcasting, or shape validation.
 - **Trigger**: Tensor literal shape doesn't match declared shape
 - **Required context**: declared shape, inferred shape from data
 - **Example**: `E3010: Tensor literal shape mismatch: declared [2, 3], inferred [2, 2] at line 8, column 10`
+
+### E3011: Index outside its axis
+- **Trigger**: an index, or a slice bound, outside its axis, where the type gives the extent of the axis and the
+  index or the bound is an integer literal ([Index bounds](./ir.md#index-bounds))
+- **Required context**: the index or the bound, the extent of the axis, source location
+- **Example**: `E3011: index 4 is outside the axis of extent 4 at line 3, column 12`
+- **Check/build contract**: checking and artifact-producing builds MUST refuse the same source with `E3011`.
 
 ## E4xxx: Verification errors
 
@@ -569,8 +577,10 @@ Autodiff errors occur during gradient computation.
 E6xxx errors occur during backend execution or while producing a runnable artifact.
 
 ### E6001: Out-of-bounds index
-- **Trigger**: Index or Gather operation accesses invalid position, or an index function of the standard library
-  gets an index outside its container ([Raw memory functions](./memory.md#raw-memory-functions))
+- **Trigger**: at run time, an index or a slice bound outside its axis ([Index bounds](./ir.md#index-bounds)), or
+  an index function of the standard library with an index outside its container
+  ([Library functions that check](./memory.md#library-functions-that-check)); the program makes the
+  [defined stop](./memory.md#the-defined-stop)
 - **Required context**: operation, indices, tensor shape
 - **Example**: `E6001: Index out of bounds: [2, 5] for shape [3, 4]`
 

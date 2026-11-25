@@ -1,0 +1,20 @@
+# MIND Conformance Test: an index literal at the extent of the axis
+# Specification reference: spec/v1.0/ir.md#index-bounds
+# Category: syntax
+# Profile: cpu
+
+description: "a has the extent 4, so the index 4 is outside its axis"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let a: [i64; 4] = [1, 2, 3, 4];
+        return a[4];
+    }
+
+expected:
+  status: error
+  error:
+    code: E3011

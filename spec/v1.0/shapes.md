@@ -29,10 +29,12 @@ Shapes and dtypes are **device-agnostic**: the same rules apply to the CPU basel
 - Scalars are treated as **rank-0** tensors with an empty shape `[]`.
 - Vectors and matrices are rank-1 and rank-2 respectively.
 
-Formally, a shape is a finite sequence of positive integers:
+Formally, a shape is a finite sequence of integers that are not negative. A dimension of size 0 is valid (an
+empty slice gives one); a negative dimension MUST be refused at check time with
+[`E3006`](./errors.md#e3006-negative-dimension) ([Index bounds](./ir.md#index-bounds)):
 
 ```text
-Shape = [d_0, d_1, ..., d_{n-1}]   where each d_i ∈ ℕ⁺
+Shape = [d_0, d_1, ..., d_{n-1}]   where each d_i ∈ ℕ (0 included)
 Rank(Shape) = n
 ```
 

@@ -160,3 +160,10 @@ implementation MAY accept or refuse those.
 | [`cont_string_alias_sees_push`](./cont_string_alias_sees_push.yaml) | accept, returns 1 | as above: the string push functions change the record in place |
 | [`cont_string_part_is_copy`](./cont_string_part_is_copy.yaml) | accept, returns 2 | as above: a function that gives a part of a string creates a new record with a copy of the bytes |
 | [`cont_string_literal_new_record`](./cont_string_literal_new_record.yaml) | accept, returns 3 | as above: each evaluation of a string literal creates a new string record |
+| [`bounds_reject_index_literal_outside`](./bounds_reject_index_literal_outside.yaml) | reject, `E3011` | [Index bounds](../../../spec/v1.0/ir.md#index-bounds): an index outside its axis that is known at check time MUST be refused |
+| [`bounds_reject_negative_index`](./bounds_reject_negative_index.yaml) | reject, `E3011` | as above: a negative index is outside its axis |
+| [`bounds_reject_slice_bound_outside`](./bounds_reject_slice_bound_outside.yaml) | reject, `E3011` | as above: a slice bound outside its axis |
+| [`bounds_accept_slice_bounds_in_axis`](./bounds_accept_slice_bounds_in_axis.yaml) | accept | as above: a bound equal to the extent is in the axis, and a dimension of size 0 is valid |
+| [`bounds_accept_last_index`](./bounds_accept_last_index.yaml) | accept, returns 4 | as above |
+| [`dimension_reject_negative`](./dimension_reject_negative.yaml) | reject, `E3006` | as above: a negative dimension MUST be refused |
+| [`dimension_accept_zero`](./dimension_accept_zero.yaml) | accept | as above: a dimension of size 0 is valid |

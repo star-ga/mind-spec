@@ -229,12 +229,10 @@ as implementation-defined.
   - **Verification**:
     - Index list length MUST equal input rank
     - Length mismatch is a verification failure
-  - **Runtime behaviour**: bounds checking is a runtime responsibility
-    - Out-of-bounds indices MAY produce an error, undefined value, or backend-specific handling
-    - Implementations SHOULD document their out-of-bounds behaviour
+  - **Bounds**: [Index bounds](#index-bounds)
 - **`Slice(input, starts: [i64], ends: [i64], steps: [i64]) -> ValueId`**
   - Extracts a sub-tensor using range-based slicing along each dimension.
-  - **Shape rules**: `output.shape[i] = ceil((ends[i] - starts[i]) / steps[i])` for each dimension i
+  - **Shape rules**: `output.shape[i] = max(0, ceil((ends[i] - starts[i]) / steps[i]))` for each dimension i
   - **Dtype rules**: output dtype equals input dtype
   - **Semantics**: slices along dimension `i` from `starts[i]` (inclusive) to `ends[i]` (exclusive)
     with stride `steps[i]`
@@ -243,7 +241,7 @@ as implementation-defined.
     - All `steps[i]` MUST be non-zero
     - Length mismatch or zero steps are verification failures
   - **Runtime behaviour**:
-    - Negative `starts`/`ends` are clamped to 0 (NOT interpreted as offsets from end)
+    - Bounds: [Index bounds](#index-bounds)
     - Negative `steps` (reverse slicing) are NOT supported; steps MUST be positive
     - Empty slices (where ends\[i\] ≤ starts\[i\] for positive step) produce size-0 dimensions
 - **`Gather(input, indices: tensor<i32|i64>) -> ValueId`**
@@ -260,8 +258,18 @@ as implementation-defined.
     - Indices tensor MUST have integer dtype (i32 or i64)
     - Non-integer indices dtype is a verification failure
   - **Runtime behaviour**:
-    - Index validity is checked at runtime
-    - Out-of-range indices MAY produce an error or backend-specific handling
+    - Bounds: [Index bounds](#index-bounds)
+
+### Index bounds
+
+No operation of the language gives an undefined value. An index, or a slice bound, that is outside its axis
+MUST be refused at check time with [`E3011`](./errors.md#e3011-index-outside-its-axis) when the type gives the extent of
+the axis and the index or the bound is an integer literal; in every other case it makes the
+[defined stop](./memory.md#the-defined-stop) at run time with [`E6001`](./errors.md#e6001-out-of-bounds-index). An index is
+outside its axis when it is negative or not less than the extent of the axis, and a slice bound when it is
+negative or greater than the extent. No bound is clamped, and no index counts from the end. A dimension of
+size 0 is valid (an empty slice gives one); a negative dimension MUST be refused with
+[`E3006`](./errors.md#e3006-negative-dimension).
 
 ### Linear and tensor algebra
 
@@ -353,7 +361,7 @@ A verifier MUST reject IR modules that violate the following rules:
    `ValueId` is defined exactly once.
 2. **Interface validity**: all declared outputs reference existing values.
 3. **Shape and dtype consistency**: instructions follow the constraints described above, including
-   reshape element-count preservation, transpose permutation length, positive tensor dimensions, and
+   reshape element-count preservation, transpose permutation length, tensor dimensions that are not negative, and
    broadcast/matmul rules from [Shapes](./shapes.md).
 4. **Conv2d constraints**:
    - Input is NHWC; filter is `[H_k, W_k, C_in, C_out]`.

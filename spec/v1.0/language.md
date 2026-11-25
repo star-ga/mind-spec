@@ -501,7 +501,8 @@ including, the index `e`, with the step `k`. An omitted `s` is 0, an omitted `e`
 omitted `k` is 1, so for an axis of length `n`, `a[:e]` is `a[0:e:1]`, `a[s:]` is `a[s:n:1]`, `a[:]` is `a[0:n:1]`
 and `a[s:e]` is `a[s:e:1]`. The form lowers to the `Slice` operation of [Core IR](./ir.md#indexing-and-slicing) with
 these bounds and this step, and the shape of the result follows the shape rule of that operation: `a[1:3]` takes the
-elements 1 and 2, and `a[0:4:2]` takes the elements 0 and 2. The lexer reads `::` as one token
+elements 1 and 2, and `a[0:4:2]` takes the elements 0 and 2. An index or a slice bound outside its axis is the case
+of [Index bounds](./ir.md#index-bounds). The lexer reads `::` as one token
 ([Tokens](./lexical.md#tokens)), so `a[::2]` is not derived; with the start and the end omitted, a step is written
 `a[: :2]`. The grammar has no range index:
 an index operator whose index is two expressions with `..` between them, such as `a[1..3]`, is not derived; it MUST be

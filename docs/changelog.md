@@ -22,6 +22,11 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   change. A method call that changes a container needs a `let mut` root (`E2402`); a push stands as a statement
   or in `xs = xs.push(v)` (`E2300`). The sentences of the replacement-owner and fresh-map model are replaced
   ([Records and containers](../spec/v1.0/memory.md#records-and-containers)). A region block is a raw memory use.
+- **Index bounds.** No operation of the language gives an undefined value. An index or a slice bound outside its
+  axis is refused at check time with the new code `E3011` when the type gives the extent and the index is a
+  literal, and makes the defined stop with `E6001` at run time otherwise; no bound is clamped. A dimension of
+  size 0 is valid, a negative one is refused (`E3006`, now "Negative dimension")
+  ([Index bounds](../spec/v1.0/ir.md#index-bounds)). The IR and the Security chapters say the same sentence.
 
 ### Changed: raw memory, the string type, elementwise operands, the tensor constructor, slice bounds, literal types, cast and method readings (2026-11-25)
 

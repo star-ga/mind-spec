@@ -136,7 +136,7 @@ Scalar mathematical functions. When applied to tensors, these operate elementwis
 
 - **`abs<T: Numeric>(x: T) -> T`**
   - Absolute value: `|x|`
-  - Differentiable for floating-point: ∂abs/∂x = sign(x) (undefined at x=0, typically 0)
+  - Differentiable for floating-point: ∂abs/∂x = sign(x) (the value at x = 0 is 0)
   - Supported dtypes: i32, i64, f32, f64
 
 - **`neg<T: Numeric>(x: T) -> T`**

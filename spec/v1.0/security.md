@@ -60,15 +60,18 @@ of memory use.
 
 Tensor operations introduce additional safety considerations:
 
-**Shape verification**:
-- All tensor shapes MUST be validated before allocation
-- Zero or negative dimensions MUST be rejected (except rank-0 scalars with empty shape)
-- Oversized allocations (>available memory) MUST fail gracefully with E4xxx errors
+**Index bounds and shapes** ([Index bounds](./ir.md#index-bounds)):
 
-**Index bounds checking**:
-- Indexing operations (`gather`, `slice`, `index`) MUST verify bounds at runtime
-- Out-of-bounds access MUST NOT return undefined values or corrupt memory
-- Implementations MAY use static analysis to eliminate redundant bounds checks
+No operation of the language gives an undefined value. An index, or a slice bound, that is outside its axis
+MUST be refused at check time with [`E3011`](./errors.md#e3011-index-outside-its-axis) when the type gives the extent of
+the axis and the index or the bound is an integer literal; in every other case it makes the
+[defined stop](./memory.md#the-defined-stop) at run time with [`E6001`](./errors.md#e6001-out-of-bounds-index). An index is
+outside its axis when it is negative or not less than the extent of the axis, and a slice bound when it is
+negative or greater than the extent. No bound is clamped, and no index counts from the end. A dimension of
+size 0 is valid (an empty slice gives one); a negative dimension MUST be refused with
+[`E3006`](./errors.md#e3006-negative-dimension).
+
+An allocation of a tensor that fails is reported with [`E6004`](./errors.md#e6004-allocation-failure).
 
 **Numeric overflow**:
 - Integer arithmetic overflow behavior MUST be defined (wrap, saturate, or error)

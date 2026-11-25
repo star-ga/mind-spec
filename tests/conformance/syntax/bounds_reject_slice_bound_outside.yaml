@@ -1,0 +1,21 @@
+# MIND Conformance Test: a slice bound greater than the extent
+# Specification reference: spec/v1.0/ir.md#index-bounds
+# Category: syntax
+# Profile: cpu
+
+description: "the end bound 5 is greater than the extent 4; no bound is clamped"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let a: [i64; 4] = [1, 2, 3, 4];
+        let b = a[1:5];
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E3011

@@ -1,0 +1,26 @@
+# MIND Conformance Test: a dimension of size 0
+# Specification reference: spec/v1.0/ir.md#index-bounds
+# Category: syntax
+# Profile: cpu
+
+description: "the shape [0, 3] is valid"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn f(t: Tensor<f32, [0, 3]>) -> i64 {
+        return 0;
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0

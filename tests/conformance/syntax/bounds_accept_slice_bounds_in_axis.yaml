@@ -1,0 +1,25 @@
+# MIND Conformance Test: slice bounds at the extent and an empty slice
+# Specification reference: spec/v1.0/ir.md#index-bounds
+# Category: syntax
+# Profile: cpu
+
+description: "a[1:4] ends at the extent; a[2:2] is empty and has a dimension of size 0"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let a: [i64; 4] = [1, 2, 3, 4];
+        let b = a[1:4];
+        let c = a[2:2];
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0
