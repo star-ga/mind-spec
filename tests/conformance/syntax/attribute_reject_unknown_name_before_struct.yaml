@@ -20,3 +20,5 @@ input:
 
 expected:
   status: error
+  error:
+    code: E2502

@@ -16,10 +16,10 @@ limitations under the License.
 
 # Memory Model (Normative)
 
-This chapter says what a value of a container type denotes, when the storage of a container is released, which
-functions use raw memory, how long an address is valid, and how a failed check of the standard library stops a
-program. A value of a struct type denotes a record with identity ([Record identity](./types.md#record-identity-and-fixed-array-values));
-a container follows the same rule.
+This chapter says what a value of a container type denotes, when the storage of a container is released, which functions
+use raw memory, how long an address is valid, and how a failed check of the standard library stops a program. A value of
+a struct type denotes a record with identity ([Record identity](./types.md#record-identity-and-fixed-array-values)); a
+container follows the same rule.
 
 ## Records and containers
 
@@ -81,7 +81,7 @@ does not check this statement.
 The attribute `raw_memory` stands only directly before a function declaration and takes no argument or the one
 argument `sealed` ([Attributes](./language.md#attributes)). Any other use of the attribute `raw_memory`, before
 another item or with another argument, MUST be refused at check time with
-[`E2502`](./errors.md#e2502-invalid-raw_memory-attribute).
+[`E2502`](./errors.md#e2502-invalid-attribute).
 
 In a raw memory function the program keeps the [address rules](#address-validity). An implementation does not have
 to detect a read or a write through an address that is not valid, and this specification gives the value of such a

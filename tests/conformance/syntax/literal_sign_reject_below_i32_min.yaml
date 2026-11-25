@@ -1,0 +1,20 @@
+# MIND Conformance Test: a signed literal below the range of its type
+# Specification reference: spec/v1.0/lexical.md#literals
+# Category: syntax
+# Profile: cpu
+
+description: "-2147483649 is one literal, which i32 cannot hold"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let m: i32 = -2147483649;
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2408

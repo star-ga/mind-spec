@@ -1,0 +1,24 @@
+# MIND Conformance Test: a minus after an identifier is an operator
+# Specification reference: spec/v1.0/lexical.md#literals
+# Category: syntax
+# Profile: cpu
+
+description: "a-1 is a subtraction; the program returns 2"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let a = 3;
+        let b = a-1;
+        return b;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 2

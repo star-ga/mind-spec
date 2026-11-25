@@ -82,8 +82,8 @@ Type errors occur during type checking and type inference.
   export that declaration, or a reference `q.m` or a call `q.m(args)` whose
   head `q` is an import qualifier and whose module exports no member `m`
   ([Module-qualified references](./language.md#module-qualified-references)).
-  This covers a bare-headed `Enum::Variant` (or
-  `Enum.Variant`) value or pattern whose head names an enum declared by another
+  This covers a bare-headed `Enum::Variant`
+  value or pattern whose head names an enum declared by another
   project module, when the current module declares no type of that name and
   (a) no import exports a type of that name, including when the module that
   declares the enum is imported but does not export it, (b) several imports
@@ -116,9 +116,7 @@ Type errors occur during type checking and type inference.
   value path (`Enum::Variant`) and a `match` pattern, which is reported at its
   match arm. It does not inspect a payload-constructor call
   (`Enum::Variant(...)`) or a struct-variant literal (`Enum::Variant { ... }`).
-  It rewrites `Enum.Variant` to the `::` form only for an enum that is visible
-  to the module, so for the dot spelling it covers an unknown variant of an
-  imported enum but not an unimported or ambiguous enum. A type that the
+  A type that the
   current module declares keeps lexical precedence over an imported type of the
   same name.
 
@@ -134,7 +132,9 @@ Type errors occur during type checking and type inference.
 
 ### E2005: Invalid dtype for operation
 - **Trigger**: Operation applied to an operand whose type or dtype the operation does not support (e.g., Log on
-  integers, or a `bool`, `f32` or `f64` operand of `&`, `|`, `^`, `<<` or `>>`)
+  integers, or a `bool`, `f32` or `f64` operand of `&`, `|`, `^`, `<<` or `>>`), or the argument `e` of the tensor
+  constructor `tensor(e)` without a dtype argument when the type of `e` gives no dtype
+  ([Tensor operations](./language.md#tensor-operations))
 - **Required context**: operation name, actual dtype, supported dtypes
 - **Example**: `E2005: Log requires floating-point dtype, found i32 at line 20, column 10`
 
@@ -273,9 +273,9 @@ exclusivity analysis; those guarantees remain future work.
   ([Changing a container](./memory.md#changing-a-container)). The arguments of an allowed push are still
   checked for nested violations. Separate result-type rules still apply, so assigning the
   scalar result of `set` back to an array is `E2032`.
-- **Required context**: the mutating call, its collection receiver, a source
-  span, and guidance to write the push as a statement or as the update of the same place. The decision is type-aware, so an equally named user-defined method
-  on a non-collection receiver is not refused.
+- **Required context**: the mutating call, its collection receiver, a source span, and guidance to write the push as a
+  statement or as the update of the same place. The decision is type-aware, so an equally named user-defined method on a
+  non-collection receiver is not refused.
 - **Check/build contract**: checking and artifact-producing builds MUST refuse
   the same source with `E2300`; a refused build MUST terminate as a user error
   and leave no artifact.
@@ -383,12 +383,15 @@ exclusivity analysis; those guarantees remain future work.
 - **Example**: `E2501: '__mind_load_i64' is raw memory; mark 'read_at' with #[raw_memory] at line 2, column 12`
 - **Check/build contract**: checking and artifact-producing builds MUST refuse the same source with `E2501`.
 
-### E2502: Invalid raw_memory attribute
+### E2502: Invalid attribute
 
-- **Trigger**: the attribute `raw_memory` before an item that is not a function declaration, or with an argument
-  other than none or the one argument `sealed` ([Raw memory](./memory.md#raw-memory)).
-- **Required context**: the attribute, its location and the item after it, with the fix: `#[raw_memory]` or
-  `#[raw_memory(sealed)]` directly before a function declaration.
+- **Trigger**: an attribute whose name this specification does not define, a defined attribute at a position
+  that its definition does not give, or a defined attribute with an argument form that its definition does not
+  give ([Attributes](./language.md#attributes)). It holds for every attribute: `raw_memory`
+  ([Raw memory](./memory.md#raw-memory)), `repr` ([Struct layout attribute](./ffi.md#struct-layout-attribute))
+  and `requires` ([Versioning](./versioning.md)).
+- **Required context**: the attribute, its location and the item after it, with the fix: an attribute that this
+  specification defines, at a position and with an argument form that its definition gives.
 - **Example**: `E2502: 'raw_memory' stands only before a function declaration at line 1, column 1`
 - **Check/build contract**: checking and artifact-producing builds MUST refuse the same source with `E2502`.
 

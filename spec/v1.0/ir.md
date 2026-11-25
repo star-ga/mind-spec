@@ -262,14 +262,13 @@ as implementation-defined.
 
 ### Index bounds
 
-No operation of the language gives an undefined value. An index, or a slice bound, that is outside its axis
-MUST be refused at check time with [`E3011`](./errors.md#e3011-index-outside-its-axis) when the type gives the extent of
-the axis and the index or the bound is an integer literal; in every other case it makes the
-[defined stop](./memory.md#the-defined-stop) at run time with [`E6001`](./errors.md#e6001-out-of-bounds-index). An index is
-outside its axis when it is negative or not less than the extent of the axis, and a slice bound when it is
-negative or greater than the extent. No bound is clamped, and no index counts from the end. A dimension of
-size 0 is valid (an empty slice gives one); a negative dimension MUST be refused with
-[`E3006`](./errors.md#e3006-negative-dimension).
+No operation of the language gives an undefined value. An index, or a slice bound, that is outside its axis MUST be
+refused at check time with [`E3011`](./errors.md#e3011-index-outside-its-axis) when the type gives the extent of the
+axis and the index or the bound is an integer literal; in every other case it makes the
+[defined stop](./memory.md#the-defined-stop) at run time with [`E6001`](./errors.md#e6001-out-of-bounds-index). An index
+is outside its axis when it is negative or not less than the extent of the axis, and a slice bound when it is negative
+or greater than the extent. No bound is clamped, and no index counts from the end. A dimension of size 0 is valid (an
+empty slice gives one); a negative dimension MUST be refused with [`E3006`](./errors.md#e3006-negative-dimension).
 
 ### Linear and tensor algebra
 

@@ -1,0 +1,23 @@
+# MIND Conformance Test: a sign directly before the digits where an operand can start
+# Specification reference: spec/v1.0/lexical.md#literals
+# Category: syntax
+# Profile: cpu
+
+description: "-2147483648 is one literal, which i32 holds"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let m: i32 = -2147483648;
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0

@@ -30,6 +30,18 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Security chapter.** Every claim of a check names the rule of the chapter that makes it: the tensor bounds
   and shape bullets are the index-bounds rule, the allocation bullets name `E6004` and the runtime rule, and the
   determinism rules cover the programs that keep the address rules.
+- **Attributes.** `E2502` (now "Invalid attribute") is the one code of an attribute name that the specification
+  does not define, a defined attribute at another position, or another argument form, for every attribute
+  ([Attributes](../spec/v1.0/language.md#attributes)).
+- **Sign of a literal.** A `-` or `+` directly before the digits is part of the literal only where an operand can
+  start; after an identifier, a literal, `)`, `]` or `}` it is an operator, so `a-1` is a subtraction and
+  `let m: i32 = -2147483648;` is accepted ([Literals](../spec/v1.0/lexical.md#literals)).
+- **Small corrections.** Inside the brackets of a slice `::` is two `:`, so `a[::2]` is derived (`SliceColon`).
+  The trigger of `E2005` names the tensor constructor, whose dtype rule covers a scalar, an array and a tensor
+  argument. A variant path is written `Enum::Variant` and a qualified type with its import qualifier. The
+  contexts that expect a type for a literal are listed. A field access on an import qualifier is not refused as
+  an unknown field. The legend of the form status page names the MLIR build. Two links of this changelog to the
+  root README use the address of the public repository.
 
 ### Changed: raw memory, the string type, elementwise operands, the tensor constructor, slice bounds, literal types, cast and method readings (2026-11-25)
 
@@ -63,10 +75,12 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   a statement can start. A struct that holds itself is refused for every struct (`E2407`, now "Struct with no
   layout"). The triggers of `E2002`, `E2005`, `E2016` and `E2032` cover every sentence that names them.
 - **Samples.** Every code block of a published page is MIND source with the tag `mind`, or text whose first line says
-  that the form is not Core v1. Math notation is written as text, not as code. The FFI chapter no longer holds an
-  observation of the reference compiler (the C API of a generated header and the reference implementation section
-  are removed). The reference runtime status of the Runtime chapter and the audit history of the Security chapter
-  moved to the status page ([Documentation Status](../STATUS.md)).
+  that the form is not Core v1. Four code spans that held math (the local derivative and the exponential of the autodiff
+  chapter, the NaN and Inf products of the determinism page) are written as text; an inline code span may still hold
+  math or notation, and it is not a MIND sample. The FFI chapter no longer holds an observation of the reference
+  compiler (the C API of a generated header and the reference implementation section are removed). The reference runtime
+  status of the Runtime chapter and the audit history of the Security chapter moved to the status page
+  ([Documentation Status](../STATUS.md)).
 
 ### Changed: loop exit keywords, bitwise and shift operators, closing angle, elementwise tokens (2026-11-24)
 
@@ -896,7 +910,7 @@ integration with modern AI development workflows.
 > accelerator backends are available under the **commercial license**
 > (open-core). **Bit-identical determinism across CPU, GPU, and accelerators
 > is the roadmap, not a shipped guarantee.** See [`STATUS.md`](../STATUS.md)
-> and the root [`README.md`](../README.md) for the current version-pinned
+> and the root [`README.md`](https://github.com/star-ga/mind-spec/blob/main/README.md) for the current version-pinned
 > status.
 
 ---
@@ -909,7 +923,7 @@ The Core v1 **specification** is frozen and stable. "Complete" here refers to
 the specification text — the 14 normative chapters and formal grammar — not to
 end-to-end implementation coverage. Reference-implementation maturity is tracked
 separately and version-pinned in [`STATUS.md`](../STATUS.md) and the root
-[`README.md`](../README.md) (reference compiler `v0.7.1`; `mind-runtime` CPU
+[`README.md`](https://github.com/star-ga/mind-spec/blob/main/README.md) (reference compiler `v0.7.1`; `mind-runtime` CPU
 backend shipped, GPU + accelerators under commercial license).
 
 ### Added

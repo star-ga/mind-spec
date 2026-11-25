@@ -316,9 +316,10 @@ Surface syntax maps to the Core IR instruction set:
   `a + b`, and `a .- b` is `a - b`.
 - **Tensor constructor**: `tensor(e)` and `tensor(e, dtype: D)` (`TensorConstructor`) make a tensor from the
   value of `e`. Its shape is the shape of `e`: a scalar `e` gives rank 0, and an array literal gives its
-  dimensions (`tensor([[1, 2], [3, 4]])` has the shape `[2, 2]`). With a dtype argument the dtype is `D`;
-  without one it is the type of a scalar `e` or the element type of an array `e`, which MUST be a dtype (`i32`,
-  `i64`, `f32` or `f64`); another element type, such as `bool`, MUST be refused at check time with
+  dimensions (`tensor([[1, 2], [3, 4]])` has the shape `[2, 2]`), and a tensor `e` gives its shape. With a dtype
+  argument the dtype is `D`; without one it is the type of a scalar `e`, the element type of an array `e` at every
+  nesting level, or the dtype of a tensor `e`, which MUST be a dtype (`i32`, `i64`, `f32` or `f64`); another type,
+  such as `bool`, a tuple, a struct or `String`, MUST be refused at check time with
   [`E2005`](./errors.md#e2005-invalid-dtype-for-operation). The dtype argument is not an expected type for `e`.
   When `D` differs from the element type of `e`, each element is converted as `as` converts it where the
   [cast table](#casts) gives a cast from that type to `D` (`tensor(3, dtype: f32)` holds `3.0`); where the table
@@ -382,16 +383,18 @@ to a literal (`#[requires(mind_spec = "1.2")]`). The spelling without `#`, `[nam
 block it reads as an array expression.
 
 In Core v1 an attribute stands directly before a function declaration (`FunctionDeclaration`). An attribute before a
-function declaration is part of Core v1 when this specification defines its name for that position. This chapter
-defines `#[raw_memory]` and `#[raw_memory(sealed)]` ([Raw memory](./memory.md#raw-memory)). An attribute before a function
-declaration whose name this specification does not define for that position MUST be refused at check time.
+function declaration is part of Core v1 when this specification defines its name for that position. This chapter defines
+`#[raw_memory]` and `#[raw_memory(sealed)]` ([Raw memory](./memory.md#raw-memory)). An attribute before a function
+declaration whose name this specification does not define for that position MUST be refused at check time with
+[`E2502`](./errors.md#e2502-invalid-attribute).
 
 An attribute before another item (`AttributedItem` in the "v1.1 candidate additions" block of the grammar, which
 `Module` does not reach) is not derived by the Core v1 grammar. The specification defines two such attributes:
 `#[repr(C)]` before a `struct` declaration ([Struct layout attribute](./ffi.md#struct-layout-attribute)) and
 `#[requires(mind_spec = "M.N")]` ([Versioning](./versioning.md)). In Core v1 both are extensions. Before another item,
-an attribute whose name this specification does not define for that position MUST be refused at check time too,
-for example `#[fast] struct S { a: i64, }`.
+an attribute whose name this specification does not define for that position MUST be refused at check time with
+`E2502` too, for example `#[fast] struct S { a: i64, }`. A defined attribute with an argument form that its
+definition does not give MUST be refused at check time with `E2502`.
 
 ## Raw memory
 
@@ -502,9 +505,8 @@ omitted `k` is 1, so for an axis of length `n`, `a[:e]` is `a[0:e:1]`, `a[s:]` i
 and `a[s:e]` is `a[s:e:1]`. The form lowers to the `Slice` operation of [Core IR](./ir.md#indexing-and-slicing) with
 these bounds and this step, and the shape of the result follows the shape rule of that operation: `a[1:3]` takes the
 elements 1 and 2, and `a[0:4:2]` takes the elements 0 and 2. An index or a slice bound outside its axis is the case
-of [Index bounds](./ir.md#index-bounds). The lexer reads `::` as one token
-([Tokens](./lexical.md#tokens)), so `a[::2]` is not derived; with the start and the end omitted, a step is written
-`a[: :2]`. The grammar has no range index:
+of [Index bounds](./ir.md#index-bounds). Inside the brackets of a slice the token `::` is read as two `:`
+([Tokens](./lexical.md#tokens)), so `a[::2]` is `a[0:n:2]`. The grammar has no range index:
 an index operator whose index is two expressions with `..` between them, such as `a[1..3]`, is not derived; it MUST be
 refused at check time with [`E2406`](./errors.md#e2406-range-index), and the diagnostic MUST name the slice form
 `a[1:3]`.
@@ -517,7 +519,8 @@ calls the method `m` of the type of `x` with the receiver `x` and the arguments 
 call of the member `m` of that module ([Module-qualified references](#module-qualified-references)). A call operator
 never directly follows a field access (`PostfixExpression` of [`grammar-syntax.ebnf`](./grammar-syntax.ebnf)), so
 `x.m(a)` has one derivation, the method call. A call of a function value that a field holds is written `(x.m)(a)`.
-A field access `x.f` whose `f` is not a field of the type of `x` MUST be refused at check time.
+A field access `x.f` whose `f` is not a field of the type of `x` MUST be refused at check time, unless `x` is an
+import qualifier ([Module-qualified references](#module-qualified-references)).
 
 ## Statement separators
 

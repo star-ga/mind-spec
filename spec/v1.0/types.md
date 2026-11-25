@@ -252,6 +252,10 @@ messages when inference requires additional annotations.
 
 ### Type of a literal
 
+A context expects a type in these places: the annotation of a `let` or a `const`, a parameter (for the
+argument of a call), the result type of a function (for the operand of `return` and the tail of the body), the
+other operand of a binary operator, and an element of an array or a tensor whose type is given.
+
 1. An integer literal takes the integer type that its context expects. With no expected type, it has the type
    `i64`: in `let a = 5;` the type of `a` is `i64`.
 2. A floating-point literal takes the floating-point type that its context expects. With no expected type, it has
@@ -312,9 +316,9 @@ The type checker participates directly in Core IR construction:
 For a manifest project, the defining source module owns each enum, struct, and
 type alias. A qualifier MUST resolve to the current module or to exactly one
 imported module, and a type referenced from another module MUST be exported by
-that owner. The terminal import alias (`defs.Color`), full module path
-(`nested.defs.Color`), and crate-qualified path (`crate.nested.defs.Color`) all
-retain the same defining owner. The rule applies recursively in reference,
+that owner. A qualified type is written with its import qualifier, the last segment of the import path
+(`defs.Color` after `import nested.defs;`), as a qualified reference is
+([Module-qualified references](./language.md#module-qualified-references)). The rule applies recursively in reference,
 fixed-array, tuple, generic-argument, raw-pointer, and external-function type
 positions. Same-named types in different modules remain distinct.
 
@@ -324,18 +328,16 @@ MUST leave no artifact.
 
 This clarifies the owner rule above for bare-headed enum variant paths. In a
 manifest project, a bare-headed enum variant path whose enum is not
-declared in the current module (`Table::Raw`, `Table.Raw`, or the same head in a
+declared in the current module (`Table::Raw`, or the same head in a
 pattern) resolves through that module's imports. When exactly one import exports
 a type of that name and that type is an enum, its module is the owner, and the
-value, payload-constructor, dot-form and pattern spellings all denote the
+value, payload-constructor and pattern spellings all denote the
 owner's variant. A type declared in the current module keeps lexical
 precedence. A bare-headed `Enum::Variant` value or pattern MUST be refused
 with `E2002` during checking and artifact-producing builds, and a refused build
 MUST leave no artifact, when its head names an enum declared by another project
 module and (a) no import exports a type of that name, (b) several imports export
-one, or (c) the single imported enum does not declare the variant. The dot
-spelling `Enum.Variant` denotes a variant only when its head resolves to a
-visible enum; with such a head, case (c) applies to it.
+one, or (c) the single imported enum does not declare the variant.
 
 **Implementation coverage (informative, released in v0.10.3).** Compiler commit
 `1def5dde` implements this resolution, and the refusal with the gaps listed

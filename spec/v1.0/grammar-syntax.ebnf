@@ -282,7 +282,13 @@ IndexExpression = Expression
 (* length of the axis, and an omitted k is 1 (language.md, "Tuple   *)
 (* index"). The grammar has no range index: `a[1..3]` is not        *)
 (* derived.                                                         *)
-SliceExpression = [ Expression ] , ":" , [ Expression ] , [ ":" , [ Expression ] ] ;
+SliceExpression = [ Expression ] , SliceColon , [ Expression ] , [ SliceColon , [ Expression ] ] ;
+
+(* Colon of a slice. Where the parser expects a SliceColon and the   *)
+(* next token is "::", the first ":" is the SliceColon and the rest *)
+(* ":" is read again as a token (lexical.md, "Tokens"). So `a[::2]` *)
+(* is the slice with the step 2.                                    *)
+SliceColon = ":" ;
 
 FieldAccessOperator = "." , Identifier ;
 

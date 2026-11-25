@@ -43,7 +43,7 @@ This section says what the language checks.
 - **Raw memory is marked**: a call of a raw memory function stands only in a function declared with
   `#[raw_memory]` or `#[raw_memory(sealed)]`, or in a function of the standard library. Any other call MUST be
   refused at check time with [`E2501`](./errors.md#e2501-raw-memory-use-outside-a-raw-memory-function), and a wrong
-  use of the attribute with [`E2502`](./errors.md#e2502-invalid-raw_memory-attribute).
+  use of the attribute with [`E2502`](./errors.md#e2502-invalid-attribute).
 - **The address rules are not checked**: in a raw memory function the program keeps the
   [address rules](./memory.md#address-validity). An implementation does not have to detect a read or a write
   through an address that is not valid, so a use after a free or a write outside a buffer in such a function is an
@@ -68,14 +68,13 @@ Tensor operations introduce additional safety considerations:
 
 **Index bounds and shapes** ([Index bounds](./ir.md#index-bounds)):
 
-No operation of the language gives an undefined value. An index, or a slice bound, that is outside its axis
-MUST be refused at check time with [`E3011`](./errors.md#e3011-index-outside-its-axis) when the type gives the extent of
-the axis and the index or the bound is an integer literal; in every other case it makes the
-[defined stop](./memory.md#the-defined-stop) at run time with [`E6001`](./errors.md#e6001-out-of-bounds-index). An index is
-outside its axis when it is negative or not less than the extent of the axis, and a slice bound when it is
-negative or greater than the extent. No bound is clamped, and no index counts from the end. A dimension of
-size 0 is valid (an empty slice gives one); a negative dimension MUST be refused with
-[`E3006`](./errors.md#e3006-negative-dimension).
+No operation of the language gives an undefined value. An index, or a slice bound, that is outside its axis MUST be
+refused at check time with [`E3011`](./errors.md#e3011-index-outside-its-axis) when the type gives the extent of the
+axis and the index or the bound is an integer literal; in every other case it makes the
+[defined stop](./memory.md#the-defined-stop) at run time with [`E6001`](./errors.md#e6001-out-of-bounds-index). An index
+is outside its axis when it is negative or not less than the extent of the axis, and a slice bound when it is negative
+or greater than the extent. No bound is clamped, and no index counts from the end. A dimension of size 0 is valid (an
+empty slice gives one); a negative dimension MUST be refused with [`E3006`](./errors.md#e3006-negative-dimension).
 
 **Numeric overflow**:
 - Integer arithmetic overflow behavior MUST be defined (wrap, saturate, or error)

@@ -506,31 +506,28 @@ the reference implementation's v0.7.1 release `std-surface` is on by default,
 so this resolution is the default behaviour of a shipped `mindc`; building with
 `--no-default-features` opts back out to the low-level-only subset.
 
-- **`std.vec`** — Growable `Vec` over `i64`-shaped slots. Eight-byte stride,
-  doubling growth from an initial capacity of **4** slots. A `Vec` value is a
-  [container record](./memory.md#records-and-containers) with three `i64` fields `addr`, `len` and `cap`
-  (Option-C struct ABI). The functions: `vec_new() -> Vec`, `vec_push(v: Vec, value: i64) -> Vec`,
+- **`std.vec`** — Growable `Vec` over `i64`-shaped slots. Eight-byte stride, doubling growth from an initial capacity of
+  **4** slots. A `Vec` value is a [container record](./memory.md#records-and-containers) with three `i64` fields `addr`,
+  `len` and `cap` (Option-C struct ABI). The functions: `vec_new() -> Vec`, `vec_push(v: Vec, value: i64) -> Vec`,
   `vec_get(v: Vec, i: i64) -> i64`, `vec_set(v: Vec, i: i64, value: i64) -> i64`, `vec_len(v: Vec) -> i64`,
   `vec_cap(v: Vec) -> i64`, `vec_addr(v: Vec) -> i64`, `vec_free(v: Vec) -> i64`, `vec_zeroed(n: i64) -> i64`.
-  `vec_push` appends `value` to the record of `v` in place and returns `v`; `vec_set` replaces the element
-  `i` and returns 0; `vec_len` gives the number of elements.
+  `vec_push` appends `value` to the record of `v` in place and returns `v`; `vec_set` replaces the element `i` and
+  returns 0; `vec_len` gives the number of elements.
 
   > **Planned (not yet shipped).** A tail-removing `vec_pop` is on the roadmap
   > but is **not** present in the reference implementation as of v0.10.0.
 
-- **`std.string`** — UTF-8 `String` shaped as `Vec<u8>`. The type is named `String`; like every entity of the
-  standard library it is available without an import, and a string literal has this type
-  ([Type formation](./types.md#type-formation)). The container stores
-  raw bytes; UTF-8 well-formedness is a documented invariant the producer
-  MUST uphold. Signatures: `string_new() -> String`, `string_push_byte(s: String, b: i64) -> String` (appends
-  the byte `b` to the record of `s` in place and returns `s`), `string_len(s: String) -> i64`,
-  `string_get_byte(s: String, i: i64) -> i64`, `string_slice_from(s: String, start: i64) -> String` (a new
-  record with a copy of the bytes from `start`). The reference implementation (mindc v0.10.0, `std/string.mind`)
-  ships: `string_new`, `string_push_byte`, `string_push_str`, `string_push_i`,
-  `string_get_byte`, `string_len`, `string_cap`, `string_addr`, `string_eq`,
-  `string_slice_from`, `string_starts_with`, `string_validate_utf`. Note
-  `string_validate_utf` is an **explicit** opt-in check — there is no implicit
-  in-band validation on push.
+- **`std.string`** — UTF-8 `String` shaped as `Vec<u8>`. The type is named `String`; like every entity of the standard
+  library it is available without an import, and a string literal has this type
+  ([Type formation](./types.md#type-formation)). The container stores raw bytes; UTF-8 well-formedness is a documented
+  invariant the producer MUST uphold. Signatures: `string_new() -> String`,
+  `string_push_byte(s: String, b: i64) -> String` (appends the byte `b` to the record of `s` in place and returns `s`),
+  `string_len(s: String) -> i64`, `string_get_byte(s: String, i: i64) -> i64`,
+  `string_slice_from(s: String, start: i64) -> String` (a new record with a copy of the bytes from `start`). The
+  reference implementation (mindc v0.10.0, `std/string.mind`) ships: `string_new`, `string_push_byte`,
+  `string_push_str`, `string_push_i`, `string_get_byte`, `string_len`, `string_cap`, `string_addr`, `string_eq`,
+  `string_slice_from`, `string_starts_with`, `string_validate_utf`. Note `string_validate_utf` is an **explicit** opt-in
+  check — there is no implicit in-band validation on push.
 
   > **Native backend (informative).** In the native backend since v0.10.4, the handle
   > `{addr, len, cap = 0}` of a string literal is written at compile time into the
@@ -783,8 +780,10 @@ Conforming implementations MUST:
 1. **Provide all functions listed**: No omissions permitted for Core v1 conformance
 2. **Match semantics**: Behavior MUST align with referenced IR operations and autodiff rules
 3. **Report errors consistently**: Use error codes from errors.md where applicable
-4. **Preserve determinism**: Same inputs MUST produce same outputs for a program that keeps the address rules
-   of [Address validity](./memory.md#address-validity). Scalar IEEE-754 arithmetic (+ − × ÷ √) and integer/Q16.16 operations are **bit-exact** (zero tolerance) on the strict path; the numeric-tolerance allowance below applies only to transcendental functions and vector/SIMD reductions, whose cross-substrate bit-identity is on the roadmap.
+4. **Preserve determinism**: Same inputs MUST produce same outputs for a program that keeps the address rules of
+   [Address validity](./memory.md#address-validity). Scalar IEEE-754 arithmetic (+ − × ÷ √) and integer/Q16.16
+   operations are **bit-exact** (zero tolerance) on the strict path; the numeric-tolerance allowance below applies only
+   to transcendental functions and vector/SIMD reductions, whose cross-substrate bit-identity is on the roadmap.
 5. **Document extensions**: Any additional functions MUST be clearly marked as extensions
 
 Implementations MAY:

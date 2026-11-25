@@ -132,8 +132,8 @@ implementation MAY accept or refuse those.
 | [`rawmem_reject_unmarked_calls_marked`](./rawmem_reject_unmarked_calls_marked.yaml) | reject, `E2501` | as above: a call of a `#[raw_memory]` function is a raw memory use |
 | [`rawmem_reject_attr_on_struct`](./rawmem_reject_attr_on_struct.yaml) | reject, `E2502` | as above: another use of the attribute MUST be refused |
 | [`rawmem_reject_attr_argument`](./rawmem_reject_attr_argument.yaml) | reject, `E2502` | as above |
-| [`attribute_reject_unknown_name`](./attribute_reject_unknown_name.yaml) | reject | [Attributes](../../../spec/v1.0/language.md#attributes): an attribute name that the specification does not define MUST be refused |
-| [`attribute_reject_unknown_name_before_struct`](./attribute_reject_unknown_name_before_struct.yaml) | reject | as above, before another item |
+| [`attribute_reject_unknown_name`](./attribute_reject_unknown_name.yaml) | reject, `E2502` | [Attributes](../../../spec/v1.0/language.md#attributes): an attribute name that the specification does not define MUST be refused |
+| [`attribute_reject_unknown_name_before_struct`](./attribute_reject_unknown_name_before_struct.yaml) | reject, `E2502` | as above, before another item |
 | [`string_type_accept_named`](./string_type_accept_named.yaml) | accept | [Type formation](../../../spec/v1.0/types.md#type-formation): the string type `String` |
 | [`string_type_reject_literal_as_integer`](./string_type_reject_literal_as_integer.yaml) | reject, `E2001` | as above: a string literal has the type `String` |
 | [`elementwise_accept_scalar_values`](./elementwise_accept_scalar_values.yaml) | accept, returns 24 | [Tensor operations](../../../spec/v1.0/language.md#tensor-operations): elementwise operators |
@@ -167,3 +167,8 @@ implementation MAY accept or refuse those.
 | [`bounds_accept_last_index`](./bounds_accept_last_index.yaml) | accept, returns 4 | as above |
 | [`dimension_reject_negative`](./dimension_reject_negative.yaml) | reject, `E3006` | as above: a negative dimension MUST be refused |
 | [`dimension_accept_zero`](./dimension_accept_zero.yaml) | accept | as above: a dimension of size 0 is valid |
+| [`literal_sign_accept_i32_min`](./literal_sign_accept_i32_min.yaml) | accept | [Literals](../../../spec/v1.0/lexical.md#literals): a sign directly before the digits is part of the literal where an operand can start |
+| [`literal_sign_accept_minus_after_name`](./literal_sign_accept_minus_after_name.yaml) | accept, returns 2 | as above: after an identifier the sign is an operator |
+| [`literal_sign_reject_below_i32_min`](./literal_sign_reject_below_i32_min.yaml) | reject, `E2408` | as above: the sign is part of the literal, and the literal is outside the range of `i32` |
+| [`slice_accept_double_colon_step`](./slice_accept_double_colon_step.yaml) | accept | [Tuple index](../../../spec/v1.0/language.md#tuple-index): inside an index bracket the token `::` is read as two `:` |
+| [`slice_reject_three_colons`](./slice_reject_three_colons.yaml) | reject | as above: `a[:::2]` is not derived |

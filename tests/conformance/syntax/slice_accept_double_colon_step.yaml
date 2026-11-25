@@ -1,0 +1,24 @@
+# MIND Conformance Test: inside an index bracket :: is two colons
+# Specification reference: spec/v1.0/language.md#tuple-index
+# Category: syntax
+# Profile: cpu
+
+description: "a[::2] is the slice with the step 2"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let a = [1, 2, 3, 4];
+        let b = a[::2];
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0

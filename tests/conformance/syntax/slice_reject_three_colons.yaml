@@ -1,0 +1,19 @@
+# MIND Conformance Test: a slice has at most two colons
+# Specification reference: spec/v1.0/language.md#tuple-index
+# Category: syntax
+# Profile: cpu
+
+description: "a[:::2] holds three colons; SliceExpression has two"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let a = [1, 2, 3, 4];
+        let b = a[:::2];
+        return 0;
+    }
+
+expected:
+  status: error

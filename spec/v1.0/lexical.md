@@ -61,6 +61,10 @@ only a list that is open: in `let o: Option<i64>>= p;` the first `>` closes the 
 the one token `>>=`, and the `>` that closes the type parameters of a declaration is not read so:
 `type X<T>= T;` holds the token `>=` and is not derived.
 
+**Colon of a slice.** Where the syntactic grammar expects a `:` of a slice (`SliceColon` of
+[`grammar-syntax.ebnf`](./grammar-syntax.ebnf)) and the next token is `::`, the first `:` is that token and the
+rest `:` is read again as a token: `a[::2]` is the slice with the start and the end omitted and the step 2.
+
 MIND has no operator `:=`. The text `:=` is the two tokens `:` and `=`, no rule of the syntactic grammar
 puts `=` directly after `:`, and an implementation MUST refuse a source such as `x := 1;`.
 
@@ -91,6 +95,11 @@ The syntactic grammar also spells out words that are not in this list; they are 
 
 - **Integer literals** consist of an optional sign followed by digits. Binary (`0b`), octal (`0o`),
   and hexadecimal (`0x`) prefixes are allowed.
+- **Sign.** A `-` or `+` directly before the digits of an integer or floating-point literal, with no character
+  between, is part of the literal only where an operand can start: at the start of an expression, after an
+  operator, after `(`, `[`, `{`, `,`, `;`, `=` or `:`, or after a keyword. After an identifier, a literal, `)`,
+  `]` or `}` it is an operator. So `a-1` is a subtraction, and `let m: i32 = -2147483648;` holds the one literal
+  `-2147483648`, which `i32` can hold.
 - **Floating-point literals** follow the grammar `<digits>.<digits>([eE][+-]?<digits>)?`. The lexer
   reads one also after the token `.`: `t.0.1` is the tokens `t`, `.` and `0.1`, and the syntactic grammar
   reads the token `0.1` as two tuple indices ([Tuple index](./language.md#tuple-index)).

@@ -65,7 +65,11 @@ Literal = IntegerLiteral
         | BooleanLiteral
         ;
 
-(* Integer literals *)
+(* Integer literals. Sign: a "-" or "+" directly before the digits  *)
+(* is part of the literal only where an operand can start: at the    *)
+(* start of an expression, after an operator, after "(", "[", "{",   *)
+(* ",", ";", "=", ":" or a keyword. After an identifier, a literal, *)
+(* ")", "]" or "}" it is an operator (lexical.md, "Literals").     *)
 IntegerLiteral = [ Sign ] , ( DecimalInteger | BinaryInteger | OctalInteger | HexInteger ) ;
 Sign = "+" | "-" ;
 DecimalInteger = DecimalDigit , { DecimalDigit | "_" } ;
