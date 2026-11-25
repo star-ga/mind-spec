@@ -116,3 +116,4 @@ implementation MAY accept or refuse those.
 | [`entry_accept_unit_result`](./entry_accept_unit_result.yaml) | accept | as above: the result type `unit` may be written |
 | [`entry_reject_f64_result`](./entry_reject_f64_result.yaml) | reject, `E2403` | as above: another result type MUST be refused |
 | [`entry_reject_parameter`](./entry_reject_parameter.yaml) | reject, `E2403` | as above: `main` has no parameter |
+| [`loop_accept_name_in_while_condition`](./loop_accept_name_in_while_condition.yaml) | accept, returns 3 | [Loop exits](../../../spec/v1.0/language.md#loop-exits): only the name `loop` directly followed by `{` where a statement can start is refused |
