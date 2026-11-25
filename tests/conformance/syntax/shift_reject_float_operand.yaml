@@ -1,9 +1,9 @@
-# MIND Conformance Test: << with an f64 left operand
+# MIND Conformance Test: << with two f64 operands
 # Specification reference: spec/v1.0/language.md#bitwise-and-shift-operators
 # Category: syntax
 # Profile: cpu
 
-description: "the left operand of << has an integer type; an f64 operand is refused with E2005"
+description: "the operands of << have integer types; two f64 operands are refused with E2005"
 category: syntax
 profile: cpu
 
@@ -11,7 +11,8 @@ input:
   source: |
     fn main() -> i64 {
         let x: f64 = 1.5;
-        let c = x << 2;
+        let y: f64 = 2.0;
+        let c = x << y;
         return 0;
     }
 
