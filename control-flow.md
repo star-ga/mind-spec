@@ -18,7 +18,7 @@ limitations under the License.
 
 ## If Expressions
 In MIND, `if` is an expression that returns a value.
-```rust
+```mind
 let y = if x > 0 { 1 } else { -1 };
 ```
 
@@ -32,9 +32,8 @@ is a valid name: in `while loop { }` it is the condition of the `while`.
 
 ## Match
 Pattern matching is exhaustive.
-```rust
-match value {
-    0 => print!("Zero"),
-    _ => print!("Non-zero"),
-}
+```mind
+let first = match pair {
+    (a, _) => a,
+};
 ```

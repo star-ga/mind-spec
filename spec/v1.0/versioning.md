@@ -208,6 +208,7 @@ To maximize compatibility across v1.x implementations:
 Programs MAY declare their required specification version:
 
 ```text
+// Not Core v1: in Core v1 a version declaration is an extension
 #[requires(mind_spec = "1.2")]
 module my_program;
 ```

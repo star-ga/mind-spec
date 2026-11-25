@@ -39,13 +39,15 @@ The `std::tensor` module provides the core primitives for N-dimensional array co
 ## Constructors (Planned)
 
 ### `zeros`
-```
+```text
+// Not Core v1 source: a signature with no body, as an API list
 fn zeros(shape: [i64]) -> Tensor
 ```
 Allocates a new contiguous tensor of the specified shape, initialized with 0.0.
 
 ### `ones`
-```
+```text
+// Not Core v1 source: a signature with no body, as an API list
 fn ones(shape: [i64]) -> Tensor
 ```
 Allocates a new contiguous tensor initialized with 1.0.
@@ -53,7 +55,8 @@ Allocates a new contiguous tensor initialized with 1.0.
 ## Operations (Planned)
 
 ### `matmul`
-```
+```text
+// Not Core v1 source: a signature with no body, as an API list
 fn matmul(a: Tensor, b: Tensor) -> Tensor
 ```
 Performs matrix multiplication. Supports broadcasting.
@@ -62,7 +65,8 @@ Performs matrix multiplication. Supports broadcasting.
 ## Spectral Operations (Planned Phase 11+)
 
 ### `fft`
-```
+```text
+// Not Core v1 source: a signature with no body, as an API list
 fn fft(signal: Tensor) -> Tensor
 ```
 Computes the 1D Fast Fourier Transform.
@@ -80,7 +84,8 @@ Computes the 1D Fast Fourier Transform.
 | WebGPU | WGSL radix-2 Cooley-Tukey |
 
 ### `fft2d`
-```
+```text
+// Not Core v1 source: a signature with no body, as an API list
 fn fft2d(signal: Tensor) -> Tensor
 ```
 Computes the 2D Fast Fourier Transform.
@@ -90,7 +95,8 @@ Computes the 2D Fast Fourier Transform.
 **Complexity:** O(H * W * log(H * W)).
 
 ### `ifft`
-```
+```text
+// Not Core v1 source: a signature with no body, as an API list
 fn ifft(spectrum: Tensor) -> Tensor
 ```
 Computes the inverse 1D FFT with automatic 1/N normalization.
@@ -103,7 +109,8 @@ Guarantees: `ifft(fft(x)) == x` (within floating-point precision).
 ## Activation Functions (Planned Phase 11)
 
 ### `softmax`
-```
+```text
+// Not Core v1 source: a signature with no body, as an API list
 fn softmax(logits: Tensor, axis: i64) -> Tensor
 ```
 Computes softmax normalization over the specified axis.
@@ -113,7 +120,8 @@ Computes softmax normalization over the specified axis.
 **Complexity:** O(N) where N = product of dimensions.
 
 ### `transpose`
-```
+```text
+// Not Core v1 source: a signature with no body, as an API list
 fn transpose(a: Tensor, axes: [i64]) -> Tensor
 ```
 Permutes tensor dimensions according to the axis order.
@@ -124,7 +132,8 @@ Permutes tensor dimensions according to the axis order.
 **Complexity:** O(N) where N = product of shape.
 
 ### `randn`
-```
+```text
+// Not Core v1 source: a signature with no body, as an API list
 fn randn(shape: [i64], seed: i64) -> Tensor
 ```
 Allocates a tensor of the specified shape filled with deterministic random values

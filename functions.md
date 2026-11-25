@@ -20,7 +20,7 @@ Functions are the primary unit of code organization in MIND.
 
 ## Syntax
 Functions are declared using the `fn` keyword.
-```rust
+```mind
 fn add(a: i32, b: i32) -> i32 {
     return a + b;
 }
@@ -28,7 +28,7 @@ fn add(a: i32, b: i32) -> i32 {
 
 ## Implicit Returns
 If the last expression in a block has no semicolon, it is returned.
-```rust
+```mind
 fn square(x: i32) -> i32 {
     x * x
 }
@@ -40,7 +40,8 @@ MIND code may declare functions whose implementation is provided by the host
 runtime via the `extern fn` keyword. Foreign function declarations name the
 symbol and its full signature; they have no body in MIND source.
 
-```rust
+```text
+// Not Core v1: the Core v1 grammar has no extern declaration, no module block and no type [u8]
 module crypto {
     extern fn sha256(data: [u8]) -> [u8; 32]
     extern fn random_bytes_32() -> [u8; 32]

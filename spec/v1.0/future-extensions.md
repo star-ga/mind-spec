@@ -87,7 +87,7 @@ MIND's combination of static shape inference, reverse-mode autodiff, ultra-low-l
 **Concept**: Specialized tensor layouts optimized for multi-channel neural recordings:
 
 ```text
-// Proposed syntax (not yet implemented)
+// Not Core v1: proposed syntax (not yet implemented)
 type NeuroSignal<Elem, C: i64, T: i64, B: i64> = tensor<Elem[C, T, B]>
   with layout = ChannelTimeBatch
   where C = channels, T = time_samples, B = trials/batches
@@ -207,7 +207,7 @@ To align **MIND** with a full-stack development vision, the language must evolve
 **Concept**: New syntax constructs for interfacing MIND models with backend services and middleware layers:
 
 ```text
-// Proposed syntax (not yet implemented)
+// Not Core v1: proposed syntax (not yet implemented)
 @api(protocol = "rest", endpoint = "/v1/inference")
 fn serve_model(input: tensor<f32[B, 784]>) -> tensor<f32[B, 10]> {
     model.forward(input)
@@ -248,7 +248,7 @@ fn authenticated_inference(ctx: Context, input: Tensor) -> Result<Tensor, Error>
 **Concept**: New constructs for parallel computation and distributed training across multiple nodes:
 
 ```text
-// Proposed surface syntax (runtime backend implemented, language syntax pending)
+// Not Core v1: proposed surface syntax (runtime backend implemented, language syntax pending)
 @distributed(strategy = "data_parallel", nodes = 8)
 fn train_distributed(data: Dataset, model: Model) -> Model {
     // Automatic gradient synchronization across nodes
@@ -302,7 +302,7 @@ mind::distributed::
 **Concept**: Specific syntax and API constructs for reading from and writing to data sources:
 
 ```text
-// Proposed syntax (not yet implemented)
+// Not Core v1: proposed syntax (not yet implemented)
 // Kafka streaming integration
 @stream(source = "kafka", topic = "events", group = "inference")
 fn process_stream(event: Event) -> Prediction {
@@ -374,7 +374,7 @@ MIND full-stack extensions support multiple deployment environments:
 **Configuration example**:
 
 ```text
-// Proposed syntax (not yet implemented)
+// Not Core v1: proposed syntax (not yet implemented)
 @deploy(environment = "kubernetes", replicas = 3, autoscale = true)
 @resources(cpu = "2", memory = "4Gi", gpu = "nvidia-t4")
 fn inference_service(config: ServiceConfig) -> Service {
@@ -546,7 +546,7 @@ These primitives extend MIND from a tensor-only language into one capable of exp
 **Concept**: Algebraic data types with unit variants and optional discriminants:
 
 ```text
-// Proposed syntax (targets Phase 10.5)
+// Not Core v1: proposed syntax (targets Phase 10.5)
 enum Action {
   Read,
   Write,
@@ -581,7 +581,7 @@ Variant = Identifier , [ "=" , IntegerLiteral ] ;
 **Concept**: Compile-time constant values:
 
 ```text
-// Proposed syntax (targets Phase 10.5)
+// Not Core v1: proposed syntax (targets Phase 10.5)
 const TIMEOUT_SHIFT: u32 = 8
 const MAX_RETRIES: i32 = 3
 ```
@@ -749,7 +749,7 @@ mind::nn::certified::
 Import weights from existing ecosystems with safety wrappers:
 
 ```text
-// Proposed syntax (not yet implemented)
+// Not Core v1: proposed syntax (not yet implemented)
 @verified_adapter(source = "huggingface", model = "bert-base-uncased")
 @output_constraint(|logits| logits.abs().max() < 100.0)
 fn safe_bert(input: TokenIds) -> Logits {
@@ -899,7 +899,7 @@ mind::compliance::
 Organization-wide safety policies enforced at compile time:
 
 ```text
-// Proposed syntax (not yet implemented)
+// Not Core v1: proposed syntax (not yet implemented)
 // Corporate safety policy file: safety-policy.mind
 @organization_policy
 policy CorporateAISafety {
