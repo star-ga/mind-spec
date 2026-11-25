@@ -29,7 +29,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `map_contains_key` tests for a key. A `for` loop over a container reads the length one time, at its start;
   added elements are not visited, and an element that is no longer there makes the defined stop
   ([Loops](../spec/v1.0/language.md#loops)). `array<T>` is the type of the vector record of `std.vec`, and
-  `xs.set(i, v)` needs a `let mut` root as `push` does. The defined stop ends the process with one exit status,
+  `xs.set(i, v)` needs a `let mut` root as `push` does. The defined stop ends the process with the exit status 77,
   the same for every cause and on every substrate; a negative dimension or slice step that is known only at
   run time makes the defined stop with the code of the fault (`E3006`, `E4008`). After the `}` that ends a
   block-like statement a sign is part of the literal. The sentence on string keys of a map is removed until a

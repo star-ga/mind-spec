@@ -166,6 +166,6 @@ an index function outside its container, an index or a slice bound outside its a
 value over an empty axis ([Empty axes](./ir.md#empty-axes)), and a false `assert`
 ([Control flow and assertions](./stdlib.md#control-flow-and-assertions)). At the defined stop the program ends at
 the failed check: no later step of the program runs and `main` returns no value. The implementation writes a
-diagnostic with the source location and, where the check has a code, that code. The process ends with one exit
-status, not 0, that is the same for every cause of the stop and on every substrate. The stop is at the same step of
-the program on every substrate.
+diagnostic with the source location and, where the check has a code, that code. The process ends with the exit
+status 77, the same for every cause of the stop and on every substrate. The stop is at the same step of the program
+on every substrate.
