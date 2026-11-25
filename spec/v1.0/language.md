@@ -267,9 +267,10 @@ signed or unsigned. `N` is the width in bits of the target type. "Canonical NaN"
 | 4 | `f32` | `f64` | The same value, exact. NaN gives the canonical NaN. |
 | 5 | `f64` | `f32` | The value rounded to the nearest `f32`, ties to even. A value whose rounded magnitude is greater than the largest finite `f32` (an overflow) gives the infinity of its sign. NaN gives the canonical NaN. |
 | 6 | `bool` | integer type | `false` gives 0, and `true` gives 1. |
-| 7 | any type | the same type | The identity: the value of `e`, bit for bit. |
+| 7 | any type | the same type | The identity: the value of `e`, bit for bit, except that a NaN gives the canonical NaN. |
 
-Rows 1 and 7 give the same value for an integer type cast to itself. Every other cast MUST be refused at
+Rows 1 and 7 give the same value for an integer type cast to itself. Every cast whose value is a
+floating-point NaN gives the canonical NaN of `T`: rows 4 and 5, and row 7 for `f32` and `f64`. Every other cast MUST be refused at
 check time with [`E2016`](./errors.md#e2016-invalid-cast). An integer or a float has no cast to `bool`: the
 program writes a comparison, such as `x != 0`.
 
