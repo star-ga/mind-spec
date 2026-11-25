@@ -269,10 +269,10 @@ signed or unsigned. `N` is the width in bits of the target type. "Canonical NaN"
 | 6 | `bool` | integer type | `false` gives 0, and `true` gives 1. |
 | 7 | any type | the same type | The identity: the value of `e`, bit for bit, except that a NaN gives the canonical NaN. |
 
-Rows 1 and 7 give the same value for an integer type cast to itself. Every cast whose value is a
-floating-point NaN gives the canonical NaN of `T`: rows 4 and 5, and row 7 for `f32` and `f64`. Every other cast MUST be refused at
-check time with [`E2016`](./errors.md#e2016-invalid-cast). An integer or a float has no cast to `bool`: the
-program writes a comparison, such as `x != 0`.
+A cast that the table does not list MUST be refused at check time with
+[`E2016`](./errors.md#e2016-invalid-cast). An integer or a float has no cast to `bool`: the program writes a
+comparison, such as `x != 0`. Rows 1 and 7 give the same value for an integer type cast to itself. Every cast
+whose value is a floating-point NaN gives the canonical NaN of `T`: rows 4 and 5, and row 7 for `f32` and `f64`.
 
 ### Grammar reference
 
@@ -435,8 +435,8 @@ name or an expression has no derivation and MUST be refused: `let break = 4;`, `
 `break = 5;` are refused. `while c { break }` is refused because the `;` of the loop exit is missing.
 
 Core v1 has no `loop` statement: `loop` is a name and not a keyword, and `loop { ... }` is the name `loop`
-followed by a block with no `;` between them, which no rule derives. It MUST be refused at check time with
-[`E2405`](./errors.md#e2405-no-loop-statement), and the diagnostic MUST say that Core v1 has no `loop`
+followed by a block with no `;` between them, which no rule derives. A source with `loop { ... }` MUST be
+refused at check time with [`E2405`](./errors.md#e2405-no-loop-statement), and the diagnostic MUST say that Core v1 has no `loop`
 statement and name the form `while true { ... }`. As a name, `loop` is valid: `let loop = 1; return loop;`.
 The range after `in` (`for i in a..b`) is not defined by the grammar; it is an extension.
 
