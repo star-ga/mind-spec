@@ -78,8 +78,11 @@ AttributableItem    = TypeDeclaration | StructDeclaration | EnumDeclaration | Co
 ```
 
 An attribute before a function declaration is the `{ Attribute }` of `FunctionDeclaration`
-([Attributes](../../spec/v1.0/language.md#attributes)). `AttributedItem` takes every other item and no
-`AttributedItem`, so `#[a] fn f() { }` and `#[a] #[b] struct S { }` have one derivation each.
+([Attributes](../../spec/v1.0/language.md#attributes)). `AttributedItem` takes every other item and no `AttributedItem`,
+so `#[a] fn f() { }` and `#[a] #[b] struct S { }` have one derivation each (a check then refuses both, because no
+chapter defines the names `a` and `b`, rule 7). The `AttributedItem` of
+[`grammar-syntax.ebnf`](../../spec/v1.0/grammar-syntax.ebnf) takes the alternatives of its `ModuleItem` except
+`FunctionDeclaration`; `AttributableItem` is the same rule over the `ModuleItem` of this draft.
 
 `TraitDeclaration` and `ImplDeclaration` are the productions of [RFC 0024](./0024-impl-forms.md); the supertrait
 list is owned by [RFC 0027](./0027-function-generics.md). `ExportDeclaration` has one form, the list form
@@ -139,21 +142,25 @@ extension that [Language](../../spec/v1.0/language.md#executable-subset-status-i
      [MLIR Lowering](../../spec/v1.0/mlir-lowering.md) names such a struct a `#[repr(C)]` struct.
 
    No attribute name is defined for a module block. An attribute whose name is not in the list, an attribute with
-   another argument than the list gives (`#[repr(packed)]`), and an attribute before an item for which its name is
-   not defined (`#[repr(C)]` before a function) are refused with `E2726`. The name `raw_memory` is the one
-   exception: a use of it before another item or with another argument is refused with `E2502`
-   ([Raw memory](../../spec/v1.0/language.md#raw-memory)), and `E2726` does not apply to it.
-   [Attributes](../../spec/v1.0/language.md#attributes) refuses an attribute name that it does not define before a
-   function declaration and gives that refusal no code; this draft gives it `E2726`. A chapter or an RFC that defines
-   an attribute adds it to the list.
+   another argument than the list gives (`#[repr(packed)]`), and an attribute before an item for which its name is not
+   defined (`#[repr(C)]` before a function) are refused with `E2726`. The name `raw_memory` is the one exception: a use
+   of it before another item or with another argument is refused with `E2502` ([Raw
+   memory](../../spec/v1.0/language.md#raw-memory)), and `E2726` does not apply to it.
+   [Attributes](../../spec/v1.0/language.md#attributes) refuses an attribute name that the specification does not define
+   for its position, before a function declaration and before another item, and gives that refusal no code; this draft
+   gives it `E2726`. A chapter or an RFC that defines an attribute adds it to the list.
 
    The other hits of the search define no attribute:
-   - The syntactic grammar, the lexical chapter, the language chapter and the changelog (`docs/changelog.md`)
-     write the general forms `#[name]` and `#[name(arg, ...)]`: the syntax of an attribute, not a name.
-   - [Core v1 forms](../../spec/v1.0/core-v1-forms.md) and the conformance row `attribute_reject_unknown_name`
-     write `#[fast]`, a name that no chapter defines; this rule refuses it with `E2726`. The forms page and the
-     conformance row `rawmem_reject_attr_argument` write `#[raw_memory(open)]`, a use with another argument, which
-     keeps `E2502`.
+   - The syntactic grammar, the lexical chapter, the language chapter and the changelog (`docs/changelog.md`) write the
+     general forms `#[name]` and `#[name(arg, ...)]`, and a comment of the syntactic grammar writes `#[a] fn f() { }`:
+     the syntax of an attribute, not a name.
+   - [Core v1 forms](../../spec/v1.0/core-v1-forms.md), [Attributes](../../spec/v1.0/language.md#attributes), the
+     conformance rows `attribute_reject_unknown_name` and `attribute_reject_unknown_name_before_struct` and the
+     [decision notes](./decision-notes.md) write `#[fast]`, a name that no chapter defines, before a function
+     declaration and before a `struct` declaration; this rule refuses it with `E2726`. The forms page, the conformance
+     rows `rawmem_reject_attr_argument` and `rawmem_reject_attr_on_struct` and the decision notes write
+     `#[raw_memory(open)]` and `#[raw_memory] struct S { a: i64, }`, a use with another argument and a use before
+     another item, which keep `E2502`.
    - [Future Extensions](../../spec/v1.0/future-extensions.md) writes `#[profile(default)]` and
      `#[profile(default | systems)]` in a design for a later edition and `#[cfg(profile = "ai")]` in a design that
      it rejects, and it names `#![no_std]` as a feature of another language. It defines none of them, and this rule
@@ -462,12 +469,16 @@ expected:
    method. The attribute `raw_memory`, which [Raw memory](../../spec/v1.0/language.md#raw-memory) defines before every
    function declaration, stands before a method too. Another attribute there is refused (`E2726`) until an RFC
    defines one (rule 7).
-8. **Code allocation.** The three codes are assigned, because they are free in the catalog: `E2720` (a name that is
-   not unique in its namespace: two items of one namespace with the same name, or a module block whose qualified name
-   equals the module path of a project module, rule 3), `E2721` (`module m;` not first or repeated), `E2722` (module
-   name differs from the project). The decisions of questions 3 to 7 and the export rule (rule 4) need seven more
-   codes: this draft proposes `E2723` to `E2729` from the same block, which the catalog does not define; they are not
-   yet assigned. `E2729` is a name that stands twice in the export lists of one module.
+8. **Code allocation.** The three codes are assigned, because they are free in the catalog: `E2720` (a name that is not
+   unique in its namespace: two items of one namespace with the same name, or a module block whose qualified name equals
+   the module path of a project module, rule 3), `E2721` (`module m;` not first or repeated), `E2722` (module name
+   differs from the project). The decisions of questions 3 to 7 and the export rule (rule 4) need seven more codes: this
+   draft proposes `E2723` to `E2729` from the same block, which the catalog does not define; they are not yet assigned.
+   Their labels: `E2723` (`pub` before an item, rule 5), `E2724` (a `static` item, rule 5), `E2725` (an export in
+   another form than the list form `export { … }`, rule 5), `E2726` (an attribute whose name, argument or position no
+   chapter defines, except `raw_memory`, rule 7), `E2727` (a version attribute with another major, or the same major and
+   a higher minor, rule 8), `E2728` (a malformed version attribute: another key, a second argument, or a value that is
+   not `major.minor`, rule 8) and `E2729` (a name that stands twice in the export lists of one module, rule 4).
 
 ### Open
 

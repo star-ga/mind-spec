@@ -241,14 +241,14 @@ is the oracle for the parser rows.
 
 ## Proposed conformance rows
 
-Proposals. The reference refuses the inherent row, the rows that use `;` in a trait signature, and every row
-that uses an associated item or `Self` as a checked name. For the reject rows with `E2701`, `E2702` and
-`E2703` the reference gives the code and the text that the row names, measured with v0.10.4 on the same
-program with the trait signature written without `;`. `E2707` is measured in the same way (the text of the
-reference says "method"). The codes `E2710` to `E2715` are reserved for this draft, and `E2038` and `E2041` are
+Proposals. The reference refuses the inherent row, the rows that use `;` in a trait signature, and every row that uses
+an associated item or `Self` as a checked name. For the reject rows with `E2701`, `E2702` and `E2703` the reference
+gives the code and the text that the row names, measured with v0.10.4 on the same program with the trait signature
+written without `;`. `E2707` is measured in the same way for the row with a missing method (the text of the reference
+says "method"); the row with a missing associated constant is one of the rows that use an associated item, which the
+reference refuses, as said above. The codes `E2710` to `E2715` are reserved for this draft, and `E2038` and `E2041` are
 codes of [RFC 0023](./0023-type-parameters-on-user-types.md). The trait signatures of the rows use the `;` of this
-draft's grammar. Rows that build a record use the record literal of
-[RFC 0025](./0025-patterns.md#record-literal).
+draft's grammar. Rows that build a record use the record literal of [RFC 0025](./0025-patterns.md#record-literal).
 
 ```yaml
 description: "An inherent impl and a method call"
