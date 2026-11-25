@@ -247,6 +247,21 @@ Implementations MUST support bidirectional type inference:
 Inference relies on unification with occurs checks. Implementations SHOULD emit informative error
 messages when inference requires additional annotations.
 
+### Type of a literal
+
+1. An integer literal takes the integer type that its context expects. With no expected type, it has the type
+   `i64`: in `let a = 5;` the type of `a` is `i64`.
+2. A floating-point literal takes the floating-point type that its context expects. With no expected type, it has
+   the type `f64`: in `let c = 1.5;` the type of `c` is `f64`.
+3. An integer literal whose value is outside the range of its type, and a floating-point literal whose value,
+   rounded to its type to the nearest value with ties to even, is greater in magnitude than the largest finite
+   value of that type, MUST be refused at check time with [`E2408`](./errors.md#e2408-literal-out-of-range):
+   `let b: i32 = 3000000000;` is refused. The value of a literal is the value of its token
+   ([Literals](./lexical.md#literals)).
+4. An integer literal where a floating-point type is expected, and a floating-point literal where an integer type is
+   expected, MUST be refused at check time with [`E2001`](./errors.md#e2001-type-mismatch): `let y: f64 = 1;` and
+   `let z: i64 = 1.5;` are refused.
+
 ### Struct literal bindings
 
 A literal of a declared struct denotes that struct, including when its local

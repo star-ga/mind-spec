@@ -1,0 +1,26 @@
+# MIND Conformance Test: the type of a literal with and without an expected type
+# Specification reference: spec/v1.0/types.md#type-of-a-literal
+# Category: syntax
+# Profile: cpu
+
+description: "a is i64 and c is f64 with no expected type; b is i32 and d is f32 from the annotations; the program returns 12"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let a = 5;
+        let b: i32 = 7;
+        let c = 1.5;
+        let d: f32 = 2.5;
+        return a + (b as i64);
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 12

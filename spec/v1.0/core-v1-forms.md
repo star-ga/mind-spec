@@ -94,6 +94,9 @@ does not change the status. A row without a mark makes no claim about the refere
 | `a .* b` with an `f64` and an `i64` operand: operands of two different dtypes | Core v1 refuses; reference gap (`mindc check` accepts it) |
 | `tensor([[1, 2], [3, 4]])` (shape `[2, 2]`, dtype `i64`), `tensor(3, dtype: f32)`: the tensor constructor ([Tensor operations](./language.md#tensor-operations)) | Core v1; reference gap (`mindc check` refuses the first with `E2003`, "unsupported call to `tensor`", and the second with `E1001`, "expected ')', found Some(':')") |
 | `tensor(true, dtype: f32)` (no cast from `bool` to `f32`), `tensor(true)` (`bool` is not a dtype) | Core v1 refuses; reference gap (`mindc check` refuses the first with `E1001` and the second with `E2003`, not with `E2016` and `E2005`) |
+| `let a = 5;` (`i64`), `let c = 1.5;` (`f64`), `let b: i32 = 7;` (`i32`): the type of a literal ([Type of a literal](./types.md#type-of-a-literal)) | Core v1; reference conforms (`mindc check` accepts them) |
+| `let b: i32 = 3000000000;`: a literal outside the range of its type | Core v1 refuses; reference gap (`mindc check` accepts it) |
+| `let y: f64 = 1;`, `let z: i64 = 1.5;`: an integer literal where a floating-point type is expected, and the reverse | Core v1 refuses; reference gap (`mindc check` refuses both with `E2015`, "no implicit int↔float conversion", a code that the catalog does not define, not with `E2001`) |
 | `1.0^` (a literal with the suffix `^`, [Lexical Structure](./lexical.md#literals)) | Core v1 refuses |
 | `fn echo(s: String) -> String { }`, `let t: String = "a";`: the string type `String`, the type of a string literal ([Type formation](./types.md#type-formation)) | Core v1; reference gap (`mindc check` accepts it; the native backend refuses a `String` result with `lane.string.result`) |
 | `let n: i64 = "a";`: a string literal where another type is expected | Core v1 refuses; reference gap (`mindc check` accepts it) |

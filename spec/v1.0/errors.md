@@ -364,6 +364,16 @@ exclusivity analysis; those guarantees remain future work.
 - **Example**: `E2407: field 'b' of repr(C) struct 'Q' has the type '(i32, i32)' with no layout at line 4, column 5`
 - **Check/build contract**: checking and artifact-producing builds MUST refuse the same source with `E2407`.
 
+### E2408: Literal out of range
+
+- **Trigger**: an integer literal whose value is outside the range of its type, or a floating-point literal whose
+  value, rounded to its type, is greater in magnitude than the largest finite value of that type
+  ([Type of a literal](./types.md#type-of-a-literal)).
+- **Required context**: the literal, its type and its location, with the fix: a literal in the range of the type,
+  or another type.
+- **Example**: `E2408: the literal 3000000000 is outside the range of i32 at line 2, column 18`
+- **Check/build contract**: checking and artifact-producing builds MUST refuse the same source with `E2408`.
+
 ### E2501: Raw memory use outside a raw memory function
 
 - **Trigger**: a call of a raw memory function ([Raw memory](./language.md#raw-memory)) in the body of a function
@@ -694,6 +704,7 @@ release binary (`mindc check --no-fmt --no-lint` on a probe source, or the comma
 |------|---------|---------------------------|-------|
 | `E1001` | Invalid UTF-8 sequence | The code of a parse error: ``unexpected `;`, expected an expression`` | `return 1 +;` |
 | `E1001` | Invalid UTF-8 sequence | A source with an ill-formed UTF-8 sequence is refused with no code: `stream did not contain valid UTF-8` | the bytes `0xFF 0xFE` in a name |
+| `E2015` | No entry; an integer literal where a floating-point type is expected, and the reverse, is `E2001` | The code of that fault: `no implicit int↔float conversion (RFC 0011)` | `let y: f64 = 1;` and `let z: i64 = 1.5;` |
 | `E2101` | No entry; a broadcasting failure is `E3001` | The code of a broadcasting failure: ``cannot broadcast shapes (3,4) and (3,5) for `+` `` | `a + b` with `Tensor<f32, [3, 4]>` and `Tensor<f32, [3, 5]>` |
 | `E3003` | Dimension mismatch | A `matmul` whose contracting dimensions differ is accepted with no code (exit status 0) | `matmul(a, b)` with `a: Tensor<f32, [2, 3]>` and `b: Tensor<f32, [4, 2]>` |
 | `E4001` | SSA violation (use before definition) | The code of an autodiff failure: `function 'f' not found in module (only 'main' is supported)` | `mindc FILE --autodiff --func f --emit-grad-ir` |

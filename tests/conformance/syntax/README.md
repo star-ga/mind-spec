@@ -143,3 +143,7 @@ implementation MAY accept or refuse those.
 | [`tensor_ctor_reject_bool_without_dtype`](./tensor_ctor_reject_bool_without_dtype.yaml) | reject, `E2005` | as above: another element type MUST be refused |
 | [`slice_accept_omitted_parts`](./slice_accept_omitted_parts.yaml) | accept | [Tuple index](../../../spec/v1.0/language.md#tuple-index): an omitted start is 0, an omitted end the length, an omitted step 1 |
 | [`slice_reject_zero_step`](./slice_reject_zero_step.yaml) | reject, `E4008` | [Indexing and slicing](../../../spec/v1.0/ir.md#indexing-and-slicing): every step of `Slice` MUST be non-zero |
+| [`literal_type_accept_defaults`](./literal_type_accept_defaults.yaml) | accept, returns 12 | [Type of a literal](../../../spec/v1.0/types.md#type-of-a-literal), rules 1 and 2 |
+| [`literal_type_reject_out_of_range`](./literal_type_reject_out_of_range.yaml) | reject, `E2408` | as above, rule 3 |
+| [`literal_type_reject_integer_for_float`](./literal_type_reject_integer_for_float.yaml) | reject, `E2001` | as above, rule 4 |
+| [`literal_type_reject_float_for_integer`](./literal_type_reject_float_for_integer.yaml) | reject, `E2001` | as above, rule 4 |

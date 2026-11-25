@@ -1,0 +1,20 @@
+# MIND Conformance Test: a floating-point literal where an integer type is expected
+# Specification reference: spec/v1.0/types.md#type-of-a-literal
+# Category: syntax
+# Profile: cpu
+
+description: "1.5 where i64 is expected"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let z: i64 = 1.5;
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2001
