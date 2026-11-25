@@ -513,10 +513,14 @@ number of elements; otherwise the source MUST be refused at check time with
 [`E2404`](./errors.md#e2404-invalid-tuple-index). An index operator `e[i]` on a tuple has no meaning: when the type of
 `e` is a tuple type, `e[i]` MUST be refused with `E2404`, and the diagnostic MUST name the form `e.N`.
 
-`a[e1:e2]` (`SliceExpression`) is the only slice form that this edition defines. `SliceExpression` also derives
-`a[:e2]`, `a[e1:]`, `a[:]` and `a[e1:e2:e3]`, and no sentence of this specification gives them a meaning. `a[e1:e2]`
-lowers to the `Slice` operation of [Core IR](./ir.md#indexing-and-slicing), which takes the elements from the index
-`e1` up to, and not including, the index `e2`: `a[1:3]` takes the elements 1 and 2. The grammar has no range index:
+`a[s:e:k]` (`SliceExpression`) is a slice: it takes the elements of the axis from the index `s` up to, and not
+including, the index `e`, with the step `k`. An omitted `s` is 0, an omitted `e` is the length of the axis, and an
+omitted `k` is 1, so for an axis of length `n`, `a[:e]` is `a[0:e:1]`, `a[s:]` is `a[s:n:1]`, `a[:]` is `a[0:n:1]`
+and `a[s:e]` is `a[s:e:1]`. The form lowers to the `Slice` operation of [Core IR](./ir.md#indexing-and-slicing) with
+these bounds and this step, and the shape of the result follows the shape rule of that operation: `a[1:3]` takes the
+elements 1 and 2, and `a[0:4:2]` takes the elements 0 and 2. The lexer reads `::` as one token
+([Tokens](./lexical.md#tokens)), so `a[::2]` is not derived; with the start and the end omitted, a step is written
+`a[: :2]`. The grammar has no range index:
 an index operator whose index is two expressions with `..` between them, such as `a[1..3]`, is not derived; it MUST be
 refused at check time with [`E2406`](./errors.md#e2406-range-index), and the diagnostic MUST name the slice form
 `a[1:3]`.

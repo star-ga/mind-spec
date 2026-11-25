@@ -347,7 +347,7 @@ exclusivity analysis; those guarantees remain future work.
 ### E2406: Range index
 
 - **Trigger**: an index operator whose index is two expressions with `..` between them (the form `a[1..3]`),
-  which no rule of the grammar derives. `a[e1:e2]` is the only slice form that this edition defines
+  which no rule of the grammar derives. The slice forms are `a[s:e:k]` and its forms with omitted parts
   ([Tuple index](./language.md#tuple-index)).
 - **Required context**: the index expression and its location, with the fix: the slice form, for example
   `a[1:3]`.

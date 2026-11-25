@@ -1,0 +1,21 @@
+# MIND Conformance Test: a slice step is not zero
+# Specification reference: spec/v1.0/ir.md#indexing-and-slicing
+# Category: syntax
+# Profile: cpu
+
+description: "a[0:4:0] has the step 0"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let a = [1, 2, 3, 4];
+        let e = a[0:4:0];
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E4008

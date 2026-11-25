@@ -141,3 +141,5 @@ implementation MAY accept or refuse those.
 | [`tensor_ctor_accept_shape_and_dtype`](./tensor_ctor_accept_shape_and_dtype.yaml) | accept | [Tensor operations](../../../spec/v1.0/language.md#tensor-operations): tensor constructor |
 | [`tensor_ctor_reject_no_cast`](./tensor_ctor_reject_no_cast.yaml) | reject, `E2016` | as above: no cast from the element type to the dtype |
 | [`tensor_ctor_reject_bool_without_dtype`](./tensor_ctor_reject_bool_without_dtype.yaml) | reject, `E2005` | as above: another element type MUST be refused |
+| [`slice_accept_omitted_parts`](./slice_accept_omitted_parts.yaml) | accept | [Tuple index](../../../spec/v1.0/language.md#tuple-index): an omitted start is 0, an omitted end the length, an omitted step 1 |
+| [`slice_reject_zero_step`](./slice_reject_zero_step.yaml) | reject, `E4008` | [Indexing and slicing](../../../spec/v1.0/ir.md#indexing-and-slicing): every step of `Slice` MUST be non-zero |

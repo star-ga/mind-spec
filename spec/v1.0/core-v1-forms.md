@@ -71,7 +71,8 @@ does not change the status. A row without a mark makes no claim about the refere
 | `t[i]`, `f(x)`, `x.m(a)`, `tensor(e)`, `tensor(e, dtype: f64)`, `(a, b)`, `[a, b]` | Core v1 |
 | `(o.unwrap_or)(0)` on an `Option<i64>`: a field access whose name is not a field of the type, then a call ([Field access and method calls](./language.md#field-access-and-method-calls)) | Core v1 refuses; reference gap (`mindc check` accepts it) |
 | `t[a:b]`, the slice form ([Tuple index](./language.md#tuple-index)) | Core v1; reference gap (`mindc check` refuses `let b = a[1:3];` on the array `[1, 2, 3, 4]` with `E1001`, "expected `]` to close index expression") |
-| `a[:e2]`, `a[e1:]`, `a[:]`, `a[e1:e2:e3]`: the other forms of `SliceExpression` ([Tuple index](./language.md#tuple-index)) | Open |
+| `a[:e2]`, `a[e1:]`, `a[:]`, `a[e1:e2:e3]`: an omitted start is 0, an omitted end is the length of the axis, and an omitted step is 1 ([Tuple index](./language.md#tuple-index)) | Core v1; reference gap (`mindc check` refuses each of `a[:2]`, `a[1:]`, `a[:]` and `a[0:4:2]` with `E1001`) |
+| `a[0:4:0]`: a slice with the step 0 ([Indexing and slicing](./ir.md#indexing-and-slicing)) | Core v1 refuses; reference gap (`mindc check` refuses it with `E1001`, "expected `]` to close index expression", not with `E4008`) |
 | `t.0`, `t.0.1` on a tuple ([Tuple index](./language.md#tuple-index)) | Core v1; reference gap (the native backend refuses tuples with `lane.source.tuple`) |
 | `t.0.1e0` (a float literal with an exponent after an access dot, [Tuple index](./language.md#tuple-index)) | Core v1 refuses; reference conforms (`mindc check` refuses it with `E2002`, as the unknown identifier `e0`) |
 | `x.0` where `x` is not a tuple, `t.N` with `N` not less than the number of elements, `t[0]` on a tuple | Core v1 refuses; reference gap (`mindc check` accepts all three) |
