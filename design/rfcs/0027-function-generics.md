@@ -21,26 +21,29 @@ limitations under the License.
 | State | Draft (2026-11-24). Not yet accepted. The specification owner decided the questions of this draft on 2026-11-24 (see [Questions](#questions-for-the-specification-owner)). |
 | Number | Provisional. The specification owner assigns the final number. |
 | Edition | Core v1.1, one edition together with [RFC 0023](./0023-type-parameters-on-user-types.md) and [RFC 0024](./0024-impl-forms.md). |
-| Changes | `grammar-syntax.ebnf` (`FunctionTypeParameters` replaced by `GenericParameters`; `WhereClause`, `GenericFunctionRef`, the supertrait list of `TraitDeclaration` and the bounds of `TraitType` added; `TraitBounds` and `TraitBound` unmarked), `types.md` (Traits and generics, Type inference, the predeclared numeric bounds), `errors.md` (the trigger of `E2701` also covers a bound and a supertrait that name no declared trait) |
+| Changes | `grammar-syntax.ebnf` (`FunctionDeclaration` gets `[ GenericParameters ]` and `[ WhereClause ]`; `GenericParameters`, `WhereClause`, `GenericFunctionRef`, the supertrait list of `TraitDeclaration` and the bounds of `TraitType` added; `TraitBounds` and `TraitBound` unmarked), `types.md` (Traits and generics, Type inference, the predeclared numeric bounds), `errors.md` (the trigger of `E2701` also covers a bound and a supertrait that name no declared trait) |
 | Owns | Bounds, the `where` clause, explicit type arguments at a call, **supertraits** (`trait B: A`), the predeclared numeric bounds and the bounds of an associated type. No other draft defines them. |
 | Depends on | [RFC 0024](./0024-impl-forms.md) (a bound names a trait; the meaning of a method call on a bounded value). The plain parameter list and the instance names of [RFC 0023](./0023-type-parameters-on-user-types.md) are used here. |
 | Related | [RFC 0023](./0023-type-parameters-on-user-types.md), [RFC 0025](./0025-patterns.md) |
 
 ## Problem
 
-Core v1 admits one unbounded type parameter on a function: `FunctionTypeParameters = "<" , Identifier , ">"`
-([Types](../../spec/v1.0/types.md#traits-and-generics)). The text of [Types](../../spec/v1.0/types.md#traits-and-generics)
-also specifies trait bounds and a `where` clause, and the old grammar had a bound inside the angle brackets
-(`<T: Bound>`). The grammar has no `where` clause and no explicit type argument at a call, and the two spellings of
-a bound do not agree. A function therefore cannot take two type parameters in the grammar, cannot require that a
-parameter has a trait, and cannot name a type argument that no argument fixes.
+The grammar has no type parameter on a function: `FunctionDeclaration` is `"fn" , Identifier , "(" ,
+[ ParameterList ] , ")" , [ "->" , Type ] , Block`. [Core v1 form status](../../spec/v1.0/core-v1-forms.md) gives
+`fn f<T>(x: T) -> T { }` the status Extension, and [Types](../../spec/v1.0/types.md#traits-and-generics) records that
+the reference ships "generics limited to a single type parameter over scalar types". The text of
+[Types](../../spec/v1.0/types.md#traits-and-generics) also specifies trait bounds in a `where` clause, while the
+grammar writes a bound inside the angle brackets of a type declaration (`TypeParameter`, `<T: Bound>`, marked NOT IN
+CORE v1). The grammar has no `where` clause and no explicit type argument at a call, and the two spellings of a bound
+do not agree. A function therefore cannot take a type parameter in the grammar, cannot require that a parameter has
+a trait, and cannot name a type argument that no argument fixes.
 
 Measured with the reference compiler v0.10.4 (`mindc check --no-fmt`):
 
 | Source | Result |
 |--------|--------|
 | `fn id<T>(x: T) -> T` | accepted |
-| `fn first<A, B>(a: A, b: B) -> A` and `fn id<T,>(…)` | accepted (an extension: the grammar has one name) |
+| `fn first<A, B>(a: A, b: B) -> A` and `fn id<T,>(…)` | accepted (an extension: the grammar has no type parameter on a function) |
 | `fn id<>(x: i64) -> i64` | accepted |
 | `fn id<T: Num>(x: T) -> T` | `E1001`, ``expected '>', found Some(':')`` (1:8) |
 | `fn id<T>(x: T) -> T where T: Num { … }` | `E1001`, ``expected '{', found Some('w')`` (1:21) |
@@ -68,7 +71,8 @@ GenericFunctionRef  = Identifier , "::" , TypeArguments ;
 PrimaryExpression   = … | GenericFunctionRef ;
 ```
 
-`GenericParameters` replaces `FunctionTypeParameters`. It does not touch the `TypeParameterList` of
+`FunctionDeclaration` of the grammar has no type parameter today; this RFC adds `[ GenericParameters ]` to it, so in
+the edition of this RFC `fn f<T>(x: T) -> T { }` is part of the language and no longer an extension. `GenericParameters` does not touch the `TypeParameterList` of
 [RFC 0023](./0023-type-parameters-on-user-types.md): the type parameters of `struct`, `enum`, `trait`, `type` and of
 an `impl` block stay plain names, and this edition has no bound on them (rule 14). The `where` clause is added
 to `FunctionDeclaration` only. `TraitRef` and `TypeArguments` are the productions of RFC 0023, and the `>>` rule of
@@ -138,9 +142,10 @@ so `f::<_, i64>(x)` is not derived.
    satisfied, existing).
 8. **Method on a type parameter.** A call `x.m(args)` where `x` has a type parameter type and no bound declares
    `m` is refused with `E2006`. (A call on a type that is known resolves by RFC 0024, rule 8.)
-9. **Compatibility.** `fn id<T>(x: T) -> T` keeps its meaning: one parameter, no bound, inferred at each call.
-   A program that is valid under Core v1 and gives a type argument that is fixed by an argument is valid
-   under this RFC. A call whose type argument no argument fixes is an error (`E2003`); the specification owner
+9. **Compatibility.** Core v1 has no generic function: `fn id<T>(x: T) -> T` is an extension
+   ([Core v1 forms](../../spec/v1.0/core-v1-forms.md)). Under this RFC it has the meaning: one parameter, no bound,
+   inferred at each call. A program that uses the extension and whose calls fix every type argument by an argument
+   is valid under this RFC. A call whose type argument no argument fixes is an error (`E2003`); the specification owner
    decided this in
    [decision note DN-13](./decision-notes.md#dn-13-a-generic-call-whose-type-argument-is-not-fixed) (option A),
    and [Types](../../spec/v1.0/types.md#type-inference) already states that a generic function MUST infer its
