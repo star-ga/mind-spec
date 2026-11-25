@@ -1,0 +1,20 @@
+# MIND Conformance Test: () where another type is expected is a type mismatch
+# Specification reference: spec/v1.0/types.md#the-unit-value
+# Category: syntax
+# Profile: cpu
+
+description: "let n: i64 = (); is refused with E2001"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let n: i64 = ();
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2001

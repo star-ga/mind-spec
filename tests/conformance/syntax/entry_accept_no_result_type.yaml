@@ -1,0 +1,17 @@
+# MIND Conformance Test: an entry function with no result type is accepted
+# Specification reference: spec/v1.0/language.md#entry-function
+# Category: syntax
+# Profile: cpu
+
+description: "fn main() { } is a valid entry function; its process status is 0"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() {
+        let x = 1;
+    }
+
+expected:
+  status: success

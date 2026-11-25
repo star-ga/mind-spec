@@ -1,0 +1,24 @@
+# MIND Conformance Test: a loop exit needs its ;, so break - 1; uses break as a name
+# Specification reference: spec/v1.0/language.md#loop-exits
+# Category: syntax
+# Profile: cpu
+
+description: "break - 1; has no derivation with the loop exit, so break is a name, and no name break is declared"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let mut i = 0;
+        while i < 3 {
+            i = i + 1;
+            break - 1;
+        }
+        return i;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2002

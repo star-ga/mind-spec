@@ -1,0 +1,31 @@
+# MIND Conformance Test: a block-like form before the closing brace is the tail and gives the value
+# Specification reference: spec/v1.0/language.md#block-like-statements
+# Category: syntax
+# Profile: cpu
+
+description: "an if and a match that only the closing brace follows are tail expressions; the program returns 4"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn pick(c: bool) -> i64 {
+        if c { 1 } else { 2 }
+    }
+
+    fn main() -> i64 {
+        let a = pick(true);
+        let b = {
+            let t = 3;
+            match t { u => u + a, }
+        };
+        b
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 4

@@ -1,0 +1,23 @@
+# MIND Conformance Test: a float literal without a suffix is accepted; the program returns 0
+# Specification reference: spec/v1.0/lexical.md#literals
+# Category: syntax
+# Profile: cpu
+
+description: "let x: f64 = 1.0; is accepted; the program returns 0"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let x: f64 = 1.0;
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0

@@ -1,0 +1,22 @@
+# MIND Conformance Test: % on an f32 and an f64 operand is a dtype mismatch
+# Specification reference: spec/v1.0/language.md#floating-point-remainder
+# Category: syntax
+# Profile: cpu
+
+description: "the two operands of a float remainder must have the same type"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let a: f32 = 7.5;
+        let b: f64 = 2.0;
+        let c = a % b;
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2004

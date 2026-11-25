@@ -1,0 +1,30 @@
+# MIND Conformance Test: a float outside the target range gives the nearest bound, NaN gives 0; the program returns 47
+# Specification reference: spec/v1.0/language.md#casts
+# Category: syntax
+# Profile: cpu
+
+description: "1.0e30 as i32 is 2147483647, NaN as i64 is 0, -1.0e30 as i64 is the least i64; the program returns 47"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let big: f64 = 1.0e30;
+        let n: i32 = big as i32;
+        let nan: f64 = 1.0 % 0.0;
+        let k: i64 = nan as i64;
+        let low: i64 = (0.0 - big) as i64;
+        if low == 0 - 9223372036854775807 - 1 {
+            return n as i64 - 2147483600 + k;
+        };
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 47

@@ -1,0 +1,28 @@
+# MIND Conformance Test: % on f64 is the truncated remainder with the sign of the left operand; the program returns 1
+# Specification reference: spec/v1.0/language.md#floating-point-remainder
+# Category: syntax
+# Profile: cpu
+
+description: "7.5 % 2.0 is 1.5, (0.0 - 7.5) % 2.0 is -1.5, and 7.5 % 0.0 is NaN; the program returns 1"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let a: f64 = 7.5 % 2.0;
+        let b: f64 = (0.0 - 7.5) % 2.0;
+        let z: f64 = 7.5 % 0.0;
+        if a == 1.5 && b == 0.0 - 1.5 && z != z {
+            return 1;
+        };
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 1

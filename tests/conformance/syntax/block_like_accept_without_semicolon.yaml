@@ -1,0 +1,39 @@
+# MIND Conformance Test: if, match, a block, while and for stand as statements with no ;
+# Specification reference: spec/v1.0/language.md#block-like-statements
+# Category: syntax
+# Profile: cpu
+
+description: "the five block-like forms stand as statements with no ; after them; the program returns 8"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let xs = [1, 2];
+        let mut s = 0;
+        if s == 0 {
+            s = s + 1;
+        }
+        match s {
+            v => { s = v + 1; }
+        }
+        {
+            s = s + 1;
+        }
+        while s < 5 {
+            s = s + 1;
+        }
+        for v in xs {
+            s = s + v;
+        }
+        return s;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 8

@@ -1,0 +1,19 @@
+# MIND Conformance Test: an entry function with the result type f64 is refused with E2403
+# Specification reference: spec/v1.0/language.md#entry-function
+# Category: syntax
+# Profile: cpu
+
+description: "fn main() -> f64 is refused with E2403"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> f64 {
+        return 1.5;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2403

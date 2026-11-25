@@ -1,0 +1,25 @@
+# MIND Conformance Test: an assignment to a let mut binding is accepted; the program returns 3
+# Specification reference: spec/v1.0/language.md#bindings-and-assignment
+# Category: syntax
+# Profile: cpu
+
+description: "let mut x = 1; x = 2; x += 1; the program returns 3"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let mut x = 1;
+        x = 2;
+        x += 1;
+        return x;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 3

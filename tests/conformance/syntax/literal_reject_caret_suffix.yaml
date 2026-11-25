@@ -1,0 +1,18 @@
+# MIND Conformance Test: a literal has no suffix ^
+# Specification reference: spec/v1.0/lexical.md#literals
+# Category: syntax
+# Profile: cpu
+
+description: "1.0^ is not a literal; the source is refused"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let x = 1.0^;
+        return 0;
+    }
+
+expected:
+  status: error

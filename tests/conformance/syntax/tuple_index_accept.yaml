@@ -1,0 +1,23 @@
+# MIND Conformance Test: t.N is the element N of a tuple; the program returns 9
+# Specification reference: spec/v1.0/language.md#tuple-index
+# Category: syntax
+# Profile: cpu
+
+description: "t.0 + t.1 with t = (4, 5) is 9; the program returns 9"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let t = (4, 5);
+        return t.0 + t.1;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 9

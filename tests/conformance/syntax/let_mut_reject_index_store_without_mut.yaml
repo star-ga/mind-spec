@@ -1,0 +1,21 @@
+# MIND Conformance Test: an index store needs a root declared with let mut
+# Specification reference: spec/v1.0/language.md#bindings-and-assignment
+# Category: syntax
+# Profile: cpu
+
+description: "a[0] = 5 where a is bound by let without mut; the source is refused"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let a = [1, 2, 3];
+        a[0] = 5;
+        return a[0];
+    }
+
+expected:
+  status: error
+  error:
+    code: E2402

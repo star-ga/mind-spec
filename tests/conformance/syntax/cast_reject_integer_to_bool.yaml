@@ -1,0 +1,20 @@
+# MIND Conformance Test: an integer to bool cast is not in the cast table
+# Specification reference: spec/v1.0/language.md#casts
+# Category: syntax
+# Profile: cpu
+
+description: "1 as bool is refused; the program writes the comparison 1 != 0"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let b = 1 as bool;
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2016

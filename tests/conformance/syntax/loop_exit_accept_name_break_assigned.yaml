@@ -10,7 +10,7 @@ profile: cpu
 input:
   source: |
     fn main() -> i64 {
-        let break = 4;
+        let mut break = 4;
         break = 5;
         return break;
     }

@@ -1,0 +1,23 @@
+# MIND Conformance Test: t.0.1 is a tuple index of a tuple index; the program returns 2
+# Specification reference: spec/v1.0/lexical.md#literals
+# Category: syntax
+# Profile: cpu
+
+description: "t.0.1 with t = ((1, 2), 3) is 2; the digits after . are not a float literal; the program returns 2"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let t = ((1, 2), 3);
+        return t.0.1;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 2

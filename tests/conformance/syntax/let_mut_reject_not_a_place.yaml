@@ -1,0 +1,21 @@
+# MIND Conformance Test: the left operand of an assignment must be a place
+# Specification reference: spec/v1.0/language.md#bindings-and-assignment
+# Category: syntax
+# Profile: cpu
+
+description: "x + 1 = 3 assigns to an expression that is not a place; the source is refused"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let mut x = 1;
+        x + 1 = 3;
+        return x;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2402

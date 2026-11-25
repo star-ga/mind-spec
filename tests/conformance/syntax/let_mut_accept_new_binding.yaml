@@ -1,0 +1,24 @@
+# MIND Conformance Test: a second let of the same name is a new binding, not an assignment; the program returns 2
+# Specification reference: spec/v1.0/language.md#bindings-and-assignment
+# Category: syntax
+# Profile: cpu
+
+description: "let x = 1; let x = 2; needs no mut; the program returns 2"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let x = 1;
+        let x = 2;
+        return x;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 2

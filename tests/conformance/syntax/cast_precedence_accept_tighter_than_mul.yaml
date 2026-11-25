@@ -1,0 +1,24 @@
+# MIND Conformance Test: a * 2 as f64 is a * (2 as f64); the program returns 3
+# Specification reference: spec/v1.0/language.md#casts
+# Category: syntax
+# Profile: cpu
+
+description: "a * 2 as f64 with a: f64 casts only the 2, so the product is f64; the program returns 3"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let a: f64 = 1.5;
+        let y: f64 = a * 2 as f64;
+        return y as i64;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 3

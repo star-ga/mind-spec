@@ -1,0 +1,21 @@
+# MIND Conformance Test: an assignment to a binding without mut is refused with E2402
+# Specification reference: spec/v1.0/language.md#bindings-and-assignment
+# Category: syntax
+# Profile: cpu
+
+description: "let x = 1; x = 2; is refused with E2402"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let x = 1;
+        x = 2;
+        return x;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2402

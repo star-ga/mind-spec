@@ -1,0 +1,20 @@
+# MIND Conformance Test: a loop has the type unit, not i64
+# Specification reference: spec/v1.0/language.md#loops
+# Category: syntax
+# Profile: cpu
+
+description: "let n: i64 = while false { }; binds a value of the type unit to an i64; the source is refused"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let n: i64 = while false { };
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2001

@@ -1,0 +1,30 @@
+# MIND Conformance Test: the strict form with every separator; the program returns 7
+# Specification reference: spec/v1.0/language.md#statement-separators
+# Category: syntax
+# Profile: cpu
+
+description: "every ; and every , of an expression arm is written; an arm with a block takes none; the program returns 7"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let mut x = 1;
+        x = 2;
+        let v = match 3 {
+            y => y,
+        };
+        let w = match 4 {
+            z => { z }
+        };
+        return v + w;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 7

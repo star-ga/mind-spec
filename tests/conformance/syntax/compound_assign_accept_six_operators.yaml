@@ -1,0 +1,34 @@
+# MIND Conformance Test: %=, <<=, >>=, &=, |= and ^= on i64; the program returns 59
+# Specification reference: spec/v1.0/language.md#bindings-and-assignment
+# Category: syntax
+# Profile: cpu
+
+description: "x op= e means x = x op e for the six compound operators; 3 + 8 + 16 + 8 + 15 + 9 = 59"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let mut a = 7;
+        a %= 4;
+        let mut b = 1;
+        b <<= 3;
+        let mut c = 64;
+        c >>= 2;
+        let mut d = 12;
+        d &= 10;
+        let mut e = 12;
+        e |= 3;
+        let mut f = 12;
+        f ^= 5;
+        return a + b + c + d + e + f;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 59

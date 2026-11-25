@@ -1,0 +1,17 @@
+# MIND Conformance Test: main with the written result type unit
+# Specification reference: spec/v1.0/language.md#entry-function
+# Category: syntax
+# Profile: cpu
+
+description: "fn main() -> unit is the entry function with the result type unit written out"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> unit {
+        let x = 1;
+    }
+
+expected:
+  status: success

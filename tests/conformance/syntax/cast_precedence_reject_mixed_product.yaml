@@ -1,0 +1,21 @@
+# MIND Conformance Test: a * 2 as f64 casts only the 2, so the product is not an f64 cast
+# Specification reference: spec/v1.0/language.md#casts
+# Category: syntax
+# Profile: cpu
+
+description: "a * 2 as f64 with a: i64 is a * (2 as f64); an i64 times an f64 is refused"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let a: i64 = 3;
+        let y: f64 = a * 2 as f64;
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2004

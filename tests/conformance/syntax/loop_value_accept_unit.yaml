@@ -1,0 +1,25 @@
+# MIND Conformance Test: a loop is an expression of the type unit
+# Specification reference: spec/v1.0/language.md#loops
+# Category: syntax
+# Profile: cpu
+
+description: "a while and a for give the value () of the type unit; the program returns 7"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let xs = [1, 2];
+        let u: unit = while false { };
+        let w: unit = for v in xs { };
+        return 7;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 7

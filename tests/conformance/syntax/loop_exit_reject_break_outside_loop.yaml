@@ -1,0 +1,20 @@
+# MIND Conformance Test: break outside the body of every loop is refused with E2401
+# Specification reference: spec/v1.0/language.md#loop-exits
+# Category: syntax
+# Profile: cpu
+
+description: "break in a function body that holds no loop is refused with E2401"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        break;
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2401

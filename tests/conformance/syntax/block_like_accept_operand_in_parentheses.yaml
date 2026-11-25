@@ -1,0 +1,27 @@
+# MIND Conformance Test: a block-like form as an operand at a statement start is written in parentheses
+# Specification reference: spec/v1.0/language.md#block-like-statements
+# Category: syntax
+# Profile: cpu
+
+description: "parentheses make an if an operand at the start of a statement; a ; after a form discards its value; the program returns 3"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let mut x = 0;
+        x = (if true { 2 } else { 3 }) + 1;
+        (if true { 4 } else { 5 }) + x;
+        if true { 6 } else { 7 };
+        while false { };
+        return x;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 3

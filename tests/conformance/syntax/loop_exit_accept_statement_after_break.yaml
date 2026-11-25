@@ -1,19 +1,20 @@
-# MIND Conformance Test: the statement after break starts a new statement; the program returns 1
+# MIND Conformance Test: the statement after break; is the next statement; the program returns 1
 # Specification reference: spec/v1.0/language.md#loop-exits
 # Category: syntax
 # Profile: cpu
 
-description: "break - 1; is the loop exit and then the statement - 1; the program returns 1"
+description: "break; ends the loop, and the statement after it is the next statement of the body; the program returns 1"
 category: syntax
 profile: cpu
 
 input:
   source: |
     fn main() -> i64 {
-        let i = 0;
+        let mut i = 0;
         while i < 3 {
             i = i + 1;
-            break - 1;
+            break;
+            i = 9;
         };
         return i;
     }

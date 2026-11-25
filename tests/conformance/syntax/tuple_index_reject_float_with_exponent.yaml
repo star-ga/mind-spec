@@ -1,0 +1,18 @@
+# MIND Conformance Test: a float literal with an exponent is not two tuple indices
+# Specification reference: spec/v1.0/language.md#tuple-index
+# Category: syntax
+# Profile: cpu
+
+description: "t.0.1e0: the token 0.1e0 has an exponent, so it is not read as two tuple indices; the source is refused"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let t = ((1, 2), 3);
+        return t.0.1e0;
+    }
+
+expected:
+  status: error

@@ -1,0 +1,26 @@
+# MIND Conformance Test: an index and a tuple index on a let mut root are places; the program returns 9
+# Specification reference: spec/v1.0/language.md#bindings-and-assignment
+# Category: syntax
+# Profile: cpu
+
+description: "a[0] = 5 and t.1 = 4 assign to places whose root is declared with let mut; the program returns 9"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let mut a = [1, 2, 3];
+        a[0] = 5;
+        let mut t = (1, 2);
+        t.1 = 4;
+        return a[0] + t.1;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 9

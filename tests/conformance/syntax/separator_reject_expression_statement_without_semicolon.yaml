@@ -1,0 +1,19 @@
+# MIND Conformance Test: an expression statement without its ; is refused
+# Specification reference: spec/v1.0/language.md#statement-separators
+# Category: syntax
+# Profile: cpu
+
+description: "x = 2 with no ; before the next statement is refused"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let mut x = 1;
+        x = 2
+        return x;
+    }
+
+expected:
+  status: error

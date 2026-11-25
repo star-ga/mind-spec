@@ -1,0 +1,20 @@
+# MIND Conformance Test: a bool to float cast is not in the cast table
+# Specification reference: spec/v1.0/language.md#casts
+# Category: syntax
+# Profile: cpu
+
+description: "true as f64 is refused; only an integer type is a target of a bool cast"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let x = true as f64;
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2016

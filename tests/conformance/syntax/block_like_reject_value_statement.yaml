@@ -1,0 +1,20 @@
+# MIND Conformance Test: a block-like statement that is not the tail must have the type unit
+# Specification reference: spec/v1.0/language.md#block-like-statements
+# Category: syntax
+# Profile: cpu
+
+description: "if true { 1 } else { 2 } stands as a statement before return and has the type i64; the source is refused"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        if true { 1 } else { 2 }
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2001
