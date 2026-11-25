@@ -44,16 +44,18 @@ source with an attributed function with `lane.source.function_contract`, the sou
 `struct` with `lane.source.top_level`, the source with `#[fast]` before a `struct` in the same way, and the sources that
 call `vec_get`, `vec_addr` or another index function with `lane.call.unknown`. It builds the source with the unmarked
 call of `__mind_load_i64`, and its image exits with the status 0. The MLIR backend builds `#[fast] struct S { a: i64, }`
-and each source with an index outside the container, and no image stops: the image of `#[fast] struct S` exits with the
-status 0, `vec_get(v, 5)` with 33, `vec_get(v, -1)` with 49, `vec_set(v, 5, 1)` and `string_get_byte(s, 5)` with 0, and
-`map_key_at(m, 5)` and `map_value_at(m, 5)` with 49; with the index 0, `vec_get` gives 7 and `map_value_at` gives 2. The
-MLIR backend also builds the sources with `#[raw_memory]` before a `struct`, with `#[raw_memory(open)]` before a
-function and with `#[fast]` before a function, and each image exits with the status 0. It accepts
-`#[raw_memory(open)] fn f(p: i64) -> i64 { return __mind_load_i64(p); }`; the native backend refuses that source with
-`lane.source.function_contract`, and the MLIR backend builds it and its image exits with the status 0. It accepts a
+and each source with an index outside the container, and no image of these sources stops with the status 77 of the
+defined stop: the image of `#[fast] struct S` exits with the status 0, `vec_get(v, 5)` with 33, `vec_get(v, -1)` with
+49, `vec_set(v, 5, 1)` and `string_get_byte(s, 5)` with 0, and `map_key_at(m, 5)` and `map_value_at(m, 5)` with 49; with
+the value of `vec_get(v, 5)` or of `string_get_byte(s, 5)` not used, the image of `return 5;` exits with the status 5,
+and `vec_get(v, 100000000)` ends with the signal SIGSEGV, status 139; with the index 0, `vec_get` gives 7 and
+`map_value_at` gives 2. The MLIR backend also builds the sources with `#[raw_memory]` before a `struct`, with
+`#[raw_memory(open)]` before a function and with `#[fast]` before a function, and each image exits with the status 0. It
+accepts `#[raw_memory(open)] fn f(p: i64) -> i64 { return __mind_load_i64(p); }`; the native backend refuses that source
+with `lane.source.function_contract`, and the MLIR backend builds it and its image exits with the status 0. It accepts a
 false `assert(x == 2);` with `x = 1`; the native backend refuses that source with `lane.source.assert`, and the MLIR
 backend builds it, and its image writes "assertion failed at source span 38..53" and ends with the signal SIGABRT,
-status 134.
+status 134, not the status 77 of the defined stop.
 
 **Options.** (A) Only a sentence on address validity. (B) An attribute on a function that allows raw memory uses in
 its body; a use elsewhere is refused at check time. (C) A block form with a new keyword. (D) Raw memory uses only in
@@ -80,8 +82,9 @@ attribute, while the library functions that give or take an address are raw memo
   with `#[raw_memory]` or `#[raw_memory(sealed)]`, or in a function of the standard library. A region block is allowed
   only in the body of a function declared with `#[raw_memory]` or `#[raw_memory(sealed)]`; a function of the standard
   library also needs the attribute for a region block. Any other raw memory use MUST be refused at check time with
-  `E2501`. `#[raw_memory(sealed)]` states that no parameter and no result of the function carries an address and that
-  the function keeps no address after it returns. A call of a sealed function is not a raw memory use. An implementation
+  `E2501`, except in the body of a function whose attribute `raw_memory` `E2502` refuses (below).
+  `#[raw_memory(sealed)]` states that no parameter and no result of the function carries an address and that the
+  function keeps no address after it returns. A call of a sealed function is not a raw memory use. An implementation
   does not check this statement. The attribute `raw_memory` stands only directly before a function declaration and takes
   no argument or the one argument `sealed`. Any other use of the attribute `raw_memory`, before another item or with
   another argument, MUST be refused at check time with `E2502`. A function whose attribute `raw_memory` `E2502` refuses
@@ -104,8 +107,8 @@ attribute, while the library functions that give or take an address are raw memo
 - [The defined stop](../../spec/v1.0/memory.md#the-defined-stop) is how a program ends when a check of the language or
   of the standard library fails at run time. The program ends at the failed check: no later step of the program runs and
   `main` returns no value. The implementation writes a diagnostic with the source location and, where the check has a
-  code, that code. The process ends with one exit status, not 0, that is the same for every cause of the stop and on
-  every substrate. The stop is at the same step of the program on every substrate.
+  code, that code. The process ends with the exit status 77, the same for every cause of the stop and on every
+  substrate. The stop is at the same step of the program on every substrate.
 - [Security](../../spec/v1.0/security.md#core-language-safety) says only what the language checks: no pointer type,
   the mark of raw memory uses, the stop of the index functions, index bounds and containers. It says that the
   address rules are not checked.
@@ -129,15 +132,18 @@ index function of the standard library with an index outside its container
 (`let v = vec_push(vec_new(), 7); return vec_get(v, 5);`, and `vec_set`, `string_get_byte`, `map_key_at`,
 `map_value_at`): Core v1; the program makes the [defined stop](../../spec/v1.0/memory.md#the-defined-stop) with `E6001`;
 reference gap (`mindc check` accepts all five; the native backend refuses each with `lane.call.unknown`; the MLIR
-backend builds each and its image does not stop: `vec_get(v, 5)` exits with the status 33, `vec_get(v, -1)` 49,
-`vec_set(v, 5, 1)` 0, `string_get_byte(s, 5)` 0, `map_key_at(m, 5)` and `map_value_at(m, 5)` 49; with the index 0,
-`vec_get` gives 7 and `map_value_at` gives 2). `#[raw_memory(open)] fn f(p: i64) -> i64 { return __mind_load_i64(p); }`:
-Core v1 refuses; the code is `E2502` only, and the call gets no `E2501`; reference gap (`mindc check` accepts it; the
-native backend refuses it with `lane.source.function_contract`; the MLIR backend builds it and its image exits with the
-status 0). `assert(x == 2);` with `x = 1`: Core v1; the program makes the
-[defined stop](../../spec/v1.0/memory.md#the-defined-stop); reference gap (`mindc check` accepts it; the native backend
-refuses it with `lane.source.assert`; the MLIR backend builds it, and its image writes "assertion failed at source span
-38..53" and ends with the signal SIGABRT, status 134).
+backend builds each and its image does not stop with the status 77 of the defined stop: `vec_get(v, 5)` exits with the
+status 33, `vec_get(v, -1)` 49, `vec_set(v, 5, 1)` 0, `string_get_byte(s, 5)` 0, `map_key_at(m, 5)` and
+`map_value_at(m, 5)` 49; with the value of `vec_get(v, 5)` or of `string_get_byte(s, 5)` not used, the image of
+`return 5;` exits with the status 5, and `vec_get(v, 100000000)` ends with the signal SIGSEGV, status 139; with the
+index 0, `vec_get` gives 7 and `map_value_at` gives 2).
+`#[raw_memory(open)] fn f(p: i64) -> i64 { return __mind_load_i64(p); }`: Core v1 refuses; the code is `E2502` only, and
+the call gets no `E2501`; reference gap (`mindc check` accepts it; the native backend refuses it with
+`lane.source.function_contract`; the MLIR backend builds it and its image exits with the status 0). `assert(x == 2);`
+with `x = 1`: Core v1; the program makes the [defined stop](../../spec/v1.0/memory.md#the-defined-stop); reference gap
+(`mindc check` accepts it; the native backend refuses it with `lane.source.assert`; the MLIR backend builds it, and its
+image writes "assertion failed at source span 38..53" and ends with the signal SIGABRT, status 134, not the status 77 of
+the defined stop).
 
 **Codes.** [`E2501`](../../spec/v1.0/errors.md#e2501-raw-memory-use-outside-a-raw-memory-function) (raw memory use
 outside a raw memory function) and [`E2502`](../../spec/v1.0/errors.md#e2502-invalid-attribute) (invalid attribute) are
@@ -497,25 +503,30 @@ of size 0. No sentence refused a negative length of a fixed array type.
 **Reference.** On `let a: [i64; 4] = [1, 2, 3, 4];`, `mindc check` refuses `a[4]` with `E2621`, "index 4 out of bounds
 for array of length 4", and `a[-1]` with `E2621`, "index -1 out of bounds for array of length 4". It refuses `a[(4)]`
 and `a[((4))]` with the message of `a[4]`, and `a[(-1)]` with the message of `a[-1]`; the native backend builds these
-three sources and their images exit with the status 77, and the MLIR backend refuses them with `E2621`. It refuses
-`a[1:5]`, `a[1:(5)]`, `a[1:4]`, `a[2:2]` and `a[-1:2]` with `E1001`, "expected `]` to close index expression". It
-accepts `return a[3];`, and the native and the MLIR images exit with the status 4. It accepts `return a[2 + 2];` on that
-array, and the native and the MLIR images exit with the status 77. It accepts `let i = 4; return a[i];` on that array;
-the native backend builds it and its image exits with the status 77, and the MLIR backend refuses it: "constant index 4
-is out of bounds for a length-4 array". It refuses `Tensor<f32, [-1, 3]>` in a parameter type with `E1001`, "expected
-dimension (integer or symbol)", and it accepts `Tensor<f32, [0, 3]>` there; the native backend refuses that source with
-`lane.type.tensor`, and the MLIR image exits with the status 0. It accepts
-`fn at(a: [i64; 4], i: i64) -> i64 { return a[i]; }` called with 5, and `xs[i]` with `let i: i64 = 5;` on
-`let xs: array<i64> = [1, 2];`; the native backend refuses both with `lane.type.array`, and the MLIR images do not stop:
-they exit with the status 77 and 33. It refuses `fn f(a: [i64; -1]) -> i64 { }` with `E1001`, "expected array length
-(positive integer)", and the native and the MLIR backends refuse it with `E1001`. It accepts `let a: [i64; 0] = [];`;
-the native backend refuses that source with `lane.source.array_element`, and the MLIR image exits with the status 0. On
-a parameter `t: Tensor<f32, [0, 3]>` it accepts `reshape(t, [0, -1])`, `mean(t)`, `max(t)` and `sum(t)`, and it refuses
-`min(t)` and `prod(t)` with `E2003`, "unsupported call to `min`" and "unsupported call to `prod`"; the native backend
-refuses each of the six sources with `lane.type.tensor`, and the MLIR backend refuses the four sources that the check
-accepts, each with "non-i64 argument to call" and the name of the function. It refuses `zeros([n, 3])` in `fn f(n: i64)`
-with `E2003`, "unsupported call to `zeros`", and `a[0:4:k]` in `fn g(a: [i64; 4], k: i64)` with `E1001`, "expected `]`
-to close index expression".
+three sources, and their images stop with the status 77 of the defined stop and write no diagnostic; the MLIR backend
+refuses them with `E2621`. It refuses `a[1:5]`, `a[1:(5)]`, `a[1:4]`, `a[2:2]` and `a[-1:2]` with `E1001`, "expected `]`
+to close index expression". It accepts `return a[3];`, and the native and the MLIR images exit with the status 4. It
+accepts `return a[2 + 2];` on that array, and the native and the MLIR images stop with the status 77 of the defined stop
+and write no diagnostic, also when the read value is not used; with `a[1 + 2]` and the read value not used, the images
+of `return 5;` exit with the status 5. It accepts `let i = 4; return a[i];` on that array; the native backend builds it,
+and its image stops with the status 77 of the defined stop and writes no diagnostic, also when the read value is not
+used; the MLIR backend refuses it: "constant index 4 is out of bounds for a length-4 array". It refuses
+`Tensor<f32, [-1, 3]>` in a parameter type with `E1001`, "expected dimension (integer or symbol)", and it accepts
+`Tensor<f32, [0, 3]>` there; the native backend refuses that source with `lane.type.tensor`, and the MLIR image exits
+with the status 0. It accepts `fn at(a: [i64; 4], i: i64) -> i64 { return a[i]; }` called with 5, and `xs[i]` with
+`let i: i64 = 5;` on `let xs: array<i64> = [1, 2];`; the native backend refuses both with `lane.type.array`. The MLIR
+image of `at` stops with the status 77 of the defined stop; with the read value not used, it stops in the same way and
+writes no diagnostic, and with `at(a, 3)` the image of `return 5;` exits with the status 5. The MLIR image of `xs[i]`
+does not stop: it exits with the status 33; with the read value not used, the image of `return 5;` exits with the status
+5, and the index 100000000 ends it with the signal SIGSEGV, status 139. It refuses `fn f(a: [i64; -1]) -> i64 { }` with
+`E1001`, "expected array length (positive integer)", and the native and the MLIR backends refuse it with `E1001`. It
+accepts `let a: [i64; 0] = [];`; the native backend refuses that source with `lane.source.array_element`, and the MLIR
+image exits with the status 0. On a parameter `t: Tensor<f32, [0, 3]>` it accepts `reshape(t, [0, -1])`, `mean(t)`,
+`max(t)` and `sum(t)`, and it refuses `min(t)` and `prod(t)` with `E2003`, "unsupported call to `min`" and "unsupported
+call to `prod`"; the native backend refuses each of the six sources with `lane.type.tensor`, and the MLIR backend
+refuses the four sources that the check accepts, each with "non-i64 argument to call" and the name of the function. It
+refuses `zeros([n, 3])` in `fn f(n: i64)` with `E2003`, "unsupported call to `zeros`", and `a[0:4:k]` in
+`fn g(a: [i64; 4], k: i64)` with `E1001`, "expected `]` to close index expression".
 
 **Options.** (A) No operation gives an undefined value: an index or a slice bound outside its axis is refused at
 check time when the check can know it, and makes the defined stop at run time in every other case; no bound is
@@ -551,33 +562,36 @@ check time with `E3006`.
   time otherwise.
 
 **Form status.** `let a: [i64; 4] = [1, 2, 3, 4];` and `a[4]`, `a[-1]`, `a[(4)]`, `a[((4))]` or `a[1:5]`: Core v1
-refuses; the code is `E3011`; reference gap (`mindc check` refuses `a[4]`, `a[-1]`, `a[(4)]` and `a[((4))]` with
-`E2621`, "index 4 out of bounds for array of length 4", and `a[1:5]` and `a[1:(5)]` with `E1001`, "expected `]` to close
-index expression"). `a[1:4]` and `a[2:2]` on `let a: [i64; 4]`, and `Tensor<f32, [0, 3]>`: Core v1; reference gap
-(`mindc check` refuses `a[1:4]` with `E1001`, "expected `]` to close index expression"; it accepts `Tensor<f32, [0, 3]>`
-in a parameter type, the native backend refuses that with `lane.type.tensor`, and the MLIR backend builds it and its
-image exits with the status 0). `Tensor<f32, [-1, 3]>`: Core v1 refuses; the code is `E3006`; reference gap
-(`mindc check` refuses it with `E1001`, "expected dimension (integer or symbol)"). `fn f(a: [i64; -1]) -> i64 { }`: Core
-v1 refuses; the code is `E3006`; reference gap (`mindc check` refuses it with `E1001`, "expected array length (positive
-integer)", and the native and the MLIR backends refuse it with `E1001`).
-`fn at(a: [i64; 4], i: i64) -> i64 { return a[i]; }` called with 5, `a[2 + 2]` and `a[i]` after `let i = 4;` on
-`let a: [i64; 4]`, and `xs[i]` with `i = 5` on an `array<i64>` of two elements: Core v1; the check accepts it, and the
-program makes the [defined stop](../../spec/v1.0/memory.md#the-defined-stop) with `E6001`; reference gap (`mindc check`
-accepts all four; the native backend refuses `at` and `xs[i]` with `lane.type.array`, and builds `a[2 + 2]` and `a[i]`,
-whose images exit with the status 77; the MLIR backend refuses `a[i]` after `let i = 4;` ("constant index 4 is out of
-bounds for a length-4 array"), and builds the other three, whose images do not stop: they exit with the status 77, 77
-and 33). `reshape(t, [0, -1])` on `t: Tensor<f32, [0, 3]>`: Core v1 refuses; the code is `E3007`; reference gap
-(`mindc check` accepts it; the native backend refuses it with `lane.type.tensor`; the MLIR backend refuses it: "non-i64
-argument to call `reshape`"). `mean(t)`, `max(t)` and `min(t)` on `t: Tensor<f32, [0, 3]>`: Core v1 refuses; reference
-gap (`mindc check` accepts `mean(t)` and `max(t)`, and refuses `min(t)` with `E2003`, "unsupported call to `min`"; the
-native backend refuses all three with `lane.type.tensor`; the MLIR backend refuses `mean(t)` and `max(t)`: "non-i64
-argument to call"). `sum(t)` and `prod(t)` on `t: Tensor<f32, [0, 3]>`: Core v1; the sum is 0 and the product is 1;
-reference gap (`mindc check` accepts `sum(t)` and refuses `prod(t)` with `E2003`, "unsupported call to `prod`"; the
-native backend refuses both with `lane.type.tensor`; the MLIR backend refuses `sum(t)`: "non-i64 argument to call
-`sum`"). `zeros([n, 3])` in `fn f(n: i64)` called with -1, and `a[0:4:k]` in `fn g(a: [i64; 4], k: i64)` called with -1:
-Core v1; the program makes the defined stop, whose diagnostic names `E3006` and `E4008`; reference gap (`mindc check`
-refuses `zeros([n, 3])` with `E2003`, "unsupported call to `zeros`", and `a[0:4:k]` with `E1001`, "expected `]` to close
-index expression").
+refuses; the code is `E3011`; reference gap (`mindc check` refuses `a[4]`, `a[(4)]` and `a[((4))]` with `E2621`, "index
+4 out of bounds for array of length 4", `a[-1]` with `E2621`, "index -1 out of bounds for array of length 4", and
+`a[1:5]` and `a[1:(5)]` with `E1001`, "expected `]` to close index expression"). `a[1:4]` and `a[2:2]` on
+`let a: [i64; 4]`, and `Tensor<f32, [0, 3]>`: Core v1; reference gap (`mindc check` refuses `a[1:4]` with `E1001`,
+"expected `]` to close index expression"; it accepts `Tensor<f32, [0, 3]>` in a parameter type, the native backend
+refuses that with `lane.type.tensor`, and the MLIR backend builds it and its image exits with the status 0).
+`Tensor<f32, [-1, 3]>`: Core v1 refuses; the code is `E3006`; reference gap (`mindc check` refuses it with `E1001`,
+"expected dimension (integer or symbol)"). `fn f(a: [i64; -1]) -> i64 { }`: Core v1 refuses; the code is `E3006`;
+reference gap (`mindc check` refuses it with `E1001`, "expected array length (positive integer)", and the native and the
+MLIR backends refuse it with `E1001`). `fn at(a: [i64; 4], i: i64) -> i64 { return a[i]; }` called with 5, `a[2 + 2]`
+and `a[i]` after `let i = 4;` on `let a: [i64; 4]`, and `xs[i]` with `i = 5` on an `array<i64>` of two elements: Core
+v1; the check accepts it, and the program makes the [defined stop](../../spec/v1.0/memory.md#the-defined-stop) with
+`E6001`; reference gap (`mindc check` accepts all four; the native backend refuses `at` and `xs[i]` with
+`lane.type.array`, and builds `a[2 + 2]` and `a[i]`, whose images stop with the status 77 of the defined stop, also when
+the read value is not used, and write no diagnostic; the MLIR backend refuses `a[i]` after `let i = 4;` ("constant index
+4 is out of bounds for a length-4 array"), builds `at` and `a[2 + 2]`, whose images stop in the same way, and builds
+`xs[i]`, whose image does not stop: `return xs[i];` exits with the status 33, with the read value not used the image of
+`return 5;` exits with the status 5, and the index 100000000 ends it with the signal SIGSEGV, status 139; with an index
+inside the axis, `a[1 + 2]` and `at(a, 3)`, the images of `return 5;` exit with the status 5). `reshape(t, [0, -1])` on
+`t: Tensor<f32, [0, 3]>`: Core v1 refuses; the code is `E3007`; reference gap (`mindc check` accepts it; the native
+backend refuses it with `lane.type.tensor`; the MLIR backend refuses it: "non-i64 argument to call `reshape`").
+`mean(t)`, `max(t)` and `min(t)` on `t: Tensor<f32, [0, 3]>`: Core v1 refuses; reference gap (`mindc check` accepts
+`mean(t)` and `max(t)`, and refuses `min(t)` with `E2003`, "unsupported call to `min`"; the native backend refuses all
+three with `lane.type.tensor`; the MLIR backend refuses `mean(t)` and `max(t)`: "non-i64 argument to call"). `sum(t)`
+and `prod(t)` on `t: Tensor<f32, [0, 3]>`: Core v1; the sum is 0 and the product is 1; reference gap (`mindc check`
+accepts `sum(t)` and refuses `prod(t)` with `E2003`, "unsupported call to `prod`"; the native backend refuses both with
+`lane.type.tensor`; the MLIR backend refuses `sum(t)`: "non-i64 argument to call `sum`"). `zeros([n, 3])` in
+`fn f(n: i64)` called with -1, and `a[0:4:k]` in `fn g(a: [i64; 4], k: i64)` called with -1: Core v1; the program makes
+the defined stop, whose diagnostic names `E3006` and `E4008`; reference gap (`mindc check` refuses `zeros([n, 3])` with
+`E2003`, "unsupported call to `zeros`", and `a[0:4:k]` with `E1001`, "expected `]` to close index expression").
 
 **Codes.** [`E3011`](../../spec/v1.0/errors.md#e3011-index-outside-its-axis) (index outside its axis) is new; the
 published catalog defines no code for it. Its trigger is an index, or a slice bound, outside its axis that is an integer
