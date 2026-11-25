@@ -59,7 +59,7 @@ Measured with the reference compiler v0.10.4 (`mindc check --no-fmt`):
 FunctionDeclaration = "fn" , Identifier , [ GenericParameters ] , "(" , [ ParameterList ] , ")" ,
                       [ "->" , Type ] , [ WhereClause ] , Block ;
 
-GenericParameters   = "<" , GenericParameter , { "," , GenericParameter } , [ "," ] , CloseAngle ;
+GenericParameters   = "<" , GenericParameter , { "," , GenericParameter } , [ "," ] , ">" ;
 GenericParameter    = Identifier , [ ":" , TraitBounds ] ;
 TraitBounds         = TraitBound , { "+" , TraitBound } ;
 TraitBound          = TraitRef ;
@@ -76,9 +76,11 @@ edition of this RFC `fn f<T>(x: T) -> T { }` is part of the language and no long
 does not touch the `TypeParameterList` of [RFC 0023](./0023-type-parameters-on-user-types.md): the type parameters of
 `struct`, `enum`, `trait`, `type` and of an `impl` block stay plain names, and this edition has no bound on them (rule
 14). The `where` clause is added to `FunctionDeclaration` only. `TraitRef` and `TypeArguments` are the productions of
-RFC 0023. `GenericParameters` ends with `CloseAngle`, so the closing angle rule of
-[Lexical Structure](../../spec/v1.0/lexical.md#tokens) applies to it too, as to `TypeArguments`: `id::<Box<i64>>(b)`
-ends two lists. `where` is already in the keyword list.
+RFC 0023. `GenericParameters` ends with the token `>`, as the type parameters of a declaration do. The closing angle
+rule of [Lexical Structure](../../spec/v1.0/lexical.md#tokens) is for the `>` that closes a type-argument list
+(`TypeArguments`): in `fn f<T: Conv<i64>>(x: T)` the first `>` of `>>` closes the arguments of `Conv`, and the rest
+of the token, read again, is the `>` of `GenericParameters`; `id::<Box<i64>>(b)` ends two type-argument lists.
+`where` is already in the keyword list.
 
 The supertrait list is a bound on the implementing type, and a bound on an associated type is a bound on the type
 that an impl gives to it. Both are added to the productions of RFC 0023 and [RFC 0024](./0024-impl-forms.md):

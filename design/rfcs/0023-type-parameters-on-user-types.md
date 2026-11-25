@@ -58,7 +58,7 @@ EnumDeclaration   = "enum"   , Identifier , [ TypeParameterList ] , "{" , [ Enum
 TypeDeclaration   = "type"   , Identifier , [ TypeParameterList ] , "=" , Type , ";" ;
 TraitDeclaration  = "trait"  , Identifier , [ TypeParameterList ] , "{" , { TraitItem } , "}" ;
 
-TypeParameterList = "<" , Identifier , { "," , Identifier } , [ "," ] , CloseAngle ;
+TypeParameterList = "<" , Identifier , { "," , Identifier } , [ "," ] , ">" ;
 
 IdentifierType    = Identifier , [ TypeArguments ] ;
 TypeArguments     = "<" , Type , { "," , Type } , [ "," ] , CloseAngle ;
@@ -75,11 +75,13 @@ supertrait list of `TraitDeclaration` (`trait B: A`) is owned by RFC 0027, which
 `fn f<T>` is an extension, [Core v1 forms](../../spec/v1.0/core-v1-forms.md)); RFC 0027 adds `[ GenericParameters ]` to
 `FunctionDeclaration`.
 
-Closing angle: both lists end with `CloseAngle`, so the rule of
-[Lexical Structure](../../spec/v1.0/lexical.md#tokens) for a closing `>` applies to them. Where a list is open and
-the next token starts with `>` (`>>`, `>=` or `>>=`), the first `>` closes the list and the rest of the token is read
-again: `Pair<Box<i64>>` ends two lists, and `let p: Box<Box<i64>>= q;` is derived. Elsewhere `>>` is the shift
-operator.
+Closing angle: `TypeArguments` ends with `CloseAngle`, so the rule of
+[Lexical Structure](../../spec/v1.0/lexical.md#tokens) for the `>` that closes a type-argument list applies to it.
+Where a type-argument list is open and the next token starts with `>` (`>>`, `>=` or `>>=`), the first `>` closes the
+list and the rest of the token is read again: `Pair<Box<i64>>` ends two lists, and `let p: Box<Box<i64>>= q;` is
+derived. `TypeParameterList` ends with the token `>`, as the type parameters of a declaration do in the grammar
+today, so the rule does not apply to it: `type X<T>= T;` holds the token `>=` and is not derived. Elsewhere `>>` is
+the shift operator.
 
 This RFC adds no type argument in an expression. The type arguments of a record literal are inferred from the
 types of its fields; a parameter that the fields do not fix is refused with `E2003` (cannot infer type). A call of
