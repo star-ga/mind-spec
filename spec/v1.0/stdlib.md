@@ -547,9 +547,9 @@ so this resolution is the default behaviour of a shipped `mindc`; building with
 
   A `Map` value is a [container record](./memory.md#records-and-containers). Signatures: `map_new() -> Map`,
   `map_insert(m: Map, key: i64, value: i64) -> Map` (adds the pair to the record of `m` in place and returns `m`),
-  `map_len(m: Map) -> i64` (the number of pairs of `m`), `map_get(m: Map, key: i64) -> i64` (0 when `m` holds no pair
-  with the key; `map_contains_key` tests whether `m` holds a key). The reference implementation ships ten public **free
-  functions**: `map_new`, `map_insert`, `map_get`, `map_contains_key`, `map_len`, `map_cap`, `map_key_at`,
+  `map_len(m: Map) -> i64` (the number of pairs of `m`), `map_get(m: Map, key: i64) -> i64` (gives 0 when `m` holds no
+  pair with the key; `map_contains_key` tests whether `m` holds a key). The reference implementation ships ten public
+  **free functions**: `map_new`, `map_insert`, `map_get`, `map_contains_key`, `map_len`, `map_cap`, `map_key_at`,
   `map_value_at`, `map_get_str`, `map_contains_key_str`. The `_str` variants compare String **key contents** (byte
   equality) rather than i64 handle identity, for a map whose keys are `String` values. `map_insert` is currently
   insert-at-tail (append) semantics; it does not yet update an existing key's value in place. Two accessor helpers
