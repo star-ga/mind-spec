@@ -42,7 +42,7 @@ Operators on the same level have equal precedence and are resolved by associativ
 | **2** | Unary `-` `!` | Negation, logical NOT | Right-to-left | `-x`, `!flag` |
 | **3** | `as` | Cast (`CastExpression`); the right operand is a type | Left-to-right | `a * b as f64` is `a * (b as f64)` |
 | **4** | `*` `/` `%` `.*` `./` | Multiplication, division, remainder (elementwise `.*` `./`) | Left-to-right | `a * b`, `a % n` |
-| **5** | `<<` `>>` `&` `^` `\|` | Shift and bitwise operators (one level) | Left-to-right | `a << 2`, `x & mask` |
+| **5** | `<<` `>>` `&` `^` `\|` | Shift and bitwise operators (one level, [rules](#bitwise-and-shift-operators)) | Left-to-right | `a << 2`, `x & mask` |
 | **6** | `+` `-` `.+` `.-` | Addition, subtraction (elementwise `.+` `.-`) | Left-to-right | `a + b`, `a - b` |
 | **7** | `==` `!=` `<` `>` `<=` `>=` | Comparison operators | Left-to-right | `a == b`, `x < y` |
 | **8** | `&&` | Logical AND | Left-to-right | `a && b` |
@@ -225,6 +225,31 @@ the result. "Canonical NaN" is the bit pattern of [Canonical NaN](./types.md#can
 | 5 | finite | infinite | `a` |
 | 6 | zero (`+0.0` or `-0.0`) | finite and not zero | `a` (the zero keeps its sign) |
 | 7 | finite and not zero | finite and not zero | the truncated remainder; a zero result has the sign of `a` |
+
+### Bitwise and shift operators
+
+`&`, `|`, `^`, `<<` and `>>` are one precedence level, left to right, tighter than `+` and `-`
+(`BitwiseExpression` of [`grammar-syntax.ebnf`](./grammar-syntax.ebnf)). An integer type is a type that
+[Casts](#casts) names so. The rows below are the complete rule for the operand types and the values. `N` is
+the width in bits of the type `T` of the left operand.
+
+| Row | Expression | Operands | Type | Value |
+|-----|------------|----------|------|-------|
+| 1 | `a & b`, `a \| b`, `a ^ b` | `a` and `b` have the same integer type `T` | `T` | The bitwise and, or and exclusive or of the two's complement bits of `a` and `b`. |
+| 2 | `a << c` | `a` has an integer type `T`; `c` has an integer type | `T` | The low `N` bits of `a` times 2 to the power `s`, in two's complement for a signed `T`. |
+| 3 | `a >> c`, `T` signed | as row 2 | `T` | The arithmetic shift: the floor of `a` divided by 2 to the power `s`. |
+| 4 | `a >> c`, `T` unsigned | as row 2 | `T` | The logical shift: the floor of `a` divided by 2 to the power `s`. |
+
+The shift count `s` is the value of `c` modulo `N`, so a count is always from 0 to `N - 1`; a negative `c`
+uses its two's complement value modulo `N`. For `T` = `i64`: `1 << 64` is 1, `1 << 65` is 2,
+`1 << (0 - 63)` is 2, and `(0 - 17) >> 2` is -5. No operator of this group traps, and every result is
+bit-identical on every substrate. `0 - 17 >> 2` is `0 - (17 >> 2)` and gives -4.
+
+Operands of two different integer types for `&`, `|` or `^` MUST be refused at check time with
+[`E2004`](./errors.md#e2004-dtype-mismatch-in-binary-operation). An operand of this group whose type is not an
+integer type, for example a `bool`, an `f32` or an `f64`, MUST be refused at check time with
+[`E2005`](./errors.md#e2005-invalid-dtype-for-operation). The compound assignments `&=`, `|=`, `^=`, `<<=` and
+`>>=` ([Bindings and assignment](#bindings-and-assignment)) use these rules.
 
 ### Casts
 

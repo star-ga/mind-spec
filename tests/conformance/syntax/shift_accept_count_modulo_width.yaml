@@ -1,0 +1,27 @@
+# MIND Conformance Test: the shift count is the right operand modulo the width
+# Specification reference: spec/v1.0/language.md#bitwise-and-shift-operators
+# Category: syntax
+# Profile: cpu
+
+description: "on i64, 1 << 64 is 1, 1 << 65 is 2 and 40 >> 66 is 10; the program returns 13"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let one: i64 = 1;
+        let x: i64 = 40;
+        let c64: i64 = 64;
+        let c65: i64 = 65;
+        let c66: i64 = 66;
+        return (one << c64) + (one << c65) + (x >> c66);
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 13

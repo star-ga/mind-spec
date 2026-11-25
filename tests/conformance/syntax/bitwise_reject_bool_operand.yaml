@@ -1,0 +1,20 @@
+# MIND Conformance Test: & with bool operands
+# Specification reference: spec/v1.0/language.md#bitwise-and-shift-operators
+# Category: syntax
+# Profile: cpu
+
+description: "an operand of & that is not of an integer type is refused with E2005"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let c = true & false;
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2005

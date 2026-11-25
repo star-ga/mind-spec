@@ -75,6 +75,15 @@ implementation MAY accept or refuse those.
 | [`compound_assign_accept_six_operators`](./compound_assign_accept_six_operators.yaml) | accept, returns 59 | `AssignmentOperator` and [Bindings and assignment](../../../spec/v1.0/language.md#bindings-and-assignment): `x op= e` is `x = x op e` |
 | [`compound_assign_accept_longest_match`](./compound_assign_accept_longest_match.yaml) | accept, returns 4 | [Tokens](../../../spec/v1.0/lexical.md#tokens): longest match makes `<<=` one token |
 | [`compound_assign_reject_mixed_types`](./compound_assign_reject_mixed_types.yaml) | reject, `E2004` | as above: `x %= y` is `x = x % y`, and the operands of `%` share a type |
+| [`bitwise_accept_and_or_xor`](./bitwise_accept_and_or_xor.yaml) | accept, returns 28 | `BitwiseExpression` and [Bitwise and shift operators](../../../spec/v1.0/language.md#bitwise-and-shift-operators), row 1 |
+| [`bitwise_accept_precedence`](./bitwise_accept_precedence.yaml) | accept, returns 23 | `AdditiveExpression` over `BitwiseExpression` and [Operator precedence](../../../spec/v1.0/language.md#operator-precedence-and-associativity): shifts and bitwise operators bind tighter than `+` and `-` |
+| [`shift_accept_count_modulo_width`](./shift_accept_count_modulo_width.yaml) | accept, returns 13 | [Bitwise and shift operators](../../../spec/v1.0/language.md#bitwise-and-shift-operators), rows 2 and 3: the count is the right operand modulo the width |
+| [`shift_accept_count_modulo_width_i32`](./shift_accept_count_modulo_width_i32.yaml) | accept, returns 3 | as above, for `i32`; the cast is row 1 of [Casts](../../../spec/v1.0/language.md#casts) |
+| [`shift_accept_negative_count`](./shift_accept_negative_count.yaml) | accept, returns 10 | as above: a negative count uses its two's complement value modulo the width |
+| [`shift_accept_arithmetic_right`](./shift_accept_arithmetic_right.yaml) | accept, returns 5 | as above, row 3: `>>` on a signed type is the arithmetic shift |
+| [`bitwise_reject_mixed_types`](./bitwise_reject_mixed_types.yaml) | reject, `E2004` | as above: the operands of `&` have the same integer type |
+| [`bitwise_reject_bool_operand`](./bitwise_reject_bool_operand.yaml) | reject, `E2005` | as above: an operand that is not of an integer type MUST be refused |
+| [`shift_reject_float_operand`](./shift_reject_float_operand.yaml) | reject, `E2005` | as above |
 | [`separator_accept_strict_form`](./separator_accept_strict_form.yaml) | accept, returns 7 | [Statement separators](../../../spec/v1.0/language.md#statement-separators) |
 | [`separator_reject_let_without_semicolon`](./separator_reject_let_without_semicolon.yaml) | reject | as above: a missing `;` MUST be refused |
 | [`separator_reject_expression_statement_without_semicolon`](./separator_reject_expression_statement_without_semicolon.yaml) | reject | as above |

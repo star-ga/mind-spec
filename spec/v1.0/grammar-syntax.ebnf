@@ -196,8 +196,15 @@ LogicalAndExpression = ComparisonExpression , { "&&" , ComparisonExpression } ;
 ComparisonExpression = AdditiveExpression , { ComparisonOperator , AdditiveExpression } ;
 ComparisonOperator = "==" | "!=" | "<" | ">" | "<=" | ">=" ;
 
-AdditiveExpression = MultiplicativeExpression , { AdditiveOperator , MultiplicativeExpression } ;
+AdditiveExpression = BitwiseExpression , { AdditiveOperator , BitwiseExpression } ;
 AdditiveOperator = "+" | "-" ;
+
+(* The shift and bitwise operators are one level, tighter than "+"    *)
+(* and "-" and looser than "*": `0 - 17 >> 2` is `0 - (17 >> 2)`.     *)
+(* Operand types and values: language.md, "Bitwise and shift          *)
+(* operators".                                                         *)
+BitwiseExpression = MultiplicativeExpression , { BitwiseOperator , MultiplicativeExpression } ;
+BitwiseOperator = "&" | "|" | "^" | "<<" | ">>" ;
 
 MultiplicativeExpression = CastExpression , { MultiplicativeOperator , CastExpression } ;
 MultiplicativeOperator = "*" | "/" | "%" ;
@@ -346,14 +353,10 @@ AssertStatement = "assert" , Expression , [ "," , StringLiteral ] , [ ";" ]
 
 (* The postfix cast `e as T` is CastExpression above.          *)
 
-(* Logical and bitwise binary operators (Phase 10.5 Tier-1).    *)
-LogicalOr       = Expression , "||" , Expression ;
-LogicalAnd      = Expression , "&&" , Expression ;
-BitwiseOr       = Expression , "|"  , Expression ;
-BitwiseAnd      = Expression , "&"  , Expression ;
-BitwiseXor      = Expression , "^"  , Expression ;
-ShiftLeft       = Expression , "<<" , Expression ;
-ShiftRight      = Expression , ">>" , Expression ;
+(* The logical operators "||" and "&&" are LogicalOrExpression  *)
+(* and LogicalAndExpression above, and the bitwise and shift    *)
+(* operators "|", "&", "^", "<<" and ">>" are BitwiseExpression *)
+(* above.                                                       *)
 
 (* Operator precedence of the binary operators and the cast       *)
 (* (highest binds tightest, all left-assoc); the full table is in *)

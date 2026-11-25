@@ -1,0 +1,23 @@
+# MIND Conformance Test: >> on a signed type is the arithmetic shift
+# Specification reference: spec/v1.0/language.md#bitwise-and-shift-operators
+# Category: syntax
+# Profile: cpu
+
+description: "(0 - 17) >> 2 is the floor of -17 / 4, which is -5; the program returns 5"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let x: i64 = 0 - 17;
+        return (x >> 2) + 10;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 5

@@ -1,0 +1,26 @@
+# MIND Conformance Test: the shift count of an i32 is the right operand modulo 32
+# Specification reference: spec/v1.0/language.md#bitwise-and-shift-operators
+# Category: syntax
+# Profile: cpu
+
+description: "on i32, 1 << 32 is 1 and 1 << 33 is 2; the program returns 3"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let one: i32 = 1;
+        let c32: i32 = 32;
+        let c33: i32 = 33;
+        let r: i32 = (one << c32) + (one << c33);
+        return r as i64;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 3
