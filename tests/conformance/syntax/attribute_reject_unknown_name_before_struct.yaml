@@ -1,0 +1,22 @@
+# MIND Conformance Test: an attribute name that the specification does not define, before a struct declaration
+# Specification reference: spec/v1.0/language.md#attributes
+# Category: syntax
+# Profile: cpu
+
+description: "the attribute fast before a struct declaration is not defined"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    #[fast]
+    struct S {
+        a: i64,
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: error

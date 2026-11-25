@@ -375,7 +375,11 @@ UseDeclaration  = "use" , ImportPath , [ ";" ] ;
 
 (* Attributes before an item other than a function declaration     *)
 (* (Attribute: FunctionDeclaration above).                           *)
-AttributedItem  = Attribute , { Attribute } , ModuleItem ;
+(* FunctionDeclaration is not an alternative here: it takes its own    *)
+(* attributes, so #[a] fn f() { } has one derivation.                 *)
+AttributedItem  = Attribute , { Attribute } ,
+                  ( TypeDeclaration | StructDeclaration | TraitDeclaration
+                  | ImportDeclaration | ExportDeclaration ) ;
 
 (* Runtime assertion (no return value).                         *)
 (* Additive, targeted for specification 1.7.0. In the            *)

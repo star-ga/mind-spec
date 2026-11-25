@@ -389,7 +389,9 @@ declaration whose name this specification does not define for that position MUST
 An attribute before another item (`AttributedItem` in the "v1.1 candidate additions" block of the grammar, which
 `Module` does not reach) is not derived by the Core v1 grammar. The specification defines two such attributes:
 `#[repr(C)]` before a `struct` declaration ([Struct layout attribute](./ffi.md#struct-layout-attribute)) and
-`#[requires(mind_spec = "M.N")]` ([Versioning](./versioning.md)). In Core v1 both are extensions.
+`#[requires(mind_spec = "M.N")]` ([Versioning](./versioning.md)). In Core v1 both are extensions. Before another item,
+an attribute whose name this specification does not define for that position MUST be refused at check time too,
+for example `#[fast] struct S { a: i64, }`.
 
 ## Raw memory
 
