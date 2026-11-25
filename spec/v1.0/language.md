@@ -190,16 +190,16 @@ adds no operator.
 - The reference MLIR path emits `arith.cmpf` with the ordered predicates `olt`, `ole`, `ogt`, `oge`
   and `oeq`. Since compiler `2597ee9c` (v0.10.3) it emits the unordered `une` for `!=`; the
   v0.10.2 release used the ordered `one`, so `NaN != NaN` was false there.
-- The native x86-64 backend (`--backend native`) matches this for `f64` since `ccbb00b8` (v0.10.3). The evidence is one script gate: 14 operand pairs plus one NaN program, each also built
-  with the MLIR backend, with the pair programs checked against Python float comparisons. That gate is
-  run in preflight, not in CI, and covers `f64` on x86-64 only. The compiler independence audit
-  records the gate as exiting 1 (its wording: "3 of 5 in-profile programs fail"), and the `ccbb00b8`
-  commit message records three helper-intrinsic programs and the tensor first-fence fixture as
-  already red before it. No passing run is attached here; that the 15 comparison programs pass is
-  inferred from that commit message, which names only those four items as red. The 14 pair programs
-  pass their operands as parameters of one function (`fn k(x: f64, y: f64)`); the NaN program
-  compares a local variable with the literal `0.0`. The backend's first admission check refuses
-  `f32`, `f16` and `bf16` scalars (`a1b0b5f5`), so `f32` comparisons are not available there.
+- The native x86-64 backend (`--backend native`) matches this for `f64` since `ccbb00b8` (v0.10.3). The evidence is
+  one script gate: 14 operand pairs plus one NaN program, each also built with the MLIR backend, with the pair
+  programs checked against Python float comparisons. That gate is run in preflight, not in CI, and covers `f64` on
+  x86-64 only. The compiler independence audit records the gate as exiting 1 (its wording: "3 of 5 in-profile programs
+  fail"), and the `ccbb00b8` commit message records three helper-intrinsic programs and the tensor first-fence fixture
+  as already red before it. No passing run is attached here; that the 15 comparison programs pass is inferred from
+  that commit message, which names only those four items as red. The 14 pair programs pass their operands as
+  parameters of one function (`fn k(x: f64, y: f64)`); the NaN program compares a local variable with the literal
+  `0.0`. The backend's first admission check refuses `f32`, `f16` and `bf16` scalars (`a1b0b5f5`), so `f32`
+  comparisons are not available there.
 - The reference `mindc test` evaluator has an open defect for `f64` comparisons used as `if` or
   `while` conditions or as `match` guards: it treats only an integer 0 as false (compiler
   independence audit, finding 15, `docs/independence-audit-plan-20260925.md` in `star-ga/mind`). Its
@@ -278,7 +278,8 @@ whose value is a floating-point NaN gives the canonical NaN of `T`: rows 4 and 5
 
 For the complete formal grammar including precedence, see:
 - **Lexical grammar**: [`grammar-lexical.ebnf`](./grammar-lexical.ebnf)
-- **Syntax grammar**: [`grammar-syntax.ebnf`](./grammar-syntax.ebnf) (expression precedence encoded in production rules)
+- **Syntax grammar**: [`grammar-syntax.ebnf`](./grammar-syntax.ebnf) (expression precedence encoded in production
+  rules)
 
 ## Types
 
@@ -371,10 +372,10 @@ of `main` is `unit`, the process status is 0.
 
 ## Bindings and assignment
 
-`let p = e;` binds the names of the pattern `p`. `let mut p = e;` binds every name of `p` as a mutable
-binding. A name that a `let` without `mut`, a parameter of a function, the pattern of a `for` or the
-pattern of a `match` arm binds is not mutable. A later `let` of the same name is a new binding and not an assignment, so
-`let x = 1; let x = 2;` is valid.
+`let p = e;` binds the names of the pattern `p`. `let mut p = e;` binds every name of `p` as a mutable binding. A name
+that a `let` without `mut`, a parameter of a function, the pattern of a `for` or the pattern of a `match` arm binds is
+not mutable. A later `let` of the same name is a new binding and not an assignment, so `let x = 1; let x = 2;` is
+valid.
 
 The left operand of an assignment or of a compound assignment is a place: a name, or a chain of index,
 field and tuple-index accesses on a name (`x`, `a[i]`, `p.f`, `t.0`, `a[i].f.1`). The name at the start of
@@ -434,41 +435,39 @@ the only rule of the grammar that holds them. A source in which one of them stan
 name or an expression has no derivation and MUST be refused: `let break = 4;`, `break - 1;` and
 `break = 5;` are refused. `while c { break }` is refused because the `;` of the loop exit is missing.
 
-Core v1 has no `loop` statement: `loop` is a name and not a keyword, and `loop { ... }` is the name `loop`
-followed by a block with no `;` between them, which no rule derives. A source with `loop { ... }` MUST be
-refused at check time with [`E2405`](./errors.md#e2405-no-loop-statement), and the diagnostic MUST say that Core v1 has no `loop`
-statement and name the form `while true { ... }`. As a name, `loop` is valid: `let loop = 1; return loop;`.
-The range after `in` (`for i in a..b`) is not defined by the grammar; it is an extension.
+Core v1 has no `loop` statement: `loop` is a name and not a keyword, and `loop { ... }` is the name `loop` followed by
+a block with no `;` between them, which no rule derives. A source with `loop { ... }` MUST be refused at check time
+with [`E2405`](./errors.md#e2405-no-loop-statement), and the diagnostic MUST say that Core v1 has no `loop` statement
+and name the form `while true { ... }`. As a name, `loop` is valid: `let loop = 1; return loop;`. The range after `in`
+(`for i in a..b`) is not defined by the grammar; it is an extension.
 
 ## Tuple index
 
-`e.N` (`TupleIndexOperator`) is the element `N` of the tuple `e`, counted from 0: after
-`let t = (4, 5);`, `t.0` is 4 and `t.1` is 5. `N` is a decimal integer literal with no sign and no prefix.
-Where the parser expects the `DecimalInteger` of a tuple index and the next token is a float literal of the
-form digits "." digits (no exponent, no suffix), the token is read as two tuple indices: `t.0.1` means
-`(t.0).1`. After an access dot, a float literal token with an exponent or a suffix is not a tuple index,
-because only the form digits "." digits is read as two indices (the lexical grammar gives a float literal no
-suffix, so in Core v1 such a token has an exponent): a source such as `t.0.1e0` is not derived and MUST be
-refused. The type of `e` MUST be a tuple type and `N` MUST be less than its number of elements; otherwise the source MUST be refused at check
-time with [`E2404`](./errors.md#e2404-invalid-tuple-index). An index operator `e[i]` on a tuple has no
-meaning: when the type of `e` is a tuple type, `e[i]` MUST be refused with `E2404`, and the diagnostic MUST
-name the form `e.N`.
+`e.N` (`TupleIndexOperator`) is the element `N` of the tuple `e`, counted from 0: after `let t = (4, 5);`, `t.0` is 4
+and `t.1` is 5. `N` is a decimal integer literal with no sign and no prefix. Where the parser expects the
+`DecimalInteger` of a tuple index and the next token is a float literal of the form digits "." digits (no exponent, no
+suffix), the token is read as two tuple indices: `t.0.1` means `(t.0).1`. After an access dot, a float literal token
+with an exponent or a suffix is not a tuple index, because only the form digits "." digits is read as two indices (the
+lexical grammar gives a float literal no suffix, so in Core v1 such a token has an exponent): a source such as
+`t.0.1e0` is not derived and MUST be refused. The type of `e` MUST be a tuple type and `N` MUST be less than its
+number of elements; otherwise the source MUST be refused at check time with
+[`E2404`](./errors.md#e2404-invalid-tuple-index). An index operator `e[i]` on a tuple has no meaning: when the type of
+`e` is a tuple type, `e[i]` MUST be refused with `E2404`, and the diagnostic MUST name the form `e.N`.
 
 `a[e1:e2]` (`SliceExpression`) is the only slice form that this edition defines. `SliceExpression` also derives
-`a[:e2]`, `a[e1:]`, `a[:]` and `a[e1:e2:e3]`, and no sentence of this specification gives them a meaning.
-`a[e1:e2]` lowers to the `Slice` operation of
-[Core IR](./ir.md#indexing-and-slicing), which takes the elements from the index `e1` up to, and not
-including, the index `e2`: `a[1:3]` takes the elements 1 and 2. The grammar has no range index: `a[1..3]` is
-not derived, it MUST be refused at check time with [`E2406`](./errors.md#e2406-range-index), and the
+`a[:e2]`, `a[e1:]`, `a[:]` and `a[e1:e2:e3]`, and no sentence of this specification gives them a meaning. `a[e1:e2]`
+lowers to the `Slice` operation of [Core IR](./ir.md#indexing-and-slicing), which takes the elements from the index
+`e1` up to, and not including, the index `e2`: `a[1:3]` takes the elements 1 and 2. The grammar has no range index:
+`a[1..3]` is not derived, it MUST be refused at check time with [`E2406`](./errors.md#e2406-range-index), and the
 diagnostic MUST name the slice form `a[1:3]`.
 
 ## Statement separators
 
-The separators are the ones that [`grammar-syntax.ebnf`](./grammar-syntax.ebnf) writes. `;` is required after
-a `let`, after a `return`, after a loop exit and after an `ExpressionStatement`; a `BlockLikeStatement` and a
-`defer` statement take none ([Block-like statements](#block-like-statements)). A `match` arm with an expression ends with `,`, the
-last arm too; an arm with a block takes none (`MatchArm`). Checking and building MUST refuse a source in
-which one of these separators is missing. A missing separator has no meaning in the language.
+The separators are the ones that [`grammar-syntax.ebnf`](./grammar-syntax.ebnf) writes. `;` is required after a `let`,
+after a `return`, after a loop exit and after an `ExpressionStatement`; a `BlockLikeStatement` and a `defer` statement
+take none ([Block-like statements](#block-like-statements)). A `match` arm with an expression ends with `,`, the last
+arm too; an arm with a block takes none (`MatchArm`). Checking and building MUST refuse a source in which one of these
+separators is missing. A missing separator has no meaning in the language.
 
 A source formatter MAY read a source in which such a separator is missing and write it with the
 separator. That reading is a repair of the text that the formatter does before it writes the strict form;
@@ -477,13 +476,13 @@ MUST NOT accept that source.
 
 ## Words that the grammar spells out
 
-The syntactic grammar spells out words that are not keywords (`in`, `as`, `const`, `enum`, `module`,
-`use`, `assert`, `mut`, `diff`, `dyn`, `Tensor`, `tensor`, `dtype`, the primitive type names and `_`). [`grammar-lexical.ebnf`](./grammar-lexical.ebnf) lists them as `ContextualWord`: the lexer
-produces each of them as an identifier, and this edition does not reserve them. A source is read by the
-derivation in which a rule of the syntactic grammar spells the word out, when such a derivation exists. A
-source with no such derivation reads the word as an identifier. This is the only rule for these words. The
-rows give the verdict that the rule has for a source. The grammar does not look at declarations, so
-`tensor(1);` is the constructor also where a function `tensor` is declared.
+The syntactic grammar spells out words that are not keywords (`in`, `as`, `const`, `enum`, `module`, `use`, `assert`,
+`mut`, `diff`, `dyn`, `Tensor`, `tensor`, `dtype`, the primitive type names and `_`).
+[`grammar-lexical.ebnf`](./grammar-lexical.ebnf) lists them as `ContextualWord`: the lexer produces each of them as an
+identifier, and this edition does not reserve them. A source is read by the derivation in which a rule of the
+syntactic grammar spells the word out, when such a derivation exists. A source with no such derivation reads the word
+as an identifier. This is the only rule for these words. The rows give the verdict that the rule has for a source. The
+grammar does not look at declarations, so `tensor(1);` is the constructor also where a function `tensor` is declared.
 
 | Source | Readings of the word | Meaning |
 |--------|---------------------------|---------|
