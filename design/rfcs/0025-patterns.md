@@ -61,7 +61,9 @@ Pattern          = IdentifierPattern
                  | VariantPattern
                  | RecordPattern ;
 
-LiteralPattern   = [ "-" ] , IntegerLiteral | BooleanLiteral | StringLiteral ;
+(* The sign of a negative integer pattern is the Sign of IntegerLiteral: a pattern  *)
+(* stands where an operand can start, so "-1" is one token (lexical.md, "Literals"). *)
+LiteralPattern   = IntegerLiteral | BooleanLiteral | StringLiteral ;
 VariantPattern   = Identifier , "::" , Identifier , [ "(" , [ PatternList ] , ")" ] ;
 RecordPattern    = Identifier , "{" , [ FieldPatternList ] , "}" ;
 FieldPatternList = FieldPattern , { "," , FieldPattern } , [ "," ] ;

@@ -91,7 +91,8 @@ or infers them.
 ## Static rules
 
 1. The names of one `TypeParameterList` MUST be pairwise different. A duplicate is refused with
-   `E2039` ("duplicate type parameter").
+   `E2039` ("duplicate type parameter"). A type parameter is not an item of a namespace of
+   [RFC 0026](./0026-module-items.md) (rule 3), so `E2720` does not apply to a duplicate.
 2. A type parameter is in scope in the declaration that lists it, and nowhere else. It is a type, not a
    value. For a `trait` the scope is the signatures and the constant types of the trait items, its supertrait list
    and the bounds of its associated types ([RFC 0027](./0027-function-generics.md)). A use outside the scope is an
@@ -122,9 +123,14 @@ or infers them.
    has the status Not in Core v1.)
 9. The built-in types `Option<T>` and `Result<T, E>` follow the same rules, with one and with two parameters. A
    `struct`, `enum`, `type` or `trait` declaration MUST NOT take a predeclared type name: a name of
-   `PrimitiveType` (`i32`, `i64`, `f32`, `f64`, `bool`, `unit`), `Tensor`, `Option`, `Result`, or a predeclared
-   bound of [RFC 0027](./0027-function-generics.md) (`Numeric`, `Integer`, `Float`). Such a declaration is refused
-   with `E2042` ("predeclared type or bound name"). A user type never shadows a predeclared one.
+   `PrimitiveType` (`i32`, `i64`, `f32`, `f64`, `bool`, `unit`), `Tensor`, `Option`, `Result`, a container type of
+   [Types](../../spec/v1.0/types.md#type-formation) (`array`, `Vec`, `Map`, `String`), another type that the
+   [standard library](../../spec/v1.0/stdlib.md) declares (every entity of the standard library is available without
+   an import), or a predeclared bound of [RFC 0027](./0027-function-generics.md) (`Numeric`, `Integer`, `Float`).
+   Such a declaration is refused with `E2042` ("predeclared type or bound name"): `struct String { }` is refused. A
+   user type never shadows a predeclared one. A predeclared name is not an item of a namespace of the program, so
+   the duplicate-name rule of [RFC 0026](./0026-module-items.md) (rule 3, `E2720`) does not apply to it: each
+   declaration with a predeclared name is refused with `E2042` only.
 
 ## Instance names
 
@@ -136,8 +142,9 @@ chapter or elsewhere.
 
 **Declaration name.** `D(N)` of a declaration `N` is its identifier, preceded by the module path that owns it
 and by the names of the module blocks around it ([RFC 0026](./0026-module-items.md)), outermost first, each one
-followed by `.`. For a manifest project the module path is the full module path of
-[Types](../../spec/v1.0/types.md#module-qualified-type-ownership) (`nested.defs.Color`). A single source without a
+followed by `.`. For a manifest project the module path is the full module path of the owning module
+([Types](../../spec/v1.0/types.md#module-qualified-type-ownership)): `Color` of the module `nested.defs` has `D` =
+`nested.defs.Color`, which a source writes `defs.Color` after `import nested.defs;`. A single source without a
 project has no module path: `struct Pt` in the block `geo` has `D` = `geo.Pt`. `D` is unique in a program: two
 items of one namespace have different names, and the qualified name of a module block never equals the module path
 of a module of the project ([RFC 0026](./0026-module-items.md), rule 3). So two different declarations have two

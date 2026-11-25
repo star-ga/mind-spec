@@ -20,7 +20,7 @@ limitations under the License.
 |-------|-------|
 | State | Draft (2026-11-24). Not yet accepted. The specification owner decided the questions of this draft on 2026-11-24 (see [Questions](#questions-for-the-specification-owner)). |
 | Number | Provisional. The specification owner assigns the final number. |
-| Changes | `grammar-syntax.ebnf` (`ModuleItem`, `ModuleDeclaration`, `ExportDeclaration` in the list form only, `ImportDeclaration`, `AttributeArg`, `AttributedItem` without the function declaration), `language.md` (Modules and imports; attributes: the code `E2726` for the refusal of an attribute that the specification does not define), `types.md` (a module block is a namespace; the text on transparent blocks goes), `versioning.md` (the `requires` attribute; the example of a version declaration becomes a `mind` block again, and the sentence that calls it an extension in Core v1 goes), `core-v1-forms.md` (the rows of the module items and of an attribute before an item), `errors.md` (`E2720` to `E2729`) |
+| Changes | `grammar-syntax.ebnf` (`ModuleItem`, `ModuleDeclaration`, `ExportDeclaration` in the list form only, `ImportDeclaration`, `AttributeArg`, `AttributedItem` without the function declaration), `language.md` (Modules and imports; Attributes: the list of rule 7, and an attribute before an item that is not a function declaration is derived), `types.md` (a module block is a namespace; the text on transparent blocks goes), `versioning.md` (the `requires` attribute; the example of a version declaration becomes a `mind` block again, and the sentence that calls it an extension in Core v1 goes), `core-v1-forms.md` (the rows of the module items and of an attribute before an item), `errors.md` (`E2720` to `E2725`, `E2727` and `E2729`) |
 | Depends on | [RFC 0024](./0024-impl-forms.md): `TraitDeclaration` and `ImplDeclaration` are listed in `ModuleItem` below, and a module block MAY hold them. |
 | Related | [RFC 0024](./0024-impl-forms.md) (visibility of methods), [RFC 0023](./0023-type-parameters-on-user-types.md) (the declaration name of a member of a module block) |
 
@@ -115,8 +115,9 @@ extension that [Language](../../spec/v1.0/language.md#executable-subset-status-i
    exported. A module block is a namespace of its module and not another module: a member of a block is visible in
    the whole module that holds the block, by its qualified name (rule 2), with no export. `export { f, g }` exports
    the named items of the module in which it stands. An export of a name that
-   is not declared in that module is refused with `E2002`. A name that stands twice in the export lists of one
-   module, in one list or in two, is refused with `E2729`; no warning comes first. A method and an
+   is not declared in that module is refused with `E2002`, at each place where it stands. A name that the module
+   declares and that stands twice in its export lists, in one list or in two, is refused with `E2729`; no warning
+   comes first. A method and an
    associated item are exported with their type ([RFC 0024](./0024-impl-forms.md), rule 10), and an export list
    does not name them.
 5. **Forms that are not in the language.** The grammar does not derive them, and a check refuses each one with
@@ -131,24 +132,24 @@ extension that [Language](../../spec/v1.0/language.md#executable-subset-status-i
    stands before. The defined attributes are exactly those that a chapter defines by name and position. A search of
    every file of the repository for the forms `#[` and `#![` finds three that a chapter defines:
    - `raw_memory`, with no argument or the one argument `sealed`, before a function declaration
-     ([Raw memory](../../spec/v1.0/language.md#raw-memory)). It is part of Core v1. A function of an `impl` block
+     ([Raw memory](../../spec/v1.0/memory.md#raw-memory)). It is part of Core v1. A function of an `impl` block
      ([RFC 0024](./0024-impl-forms.md)) is a function declaration too.
-   - `requires`, with the key `mind_spec`, before the file module declaration `module m;`
-     ([Versioning](../../spec/v1.0/versioning.md#in-source-code); rule 8 gives the rules for its argument).
+   - `requires`, with the one argument `mind_spec = "M.N"`, before the file module declaration `module m;`
+     ([Versioning](../../spec/v1.0/versioning.md#in-source-code); rule 8 gives the form and the meaning of the
+     value).
    - `repr(C)`, with the one argument `C`, before a `struct` declaration. The FFI chapter defines its name, its
      position and its meaning: the layout of the struct in memory, the field types that have a layout, and the
      refusal of another field type with `E2407`
      ([Struct layout attribute](../../spec/v1.0/ffi.md#struct-layout-attribute)).
      [MLIR Lowering](../../spec/v1.0/mlir-lowering.md) names such a struct a `#[repr(C)]` struct.
 
-   No attribute name is defined for a module block. An attribute whose name is not in the list, an attribute with
-   another argument than the list gives (`#[repr(packed)]`), and an attribute before an item for which its name is not
-   defined (`#[repr(C)]` before a function) are refused with `E2726`. The name `raw_memory` is the one exception: a use
-   of it before another item or with another argument is refused with `E2502` ([Raw
-   memory](../../spec/v1.0/language.md#raw-memory)), and `E2726` does not apply to it.
-   [Attributes](../../spec/v1.0/language.md#attributes) refuses an attribute name that the specification does not define
-   for its position, before a function declaration and before another item, and gives that refusal no code; this draft
-   gives it `E2726`. A chapter or an RFC that defines an attribute adds it to the list.
+   No attribute name is defined for a module block. An attribute whose name is not in the list, a listed attribute
+   with an argument form that the list does not give (`#[repr(packed)]`, `#[raw_memory(open)]`,
+   `#[requires(mind_lang = "1.0")]`), and a listed attribute before an item for which its name is not defined
+   (`#[repr(C)]` before a function, `#[raw_memory]` before a `struct`) are refused with
+   [`E2502`](../../spec/v1.0/errors.md#e2502-invalid-attribute), the one code of the catalog for an invalid attribute,
+   as [Attributes](../../spec/v1.0/language.md#attributes) refuses them. No attribute is an exception. A chapter or an
+   RFC that defines an attribute adds it to the list.
 
    The other hits of the search define no attribute:
    - The syntactic grammar, the lexical chapter, the language chapter and the changelog (`docs/changelog.md`) write the
@@ -156,26 +157,28 @@ extension that [Language](../../spec/v1.0/language.md#executable-subset-status-i
      the syntax of an attribute, not a name.
    - [Core v1 forms](../../spec/v1.0/core-v1-forms.md), [Attributes](../../spec/v1.0/language.md#attributes), the
      conformance rows `attribute_reject_unknown_name` and `attribute_reject_unknown_name_before_struct` and the
-     [decision notes](./decision-notes.md) write `#[fast]`, a name that no chapter defines, before a function
-     declaration and before a `struct` declaration; this rule refuses it with `E2726`. The forms page, the conformance
+     [decision notes](./decision-notes-2.md) write `#[fast]`, a name that no chapter defines, before a function
+     declaration and before a `struct` declaration; this rule refuses it with `E2502`. The forms page, the conformance
      rows `rawmem_reject_attr_argument` and `rawmem_reject_attr_on_struct` and the decision notes write
      `#[raw_memory(open)]` and `#[raw_memory] struct S { a: i64, }`, a use with another argument and a use before
-     another item, which keep `E2502`.
+     another item, which this rule refuses with `E2502` too.
    - [Future Extensions](../../spec/v1.0/future-extensions.md) writes `#[profile(default)]` and
      `#[profile(default | systems)]` in a design for a later edition and `#[cfg(profile = "ai")]` in a design that
      it rejects, and it names `#![no_std]` as a feature of another language. It defines none of them, and this rule
-     refuses each of their names with `E2726`.
+     refuses each of their names with `E2502`.
    - The example `examples/ffi/c_bindings.mind` writes `#[extern("C")]`, `#[export("C")]` and `#[unsafe]` before a
      function. The FFI and MLIR chapters write an external function as `extern "C"`, not as an attribute. The
      example is not a valid program under this RFC until a chapter or an RFC defines these names ([Open](#open)).
    - The changelog names the compiler attributes `#[deterministic]`, `#[target(...)]` and `#[q16]`, and
      `#[cfg(feature = "std-surface")]`, a gate in the source code of the compiler. This rule refuses each of their
-     names with `E2726`.
+     names with `E2502`.
 8. **Version attribute.** In `#[requires(mind_spec = "M.N")]`, `mind_spec` is the only key. Its value is a string
-   literal that holds a version `major.minor`: two decimal numbers joined by one `.`. An implementation compares the
-   value with its own specification version. Another major, or the same major with a higher minor than its own, is
-   refused with `E2727`. Another key, a second argument, or a value that is not `major.minor` is refused with
-   `E2728`.
+   literal that holds a version `major.minor`: two decimal numbers joined by one `.`. Another key, a second argument,
+   or a value that is not `major.minor` is an argument form that the definition does not give, and is refused with
+   `E2502` (rule 7). An implementation compares a well-formed value with its own specification version. Another
+   major, or the same major with a higher minor than its own, is a version that the implementation does not provide,
+   and is refused with `E2727`. The two refusals do not overlap: `E2502` is about the form of the attribute, and
+   `E2727` is about the version of a well-formed one.
 
 ## Meaning as a desugaring
 
@@ -211,8 +214,8 @@ that the project loader reads. `export { f, g }` has no desugaring: it marks `f`
 ## Proposed conformance rows
 
 Proposals. The reference accepts the text `module app;` and refuses the version attribute (measured above).
-The other rows were not measured. The codes `E2720` to `E2722` are assigned to this draft, `E2723` to `E2729` are
-proposed by it, and `E2002` exists.
+The other rows were not measured. The codes `E2720` to `E2722` are assigned to this draft, `E2723` to `E2725`,
+`E2727` and `E2729` are proposed by it, and `E2002` and `E2502` exist.
 
 ```yaml
 description: "A file module declaration and a module block"
@@ -377,7 +380,7 @@ input:
     }
 expected:
   status: error
-  error: { code: E2728, message_contains: "mind_lang" }
+  error: { code: E2502, message_contains: "mind_lang" }
 ```
 
 ```yaml
@@ -391,7 +394,7 @@ input:
     }
 expected:
   status: error
-  error: { code: E2726, message_contains: "test" }
+  error: { code: E2502, message_contains: "test" }
 ```
 
 ```yaml
@@ -423,7 +426,7 @@ input:
     }
 expected:
   status: error
-  error: { code: E2726, message_contains: "repr" }
+  error: { code: E2502, message_contains: "repr" }
 ```
 
 ```yaml
@@ -464,32 +467,33 @@ expected:
 5. **Export spelling.** There is ONE export form, the list form `export { f }`, which formatted sources hold today.
    The grammar changes to it, and another form is refused (rule 5, `E2725`).
 6. **Version attribute.** `mind_spec` is the only key. The value is parsed as `major.minor`. An implementation
-   refuses another major and a higher minor than its own (`E2727`). An unknown key is refused (`E2728`) (rule 8).
+   refuses another major and a higher minor than its own (`E2727`). An unknown key is an argument form that the
+   definition does not give, and is refused with `E2502` (rule 8).
 7. **Attribute on a module block and on a method.** This draft defines no attribute name for a module block or a
-   method. The attribute `raw_memory`, which [Raw memory](../../spec/v1.0/language.md#raw-memory) defines before every
-   function declaration, stands before a method too. Another attribute there is refused (`E2726`) until an RFC
+   method. The attribute `raw_memory`, which [Raw memory](../../spec/v1.0/memory.md#raw-memory) defines before every
+   function declaration, stands before a method too. Another attribute there is refused (`E2502`) until an RFC
    defines one (rule 7).
 8. **Code allocation.** The three codes are assigned, because they are free in the catalog: `E2720` (a name that is not
    unique in its namespace: two items of one namespace with the same name, or a module block whose qualified name equals
    the module path of a project module, rule 3), `E2721` (`module m;` not first or repeated), `E2722` (module name
-   differs from the project). The decisions of questions 3 to 7 and the export rule (rule 4) need seven more codes: this
-   draft proposes `E2723` to `E2729` from the same block, which the catalog does not define; they are not yet assigned.
-   Their labels: `E2723` (`pub` before an item, rule 5), `E2724` (a `static` item, rule 5), `E2725` (an export in
-   another form than the list form `export { … }`, rule 5), `E2726` (an attribute whose name, argument or position no
-   chapter defines, except `raw_memory`, rule 7), `E2727` (a version attribute with another major, or the same major and
-   a higher minor, rule 8), `E2728` (a malformed version attribute: another key, a second argument, or a value that is
-   not `major.minor`, rule 8) and `E2729` (a name that stands twice in the export lists of one module, rule 4).
+   differs from the project). The decisions of questions 3 to 6 and the export rule (rule 4) need five more codes:
+   this draft proposes `E2723`, `E2724`, `E2725`, `E2727` and `E2729` from the same block, which the catalog does not
+   define; they are not yet assigned. Their labels: `E2723` (`pub` before an item, rule 5), `E2724` (a `static` item,
+   rule 5), `E2725` (an export in another form than the list form `export { … }`, rule 5), `E2727` (a well-formed
+   version attribute with another major, or the same major and a higher minor, rule 8) and `E2729` (a name that the
+   module declares and that stands twice in its export lists, rule 4). `E2726` and `E2728` are not used: an invalid
+   attribute, also a malformed version attribute, has the code `E2502` of the catalog (rule 7).
 
 ### Open
 
 - **FFI attribute names of the example.** Whether the FFI chapter defines `extern("C")`, `export("C")` and `unsafe`
-  as attributes is not decided. Until a chapter or an RFC defines them, they are refused with `E2726` (rule 7).
+  as attributes is not decided. Until a chapter or an RFC defines them, they are refused with `E2502` (rule 7).
 - **Export of a module block.** Whether an export list can make the members of a module block visible to another
   module (for example by naming the block) is not decided.
-- **Qualified type names.** [Types](../../spec/v1.0/types.md#module-qualified-type-ownership) writes a type of a
-  block as `defs.Color`, but `IdentifierType` and `TraitRef` take one identifier, so no type position derives
-  `m.T`. How a type or a trait of a block is named from outside the block is not decided; a later change that adds
-  qualified names to these productions decides it, also for the head of an impl
+- **Qualified type names.** [Types](../../spec/v1.0/types.md#module-qualified-type-ownership) writes a type of another
+  module with its import qualifier (`defs.Color` after `import nested.defs;`), but `IdentifierType` and `TraitRef` take
+  one identifier, so no type position derives `m.T`. How a type or a trait of a block is named from outside the block is
+  not decided; a later change that adds qualified names to these productions decides it, also for the head of an impl
   ([RFC 0024](./0024-impl-forms.md#open)).
 - **`requires` before another item.** This edition defines `requires` only before `module m;` (rule 7). Whether it
-  MAY stand before another item is not decided; until then it is refused there with `E2726`.
+  MAY stand before another item is not decided; until then it is refused there with `E2502`.
