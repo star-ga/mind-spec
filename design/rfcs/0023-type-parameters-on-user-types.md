@@ -18,11 +18,12 @@ limitations under the License.
 
 | Field | Value |
 |-------|-------|
-| State | Draft (2026-11-24). Not yet accepted. |
+| State | Draft (2026-11-24). Not yet accepted. The specification owner decided the questions of this draft on 2026-11-24 (see [Questions](#questions-for-the-specification-owner)). |
 | Number | Provisional. The specification owner assigns the final number. |
-| Changes | `grammar-syntax.ebnf` (replaces `TypeParameters` and `TypeParameter` by the plain `TypeParameterList` on four declarations and unmarks it, adds `TypeArguments` and `TraitRef`), `types.md`, `errors.md` (three new codes, `E2038` to `E2040`) |
+| Edition | Core v1.1, one edition together with [RFC 0027](./0027-function-generics.md) and [RFC 0024](./0024-impl-forms.md). The order of the work is free. |
+| Changes | `grammar-syntax.ebnf` (replaces `TypeParameters` and `TypeParameter` by the plain `TypeParameterList` on four declarations and unmarks it, adds `TypeArguments` and `TraitRef`), `types.md` (type parameters, instance names), `errors.md` (five codes: `E2038` to `E2042` assigned to this RFC) |
 | Depends on | none. Bounds, supertraits and `where` are in [RFC 0027](./0027-function-generics.md), not here. |
-| Related | [RFC 0025](./0025-patterns.md) (record literal), [RFC 0024](./0024-impl-forms.md) (methods of a generic type; `impl` of a trait that has parameters), [RFC 0027](./0027-function-generics.md) |
+| Related | [RFC 0025](./0025-patterns.md) (record literal), [RFC 0024](./0024-impl-forms.md) (methods of a generic type; `impl` of a trait that has parameters), [RFC 0027](./0027-function-generics.md), [RFC 0026](./0026-module-items.md) (module blocks in a declaration name) |
 
 ## Problem
 
@@ -64,50 +65,102 @@ TypeArguments     = "<" , Type , { "," , Type } , [ "," ] , ">" ;
 TraitRef          = Identifier , [ TypeArguments ] ;
 ```
 
-The `trait` item stays marked NOT IN CORE v1 until [RFC 0024](./0024-impl-forms.md) is accepted; the rows below
-that declare a trait are valid together with that RFC. `TraitRef` is the name of a trait with its arguments. [RFC 0024](./0024-impl-forms.md) uses it in the head of
-an `impl`. This draft removes the productions `TypeParameters` and `TypeParameter` of the current grammar: a
-type parameter of a declaration is a plain name, and a bound on it is not defined (the bound of a function
-parameter is in [RFC 0027](./0027-function-generics.md)). The supertrait list of `TraitDeclaration` (`trait B: A`)
-is owned by RFC 0027, which adds `[ ":" , TraitBounds ]` to the `TraitDeclaration` production above; `TraitBounds`
-and `TraitBound` stay marked NOT IN CORE v1 until RFC 0027 is accepted. `FunctionTypeParameters` (one unbounded
-name) is unchanged here; RFC 0027 widens it.
+The `trait` item and the `impl` block are defined by [RFC 0024](./0024-impl-forms.md) in the same edition; the
+rows below that declare a trait need that RFC. `TraitRef` is the name of a trait with its arguments. [RFC 0024](./0024-impl-forms.md)
+uses it in the head of an `impl`. This draft removes the productions `TypeParameters` and `TypeParameter` of the
+current grammar: a type parameter of a declaration is a plain name, and a bound on it is not part of this edition
+([RFC 0027](./0027-function-generics.md) defines the bounds of a function parameter only). The supertrait list of
+`TraitDeclaration` (`trait B: A`) is owned by RFC 0027, which adds `[ ":" , TraitBounds ]` to the `TraitDeclaration`
+production above. `FunctionTypeParameters` (one unbounded name) is unchanged here; RFC 0027 replaces it.
 
 Lexing: the token `>>` ends two nested argument lists in `Pair<Box<i64>>`. A parser MUST split `>>` into two
 `>` tokens while it reads `TypeArguments` or `TypeParameterList`. Elsewhere `>>` is the shift operator.
 
-There is no syntax for an explicit type argument in an expression. The type arguments of a generic
-function call and of a record literal are inferred.
+This RFC adds no type argument in an expression. The type arguments of a record literal are inferred from the
+types of its fields; a parameter that the fields do not fix is refused with `E2003` (cannot infer type). A call of
+a generic function takes explicit type arguments in the form `f::<A>(x)` of [RFC 0027](./0027-function-generics.md),
+or infers them.
 
 ## Static rules
 
 1. The names of one `TypeParameterList` MUST be pairwise different. A duplicate is refused with
-   `E2039` ("duplicate type parameter"), a code reserved for this draft.
+   `E2039` ("duplicate type parameter").
 2. A type parameter is in scope in the declaration that lists it, and nowhere else. It is a type, not a
-   value. For a `trait` the scope is the signatures of the trait items. A use outside the scope is an
+   value. For a `trait` the scope is the signatures and the constant types of the trait items, its supertrait list
+   and the bounds of its associated types ([RFC 0027](./0027-function-generics.md)). A use outside the scope is an
    unknown name (`E2002`).
-3. A type parameter MAY be unused in the declaration (a marker type). It then cannot be inferred and the
-   program MUST name it with an annotation.
+3. Every type parameter MUST be used in its declaration: in a field type of a `struct`, in a payload type of an
+   `enum`, in the right-hand side of a `type`, or, for a `trait`, in a parameter type, a result type or a constant
+   type of a trait item, in its supertrait list or in a bound of an associated type. An unused parameter is refused
+   with `E2041` ("unused type parameter"). A list that has a duplicate name is refused with `E2039` only.
 4. A use of a declared type with parameters MUST give exactly as many type arguments as the declaration has
-   parameters. A mismatch is refused with `E2038` ("wrong number of type arguments"), a code reserved for this draft.
+   parameters. A mismatch is refused with `E2038` ("wrong number of type arguments").
    The same rule applies to a `TraitRef` that names a trait with parameters.
 5. A type alias with parameters MUST be applied in full wherever it is used. It is a transparent name: the
    alias and its right-hand side are the same type.
-6. A type argument is any `Type` except `unit`. Aggregate types, arrays and tensors are allowed.
-7. A struct or enum MAY NOT contain itself by value, with or without arguments. Indirect containment
-   waits for a reference type RFC. A violation is refused with `E2040` ("type contains
-   itself"), a code reserved for this draft. [RFC 0027](./0027-function-generics.md) uses the same code for a
-   trait that is its own supertrait.
+6. A type argument is any `Type`, `unit` included. Aggregate types, arrays and tensors are allowed. A field or a
+   payload of type `unit` has size 0 and no storage.
+7. A `struct` or `enum` MUST NOT contain itself by value: not directly, and not through the fields, payloads and
+   type arguments of other types (a field of type `Option<Node<T>>` in `Node<T>` contains `Node<T>`). A violation is
+   refused with `E2040` ("type contains itself"). A type that holds itself through a pointer comes with a later RFC
+   on an owning pointer type. [RFC 0027](./0027-function-generics.md) uses the same code for a trait that names
+   itself in its supertrait list.
 8. A type argument on a type without parameters is refused with the code of rule 4. (The reference
    v0.10.4 accepts `Box<i64>` for a `Box` without parameters; Core v1 would refuse it.)
-9. The built-in types `Option` and `Result` follow the same rules. A user type MUST NOT take the name of a
-   built-in type in the same module.
+9. The built-in types `Option<T>` and `Result<T, E>` follow the same rules, with one and with two parameters. A
+   `struct`, `enum`, `type` or `trait` declaration MUST NOT take a predeclared type name: a name of
+   `PrimitiveType` (`i32`, `i64`, `f32`, `f64`, `bool`, `unit`), `Tensor`, `Option`, `Result`, or a predeclared
+   bound of [RFC 0027](./0027-function-generics.md) (`Numeric`, `Integer`, `Float`). Such a declaration is refused
+   with `E2042` ("predeclared type name"). A user type never shadows a predeclared one.
+
+## Instance names
+
+An instance is a generic declaration together with one list of type arguments. The canonical IR gives each
+instance a name, and that name is part of the artifact bytes, so its spelling is normative. An instance name
+holds characters that no identifier can hold (`<`, `>`, `,`, `(`, `)`, `[`, `]`, `;`, `.`), so it never equals an
+identifier of the program. No identifier spelling is reserved for it, in the lexical chapter or elsewhere.
+
+**Declaration name.** `D(N)` of a declaration `N` is its identifier, preceded by the module path that owns it
+and by the names of the module blocks around it ([RFC 0026](./0026-module-items.md)), outermost first, each one
+followed by `.`. For a manifest project the module path is the full module path of
+[Types](../../spec/v1.0/types.md#module-qualified-type-ownership) (`nested.defs.Color`). A single source without a
+project has no module path: `struct Pt` in the block `geo` has `D` = `geo.Pt`.
+
+**Canonical spelling of a type.** `C(T)` is written without a space, except the one space after `diff`:
+
+| Type `T` | `C(T)` |
+|----------|--------|
+| a primitive type | its name: `i32`, `i64`, `f32`, `f64`, `bool`, `unit` |
+| a declared type `N` without parameters | `D(N)` |
+| `N<A1, …, An>`, an instance of a declared type or of `Option` or `Result` | `D(N)` , `<` , `C(A1)` , `,` … `,` , `C(An)` , `>` (`Option` and `Result` have no module path) |
+| a tuple type with the elements `T1, …, Tn`, `n` ≥ 1 | `(` , `C(T1)` , `,` … `,` , `C(Tn)` , `)` |
+| `[T; n]` | `[` , `C(T)` , `;` , `n` , `]`, with `n` in decimal digits, without sign, prefix, `_` or leading zero |
+| `Tensor<d, [s1, …, sk]>` | `Tensor<` , `d` , `,[` , `s1` , `,` … `,` , `sk` , `]>`, each dimension in decimal digits as for an array, or its identifier |
+| `diff T` | `diff` , one space , `C(T)` |
+
+A type parameter and an associated type never stand in an instance name: they are replaced by the types of the
+instance first. A trailing `,` of the source is not written.
+
+**Instance name.** The instance of `N` with the arguments `A1, …, An` has the name
+`D(N)<C(A1),…,C(An)>`, which is `C(N<A1, …, An>)`. Nested arguments nest in the same way. Two uses with equal
+arguments name one instance. An example:
+
+```mind
+struct Box<T> { v: T, }
+struct Pair<A, B> { a: A, b: B, }
+fn f(p: Pair<Box<i64>, (f64, bool)>) -> i64 { return p.a.v; }
+```
+
+has the two instances `Box<i64>` and `Pair<Box<i64>,(f64,bool)>`. [RFC 0027](./0027-function-generics.md) names an
+instance of a generic function in the same way (`first<P,P>`), and [RFC 0024](./0024-impl-forms.md) names the items
+of an `impl` block with these spellings. A diagnostic writes the source spelling `Pair<Box<i64>, (f64, bool)>`.
 
 ## Meaning as a desugaring
 
 Every use of a generic type has a plain form. A conforming implementation MAY implement generics in any
 way that keeps this equality: a program with generic types and the program in which every instance is
-written out as a plain declaration have the same behaviour and the same canonical IR bytes.
+written out as a plain declaration under its instance name have the same behaviour and the same canonical IR
+bytes.
 
 ```mind
 struct Pair<A, B> { a: A, b: B, }
@@ -116,38 +169,37 @@ fn first(p: Pair<i64, f64>) -> i64 { return p.a; }
 fn both(t: Twice<i64>) -> i64 { return t.a + t.b; }
 ```
 
-is the program
+is the written-out form below. In it, `Pair<i64,f64>` is one name, not a use with arguments. The written-out form
+is not source text, because an instance name is not an identifier.
 
-```mind
-struct Pair__i64__f64 { a: i64, b: f64, }
-struct Pair__i64__i64 { a: i64, b: i64, }
-fn first(p: Pair__i64__f64) -> i64 { return p.a; }
-fn both(t: Pair__i64__i64) -> i64 { return t.a + t.b; }
+```text
+struct Pair<i64,f64> { a: i64, b: f64, }
+struct Pair<i64,i64> { a: i64, b: i64, }
+fn first(p: Pair<i64,f64>) -> i64 { return p.a; }
+fn both(t: Pair<i64,i64>) -> i64 { return t.a + t.b; }
 ```
 
-The instance name is the declaration name, then one `__` and the canonical spelling of each argument
-(`i64`, `f64`, a nested instance in the same form), joined by `__`. Two uses with equal arguments name one
-instance. The instance names are not visible to the user: a diagnostic writes the source spelling
-`Pair<i64, f64>`. A user identifier that contains `__` is refused when it could collide with an instance
-name (open question 3).
+**Equality test.** The test compares the canonical IR of the generic program with the canonical IR of a plain
+source program in which each instance is declared under a fresh identifier, after each instance name in the first
+IR is replaced by that identifier. [RFC 0024](./0024-impl-forms.md), [RFC 0026](./0026-module-items.md) and
+[RFC 0027](./0027-function-generics.md) use the same test for their written-out forms.
 
-A generic function whose parameter types name a generic type is instantiated in the same way, one plain
-function for each distinct set of inferred arguments.
+A generic function is instantiated in the same way ([RFC 0027](./0027-function-generics.md)): one plain function for
+each distinct list of type arguments.
 
 A `trait` with parameters is a family of signature lists. A trait has no value and no run-time form in Core
-v1 (`dyn Trait` stays NOT IN CORE v1), so a trait declaration only supplies the signatures that an `impl`
+v1.1 (`dyn Trait` stays NOT IN CORE v1), so a trait declaration only supplies the signatures that an `impl`
 is checked against. The use `Conv<f64>` in the head of an `impl` selects the signatures with `X` replaced by
-`f64`, and the `impl` is written out with the canonical names of [RFC 0024](./0024-impl-forms.md), in which
-the trait name is the instance name `Conv__f64`. A trait with parameters adds no item to the program that
-the written-out form needs.
+`f64`, and the `impl` is written out with the item names of [RFC 0024](./0024-impl-forms.md), in which the trait part
+is the spelling `Conv<f64>`. A trait with parameters adds no item to the program that the written-out form needs.
 
 ## Proposed conformance rows
 
 Rows use the format of [Conformance](../../spec/v1.0/conformance.md#test-format). They are proposals: no
-compiler accepts the accept rows today. The codes `E2038`, `E2039` and `E2040` are reserved for this draft; `E2002` exists. The fields `category: syntax`
-and `profile: cpu` are omitted after the first row. The rows that declare a trait write the signature with the `;`
-of the grammar. The reference v0.10.4 refuses that form and accepts a trait item without `;`; the draft keeps the
-grammar (see [RFC 0024](./0024-impl-forms.md), open question 1).
+compiler accepts the accept rows today. The codes `E2038` to `E2042` are assigned to this draft, and `E2002` and `E2003` exist. The fields `category: syntax` and `profile: cpu` are
+omitted after the first row. The rows that declare a trait write the signature with the `;` of the grammar. The
+reference v0.10.4 refuses that form and accepts a trait item without `;`; the specification owner decided that the
+form with `;` is the only one ([RFC 0024](./0024-impl-forms.md), question 1).
 
 ```yaml
 # accept: two instances of one declaration, a nested use and an alias
@@ -166,6 +218,24 @@ input:
     }
     fn both(t: Twice<i64>) -> i64 {
         return t.a + t.b;
+    }
+    fn main() -> i64 {
+        return 0;
+    }
+expected:
+  status: success
+```
+
+```yaml
+# accept: unit as a type argument
+description: "unit is a valid type argument"
+input:
+  source: |
+    struct Box<T> {
+        v: T,
+    }
+    fn f(b: Box<unit>) -> i64 {
+        return 1;
     }
     fn main() -> i64 {
         return 0;
@@ -293,33 +363,75 @@ expected:
   error: { code: E2039, message_contains: "duplicate type parameter" }
 ```
 
+```yaml
+# reject 7: an unused type parameter
+description: "A type parameter that no field uses is refused"
+input:
+  source: |
+    struct Tag<T> {
+        n: i64,
+    }
+    fn main() -> i64 {
+        return 0;
+    }
+expected:
+  status: error
+  error: { code: E2041, message_contains: "unused type parameter" }
+```
+
+```yaml
+# reject 8: a user type with a predeclared name
+description: "A struct with the name of a built-in type is refused"
+input:
+  source: |
+    struct Option {
+        v: i64,
+    }
+    fn main() -> i64 {
+        return 0;
+    }
+expected:
+  status: error
+  error: { code: E2042, message_contains: "Option" }
+```
+
 ## Cost for the compiler
 
 | Part | Work | Size |
 |------|------|------|
 | Front end, parser | `TypeParameterList` after the name of four declarations (the `trait` form is parsed today without it and refuses `<`); `TypeArguments` in a type; the `>>` split. The reference keeps two front ends in step; both change. | small |
-| Front end, resolver and checker | scope of a type parameter; arity rule; alias expansion; inference of the arguments of a generic function from a struct argument; the new code | medium |
-| Front end, desugaring | instance collection and the canonical instance name; one pass before lowering, shared by the MLIR path and the native path | medium |
+| Front end, resolver and checker | scope of a type parameter; arity rule; the unused-parameter rule; the predeclared-name rule; alias expansion; inference of the arguments of a record literal and of a generic function from a struct argument; the new codes | medium |
+| Front end, desugaring | instance collection and the instance names of this RFC; one pass before lowering, shared by the MLIR path and the native path | medium |
 | Native lowering | none after the pass above. The native lane refuses `struct`, `enum` and `type` items today (`lane.source.top_level`); it MUST admit plain `struct` and `enum` first, and that work is a prerequisite and a separate item. | large (prerequisite) |
-| Tests | accept and reject rows above; a parity row for the desugaring (the generic program and its written-out form give equal bytes); a determinism row for the instance order | small |
+| Tests | accept and reject rows above; a parity row for the desugaring (the equality test above); a determinism row for the instance order and the instance names | small |
 
-The desugaring is the oracle for the equality test: the bytes of the generic program equal the bytes of
-the written-out program. No other oracle is needed for the parser rows.
+The desugaring is the oracle for the equality test. No other oracle is needed for the parser rows.
 
-## Open questions for the specification owner
+## Questions for the specification owner
 
-1. **Bounds and traits.** This RFC takes the plain parameter list for `trait` too. Bounds on function
-   parameters, supertraits and `where` are in [RFC 0027](./0027-function-generics.md); a bound on a parameter of a
-   `struct`, `enum`, `type` or `trait` is in no draft (RFC 0027, open question 2). This RFC has no operation on a `T` other than
-   moving it (field access, passing, returning). Arithmetic on a `T` needs a bound. Should RFC 0027 be
-   accepted before this one, so that both land in one edition?
-2. **`unit` and zero-size types** as an argument: rule 6 refuses `unit`. Keep or allow?
-3. **Instance names.** The `__` rule reserves a spelling. Reserve it in the lexical chapter, or mangle with a
-   character that no identifier can contain?
-4. **Recursive types** (rule 7): when does indirect containment arrive, and with which type?
-5. **Marker parameters** (rule 3): allow, or refuse an unused parameter?
-6. **Code allocation (settled).** The specification owner reserved `E2038` (wrong number of type arguments),
-   `E2039` (duplicate type parameter) and `E2040` (type contains itself) for this draft.
-7. **Defaults** (`struct Box<T = i64>`) and **const parameters** (`[T; N]` with a named `N`): out of scope here;
-   the owner decides whether to open a later RFC.
-8. **Name of a user type equal to a built-in** (rule 9): refuse (proposed) or shadow?
+### Decided by the specification owner (2026-11-24)
+
+1. **Edition.** RFC 0023 and [RFC 0027](./0027-function-generics.md) land in one edition, Core v1.1. The order of
+   the work is free. [RFC 0024](./0024-impl-forms.md) is in the same edition.
+2. **`unit` as an argument.** `unit` is allowed as a type argument. A field or payload of type `unit` has size 0
+   and no storage (rule 6).
+3. **Instance names.** An instance name is formed with characters that no identifier can hold. The scheme is
+   normative, because the name is part of the artifact bytes ([Instance names](#instance-names)). No spelling is
+   reserved in the lexical chapter.
+4. **Recursive types.** Containment by value stays refused (rule 7). A type that holds itself through a pointer
+   comes with a later RFC on an owning pointer type.
+5. **Marker parameters.** An unused type parameter is refused with `E2041` (rule 3).
+6. **Codes.** `E2038` (wrong number of type arguments), `E2039` (duplicate type parameter), `E2040` (type
+   contains itself), `E2041` (unused type parameter) and `E2042` (predeclared type name) are assigned to this draft.
+   The published catalog does not define any of them.
+7. **Defaults and const parameters.** There are no defaults (`struct Box<T = i64>`). Const parameters (`[T; N]`
+   with a named `N`) get their own RFC, because shapes need them.
+8. **Name of a user type equal to a built-in.** A user type with the name of a built-in type is refused with
+   `E2042` (rule 9). It does not shadow the built-in type.
+
+### Open
+
+- **The empty tuple type.** The grammar derives the type `()` (`TupleType` without elements). Whether it is the
+  type `unit` is not decided, so [Instance names](#instance-names) gives no spelling for it.
+- **Instances across source modules.** Which source module's IR holds an instance whose declaration and arguments
+  come from different source modules is not decided. The instance name itself does not depend on it.
