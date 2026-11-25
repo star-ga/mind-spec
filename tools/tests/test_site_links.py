@@ -14,6 +14,11 @@ CASES = [
     ("rfcs/a.md", "[x](../../design/rfcs/0024-impl-forms.md)", "[x](../design/rfcs/0024-impl-forms.md)"),
     ("rfcs/a.md", "[x](../../tests/conformance/syntax/README.md)", "[x](../tests/conformance/syntax/README.md)"),
     ("changelog.md", "[x](../STATUS.md) [y](../spec/v1.0/ir.md)", "[x](STATUS.md) [y](spec/v1.0/ir.md)"),
+    # a link with an anchor to a root file: the anchor is kept, the file decides
+    ("changelog.md", "[x](../design/rfcs/0024-impl-forms.md#static-rules)", "[x](design/rfcs/0024-impl-forms.md#static-rules)"),
+    ("rfcs/a.md", "[x](../../STATUS.md#core-v1)", "[x](../STATUS.md#core-v1)"),
+    # a path with a "." segment names the same published file
+    ("rfcs/a.md", "[x](../../design/rfcs/./0024-impl-forms.md)", "[x](../design/rfcs/./0024-impl-forms.md)"),
     # not published from outside docs/: unchanged
     ("rfcs/a.md", "[x](../../design/rfcs/0099-other.md)", "[x](../../design/rfcs/0099-other.md)"),
     ("changelog.md", "[x](../README.md)", "[x](../README.md)"),
@@ -24,6 +29,7 @@ CASES = [
     ("rfcs/a.md", "[x](sub/a/spec/v1.0/ir.md)", "[x](sub/a/spec/v1.0/ir.md)"),
     # a fenced code block is not changed
     ("rfcs/a.md", "```text\n[x](../../spec/v1.0/ir.md)\n```", "```text\n[x](../../spec/v1.0/ir.md)\n```"),
+    ("rfcs/a.md", "~~~text\n[x](../../spec/v1.0/ir.md)\n~~~", "~~~text\n[x](../../spec/v1.0/ir.md)\n~~~"),
 ]
 
 SCRIPT = """
