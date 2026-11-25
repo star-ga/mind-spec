@@ -346,7 +346,7 @@ These functions map directly to IR operations from ir.md#shape-manipulation:
 - **`sum(input: Tensor<T>, axes: [i64] = all, keepdims: bool = false) -> Tensor<T>`**
   - Semantics: ir.md#reductions Sum
   - Default: sum over all axes (produces scalar)
-  - With axes: sum over specified axes; the sum over an [empty axis](./ir.md#empty-axes) is 0
+  - With axes: sum over specified axes; gives 0 over an [empty axis](./ir.md#empty-axes)
 
 - **`mean(input: Tensor<T>, axes: [i64] = all, keepdims: bool = false) -> Tensor<T>`**
   - Semantics: ir.md#reductions Mean
@@ -361,7 +361,7 @@ These functions map directly to IR operations from ir.md#shape-manipulation:
   - Not differentiable
 
 - **`prod(input: Tensor<T>, axes: [i64] = all, keepdims: bool = false) -> Tensor<T>`**
-  - Product of elements over specified axes; the product over an [empty axis](./ir.md#empty-axes) is 1
+  - Product of elements over specified axes; gives 1 over an [empty axis](./ir.md#empty-axes)
   - Differentiable: gradient computed via quotient rule
 
 ### Linear algebra
