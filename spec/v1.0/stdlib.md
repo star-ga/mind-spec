@@ -344,9 +344,9 @@ These functions map directly to IR operations from ir.md#shape-manipulation:
 ### Reductions
 
 - **`sum(input: Tensor<T>, axes: [i64] = all, keepdims: bool = false) -> Tensor<T>`**
-  - Semantics: ir.md#reductions Sum
+  - Semantics: ir.md#reductions Sum; gives 0 over an [empty axis](./ir.md#empty-axes)
   - Default: sum over all axes (produces scalar)
-  - With axes: sum over specified axes; gives 0 over an [empty axis](./ir.md#empty-axes)
+  - With axes: sum over specified axes
 
 - **`mean(input: Tensor<T>, axes: [i64] = all, keepdims: bool = false) -> Tensor<T>`**
   - Semantics: ir.md#reductions Mean

@@ -173,7 +173,7 @@ implementation MAY accept or refuse those.
 | [`dimension_accept_zero`](./dimension_accept_zero.yaml) | accept | as above: a dimension of size 0 is valid |
 | [`reshape_reject_marker_with_zero`](./reshape_reject_marker_with_zero.yaml) | reject, `E3007` | [Shape manipulation](../../../spec/v1.0/ir.md#shape-manipulation): a marker `-1` that another entry 0 leaves without a value MUST be refused |
 | [`reduction_reject_mean_empty_axis`](./reduction_reject_mean_empty_axis.yaml) | reject | [Empty axes](../../../spec/v1.0/ir.md#empty-axes): `mean` over an axis of extent 0 has no value and MUST be refused at check time when the type gives the shape |
-| [`reduction_accept_sum_prod_empty_axis`](./reduction_accept_sum_prod_empty_axis.yaml) | accept, returns 0 | as above: over an axis of extent 0 the sum is 0 and the product is 1 |
+| [`reduction_accept_sum_prod_empty_axis`](./reduction_accept_sum_prod_empty_axis.yaml) | accept, returns 0 | as above: a sum and a product over an axis of extent 0 have a value (0 and 1), so the check accepts them; the row does not read the values |
 | [`dimension_reject_negative_array_length`](./dimension_reject_negative_array_length.yaml) | reject, `E3006` | [Fixed-array literal cardinality](../../../spec/v1.0/types.md#fixed-array-literal-cardinality): a negative length of a fixed array type MUST be refused |
 | [`literal_sign_accept_i32_min`](./literal_sign_accept_i32_min.yaml) | accept | [Literals](../../../spec/v1.0/lexical.md#literals): a sign directly before the digits is part of the literal where an operand can start |
 | [`literal_sign_accept_minus_after_name`](./literal_sign_accept_minus_after_name.yaml) | accept, returns 2 | as above: after an identifier the sign is an operator |

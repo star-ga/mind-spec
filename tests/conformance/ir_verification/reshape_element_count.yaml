@@ -1,6 +1,6 @@
 # MIND Conformance Test: Reshape Element Count
 # Specification reference: spec/v1.0/ir.md#shape-manipulation
-# Specification reference: spec/v1.0/errors.md#e4003-element-count-mismatch
+# Specification reference: spec/v1.0/errors.md#e3007-element-count-mismatch
 # Category: ir_verification
 # Profile: cpu
 

@@ -3,7 +3,7 @@
 # Category: syntax
 # Profile: cpu
 
-description: "over an axis of extent 0 the sum is 0 and the product is 1"
+description: "a sum and a product over an axis of extent 0 have a value, so the check accepts them; the row does not read the values 0 and 1"
 category: syntax
 profile: cpu
 
