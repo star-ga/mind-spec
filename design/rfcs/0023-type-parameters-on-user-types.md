@@ -130,14 +130,13 @@ or infers them.
 9. The built-in types `Option<T>` and `Result<T, E>` follow the same rules, with one and with two parameters. A
    `struct`, `enum`, `type` or `trait` declaration MUST NOT take a predeclared type name: a name of `PrimitiveType`
    (`i32`, `i64`, `f32`, `f64`, `bool`, `unit`), `Tensor`, `Option`, `Result`, a container type of
-   [Types](../../spec/v1.0/types.md#type-formation) (`array`, `Map`, `String`, and `Vec`, the name that the signatures
-   of `std.vec` write for `array<i64>`), another type that the [standard library](../../spec/v1.0/stdlib.md) declares
-   (every entity of the standard library is available without an import), or a predeclared bound of
-   [RFC 0027](./0027-function-generics.md) (`Numeric`, `Integer`, `Float`). Such a declaration is refused with `E2042`
-   ("predeclared type or bound name"): `struct String { }` is refused. A user type never shadows a predeclared one. A
-   predeclared name is not an item of a namespace of the program, so the duplicate-name rule of
-   [RFC 0026](./0026-module-items.md) (rule 3, `E2720`) does not apply to it: each declaration with a predeclared name
-   is refused with `E2042` only.
+   [Types](../../spec/v1.0/types.md#type-formation) (`array`, `Map`, `String`), another type that the
+   [standard library](../../spec/v1.0/stdlib.md) declares (every entity of the standard library is available without an
+   import), or a predeclared bound of [RFC 0027](./0027-function-generics.md) (`Numeric`, `Integer`, `Float`). Such a
+   declaration is refused with `E2042` ("predeclared type or bound name"): `struct String { }` is refused. A user type
+   never shadows a predeclared one. A predeclared name is not an item of a namespace of the program, so the
+   duplicate-name rule of [RFC 0026](./0026-module-items.md) (rule 3, `E2720`) does not apply to it: each declaration
+   with a predeclared name is refused with `E2042` only.
 
 ## Instance names
 
