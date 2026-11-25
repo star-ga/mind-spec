@@ -14,15 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# RFC 0026: Module items (`module`, visibility, `export`, `static`, import alias, version attribute)
+# RFC 0026: Module items (`module`, visibility and `export`, import alias, attributes, version attribute)
 
 | Field | Value |
 |-------|-------|
-| State | Draft (2026-11-24). Not yet accepted. |
+| State | Draft (2026-11-24). Not yet accepted. The specification owner decided the questions of this draft on 2026-11-24 (see [Questions](#questions-for-the-specification-owner)). |
 | Number | Provisional. The specification owner assigns the final number. |
-| Changes | `grammar-syntax.ebnf` (`ModuleItem`, `ModuleDeclaration`, `ExportDeclaration`, `ImportDeclaration`, `AttributeArg`), `language.md` (Modules and imports), `versioning.md` |
+| Changes | `grammar-syntax.ebnf` (`ModuleItem`, `ModuleDeclaration`, `ExportDeclaration` in the list form only, `ImportDeclaration`, `AttributeArg`), `language.md` (Modules and imports; attributes), `types.md` (a module block is a namespace; the text on transparent blocks goes), `versioning.md` (the `requires` attribute), `errors.md` (`E2720` to `E2728`) |
 | Depends on | [RFC 0024](./0024-impl-forms.md): `TraitDeclaration` and `ImplDeclaration` are listed in `ModuleItem` below, and a module block MAY hold them. |
-| Related | [RFC 0024](./0024-impl-forms.md) (visibility of methods), [RFC 0023](./0023-type-parameters-on-user-types.md) |
+| Related | [RFC 0024](./0024-impl-forms.md) (visibility of methods), [RFC 0023](./0023-type-parameters-on-user-types.md) (the declaration name of a member of a module block) |
 
 ## Problem
 
@@ -65,41 +65,64 @@ ModuleDeclaration   = "module" , Identifier , ( ";" | "{" , { ModuleItem } , "}"
 
 ImportDeclaration   = "import" , ImportPath , [ "as" , Identifier ] , ";" ;
 
-ExportDeclaration   = "export" , ( Identifier | "{" , Identifier , { "," , Identifier } , [ "," ] , "}" ) , [ ";" ] ;
+ExportDeclaration   = "export" , "{" , Identifier , { "," , Identifier } , [ "," ] , "}" ;
 
 AttributeArg        = Identifier | Literal | Identifier , "=" , Literal ;
 ```
 
 `TraitDeclaration` and `ImplDeclaration` are the productions of [RFC 0024](./0024-impl-forms.md); the supertrait
-list is owned by [RFC 0027](./0027-function-generics.md) and stays NOT IN CORE v1. `static` is not added (open
-question 4). `pub` is not added (open question 3). A `Literal` of `AttributeArg` includes a string literal.
-The form `import a.b as c;` is the extension that
-[Language](../../spec/v1.0/language.md#executable-subset-status-informative) already documents.
+list is owned by [RFC 0027](./0027-function-generics.md). `ExportDeclaration` has one form, the list form
+`export { f, g }`, with no `;` after the brace; this is the form that formatted sources hold today. `pub` and
+`static` are not added. A `Literal` of `AttributeArg` includes a string literal. The form `import a.b as c;` is the
+extension that [Language](../../spec/v1.0/language.md#executable-subset-status-informative) already documents.
 
 ## Static rules
 
 1. **File module.** `module m;` names the module of the file in which it stands. It MUST be the first
-   item of the file, after attributes, and MUST appear at most once; a `module m;` that is not the first item, and a second one, are refused with `E2721`.
-   The name `m` MUST be the file's module name if the file belongs to a project that names its modules; a
-   mismatch is refused with `E2722`. Without a project, the declaration only names the file.
+   item of the file, after attributes, and MUST appear at most once; a `module m;` that is not the first item, and a
+   second one, are refused with `E2721`. When the file belongs to a project, the name `m` MUST equal the name that
+   the project file gives to the file; a mismatch is refused with `E2722`. A file outside a project has no such
+   name, and the declaration only names the file.
 2. **Module block.** `module m { … }` introduces the namespace `m` inside the enclosing module. A member
    `f` of `m` is referred to as `m.f` from outside the block and as `f` inside it. This is the qualifier rule
-   of [Language](../../spec/v1.0/language.md#module-qualified-references) applied to a block.
+   of [Language](../../spec/v1.0/language.md#module-qualified-references) applied to a block. A block is not
+   flattened into the file in any edition: two blocks with members of the same name are two namespaces.
 3. **Names.** Two items of one namespace MUST NOT have the same name. A module block and a function of
    the same enclosing namespace MUST NOT have the same name. A violation is refused with `E2720`.
-4. **Export.** An item is visible to another module only if it is exported. `export f;` and `export { f, g };`
-   export the named items of the module in which they stand. An export of a name that is not declared in
-   that module is refused with `E2002`. One export of the same name twice is a warning.
-5. **Import alias.** `import a.b as c;` binds the qualifier `c` and not `b`. The reference registers both
+4. **Export.** `export` is the only visibility mechanism. An item is visible to another module only if it is
+   exported. `export { f, g }` exports the named items of the module in which it stands. An export of a name that
+   is not declared in that module is refused with `E2002`. One name exported twice is a warning. A method and an
+   associated item are exported with their type ([RFC 0024](./0024-impl-forms.md), rule 10), and an export list
+   does not name them.
+5. **Forms that are not in the language.** The grammar does not derive them, and a check refuses each one with
+   its own code and a message that names the replacement:
+   - `pub` before an item is refused with `E2723`; the message names `export { … }`.
+   - A `static` item is refused with `E2724`; the message names `const`, which holds constants.
+   - An export in another form than `export { … }` (`export f;`, `export { f };`) is refused with `E2725`; the
+     message names the list form.
+6. **Import alias.** `import a.b as c;` binds the qualifier `c` and not `b`. The reference registers both
    (language.md); this RFC makes the alias the only qualifier of that import.
-6. **Attribute arguments.** `#[name(key = "value")]` is accepted by the grammar. The meaning of an attribute
-   name is defined where the name is used. The attribute `requires` is defined in
-   [Versioning](../../spec/v1.0/versioning.md#in-source-code): its key `mind_spec` has a string value
-   that names a specification version.
+7. **Attributes.** An attribute is defined by a chapter of the specification, by its name and by the item that it
+   stands before. The attributes defined are exactly these:
+   - `requires`, with the key `mind_spec`, before the file module declaration `module m;`
+     ([Versioning](../../spec/v1.0/versioning.md#in-source-code); rule 8 gives the rules for its argument).
+
+   [FFI](../../spec/v1.0/ffi.md#abi-stability-guarantees) and [MLIR Lowering](../../spec/v1.0/mlir-lowering.md) write
+   `#[repr(C)]`. The first uses it to describe the C layout rule by the spelling of another language, and the second
+   names a `#[repr(C)]` struct as a kind of type; neither defines an attribute of MIND with a position, so `repr` is
+   not in the list. No attribute name is defined for a module block or for a function of an `impl` block. An attribute
+   whose name is not in the list, and an attribute before an item for which its name is not defined, are refused with
+   `E2726`. A chapter or an RFC that defines an attribute adds it to the list.
+8. **Version attribute.** In `#[requires(mind_spec = "M.N")]`, `mind_spec` is the only key. Its value is a string
+   literal that holds a version `major.minor`: two decimal numbers joined by one `.`. An implementation compares the
+   value with its own specification version. Another major, or the same major with a higher minor than its own, is
+   refused with `E2727`. Another key, a second argument, or a value that is not `major.minor` is refused with
+   `E2728`.
 
 ## Meaning as a desugaring
 
-**Module block.** A module block is a prefix on the names of its members. This is the written-out form:
+**Module block.** A module block is a prefix on the names of its members. The item name of a member is its
+qualified spelling, as in the declaration name `D` of [RFC 0023](./0023-type-parameters-on-user-types.md#instance-names):
 
 ```mind
 module m {
@@ -108,26 +131,27 @@ module m {
 fn main() -> i64 { return m.f(); }
 ```
 
-is
+has the written-out form below (not source text, because `m.f` in a declaration is not an identifier):
 
-```mind
-fn m__f() -> i64 { return 1; }
-fn main() -> i64 { return m__f(); }
+```text
+fn m.f() -> i64 { return 1; }
+fn main() -> i64 { return m.f(); }
 ```
 
-with a reference `m.f` rewritten to the prefixed name and a reference `f` inside the block rewritten in the
-same way. A nested block uses one `__` for each level. The prefixed name is not visible to the user.
+with a reference `m.f` read as the prefixed name and a reference `f` inside the block rewritten to it. A nested block
+adds one prefix with one `.` for each level (`a.b.f`). An item name holds `.`, which no identifier holds, so it never
+equals a name of the program. The equality test of
+[RFC 0023](./0023-type-parameters-on-user-types.md#meaning-as-a-desugaring) is the oracle.
 
-**File module and export braces.** `module m;` has no desugaring: it is a declaration of the module name
-that the project loader reads. `export { f, g };` is `export f; export g;`.
+**File module and export.** `module m;` has no desugaring: it is a declaration of the module name
+that the project loader reads. `export { f, g }` has no desugaring: it marks `f` and `g` as visible.
 
 **Import alias.** `import a.b as c;` is `import a.b;` with the qualifier `b` renamed to `c` in the file.
 
 ## Proposed conformance rows
 
 Proposals. The reference accepts the text `module app;` and refuses the version attribute (measured above).
-The other rows were not measured. The codes `E2720`, `E2721` and `E2722` are proposed by this draft (open
-question 8); `E2002` exists.
+The other rows were not measured. The codes `E2720` to `E2728` are the codes of this draft; `E2002` exists.
 
 ```yaml
 description: "A file module declaration and a module block"
@@ -187,23 +211,109 @@ input:
     fn main() -> i64 {
         return 0;
     }
-    export missing;
+    export { missing }
 expected:
   status: error
   error: { code: E2002, message_contains: "missing" }
 ```
 
 ```yaml
+description: "An export without the list form is refused"
+input:
+  source: |
+    fn f() -> i64 {
+        return 1;
+    }
+    fn main() -> i64 {
+        return 0;
+    }
+    export f;
+expected:
+  status: error
+  error: { code: E2725, message_contains: "export {" }
+```
+
+```yaml
+description: "pub is refused and the message names export"
+input:
+  source: |
+    pub fn f() -> i64 {
+        return 1;
+    }
+    fn main() -> i64 {
+        return 0;
+    }
+expected:
+  status: error
+  error: { code: E2723, message_contains: "export" }
+```
+
+```yaml
+description: "static is refused and the message names const"
+input:
+  source: |
+    static X: i64 = 1;
+    fn main() -> i64 {
+        return 0;
+    }
+expected:
+  status: error
+  error: { code: E2724, message_contains: "const" }
+```
+
+```yaml
 description: "The version attribute with a string value"
 input:
   source: |
-    #[requires(mind_spec = "1.2")]
+    #[requires(mind_spec = "1.0")]
     module app;
     fn main() -> i64 {
         return 0;
     }
 expected:
   status: success
+```
+
+```yaml
+description: "A version attribute with another major is refused"
+input:
+  source: |
+    #[requires(mind_spec = "2.0")]
+    module app;
+    fn main() -> i64 {
+        return 0;
+    }
+expected:
+  status: error
+  error: { code: E2727, message_contains: "mind_spec" }
+```
+
+```yaml
+description: "A version attribute with an unknown key is refused"
+input:
+  source: |
+    #[requires(mind_lang = "1.0")]
+    module app;
+    fn main() -> i64 {
+        return 0;
+    }
+expected:
+  status: error
+  error: { code: E2728, message_contains: "mind_lang" }
+```
+
+```yaml
+description: "An attribute name that is not defined is refused"
+input:
+  source: |
+    #[test]
+    module app;
+    fn main() -> i64 {
+        return 0;
+    }
+expected:
+  status: error
+  error: { code: E2726, message_contains: "test" }
 ```
 
 ```yaml
@@ -226,30 +336,34 @@ expected:
 
 | Part | Work | Size |
 |------|------|------|
-| Front end, parser | `module m;`; export braces; import alias; the attribute argument `key = literal` and string literals | small |
-| Front end, resolver | a real namespace for a module block (the reference flattens a block today); the qualifier rule for members; the export rule | medium |
+| Front end, parser | `module m;`; the list form of `export`; import alias; the attribute argument `key = literal` and string literals | small |
+| Front end, resolver | a real namespace for a module block (the reference flattens a block today); the qualifier rule for members; the export rule; the refusals of rule 5; the attribute and version rules | medium |
 | Front end, desugaring | the prefixed names | small |
 | Native lowering | none after the prefixing. The native lane refuses every module item (`lane.source.top_level`); the prefixed form is plain functions, so the work is the admission of `module`, `import … as` and `export` items. | small to medium |
 | Tests | rows above; parity of the module block against the written-out form | small |
 
-## Open questions for the specification owner
+## Questions for the specification owner
 
-1. **Transparent block or namespace.** The reference flattens a module block (types.md). This draft makes it a
-   namespace (rule 2). A project that has two blocks with a member of the same name changes meaning. Keep
-   the flattening for one edition?
-2. **`module m;` and the project.** Does the file module name have to equal the name from the project file?
-   The reference accepts any name today.
-3. **`pub`.** The reference accepts `pub` before several items and gives it no checked meaning. Is `export`
-   the only visibility mechanism (this draft), or does `pub` join the language? If `pub` joins, `export`
-   becomes redundant.
-4. **`static`.** A module-level mutable value conflicts with a deterministic evaluation order. Refuse for
-   good, allow only a constant (`const` already exists), or allow with a rule?
-5. **Export spelling.** The reference formatter rewrites `export f;` to `export { f }`. This draft accepts
-   both. Should the formatter write the grammar's form instead?
-6. **Version attribute.** Is `mind_spec` the only key? Is the value compared as a string or parsed as a
-   version? What does an implementation do with an unknown key?
-7. **Attribute on a module block** and on a method of an impl: allowed by `AttributedItem`; is any attribute
-   name defined for them?
-8. **Code allocation.** `E2720` (duplicate name in one namespace), `E2721` (`module m;` not first or repeated) and
-   `E2722` (module name differs from the project) are proposals in the range next to the reserved codes of
-   [RFC 0024](./0024-impl-forms.md). Are the three codes free?
+### Decided by the specification owner (2026-11-24)
+
+1. **Transparent block or namespace.** A module block is a namespace (rule 2). No edition flattens it.
+2. **`module m;` and the project.** The file module name MUST equal the name from the project file (rule 1,
+   `E2722`).
+3. **`pub`.** `export` is the only visibility mechanism. `pub` is refused (rule 5, `E2723`).
+4. **`static`.** `static` is refused for good (rule 5, `E2724`). `const` holds constants.
+5. **Export spelling.** There is ONE export form, the list form `export { f }`, which formatted sources hold today.
+   The grammar changes to it, and another form is refused (rule 5, `E2725`).
+6. **Version attribute.** `mind_spec` is the only key. The value is parsed as `major.minor`. An implementation
+   refuses another major and a higher minor than its own (`E2727`). An unknown key is refused (`E2728`) (rule 8).
+7. **Attribute on a module block and on a method.** No attribute name is defined for a module block or a method.
+   An attribute there is refused (`E2726`) until an RFC defines one (rule 7).
+8. **Code allocation.** The codes are assigned, because they are free in the catalog: `E2720` (duplicate name in
+   one namespace), `E2721` (`module m;` not first or repeated), `E2722` (module name differs from the project).
+   The decisions of questions 3 to 7 take `E2723` to `E2728` from the same block.
+
+### Open
+
+- **`repr(C)` on a struct.** The FFI chapter states the C layout rule of a struct and defines no attribute for it.
+  Until a chapter defines the name and its position, `#[repr(C)]` is refused with `E2726`.
+- **`requires` before another item.** This edition defines `requires` only before `module m;` (rule 7). Whether it
+  MAY stand before another item is not decided; until then it is refused there with `E2726`.
