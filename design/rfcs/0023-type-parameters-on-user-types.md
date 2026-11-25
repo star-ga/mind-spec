@@ -113,11 +113,15 @@ or infers them.
    [Types](../../spec/v1.0/types.md#type-formation) refuses a struct that holds itself with `E2407` ("struct with no
    layout"); this draft extends the meaning of "holds" there to the payloads of an enum and to the type arguments of an
    instance, so a `struct` that contains itself in any of these ways is refused with `E2407`. An `enum` that contains
-   itself by value, and a `type` declaration that names itself in its right-hand side, directly or through other aliases
-   (`type L = Pair<L, i64>;`), because the replacement of [Instance names](#instance-names) would not end, are refused
-   with `E2040` ("declaration contains itself"). A type that holds itself through a pointer comes with a later RFC on an
-   owning pointer type. [RFC 0027](./0027-function-generics.md) uses `E2040` for a trait that names itself in its
-   supertrait list.
+   itself by value through no `struct` (`enum E { A(E), }`, or two enums that hold each other), and a `type`
+   declaration that names itself in its right-hand side, directly or through other aliases (`type L = Pair<L, i64>;`),
+   because the replacement of [Instance names](#instance-names) would not end, are refused with `E2040` ("declaration
+   contains itself"). Each such source gets one code. A cycle that passes through a `struct` and an `enum` is refused
+   with `E2407` at each `struct` of the cycle, and an `enum` of that cycle gets no second code:
+   `struct S { e: E, } enum E { A(S), }` is refused with `E2407` only. An alias that names itself is refused with
+   `E2040` only: its right-hand side is never formed, so no instance holds itself. A type that holds itself through a
+   pointer comes with a later RFC on an owning pointer type. [RFC 0027](./0027-function-generics.md) uses `E2040` for a
+   trait that names itself in its supertrait list.
 8. A type argument on a type without parameters is refused with the code of rule 4. (The reference
    v0.10.4 accepts `Box<i64>` for a `Box` without parameters; in Core v1 a type argument on a user-declared type
    has the status Not in Core v1.)
@@ -144,7 +148,8 @@ chapter or elsewhere.
 and by the names of the module blocks around it ([RFC 0026](./0026-module-items.md)), outermost first, each one
 followed by `.`. For a manifest project the module path is the full module path of the owning module
 ([Types](../../spec/v1.0/types.md#module-qualified-type-ownership)): `Color` of the module `nested.defs` has `D` =
-`nested.defs.Color`, which a source writes `defs.Color` after `import nested.defs;`. A single source without a
+`nested.defs.Color`, which a source writes `defs.Color` after `import nested.defs;` (a qualified type is an extension
+of Core v1, as Types says). A single source without a
 project has no module path: `struct Pt` in the block `geo` has `D` = `geo.Pt`. `D` is unique in a program: two
 items of one namespace have different names, and the qualified name of a module block never equals the module path
 of a module of the project ([RFC 0026](./0026-module-items.md), rule 3). So two different declarations have two
@@ -389,6 +394,25 @@ expected:
 ```
 
 ```yaml
+# reject 4c: a cycle through a struct and an enum
+description: "A struct that holds itself through the payload of an enum is refused at the struct only"
+input:
+  source: |
+    struct S {
+        e: E,
+    }
+    enum E {
+        A(S),
+    }
+    fn main() -> i64 {
+        return 0;
+    }
+expected:
+  status: error
+  error: { code: E2407, message_contains: "S" }
+```
+
+```yaml
 # accept: a trait with a type parameter (declaration only; the impl rows are in RFC 0024)
 description: "A trait with one type parameter that appears in a signature"
 input:
@@ -493,13 +517,15 @@ The desugaring is the oracle for the equality test. No other oracle is needed fo
    normative, because the name is part of the artifact bytes ([Instance names](#instance-names)). No spelling is
    reserved in the lexical chapter. An alias, with or without parameters, is replaced by its right-hand side applied to
    its arguments before the scheme is applied, as a type parameter is; an alias is never an instance.
-4. **Recursive types.** Containment by value stays refused (rule 7): a struct with `E2407` of
-   [Types](../../spec/v1.0/types.md#type-formation), an enum and an alias with `E2040`. A type that holds itself
+4. **Recursive types.** Containment by value stays refused (rule 7): a struct, also one in a cycle with an enum, with
+   `E2407` of [Types](../../spec/v1.0/types.md#type-formation), an enum whose cycle passes through no struct and an
+   alias with `E2040`. A type that holds itself
    through a pointer comes with a later RFC on an owning pointer type.
 5. **Marker parameters.** An unused type parameter is refused with `E2041` (rule 3).
 6. **Codes.** `E2038` (wrong number of type arguments), `E2039` (duplicate type parameter), `E2040`
-   (declaration contains itself: an enum by value or an alias in its right-hand side here, a trait in its own
-   supertrait list in RFC 0027; a struct that holds itself keeps `E2407` of the catalog), `E2041`
+   (declaration contains itself: an enum by value through no struct or an alias in its right-hand side here, a trait
+   in its own supertrait list in RFC 0027; a struct that holds itself, also through an enum, keeps `E2407` of the
+   catalog), `E2041`
    (unused type parameter) and `E2042` (predeclared type or bound name) are assigned to this draft.
    The published catalog does not define any of them.
 7. **Defaults and const parameters.** There are no defaults (`struct Box<T = i64>`). Const parameters (`[T; N]`

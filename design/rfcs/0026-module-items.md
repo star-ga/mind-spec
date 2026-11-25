@@ -20,7 +20,7 @@ limitations under the License.
 |-------|-------|
 | State | Draft (2026-11-24). Not yet accepted. The specification owner decided the questions of this draft on 2026-11-24 (see [Questions](#questions-for-the-specification-owner)). |
 | Number | Provisional. The specification owner assigns the final number. |
-| Changes | `grammar-syntax.ebnf` (`ModuleItem`, `ModuleDeclaration`, `ExportDeclaration` in the list form only, `ImportDeclaration`, `AttributeArg`, `AttributedItem` without the function declaration), `language.md` (Modules and imports; Attributes: the list of rule 7, and an attribute before an item that is not a function declaration is derived), `types.md` (a module block is a namespace; the text on transparent blocks goes), `versioning.md` (the `requires` attribute; the example of a version declaration becomes a `mind` block again, and the sentence that calls it an extension in Core v1 goes), `core-v1-forms.md` (the rows of the module items and of an attribute before an item), `errors.md` (`E2720` to `E2725`, `E2727` and `E2729`) |
+| Changes | `grammar-syntax.ebnf` (`ModuleItem`, `ModuleDeclaration`, `ExportDeclaration` in the list form only, `ImportDeclaration`, `AttributeArg`, `AttributedItem` without the function declaration), `language.md` (Modules and imports; Attributes: the list of rule 7, and an attribute before an item that is not a function declaration is derived), `types.md` (a module block is a namespace; the text on transparent blocks goes), `versioning.md` (the `requires` attribute; the example of a version declaration becomes a `mind` block again, and the sentence that calls it an extension in Core v1 goes), `core-v1-forms.md` (the rows of the module items and of an attribute before an item), `errors.md` (`E2720` to `E2725`, `E2728` and `E2729`) |
 | Depends on | [RFC 0024](./0024-impl-forms.md): `TraitDeclaration` and `ImplDeclaration` are listed in `ModuleItem` below, and a module block MAY hold them. |
 | Related | [RFC 0024](./0024-impl-forms.md) (visibility of methods), [RFC 0023](./0023-type-parameters-on-user-types.md) (the declaration name of a member of a module block) |
 
@@ -172,13 +172,16 @@ extension that [Language](../../spec/v1.0/language.md#executable-subset-status-i
    - The changelog names the compiler attributes `#[deterministic]`, `#[target(...)]` and `#[q16]`, and
      `#[cfg(feature = "std-surface")]`, a gate in the source code of the compiler. This rule refuses each of their
      names with `E2502`.
-8. **Version attribute.** In `#[requires(mind_spec = "M.N")]`, `mind_spec` is the only key. Its value is a string
-   literal that holds a version `major.minor`: two decimal numbers joined by one `.`. Another key, a second argument,
-   or a value that is not `major.minor` is an argument form that the definition does not give, and is refused with
-   `E2502` (rule 7). An implementation compares a well-formed value with its own specification version. Another
-   major, or the same major with a higher minor than its own, is a version that the implementation does not provide,
-   and is refused with `E2727`. The two refusals do not overlap: `E2502` is about the form of the attribute, and
-   `E2727` is about the version of a well-formed one.
+8. **Version attribute.** In `#[requires(mind_spec = "M.N")]` before `module m;`, `mind_spec` is the only key. Its
+   value is a string literal that holds a version `major.minor`: two decimal numbers joined by one `.`. Another key, a
+   second argument, or a value that is not `major.minor` is an argument form that the definition does not give, and is
+   refused with `E2502` (rule 7). An implementation compares a well-formed value with its own specification version.
+   Another major, or the same major with a higher minor than its own, is a version that the implementation does not
+   provide, and is refused with `E2728`. `E2728` applies only to a well-formed version attribute before `module m;`.
+   Before another item, `requires` stands at a position that its definition does not give, so it is refused with
+   `E2502` (rule 7) and its value is not compared: `#[requires(mind_spec = "9.0")] fn f() -> i64 { return 0; }` gets
+   `E2502` only. The two refusals do not overlap: `E2502` is about the form and the position of the attribute, and
+   `E2728` is about the version of a well-formed one before `module m;`.
 
 ## Meaning as a desugaring
 
@@ -215,7 +218,7 @@ that the project loader reads. `export { f, g }` has no desugaring: it marks `f`
 
 Proposals. The reference accepts the text `module app;` and refuses the version attribute (measured above).
 The other rows were not measured. The codes `E2720` to `E2722` are assigned to this draft, `E2723` to `E2725`,
-`E2727` and `E2729` are proposed by it, and `E2002` and `E2502` exist.
+`E2728` and `E2729` are proposed by it, and `E2002` and `E2502` exist.
 
 ```yaml
 description: "A file module declaration and a module block"
@@ -366,7 +369,7 @@ input:
     }
 expected:
   status: error
-  error: { code: E2727, message_contains: "mind_spec" }
+  error: { code: E2728, message_contains: "mind_spec" }
 ```
 
 ```yaml
@@ -467,7 +470,7 @@ expected:
 5. **Export spelling.** There is ONE export form, the list form `export { f }`, which formatted sources hold today.
    The grammar changes to it, and another form is refused (rule 5, `E2725`).
 6. **Version attribute.** `mind_spec` is the only key. The value is parsed as `major.minor`. An implementation
-   refuses another major and a higher minor than its own (`E2727`). An unknown key is an argument form that the
+   refuses another major and a higher minor than its own (`E2728`). An unknown key is an argument form that the
    definition does not give, and is refused with `E2502` (rule 8).
 7. **Attribute on a module block and on a method.** This draft defines no attribute name for a module block or a
    method. The attribute `raw_memory`, which [Raw memory](../../spec/v1.0/memory.md#raw-memory) defines before every
@@ -477,12 +480,13 @@ expected:
    unique in its namespace: two items of one namespace with the same name, or a module block whose qualified name equals
    the module path of a project module, rule 3), `E2721` (`module m;` not first or repeated), `E2722` (module name
    differs from the project). The decisions of questions 3 to 6 and the export rule (rule 4) need five more codes:
-   this draft proposes `E2723`, `E2724`, `E2725`, `E2727` and `E2729` from the same block, which the catalog does not
+   this draft proposes `E2723`, `E2724`, `E2725`, `E2728` and `E2729` from the same block, which the catalog does not
    define; they are not yet assigned. Their labels: `E2723` (`pub` before an item, rule 5), `E2724` (a `static` item,
-   rule 5), `E2725` (an export in another form than the list form `export { … }`, rule 5), `E2727` (a well-formed
-   version attribute with another major, or the same major and a higher minor, rule 8) and `E2729` (a name that the
-   module declares and that stands twice in its export lists, rule 4). `E2726` and `E2728` are not used: an invalid
-   attribute, also a malformed version attribute, has the code `E2502` of the catalog (rule 7).
+   rule 5), `E2725` (an export in another form than the list form `export { … }`, rule 5), `E2728` (a well-formed
+   version attribute before `module m;` with another major, or the same major and a higher minor, rule 8) and `E2729`
+   (a name that the module declares and that stands twice in its export lists, rule 4).
+   `E2726` and `E2727` are not used: an invalid attribute, also a malformed version attribute or one before another
+   item, has the code `E2502` of the catalog (rule 7).
 
 ### Open
 
@@ -491,9 +495,9 @@ expected:
 - **Export of a module block.** Whether an export list can make the members of a module block visible to another
   module (for example by naming the block) is not decided.
 - **Qualified type names.** [Types](../../spec/v1.0/types.md#module-qualified-type-ownership) writes a type of another
-  module with its import qualifier (`defs.Color` after `import nested.defs;`), but `IdentifierType` and `TraitRef` take
-  one identifier, so no type position derives `m.T`. How a type or a trait of a block is named from outside the block is
-  not decided; a later change that adds qualified names to these productions decides it, also for the head of an impl
-  ([RFC 0024](./0024-impl-forms.md#open)).
+  module with its import qualifier (`defs.Color` after `import nested.defs;`) and says that a qualified type is an
+  extension of Core v1: `IdentifierType` and `TraitRef` take one identifier, so no type position derives `m.T`. How a
+  type or a trait of a block is named from outside the block is not decided; a later change that adds qualified names
+  to these productions decides it, also for the head of an impl ([RFC 0024](./0024-impl-forms.md#open)).
 - **`requires` before another item.** This edition defines `requires` only before `module m;` (rule 7). Whether it
   MAY stand before another item is not decided; until then it is refused there with `E2502`.
