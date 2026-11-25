@@ -23,15 +23,17 @@ does not give a meaning, except where it records a decision.** The specification
 2026-11-24; each note records the decision in its **Decision** paragraph, and an RFC or an editorial change carries
 it into the normative text. The tables of options stay as the record of the choice. Each note ends with the status
 of its forms after the decision, in the words of [Core v1 form status](../../spec/v1.0/core-v1-forms.md); that page
-gives the same status to the same form. The status is **Open** only where the note says so.
+gives the same status to the same form. The status is **Open** only where the note says so. The paragraph **Text
+before the decision** records the specification text on which the decision was taken, as it stood before the change
+that carries the decision; its links lead to the place that now holds the decided rule.
 
 ## DN-1. The operator `:=`
 
-**Text today.** `:=` is in `AssignmentOperator` ([`grammar-syntax.ebnf`](../../spec/v1.0/grammar-syntax.ebnf)),
+**Text before the decision.** `:=` was in `AssignmentOperator` ([`grammar-syntax.ebnf`](../../spec/v1.0/grammar-syntax.ebnf)),
 in the `Operator` list of [`grammar-lexical.ebnf`](../../spec/v1.0/grammar-lexical.ebnf), in the precedence
 table of [Language](../../spec/v1.0/language.md#operator-precedence-and-associativity) (row 9, "Assignment
 and compound assignment") and in the token examples of [Lexical Structure](../../spec/v1.0/lexical.md#tokens).
-No sentence says what `x := e` means, and no example uses it.
+No sentence said what `x := e` means, and no example used it.
 
 **Reference.** `let mut x = 1; x := 2;` is refused with `E1001`, ``unexpected `:`, expected an expression``
 (3:7). `let y = x := 2;` is refused in the same way.
@@ -57,8 +59,8 @@ no rule of the syntactic grammar puts `=` directly after `:`, and a source such 
 
 ## DN-2. `while` and `for` as expressions with a value
 
-**Text today.** `PrimaryExpression` lists `WhileExpression` and `ForExpression`. No sentence gives the type or
-the value of a loop.
+**Text before the decision.** `PrimaryExpression` listed `WhileExpression` and `ForExpression`. No sentence
+gave the type or the value of a loop.
 
 **Reference.** `let x = while i < 3 { i };` is refused with `E2002`, ``unknown identifier `while` ``; the same for
 `for`. A loop works as a statement.
@@ -82,8 +84,8 @@ removed, so a program that the published grammar derives, such as `while c { };`
 
 ## DN-3. The remainder operator on floating-point values
 
-**Text today.** `%` is in the precedence table and in the lexical operator list. [Language](../../spec/v1.0/language.md)
-gives no rule for the type of its operands or the sign of the result.
+**Text before the decision.** `%` was in the precedence table and in the lexical operator list.
+[Language](../../spec/v1.0/language.md) gave no rule for the type of its operands or the sign of the result.
 
 **Reference.** `let x: f64 = 7.5 % 2.0;` is accepted by `mindc check --no-fmt`. The native backend refuses it with
 `lane.type.mismatch`. For integer operands `%` builds and runs.
@@ -109,9 +111,9 @@ Core v1 refuses; reference gap (`mindc check` accepts both).
 
 ## DN-4. The unit value
 
-**Text today.** `unit` is a primitive type ([Types](../../spec/v1.0/types.md)); the standard library calls its
-value `()` ([Standard Library](../../spec/v1.0/stdlib.md)). No expression production derives `()`:
-`ParenthesizedExpression` and `TupleExpression` need an inner expression.
+**Text before the decision.** `unit` was a primitive type ([Types](../../spec/v1.0/types.md)), and the standard
+library called its value `()` ([Standard Library](../../spec/v1.0/stdlib.md)). No expression production derived `()`:
+`ParenthesizedExpression` and `TupleExpression` needed an inner expression.
 
 **Reference.** `let u = ();` is accepted. `let u: unit = ();` is accepted. `let n: i64 = ();` is also accepted,
 so the type of `()` is not checked against the annotation. The native backend refuses all three
@@ -132,10 +134,10 @@ expected (an annotation, a parameter, a result type, an operand) with `E2001`
 
 ## DN-5. The `^` suffix of a differentiable literal
 
-**Text today.** [Lexical Structure](../../spec/v1.0/lexical.md#literals) says that a differentiable literal MAY
-include a tangent annotation with the suffix `^` and refers to [Automatic differentiation](../../spec/v1.0/autodiff.md),
-which has no text for it. `DifferentiableLiteral = Literal , "^"` is in the lexical grammar, and `^` is also
-the bitwise exclusive-or operator.
+**Text before the decision.** [Lexical Structure](../../spec/v1.0/lexical.md#literals) said that a differentiable
+literal MAY include a tangent annotation with the suffix `^` and referred to
+[Automatic differentiation](../../spec/v1.0/autodiff.md), which had no text for it. `DifferentiableLiteral = Literal ,
+"^"` was in the lexical grammar, and `^` was also the bitwise exclusive-or operator.
 
 **Reference.** `1.0^;` reads as the operator `^` with a missing operand, so the suffix does not exist in
 practice (measured with v0.10.4).
@@ -152,10 +154,10 @@ agrees with the decision.
 
 ## DN-6. Precedence of `as`
 
-**Text today.** The comment at the end of [`grammar-syntax.ebnf`](../../spec/v1.0/grammar-syntax.ebnf) lists `as`
-below `+` and `-` (level 4 of 7, where level 1 binds tightest). The table of
-[Language](../../spec/v1.0/language.md#operator-precedence-and-associativity) has no row for `as`. The block of
-the comment belongs to the v1.1 candidate additions.
+**Text before the decision.** The comment at the end of [`grammar-syntax.ebnf`](../../spec/v1.0/grammar-syntax.ebnf)
+listed `as` below `+` and `-` (level 4 of 7, where level 1 binds tightest). The table of
+[Language](../../spec/v1.0/language.md#operator-precedence-and-associativity) had no row for `as`. The block of
+the comment belonged to the v1.1 candidate additions.
 
 **Reference.** `as` binds tighter than `*` (measured with v0.10.4). The two
 sources disagree for an expression such as `a * b as f64`. The reference refuses `1 as bool` at check time
@@ -192,9 +194,10 @@ reference gap (`mindc check` accepts `true as f64`; it refuses a cast to `bool` 
 
 ## DN-7. Loop exits outside a loop, `loop`, labels and values
 
-**Text today.** [Language](../../spec/v1.0/language.md#loop-exits) defines `break` and `continue` inside `while` and
-`for`. Nothing defines them outside a loop. `loop` is not a keyword. [Conformance](../../spec/v1.0/conformance.md)
-and [MLIR Lowering](../../spec/v1.0/mlir-lowering.md) mention `break`, `continue` and a loop.
+**Text before the decision.** [Language](../../spec/v1.0/language.md#loop-exits) defined `break` and `continue`
+inside `while` and `for`. Nothing defined them outside a loop. `loop` was not a keyword.
+[Conformance](../../spec/v1.0/conformance.md) and [MLIR Lowering](../../spec/v1.0/mlir-lowering.md) mentioned `break`,
+`continue` and a loop.
 
 **Reference.** A `break` outside a loop is accepted by `mindc check --no-fmt` and refused by the native backend
 (`lane.source.loop_exit_scope`). The text `loop { … }` is accepted by `mindc check --no-fmt` and refused by the native
@@ -220,8 +223,8 @@ refuses; reference gap (`mindc check` accepts it).
 
 ## DN-8. `let mut` and assignment to a binding
 
-**Text today.** `LetStatement` has no `mut`. [Language](../../spec/v1.0/language.md) shows assignment to a
-variable (`x = y = z;`) and does not say that the variable must be declared mutable.
+**Text before the decision.** `LetStatement` had no `mut`. [Language](../../spec/v1.0/language.md) showed
+assignment to a variable (`x = y = z;`) and did not say that the variable must be declared mutable.
 
 **Reference.** `let mut x = 1; x = 2;` and `let x = 1; x = 2;` are both accepted, and both return 2 when built
 natively. `mut` has no checked effect: an assignment to a parameter, `fn f(a: i64) -> i64 { a = 3; return a; }`, is accepted too.
@@ -250,7 +253,7 @@ not `E2402`).
 
 ## DN-9. The result type of the entry function
 
-**Text today.** The entry function is not defined as to its result type.
+**Text before the decision.** No sentence defined the result type of the entry function.
 
 **Reference.** `fn main() -> i64` builds and returns its value as the process status. `fn main() -> f64` is
 accepted by `mindc check --no-fmt` and refused by the native backend with `lane.entry.f64_result`.
@@ -272,8 +275,8 @@ Core v1 refuses; reference gap (`mindc check` accepts both).
 
 ## DN-10. Separators that the grammar requires and the reference does not
 
-**Text today.** `LetStatement` and `ExpressionStatement` end with `;`. A `MatchArm` with an expression ends
-with `,`.
+**Text before the decision.** `LetStatement` and `ExpressionStatement` ended with `;`. A `MatchArm` with an
+expression ended with `,`.
 
 **Reference.** A missing `;` after `let` or after an expression statement, and a missing `,` after an
 expression arm of a `match`, are accepted. `mindc fmt` inserts the separators and plain `mindc check` then reports
@@ -321,7 +324,8 @@ an expression statement, and a missing `,` after an expression arm of a `match`:
 
 ## DN-11. Tuple index and range index
 
-**Text today.** `FieldAccessOperator = "." , Identifier`; `IndexExpression` has no range.
+**Text before the decision.** `FieldAccessOperator` was `"." , Identifier`, the grammar had no tuple index, and
+`IndexExpression` had no range.
 
 **Reference.** `t.1` on a tuple and `a[1..3]` are accepted by `mindc check --no-fmt`. So are `t.0.1` on a nested
 tuple, `t.5` on a pair and `t[0]` on a tuple. The native backend refuses a tuple (`lane.source.tuple`).
@@ -348,7 +352,7 @@ number of elements, and `t[0]` on a tuple: Core v1 refuses; reference gap (`mind
 
 ## DN-12. Compound assignment operators
 
-**Text today.** The assignment operator list is closed: `=`, `+=`, `-=`, `*=`, `/=`, `:=`.
+**Text before the decision.** The assignment operator list was closed: `=`, `+=`, `-=`, `*=`, `/=`, `:=`.
 
 **Reference.** `%=`, `<<=`, `>>=`, `&=`, `|=` and `^=` are accepted by `mindc check --no-fmt`. `%=` builds natively;
 the others are refused by the native backend without a key.
@@ -367,10 +371,10 @@ bound by `let mut`: Core v1; reference gap (the native backend builds `%=` and r
 
 ## DN-13. A generic call whose type argument is not fixed
 
-**Text today.** [Types](../../spec/v1.0/types.md#type-inference) says that a generic function MUST infer its type
-parameters when the information is sufficient, and that the caller MUST provide explicit type arguments otherwise.
-The grammar has no explicit type argument at a call. The text does not say what happens when
-the argument types do not fix a parameter. [Error Catalog](../../spec/v1.0/errors.md) has `E2003` (cannot infer type) and
+**Text before the decision.** [Types](../../spec/v1.0/types.md#type-inference) said that a generic function MUST
+infer its type parameters when the information is sufficient, and that the caller MUST provide explicit type
+arguments otherwise. The grammar had no explicit type argument at a call. The text did not say what happens when the
+argument types do not fix a parameter. [Error Catalog](../../spec/v1.0/errors.md) had `E2003` (cannot infer type) and
 `E2001` (type mismatch).
 
 **Reference.** `fn z<T>(x: i64) -> i64` called as `z(1)`, and `fn mk<T>() -> i64` called as `mk()`, are accepted
