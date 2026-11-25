@@ -666,13 +666,13 @@ Implementations SHOULD provide structured error data suitable for tooling:
 
 ```rust
 // Not MIND source: the shape of the error data of an implementation, written in Rust
-struct CompilerError {
-    code: ErrorCode,        // E.g., E3001
-    message: String,
-    span: SourceSpan,       // File, line, column range
-    severity: Severity,     // Error, Warning, Note
-    context: HashMap<String, Value>,
-    related: Vec<RelatedInfo>,
+pub struct CompilerError {
+    pub code: ErrorCode,        // E.g., E3001
+    pub message: String,
+    pub span: SourceSpan,       // File, line, column range
+    pub severity: Severity,     // Error, Warning, Note
+    pub context: HashMap<String, Value>,
+    pub related: Vec<RelatedInfo>,
 }
 ```
 
