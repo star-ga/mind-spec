@@ -644,28 +644,19 @@ Error codes in this catalog are **stable across Core v1 versions**:
 - Renumbering or removing error codes is NOT permitted without major version change
 - Context requirements MAY be expanded but MUST NOT be reduced
 
-## Reference implementation (`star-ga/mind`)
+## Reference implementation (`star-ga/mind`) (informative)
 
-The reference compiler implements the following error codes:
+The headings of this catalog define the codes; this section defines nothing. It lists the codes where the
+reference compiler v0.10.4 differs from the catalog, each as a reference gap, measured on 2026-11-24 with the
+release binary (`mindc check --no-fmt --no-lint` on a probe source, or the command that the row names).
 
-| Code  | Phase       | Description                              |
-|-------|-------------|------------------------------------------|
-| E1001 | Parse       | Unexpected token / parsing error         |
-| E2001 | Type-check  | General type error                       |
-| E2036 | Type-check  | Non-integer value stored into a narrow integer element (v0.10.3, `0a8b34a5`) |
-| E2037 | Type-check  | Function name used as a value (v0.10.3, `1def5dde`) |
-| E2101 | Type-check  | Broadcast compatibility failure          |
-| E2102 | Type-check  | Rank/shape mismatch, invalid reductions  |
-| E2103 | Type-check  | MatMul inner-dimension mismatch          |
-| E3001 | IR Verify   | IR verification error                    |
-| E4001 | Autodiff    | Autodiff operation failure               |
-| E4002 | Autodiff    | Autodiff requires --func argument        |
-| E4003 | Autodiff    | Autodiff feature not enabled             |
-| E5001 | Autodiff    | Unsupported operation for autodiff       |
-| E6002 | Backend     | Requested backend unavailable             |
-| E6009 | Materialize | Compiler materialization refusal          |
-| E6010 | Manifest    | Invalid Mind.toml export                  |
+| Code | Catalog | Measured in the reference | Probe |
+|------|---------|---------------------------|-------|
+| `E1001` | Invalid UTF-8 sequence | The code of a parse error: ``unexpected `;`, expected an expression`` | `return 1 +;` |
+| `E1001` | Invalid UTF-8 sequence | A source with an ill-formed UTF-8 sequence is refused with no code: `stream did not contain valid UTF-8` | the bytes `0xFF 0xFE` in a name |
+| `E2101` | No entry; a broadcasting failure is `E3001` | The code of a broadcasting failure: ``cannot broadcast shapes (3,4) and (3,5) for `+` `` | `a + b` with `Tensor<f32, [3, 4]>` and `Tensor<f32, [3, 5]>` |
+| `E4001` | SSA violation (use before definition) | The code of an autodiff failure: `function 'f' not found in module (only 'main' is supported)` | `mindc FILE --autodiff --func f --emit-grad-ir` |
 
-**Note**: The reference implementation uses E2xxx for both type AND shape errors (combining
-the spec's E2xxx and E3xxx categories). Most error codes in the spec are reserved for future
-expansion.
+No probe of this measurement reached `E3001`, `E4002` or `E4003`: `--autodiff` without `--func` is refused with
+no code (`--autodiff requires --func <name>`), and the release binary has the autodiff feature. This list makes
+no claim about the codes that it does not name.
