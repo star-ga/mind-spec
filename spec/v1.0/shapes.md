@@ -42,9 +42,9 @@ Core v1 does not define symbolic or unknown dimensions in the base profile.
 Implementations may extend the shape system, but conformance is defined for
 fully-known shapes.
 
-The verifier rejects tensors whose dimensions are zero or negative. Scalars
-remain rank-0 tensors with an empty `[]` shape and therefore bypass the
-positive-dimension rule.
+The verifier rejects tensors with a negative dimension. Scalars remain
+rank-0 tensors with an empty `[]` shape and therefore have no dimension to
+check.
 
 ## Broadcasting
 

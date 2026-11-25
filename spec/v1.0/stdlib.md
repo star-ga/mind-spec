@@ -264,12 +264,12 @@ Tensor construction, manipulation, and linear algebra operations.
 
 - **`zeros(shape: [i64], dtype: DType = f32) -> Tensor<dtype>`**
   - Creates tensor filled with zeros
-  - Shape dimensions MUST be positive integers
+  - Shape dimensions MUST NOT be negative; a dimension of size 0 is valid ([Index bounds](./ir.md#index-bounds))
   - Example: `zeros([2, 3])` produces rank-2 tensor with shape [2, 3]
 
 - **`ones(shape: [i64], dtype: DType = f32) -> Tensor<dtype>`**
   - Creates tensor filled with ones
-  - Shape dimensions MUST be positive integers
+  - Shape dimensions MUST NOT be negative; a dimension of size 0 is valid ([Index bounds](./ir.md#index-bounds))
 
 - **`full(shape: [i64], value: T, dtype: DType = infer) -> Tensor<dtype>`**
   - Creates tensor filled with constant `value`
@@ -297,7 +297,7 @@ These functions map directly to IR operations from ir.md#shape-manipulation:
 - **`reshape(input: Tensor<T>, new_shape: [i64]) -> Tensor<T>`**
   - Semantics: ir.md#shape-manipulation Reshape
   - Element count MUST be preserved
-  - Exactly one dimension MAY be -1 (inferred)
+  - Exactly one entry MAY be the marker `-1`, which is not a dimension (Reshape of [Core IR](./ir.md#shape-manipulation))
 
 - **`transpose(input: Tensor<T>, axes: [i64] = infer) -> Tensor<T>`**
   - Semantics: ir.md#shape-manipulation Transpose

@@ -42,6 +42,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   contexts that expect a type for a literal are listed. A field access on an import qualifier is not refused as
   an unknown field. The legend of the form status page names the MLIR build. Two links of this changelog to the
   root README use the address of the public repository.
+- **Dimensions.** The shape rules of `zeros`, `ones`, `Reshape` and shape validation say that a dimension
+  of size 0 is valid and a negative one is refused; the `-1` of a reshape is a marker, not a dimension; a
+  negative length of a fixed array type is refused with `E3006`
+  ([Fixed-array literal cardinality](../spec/v1.0/types.md#fixed-array-literal-cardinality)).
 
 ### Changed: raw memory, the string type, elementwise operands, the tensor constructor, slice bounds, literal types, cast and method readings (2026-11-25)
 

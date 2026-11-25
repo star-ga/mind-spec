@@ -182,9 +182,10 @@ as implementation-defined.
   - **Dtype rules**: output dtype equals input dtype (reshape does not change dtype)
   - **Verification**:
     - Element count MUST be preserved: `product(input.shape) == product(new_shape)`
-    - All dimensions in `new_shape` MUST be positive integers
-    - Exactly one dimension MAY be `-1` (inferred from element count); if present, it is computed
-      as `product(input.shape) / product(other_dimensions)`
+    - Every entry of `new_shape` other than the marker `-1` is a dimension and MUST NOT be negative; a
+      dimension of size 0 is valid ([Index bounds](#index-bounds))
+    - Exactly one entry MAY be the marker `-1`, which is not a dimension: the dimension at its position is
+      computed as `product(input.shape) / product(other_dimensions)`
     - Element count mismatch is a verification failure
 - **`Transpose(input, permutation: [i64]) -> ValueId`**
   - Permutes the dimensions of a tensor according to the given permutation.

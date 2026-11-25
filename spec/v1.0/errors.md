@@ -457,7 +457,9 @@ Shape errors occur during shape inference, broadcasting, or shape validation.
 
 ### E3006: Negative dimension
 - **Trigger**: a shape that contains a negative dimension
-  ([Tensor ranks and shapes](./shapes.md#tensor-ranks-and-shapes)); a dimension of size 0 is valid
+  ([Tensor ranks and shapes](./shapes.md#tensor-ranks-and-shapes)), or a fixed array type `[T; n]` whose
+  length `n` is negative ([Fixed-array literal cardinality](./types.md#fixed-array-literal-cardinality)); a
+  dimension or a length of 0 is valid, and the marker `-1` of a reshape is not a dimension
 - **Required context**: shape, invalid dimension index, value
 - **Example**: `E3006: Invalid dimension -1 in shape [3, -1, 5] at line 18, column 10`
 

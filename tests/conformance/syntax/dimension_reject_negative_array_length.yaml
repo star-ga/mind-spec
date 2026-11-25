@@ -1,0 +1,23 @@
+# MIND Conformance Test: a negative length of a fixed array type
+# Specification reference: spec/v1.0/types.md#fixed-array-literal-cardinality
+# Category: syntax
+# Profile: cpu
+
+description: "the array type [i64; -1] has a negative length"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn f(a: [i64; -1]) -> i64 {
+        return 0;
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E3006

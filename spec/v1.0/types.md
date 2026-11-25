@@ -110,6 +110,10 @@ type, each nested array literal MUST satisfy its corresponding extent.
 A cardinality mismatch MUST be rejected during static checking. The diagnostic
 MUST identify the literal and report both the required and actual element
 counts; execution failure at a later call site is not an adequate substitute.
+
+The length `n` of a fixed array type `[T; n]` is the extent of its one axis. A length of 0 is valid, and a
+negative length (`[i64; -1]`, one literal by [Literals](./lexical.md#literals)) MUST be refused at check time
+with [`E3006`](./errors.md#e3006-negative-dimension).
 This rule concerns literal cardinality; nonliteral initializers remain subject
 to the ordinary type compatibility rules.
 
@@ -294,8 +298,8 @@ The type checker participates directly in Core IR construction:
 
 - **Symbol tables** feed module inputs. Each declared value is materialised as an `Input` instruction
   carrying its resolved tensor type so that the IR verifier can enforce the single-definition rule.
-- **Shape validation** rejects tensors with zero or negative extents. Scalars (rank-0) are exempt and
-  remain represented with an empty shape.
+- **Shape validation** rejects tensors with a negative extent; an extent of 0 is valid
+  ([Index bounds](./ir.md#index-bounds)). Scalars (rank-0) are exempt and remain represented with an empty shape.
 - **Operation typing** mirrors the IR instruction set. For arithmetic operations the operands MUST
   share a dtype; shape compatibility follows the broadcasting rules in
   [Shapes](./shapes.md#broadcasting). Scalar operands implicitly broadcast to the non-scalar
