@@ -9,6 +9,20 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed: loop exit keywords, bitwise and shift operators, closing angle, elementwise tokens (2026-11-24)
+
+- **`break` and `continue` are keywords.** They join the keyword list and leave the contextual words. `let break = 4;`, `break - 1;` and `break = 5;` are refused, and `while c { break }` is refused because the `;` of the loop exit is missing. `loop` stays a name ([Loop exits](../spec/v1.0/language.md#loop-exits)).
+- **Bitwise and shift operators.** `&`, `|`, `^`, `<<` and `>>` are in the expression grammar (`BitwiseExpression`), one level tighter than `+` and `-`. A table gives the operand types and the values: the shift count is the right operand modulo the width, `>>` is the arithmetic shift on a signed type and the logical shift on an unsigned type, and no operator of the group traps. Two different integer types are refused with `E2004`, and another operand type with `E2005` ([Bitwise and shift operators](../spec/v1.0/language.md#bitwise-and-shift-operators)). The unconnected productions `LogicalOr` to `ShiftRight` are replaced by the connected rules.
+- **Closing angle.** Where a `>` closes a list in angle brackets (`CloseAngle`) and the next token starts with `>`, the first `>` closes the list and the rest of the token is read again as a token, so `let o: Option<Option<i64>>= p;` is derived ([Tokens](../spec/v1.0/lexical.md#tokens)).
+- **Elementwise operator tokens.** `.*`, `./`, `.+` and `.-` are tokens of the lexical grammar, on the levels of `*` and `+` in the expression grammar. No rule gives their operands yet; the form status is Open.
+- **`defer`.** A `defer` statement takes no `;`, so `defer { };` is refused. No sentence gives `defer` a meaning; its status is Open.
+- **Tuple index.** After an access dot, a float literal with an exponent is not a tuple index: `t.0.1e0` is refused.
+- **Casts.** Every cast whose value is a NaN gives the canonical NaN, the cast of a float type to itself too.
+- **Slices.** `a[1:3]` takes the elements 1 and 2 (the `Slice` operation); a row accepts it beside the refused `a[1..3]`.
+- **Base text.** The primitive type list of [Types](../spec/v1.0/types.md#type-formation) names all six types of the grammar. The [FFI chapter](../spec/v1.0/ffi.md#struct-layout-attribute) defines the attribute `repr(C)` on a struct by its name, position and layout. The samples of `std/tensor.md`, of the root determinism and types pages and of the performance chapter are derivable sources.
+- **Error catalog.** The headings define the codes. The table of the reference implementation is an informative list of the measured differences ([Error catalog](../spec/v1.0/errors.md#reference-implementation-star-gamind-informative)).
+- **Form status and rows.** [Core v1 forms](../spec/v1.0/core-v1-forms.md) has a "reference conforms" mark beside "reference gap". New rows in [`tests/conformance/syntax`](../tests/conformance/syntax/README.md) for each change; the row that used `break` as a name is now a reject row.
+
 ### Changed: forms of Core v1 decided by the specification owner (2026-11-24)
 
 - **`:=`.** The operator is removed from the grammar, the operator list and the precedence table. `x := 1;` MUST be refused.
