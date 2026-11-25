@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# RFC 0024: `trait` and `impl` blocks (an implementation of a type, of a trait for a type, and the associated items of a trait)
+# RFC 0024: `trait` and `impl` blocks (implementations of a type and of a trait, associated items)
 
 | Field | Value |
 |-------|-------|
