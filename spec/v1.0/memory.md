@@ -83,7 +83,8 @@ A call of a raw memory function is allowed only in the body of a function declar
 `#[raw_memory(sealed)]`, or in a function of the standard library. A region block is allowed only in the body of a
 function declared with `#[raw_memory]` or `#[raw_memory(sealed)]`; a function of the standard library also needs the
 attribute for a region block ([Region blocks](#region-blocks)). Any other raw memory use MUST be refused at check time
-with [`E2501`](./errors.md#e2501-raw-memory-use-outside-a-raw-memory-function).
+with [`E2501`](./errors.md#e2501-raw-memory-use-outside-a-raw-memory-function), except in the body of a function whose
+attribute `raw_memory` `E2502` refuses (below).
 
 `#[raw_memory(sealed)]` states that no parameter and no result of the function carries an address and that the
 function keeps no address after it returns. A call of a sealed function is not a raw memory use. An implementation

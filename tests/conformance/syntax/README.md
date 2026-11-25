@@ -132,7 +132,7 @@ implementation MAY accept or refuse those.
 | [`rawmem_reject_unmarked_calls_marked`](./rawmem_reject_unmarked_calls_marked.yaml) | reject, `E2501` | as above: a call of a `#[raw_memory]` function is a raw memory use |
 | [`rawmem_reject_attr_on_struct`](./rawmem_reject_attr_on_struct.yaml) | reject, `E2502` | as above: another use of the attribute MUST be refused |
 | [`rawmem_reject_attr_argument`](./rawmem_reject_attr_argument.yaml) | reject, `E2502` | as above |
-| [`rawmem_reject_attr_argument_with_use`](./rawmem_reject_attr_argument_with_use.yaml) | reject, `E2502` | [Raw memory](../../../spec/v1.0/memory.md#raw-memory): a function whose attribute `E2502` refuses gets no `E2501` |
+| [`rawmem_reject_attr_argument_with_use`](./rawmem_reject_attr_argument_with_use.yaml) | reject, `E2502` | [Raw memory](../../../spec/v1.0/memory.md#raw-memory): a function whose attribute `raw_memory` `E2502` refuses gets no `E2501` |
 | [`attribute_reject_unknown_name`](./attribute_reject_unknown_name.yaml) | reject, `E2502` | [Attributes](../../../spec/v1.0/language.md#attributes): an attribute name that the specification does not define MUST be refused |
 | [`attribute_reject_unknown_name_before_struct`](./attribute_reject_unknown_name_before_struct.yaml) | reject, `E2502` | as above, before another item |
 | [`string_type_accept_named`](./string_type_accept_named.yaml) | accept | [Type formation](../../../spec/v1.0/types.md#type-formation): the string type `String` |
