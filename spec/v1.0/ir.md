@@ -225,7 +225,7 @@ as implementation-defined.
   - Extracts a single element from the input tensor at the specified multi-dimensional index.
   - **Shape rules**: output is a rank-0 scalar `[]`
   - **Dtype rules**: output dtype equals input dtype
-  - **Semantics**: `Index(input, [i₀, i₁, ..., iₙ₋₁])` returns `input[i₀, i₁, ..., iₙ₋₁]`
+  - **Semantics**: Index(input, \[i₀, i₁, ..., iₙ₋₁\]) returns input\[i₀, i₁, ..., iₙ₋₁\]
   - **Verification**:
     - Index list length MUST equal input rank
     - Length mismatch is a verification failure
@@ -245,17 +245,17 @@ as implementation-defined.
   - **Runtime behaviour**:
     - Negative `starts`/`ends` are clamped to 0 (NOT interpreted as offsets from end)
     - Negative `steps` (reverse slicing) are NOT supported; steps MUST be positive
-    - Empty slices (where `ends[i] ≤ starts[i]` for positive step) produce size-0 dimensions
+    - Empty slices (where ends\[i\] ≤ starts\[i\] for positive step) produce size-0 dimensions
 - **`Gather(input, indices: tensor<i32|i64>) -> ValueId`**
   - Gathers elements from input using an index tensor.
   - **Shape rules**:
-    - If `indices` has shape `[I₀, I₁, ..., Iₖ]` and `input` has shape `[D₀, D₁, ..., Dₘ]`
-    - Output shape is `[I₀, I₁, ..., Iₖ, D₁, D₂, ..., Dₘ]`
+    - If `indices` has shape \[I₀, I₁, ..., Iₖ\] and `input` has shape \[D₀, D₁, ..., Dₘ\]
+    - Output shape is \[I₀, I₁, ..., Iₖ, D₁, D₂, ..., Dₘ\]
     - Indices tensor indexes into the first dimension of input
   - **Dtype rules**:
     - Indices tensor MUST have dtype `i32` or `i64`
     - Output tensor has the same dtype as input
-  - **Semantics**: `output[i₀, ..., iₖ, d₁, ..., dₘ] = input[indices[i₀, ..., iₖ], d₁, ..., dₘ]`
+  - **Semantics**: output\[i₀, ..., iₖ, d₁, ..., dₘ\] = input\[indices\[i₀, ..., iₖ\], d₁, ..., dₘ\]
   - **Verification**:
     - Indices tensor MUST have integer dtype (i32 or i64)
     - Non-integer indices dtype is a verification failure
@@ -268,9 +268,9 @@ as implementation-defined.
 - **`Dot(lhs, rhs) -> ValueId`**
   - Inputs: rank-1 or rank-2 tensors with compatible inner dimensions.
   - **Shape rules**:
-    - Rank-1 × Rank-1: `[n] · [n] → []` (scalar inner product)
-    - Rank-2 × Rank-1: `[m, n] · [n] → [m]` (matrix-vector product)
-    - Rank-1 × Rank-2: `[m] · [m, n] → [n]` (vector-matrix product)
+    - Rank-1 × Rank-1: \[n\] · \[n\] → \[\] (scalar inner product)
+    - Rank-2 × Rank-1: \[m, n\] · \[n\] → \[m\] (matrix-vector product)
+    - Rank-1 × Rank-2: \[m\] · \[m, n\] → \[n\] (vector-matrix product)
     - Rank-2 × Rank-2: delegates to MatMul
   - **Dtype rules**: both operands MUST have the same dtype; output has the same dtype.
   - **Verification**: inner dimensions MUST match; mismatches are verification failures.
@@ -328,7 +328,7 @@ as implementation-defined.
   - **Shape rules**: output shape equals input shape
   - **Dtype rules**: input MUST be a floating-point dtype; output has the same dtype
   - **Semantics**: `Log(x)[i] = ln(x[i])` for all indices i
-  - **Runtime behaviour**: `Log(x)` where `x ≤ 0` is implementation-defined (may produce NaN or error)
+  - **Runtime behaviour**: `Log(x)` where x ≤ 0 is implementation-defined (may produce NaN or error)
 
 ## Canonicalisation
 

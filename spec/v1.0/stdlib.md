@@ -135,12 +135,12 @@ Scalar mathematical functions. When applied to tensors, these operate elementwis
 
 - **`abs<T: Numeric>(x: T) -> T`**
   - Absolute value: `|x|`
-  - Differentiable for floating-point: `∂abs/∂x = sign(x)` (undefined at x=0, typically 0)
+  - Differentiable for floating-point: ∂abs/∂x = sign(x) (undefined at x=0, typically 0)
   - Supported dtypes: i32, i64, f32, f64
 
 - **`neg<T: Numeric>(x: T) -> T`**
   - Negation: `-x`
-  - Differentiable: `∂neg/∂x = -1`
+  - Differentiable: ∂neg/∂x = -1
   - Supported dtypes: i32, i64, f32, f64
 
 - **`min<T: Ord>(a: T, b: T) -> T`**
@@ -157,68 +157,68 @@ Scalar mathematical functions. When applied to tensors, these operate elementwis
 
 - **`exp<T: Float>(x: T) -> T`**
   - Exponential function: eˣ (e to the power `x`)
-  - Differentiable: `∂exp/∂x = exp(x)`
+  - Differentiable: ∂exp/∂x = exp(x)
   - Supported dtypes: f32, f64
   - Semantics: matches exp() from ir.md#activation-and-elementwise-unary-operations
 
 - **`log<T: Float>(x: T) -> Result<T, DomainError>`**
   - Natural logarithm: `ln(x)`
-  - Differentiable: `∂log/∂x = 1/x`
+  - Differentiable: ∂log/∂x = 1/x
   - Supported dtypes: f32, f64
   - Domain: x > 0; returns Err(DomainError) for x ≤ 0
   - Semantics: matches log() from ir.md#activation-and-elementwise-unary-operations
 
 - **`log2<T: Float>(x: T) -> Result<T, DomainError>`**
-  - Base-2 logarithm: `log₂(x)`
-  - Differentiable: `∂log2/∂x = 1/(x ln(2))`
+  - Base-2 logarithm: log₂(x)
+  - Differentiable: ∂log2/∂x = 1/(x ln(2))
   - Domain: x > 0
 
 - **`log10<T: Float>(x: T) -> Result<T, DomainError>`**
-  - Base-10 logarithm: `log₁₀(x)`
-  - Differentiable: `∂log10/∂x = 1/(x ln(10))`
+  - Base-10 logarithm: log₁₀(x)
+  - Differentiable: ∂log10/∂x = 1/(x ln(10))
   - Domain: x > 0
 
 - **`sqrt<T: Float>(x: T) -> Result<T, DomainError>`**
-  - Square root: `√x`
-  - Differentiable: `∂sqrt/∂x = 1/(2√x)`
+  - Square root: √x
+  - Differentiable: ∂sqrt/∂x = 1/(2√x)
   - Supported dtypes: f32, f64
   - Domain: x ≥ 0; returns Err(DomainError) for x < 0
 
 - **`pow<T: Float>(base: T, exponent: T) -> T`**
   - Power function: `base` to the power `exponent`
-  - Differentiable: `∂pow/∂base = exponent · pow(base, exponent - 1)`
+  - Differentiable: ∂pow/∂base = exponent · pow(base, exponent - 1)
   - Special cases: `pow(0, 0) = 1`, `pow(x, 0) = 1`
 
 ### Trigonometric
 
 - **`sin<T: Float>(x: T) -> T`**
   - Sine function (radians)
-  - Differentiable: `∂sin/∂x = cos(x)`
+  - Differentiable: ∂sin/∂x = cos(x)
   - Supported dtypes: f32, f64
 
 - **`cos<T: Float>(x: T) -> T`**
   - Cosine function (radians)
-  - Differentiable: `∂cos/∂x = -sin(x)`
+  - Differentiable: ∂cos/∂x = -sin(x)
   - Supported dtypes: f32, f64
 
 - **`tan<T: Float>(x: T) -> T`**
   - Tangent function (radians)
-  - Differentiable: `∂tan/∂x = sec²(x) = 1/cos²(x)`
+  - Differentiable: ∂tan/∂x = sec²(x) = 1/cos²(x)
   - Supported dtypes: f32, f64
 
 - **`asin<T: Float>(x: T) -> Result<T, DomainError>`**
   - Arcsine (radians)
-  - Differentiable: `∂asin/∂x = 1/√(1-x²)`
+  - Differentiable: ∂asin/∂x = 1/√(1-x²)
   - Domain: -1 ≤ x ≤ 1
 
 - **`acos<T: Float>(x: T) -> Result<T, DomainError>`**
   - Arccosine (radians)
-  - Differentiable: `∂acos/∂x = -1/√(1-x²)`
+  - Differentiable: ∂acos/∂x = -1/√(1-x²)
   - Domain: -1 ≤ x ≤ 1
 
 - **`atan<T: Float>(x: T) -> T`**
   - Arctangent (radians)
-  - Differentiable: `∂atan/∂x = 1/(1+x²)`
+  - Differentiable: ∂atan/∂x = 1/(1+x²)
   - Supported dtypes: f32, f64
 
 - **`atan2<T: Float>(y: T, x: T) -> T`**
@@ -230,15 +230,15 @@ Scalar mathematical functions. When applied to tensors, these operate elementwis
 
 - **`sinh<T: Float>(x: T) -> T`**
   - Hyperbolic sine: `(exp(x) - exp(-x)) / 2`
-  - Differentiable: `∂sinh/∂x = cosh(x)`
+  - Differentiable: ∂sinh/∂x = cosh(x)
 
 - **`cosh<T: Float>(x: T) -> T`**
   - Hyperbolic cosine: `(exp(x) + exp(-x)) / 2`
-  - Differentiable: `∂cosh/∂x = sinh(x)`
+  - Differentiable: ∂cosh/∂x = sinh(x)
 
 - **`tanh<T: Float>(x: T) -> T`**
   - Hyperbolic tangent: `sinh(x) / cosh(x)`
-  - Differentiable: `∂tanh/∂x = 1 - tanh²(x)`
+  - Differentiable: ∂tanh/∂x = 1 - tanh²(x)
   - Common activation function in neural networks
 
 ### Rounding
@@ -387,14 +387,14 @@ These functions map directly to IR operations from ir.md#shape-manipulation:
   - Differentiable: gradient is 1 for x>0, 0 otherwise
 
 - **`sigmoid(input: Tensor<T>) -> Tensor<T>`**
-  - Sigmoid function: `σ(x) = 1 / (1 + exp(-x))`
-  - Differentiable: `∂σ/∂x = σ(x)(1 - σ(x))`
+  - Sigmoid function: σ(x) = 1 / (1 + exp(-x))
+  - Differentiable: ∂σ/∂x = σ(x)(1 - σ(x))
   - Output range: (0, 1)
 
 - **`softmax(input: Tensor<T>, axis: i64 = -1) -> Tensor<T>`**
-  - Softmax function: `softmax(x)ᵢ = exp(xᵢ) / Σⱼ exp(xⱼ)`
+  - Softmax function: softmax(x)ᵢ = exp(xᵢ) / Σⱼ exp(xⱼ)
   - Normalizes to probability distribution (sums to 1 along axis)
-  - Differentiable: Jacobian computed via `∂softmax/∂x = diag(softmax) - softmax ⊗ softmax`
+  - Differentiable: Jacobian computed via ∂softmax/∂x = diag(softmax) - softmax ⊗ softmax
 
 ## `diff` module
 
@@ -825,7 +825,7 @@ Conforming implementations MUST:
 1. **Provide all functions listed**: No omissions permitted for Core v1 conformance
 2. **Match semantics**: Behavior MUST align with referenced IR operations and autodiff rules
 3. **Report errors consistently**: Use error codes from errors.md where applicable
-4. **Preserve determinism**: Same inputs MUST produce same outputs. Scalar IEEE-754 arithmetic (`+ − × ÷ √`) and integer/Q16.16 operations are **bit-exact** (zero tolerance) on the strict path; the numeric-tolerance allowance below applies only to transcendental functions and vector/SIMD reductions, whose cross-substrate bit-identity is on the roadmap.
+4. **Preserve determinism**: Same inputs MUST produce same outputs. Scalar IEEE-754 arithmetic (+ − × ÷ √) and integer/Q16.16 operations are **bit-exact** (zero tolerance) on the strict path; the numeric-tolerance allowance below applies only to transcendental functions and vector/SIMD reductions, whose cross-substrate bit-identity is on the roadmap.
 5. **Document extensions**: Any additional functions MUST be clearly marked as extensions
 
 Implementations MAY:
@@ -838,11 +838,11 @@ Implementations MAY:
 
 The tolerances below bound **transcendental functions** (`sin`, `exp`, `log`, …) and
 **vector/SIMD reductions**, where a correctly-rounded / canonical-reduction
-implementation is on the roadmap. **Scalar** IEEE-754 arithmetic (`+ − × ÷ √`) is
+implementation is on the roadmap. **Scalar** IEEE-754 arithmetic (+ − × ÷ √) is
 correctly-rounded and **bit-exact** (zero tolerance) on the strict no-FMA path —
 run-to-run bit-identical and verified byte-identical across x86_64 + ARM64 on real hardware.
 
-- **Scalar `+ − × ÷ √` (`f32`/`f64`)**: bit-exact (0 tolerance) on the strict path
+- **Scalar + − × ÷ √ (`f32`/`f64`)**: bit-exact (0 tolerance) on the strict path
 - **f32 transcendental / vector-reduction operations**: Error MUST be within 1e-6 relative tolerance or 1e-9 absolute
 - **f64 transcendental / vector-reduction operations**: Error MUST be within 1e-12 relative tolerance or 1e-15 absolute
 - **Integer operations**: Exact (no approximation)

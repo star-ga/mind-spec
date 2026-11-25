@@ -64,10 +64,10 @@ provide complete mathematical formulations for each Core v1 operation.
 
 ### Notation
 
-- `∇_y L`: upstream gradient (gradient of loss L with respect to output y)
+- ∇\_y L: upstream gradient (gradient of loss L with respect to output y)
 - `∂y/∂x`: local derivative (derivative of output y with respect to input x)
-- `∇_x L = ∇_y L · ∂y/∂x`: downstream gradient via chain rule
-- `⊙`: elementwise (Hadamard) product
+- ∇\_x L = ∇\_y L · ∂y/∂x: downstream gradient via chain rule
+- ⊙: elementwise (Hadamard) product
 - `shape(x)`: shape of tensor x
 - `ReduceSum(g, axes)`: sum gradient g along specified axes to restore original shape
 - `Broadcast(g, shape_target, shape_original)`: reduce gradient from broadcasted shape back to original
@@ -80,111 +80,111 @@ provide complete mathematical formulations for each Core v1 operation.
 
 ### Binary operations
 
-- **`Add: y = x₁ + x₂`**
-  - Forward: `y = x₁ + x₂` (with broadcasting)
-  - Gradient for `x₁`: `∇_{x₁} L = ReduceSum(∇_y L, broadcast_axes(shape(x₁), shape(y)))`
-  - Gradient for `x₂`: `∇_{x₂} L = ReduceSum(∇_y L, broadcast_axes(shape(x₂), shape(y)))`
+- **Add: y = x₁ + x₂**
+  - Forward: y = x₁ + x₂ (with broadcasting)
+  - Gradient for x₁: ∇\_{x₁} L = ReduceSum(∇\_y L, broadcast\_axes(shape(x₁), shape(y)))
+  - Gradient for x₂: ∇\_{x₂} L = ReduceSum(∇\_y L, broadcast\_axes(shape(x₂), shape(y)))
   - If no broadcasting occurred for an operand, gradient passes through unchanged
-  - Example: `x₁=[2,1], x₂=[2,3] → y=[2,3]`, then `∇_{x₁}` sums gradient over axis 1
+  - Example: x₁=\[2,1\], x₂=\[2,3\] → y=\[2,3\], then ∇\_{x₁} sums gradient over axis 1
 
-- **`Sub: y = x₁ - x₂`**
-  - Forward: `y = x₁ - x₂` (with broadcasting)
-  - Gradient for `x₁`: `∇_{x₁} L = ReduceSum(∇_y L, broadcast_axes(shape(x₁), shape(y)))`
-  - Gradient for `x₂`: `∇_{x₂} L = -ReduceSum(∇_y L, broadcast_axes(shape(x₂), shape(y)))`
+- **Sub: y = x₁ - x₂**
+  - Forward: y = x₁ - x₂ (with broadcasting)
+  - Gradient for x₁: ∇\_{x₁} L = ReduceSum(∇\_y L, broadcast\_axes(shape(x₁), shape(y)))
+  - Gradient for x₂: ∇\_{x₂} L = -ReduceSum(∇\_y L, broadcast\_axes(shape(x₂), shape(y)))
   - Note the negation for the right operand (∂y/∂x₂ = -1)
 
-- **`Mul: y = x₁ * x₂`**
-  - Forward: `y = x₁ ⊙ x₂` (elementwise with broadcasting)
-  - Local derivatives: `∂y/∂x₁ = x₂`, `∂y/∂x₂ = x₁`
-  - Gradient for `x₁`: `∇_{x₁} L = ReduceSum(∇_y L ⊙ Broadcast(x₂, shape(y)), broadcast_axes(shape(x₁), shape(y)))`
-  - Gradient for `x₂`: `∇_{x₂} L = ReduceSum(∇_y L ⊙ Broadcast(x₁, shape(y)), broadcast_axes(shape(x₂), shape(y)))`
+- **Mul: y = x₁ \* x₂**
+  - Forward: y = x₁ ⊙ x₂ (elementwise with broadcasting)
+  - Local derivatives: ∂y/∂x₁ = x₂, ∂y/∂x₂ = x₁
+  - Gradient for x₁: ∇\_{x₁} L = ReduceSum(∇\_y L ⊙ Broadcast(x₂, shape(y)), broadcast\_axes(shape(x₁), shape(y)))
+  - Gradient for x₂: ∇\_{x₂} L = ReduceSum(∇\_y L ⊙ Broadcast(x₁, shape(y)), broadcast\_axes(shape(x₂), shape(y)))
   - Product rule: each operand's gradient is upstream gradient times the other operand
 
 ### Reductions
 
 - **`Sum: y = Sum(x, axes, keepdims)`**
-  - Forward: `y = Σ_{i ∈ axes} x_i`
-  - Local derivative: `∂y/∂x_j = 1` for all j
-  - Gradient: `∇_x L = ExpandToOriginalShape(∇_y L, shape(x), axes, keepdims)`
+  - Forward: y = Σ\_{i ∈ axes} x\_i
+  - Local derivative: ∂y/∂x\_j = 1 for all j
+  - Gradient: ∇\_x L = ExpandToOriginalShape(∇\_y L, shape(x), axes, keepdims)
   - If `keepdims=true`: gradient has same rank as input with 1s at reduced axes; broadcast to restore
   - If `keepdims=false`: gradient has lower rank; insert 1s at reduced axes then broadcast
   - Implementation: uses `ExpandDims` if keepdims=false, then broadcasts gradient to input shape
 
 - **`Mean: y = Mean(x, axes, keepdims)`**
-  - Forward: `y = (1/N) Σ_{i ∈ axes} x_i` where `N = ∏_{axis ∈ axes} shape(x)[axis]`
-  - Local derivative: `∂y/∂x_j = 1/N` for all j
-  - Gradient: `∇_x L = (1/N) · ExpandToOriginalShape(∇_y L, shape(x), axes, keepdims)`
+  - Forward: y = (1/N) Σ\_{i ∈ axes} x\_i where N = ∏\_{axis ∈ axes} shape(x)\[axis\]
+  - Local derivative: ∂y/∂x\_j = 1/N for all j
+  - Gradient: ∇\_x L = (1/N) · ExpandToOriginalShape(∇\_y L, shape(x), axes, keepdims)
   - Same expansion as Sum, but scaled by reciprocal of reduced element count
 
 ### Shape manipulation
 
 - **`Reshape: y = Reshape(x, new_shape)`**
   - Forward: reinterprets tensor storage in new shape
-  - Gradient: `∇_x L = Reshape(∇_y L, shape(x))`
+  - Gradient: ∇\_x L = Reshape(∇\_y L, shape(x))
   - Reshape gradient back to original input shape
 
 - **`Transpose: y = Transpose(x, permutation)`**
   - Forward: permutes axes according to permutation `perm`
-  - Gradient: `∇_x L = Transpose(∇_y L, inverse_perm)`
+  - Gradient: ∇\_x L = Transpose(∇\_y L, inverse\_perm)
   - Inverse permutation undoes the original transpose
   - If `perm = [2, 0, 1]`, then `inverse_perm = [1, 2, 0]`
 
 - **`ExpandDims: y = ExpandDims(x, axes)`**
   - Forward: inserts singleton dimensions at specified axes
-  - Gradient: `∇_x L = Squeeze(∇_y L, axes)`
+  - Gradient: ∇\_x L = Squeeze(∇\_y L, axes)
   - Removes inserted dimensions to restore original shape
 
 - **`Squeeze: y = Squeeze(x, axes)`**
   - Forward: removes singleton dimensions at specified axes
-  - Gradient: `∇_x L = ExpandDims(∇_y L, axes)`
+  - Gradient: ∇\_x L = ExpandDims(∇\_y L, axes)
   - Reinserts squeezed dimensions
 
 ### Indexing and slicing
 
 - **`Index: y = Index(x, indices)`**
   - Forward: extracts single element at multi-dimensional index
-  - Gradient: `∇_x L = ZeroTensor(shape(x))` with `∇_y L` placed at `indices` position
+  - Gradient: ∇\_x L = ZeroTensor(shape(x)) with ∇\_y L placed at `indices` position
   - Scatter gradient back to indexed position; all other elements receive zero gradient
 
 - **`Slice: y = Slice(x, starts, ends, steps)`**
   - Forward: extracts sub-tensor
-  - Gradient: `∇_x L = ZeroTensor(shape(x))` with `∇_y L` scattered to sliced region
+  - Gradient: ∇\_x L = ZeroTensor(shape(x)) with ∇\_y L scattered to sliced region
   - Pad zeros outside sliced region; place upstream gradient in corresponding slice
 
 - **`Gather: y = Gather(x, indices)`**
   - Forward: gathers elements using index tensor
-  - Gradient: `∇_x L = ScatterAdd(ZeroTensor(shape(x)), indices, ∇_y L)`
+  - Gradient: ∇\_x L = ScatterAdd(ZeroTensor(shape(x)), indices, ∇\_y L)
   - Scatter gradient values back to gathered positions; duplicate indices accumulate gradients
 
 ### Linear and tensor algebra
 
-- **`Dot: y = Dot(x₁, x₂)`**
-  - **Rank-1 × Rank-1** (inner product): `y = Σᵢ x₁[i] · x₂[i]`
-    - `∇_{x₁} L = ∇_y L · x₂`
-    - `∇_{x₂} L = ∇_y L · x₁`
-  - **Rank-2 × Rank-1** (matrix-vector): `y[i] = Σⱼ x₁[i,j] · x₂[j]`
-    - `∇_{x₁} L = ∇_y L ⊗ x₂ᵀ` (outer product)
-    - `∇_{x₂} L = x₁ᵀ · ∇_y L`
-  - **Rank-1 × Rank-2** (vector-matrix): `y[j] = Σᵢ x₁[i] · x₂[i,j]`
-    - `∇_{x₁} L = ∇_y L · x₂ᵀ`
-    - `∇_{x₂} L = x₁ᵀ ⊗ ∇_y L` (outer product)
+- **Dot: y = Dot(x₁, x₂)**
+  - **Rank-1 × Rank-1** (inner product): y = Σᵢ x₁\[i\] · x₂\[i\]
+    - ∇\_{x₁} L = ∇\_y L · x₂
+    - ∇\_{x₂} L = ∇\_y L · x₁
+  - **Rank-2 × Rank-1** (matrix-vector): y\[i\] = Σⱼ x₁\[i,j\] · x₂\[j\]
+    - ∇\_{x₁} L = ∇\_y L ⊗ x₂ᵀ (outer product)
+    - ∇\_{x₂} L = x₁ᵀ · ∇\_y L
+  - **Rank-1 × Rank-2** (vector-matrix): y\[j\] = Σᵢ x₁\[i\] · x₂\[i,j\]
+    - ∇\_{x₁} L = ∇\_y L · x₂ᵀ
+    - ∇\_{x₂} L = x₁ᵀ ⊗ ∇\_y L (outer product)
 
-- **`MatMul: y = MatMul(x₁, x₂)`** where `x₁: [..., M, K]`, `x₂: [..., K, N]`, `y: [..., M, N]`
+- **MatMul: y = MatMul(x₁, x₂)** where x₁: \[..., M, K\], x₂: \[..., K, N\], `y: [..., M, N]`
   - Forward: batched matrix multiplication
-  - Gradient for `x₁`: `∇_{x₁} L = MatMul(∇_y L, Transpose(x₂, last_two_axes))`
-    - `∇_{x₁}[..., i, k] = Σⱼ ∇_y L[..., i, j] · x₂[..., k, j]`
+  - Gradient for x₁: ∇\_{x₁} L = MatMul(∇\_y L, Transpose(x₂, last\_two\_axes))
+    - ∇\_{x₁}\[..., i, k\] = Σⱼ ∇\_y L\[..., i, j\] · x₂\[..., k, j\]
     - If batch dimensions were broadcast, reduce gradient appropriately
-  - Gradient for `x₂`: `∇_{x₂} L = MatMul(Transpose(x₁, last_two_axes), ∇_y L)`
-    - `∇_{x₂}[..., k, j] = Σᵢ x₁[..., i, k] · ∇_y L[..., i, j]`
+  - Gradient for x₂: ∇\_{x₂} L = MatMul(Transpose(x₁, last\_two\_axes), ∇\_y L)
+    - ∇\_{x₂}\[..., k, j\] = Σᵢ x₁\[..., i, k\] · ∇\_y L\[..., i, j\]
     - If batch dimensions were broadcast, reduce gradient appropriately
 
 - **`Conv2d: y = Conv2d(input, filter, strides, padding)`**
   - Forward: 2D convolution NHWC format
   - Gradient for `input`:
-    - `∇_{input} L = Conv2dBackwardInput(∇_y L, filter, input_shape, strides, padding)`
+    - ∇\_{input} L = Conv2dBackwardInput(∇\_y L, filter, input\_shape, strides, padding)
     - Convolves gradient with flipped filter to distribute gradients back to input positions
   - Gradient for `filter`:
-    - `∇_{filter} L = Conv2dBackwardFilter(input, ∇_y L, filter_shape, strides, padding)`
+    - ∇\_{filter} L = Conv2dBackwardFilter(input, ∇\_y L, filter\_shape, strides, padding)
     - Convolves input with gradient to accumulate filter gradients
   - Implementation uses standard convolution backward formulas maintaining NHWC/HWCF layouts
 
@@ -192,25 +192,25 @@ provide complete mathematical formulations for each Core v1 operation.
 
 - **`Relu: y = Relu(x) = max(0, x)`**
   - Forward: `y[i] = x[i] if x[i] > 0 else 0`
-  - Local derivative: `∂y/∂x = 1 if x > 0 else 0` (undefined at x=0; implementations typically use 0)
-  - Gradient: `∇_x L = ∇_y L ⊙ (x > 0)`
+  - Local derivative: ∂y/∂x = 1 if x > 0 else 0 (undefined at x=0; implementations typically use 0)
+  - Gradient: ∇\_x L = ∇\_y L ⊙ (x > 0)
   - Multiply upstream gradient by indicator function of positive inputs
 
 - **`Neg: y = -x`**
   - Forward: `y = -x`
-  - Local derivative: `∂y/∂x = -1`
-  - Gradient: `∇_x L = -∇_y L`
+  - Local derivative: ∂y/∂x = -1
+  - Gradient: ∇\_x L = -∇\_y L
 
 - **`Exp: y = exp(x)`**
   - Forward: `y = eˣ`
-  - Local derivative: `∂y/∂x = eˣ = y`
-  - Gradient: `∇_x L = ∇_y L ⊙ y`
+  - Local derivative: ∂y/∂x = eˣ = y
+  - Gradient: ∇\_x L = ∇\_y L ⊙ y
   - Multiply upstream gradient by forward output (efficient: reuse forward result)
 
 - **`Log: y = log(x)`**
   - Forward: `y = ln(x)`
-  - Local derivative: `∂y/∂x = 1/x`
-  - Gradient: `∇_x L = ∇_y L ⊙ (1/x)`
+  - Local derivative: ∂y/∂x = 1/x
+  - Gradient: ∇\_x L = ∇\_y L ⊙ (1/x)
   - Multiply upstream gradient by reciprocal of input
 
 ### Unsupported operations

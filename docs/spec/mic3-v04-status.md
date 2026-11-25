@@ -141,7 +141,7 @@ rules (`tests/v04_value_id_boundary.rs`). The mirror now refuses:
 - semantic rows that type a value their own scope does not define, with a nested
   `FnDef` treated as opaque to the enclosing scope ([`e96cde52`](https://github.com/star-ga/mind/commit/e96cde520d75909efffd4058aa7ed1be4bf1d342), with the
   membership lookup bounded by [`e85e0b5f`](https://github.com/star-ga/mind/commit/e85e0b5f2c5348618ff23b206a3cf21b59e96aea)); and
-- a function's scoped rows above `2^40` elements, counted per function so that
+- a function's scoped rows above 2⁴⁰ elements, counted per function so that
   siblings and nested functions do not share an allowance ([`3923608a`](https://github.com/star-ga/mind/commit/3923608a036b7be46e130dc224500c64f88939d1)).
 
 Module semantic rows are charged to the same cumulative element scope as every
@@ -180,22 +180,22 @@ The candidate's implementation limits are:
 | Admitted input | 10,485,760 bytes (`10 MiB`) | refuse before decoding when larger |
 | Temporary read buffer | admitted limit plus 2 bytes | bounded probe for oversize detection; the extra bytes are never admitted |
 | Re-emitted core body | 65,536 bytes | refuse when the body exceeds the mirror limit |
-| ULEB value | `2^62 - 1` (`4,611,686,018,427,387,903`) | refuse larger values without wrapping |
+| ULEB value | 2⁶² - 1 (`4,611,686,018,427,387,903`) | refuse larger values without wrapping |
 | Type-descriptor nesting | 64 | refuse deeper declared type descriptors |
 | Instruction depth | less than 256, with root depth 0 | refuse depth 256 |
-| Allocation budget | `min(128 MiB, 1 MiB + 32 × input bytes)` | refuse when checked charges exceed the budget |
-| Implemented descriptor scopes | `2^40` elements | check each descriptor, the schema-field total, and the shared total over every declaration signature plus module semantic rows (`2^40` admitted, `2^40 + 1` refused); each function's own scoped rows have a separate `2^40` allowance, counted per function |
+| Allocation budget | min(128 MiB, 1 MiB + 32 × input bytes) | refuse when checked charges exceed the budget |
+| Implemented descriptor scopes | 2⁴⁰ elements | check each descriptor, the schema-field total, and the shared total over every declaration signature plus module semantic rows (2⁴⁰ admitted, 2⁴⁰ + 1 refused); each function's own scoped rows have a separate 2⁴⁰ allowance, counted per function |
 
 The input cap, body cap, and budget are implementation limits for this
 draft. They do not establish complete v04 reader/writer parity
 or native aggregate execution. The ULEB limit is a declared narrowing. The
 reference decoder reads ULEB values over the full `u64` range, while the mirror
-refuses any ULEB field above `2^62 - 1` (exit 17, or exit 14 past nine bytes).
+refuses any ULEB field above 2⁶² - 1 (exit 17, or exit 14 past nine bytes).
 On a 64-bit host, bodies the reference accepts are therefore refused here when
-they carry a `next_id` from `2^62` to `2^64 - 2` (the reference itself refuses
-only `usize::MAX`), a `ConstI64` value of `2^61` or more or below `-2^61`
+they carry a `next_id` from 2⁶² to 2⁶⁴ - 2 (the reference itself refuses
+only `usize::MAX`), a `ConstI64` value of 2⁶¹ or more or below -2⁶¹
 (including `i64::MAX` and `i64::MIN`, whose zigzag encodings exceed the limit),
-or a `ValueId` or `Param` index of `2^62` or more. The reference
+or a `ValueId` or `Param` index of 2⁶² or more. The reference
 allocation accounting charges each instruction twice (640 logical bytes total);
 this is an admission budget, not a measured heap allocation. The mirror applies
 the reference's per-item charges but not its final whole-body re-emission

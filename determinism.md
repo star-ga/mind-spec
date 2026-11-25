@@ -58,7 +58,7 @@ Integer arithmetic is fully deterministic and byte-identical across substrates.
 | Integer overflow | wraps two's-complement (defined; identical on x86 and ARM) |
 | Declared narrow width (`i8`, `u8`, `i16`, `u16`, `i32`, `u32`) | a value wraps at the declared width where it is materialised (binding, assignment, argument, return, struct field): two's-complement for signed widths, modulo 2 to the power N for unsigned widths. An 8- or 16-bit arithmetic intermediate (`+ - * / %` and shifts) is re-wrapped to the widest 8- or 16-bit operand width; an operand that is a wider variable, or a cast to a wider type, leaves it unwrapped. ✅ on the MLIR build path for the 8- and 16-bit widths since v0.10.2 (not v0.10.0); the wider-operand rule holds since `732edb0f` (v0.10.3), and v0.10.2 re-wrapped such an intermediate to the narrow width (`i64` 1000 + `u8` 1 gave 233). The native backend is not covered by this evidence. |
 | Integer type the implementation does not compute at its written width (e.g. `i128`, `u128`, `i256`) | never computed at a narrower width: it is either computed at its written width as a documented extension, or refused at check time. 📋 The reference compiler refuses `iN`/`uN` with N > 64 at check time since `4fd65cfb` (v0.10.3); v0.10.2 accepted them outside extern function signatures, and a `let` binding of one was computed in 64 bits. Widths of 64 or less that it does not recognise (e.g. `i24`) are not covered by this check (see [types.md](spec/v1.0/types.md#type-formation)). |
-| Oversized shift (`count ≥ bit-width`) | given a defined result (never UB) |
+| Oversized shift (count ≥ bit-width) | given a defined result (never UB) |
 | Condition truthiness (`if c`) | tests `c != 0` — the whole value, not the low bit |
 
 The narrow-integer call ABI (`i32`/`u32` across call boundaries) and struct
@@ -85,13 +85,13 @@ substrates (x86 == ARM) today.
 
 | Case | Rule | Status |
 |------|------|--------|
-| Scalar `+ − × ÷ √` (`f64`/`f32`) | bit-exact IEEE-754 on the strict path; no FMA-contraction, no reassociation, fixed source order | 🔄 |
+| Scalar + − × ÷ √ (`f64`/`f32`) | bit-exact IEEE-754 on the strict path; no FMA-contraction, no reassociation, fixed source order | 🔄 |
 | `1.0 / 0.0` | `+Inf` (IEEE) | 🔄 |
 | `-1.0 / 0.0` | `-Inf` (IEEE) | 🔄 |
 | `0.0 / 0.0` | `NaN` (IEEE) | 🔄 |
 | `sqrt(-1.0)` | `NaN` (IEEE); `strict_domain` → defined domain error | 🔄 (`strict_domain` error 📋) |
 | `pow(0.0, 0.0)` | `1.0` — IEEE `pow`: `pow(x, 0.0)` is `1.0` for **all** `x` (including `0` and `NaN`) | 📋 (transcendental) |
-| `powr(0.0, 0.0)` | `NaN` — IEEE `powr` (= `exp(0·log 0)`), the strict real-power form | 📋 (transcendental) |
+| `powr(0.0, 0.0)` | `NaN` — IEEE `powr` (= exp(0·log 0)), the strict real-power form | 📋 (transcendental) |
 | 0⁰ as a limit form | indeterminate — symbolic/calculus context, not a number | 📋 |
 | Float comparisons (NaN operand, signed zero) | `<`, `<=`, `>`, `>=`, `==` are `false` and `!=` is `true`; `-0.0 == +0.0` is `true` | 📋 compiled MLIR path since `2597ee9c` (v0.10.3) (the v0.10.2 release lowered `!=` as ordered, so `NaN != NaN` was `false` there); native x86-64 `f64` since `ccbb00b8` (v0.10.3; the native backend refuses `f32`); the `mindc test` evaluator has an open `f64` comparison defect |
 | `min` / `max` / `sort` with NaN | use a defined total order (NaN sorts last) so results are deterministic | 📋 |
@@ -135,7 +135,7 @@ x86 CPU and on an NVIDIA GPU (CUDA, `sm_86`), because the same no-FMA-contractio
 contract (`-ffp-contract=off` on the CPU, `--fmad=false` on the GPU) forbids the
 fused multiply-add both would otherwise apply — with contraction enabled the
 chaotic trajectory diverges, worse the longer it runs. Because scalar
-`+ − × ÷ √` are correctly-rounded IEEE-754 operations, the same holds in
++ − × ÷ √ are correctly-rounded IEEE-754 operations, the same holds in
 principle on any conforming FPU; further substrate coverage is added as it is
 verified on hardware. This scalar strict path is now **verified byte-identical
 across x86_64 (AVX2) and ARM64 (NEON) CPUs on real hardware**: the `cross_substrate`
@@ -196,7 +196,7 @@ Two execution tiers; the contract is **bit-identity**, never "within tolerance"
 
 - **Strict tier (default).** Integer and Q16.16 results are byte-identical across
   substrates (x86 == ARM), gated by `cross_substrate` (see §2.1 for the workload set). ✅ Scalar `f64`/`f32`
-  arithmetic (`+ − × ÷ √`) runs on the strict path bit-exact and run-to-run
+  arithmetic (+ − × ÷ √) runs on the strict path bit-exact and run-to-run
   bit-identical, and is verified byte-identical across substrates (x86_64 + ARM64)
   on real hardware by the same `cross_substrate` gate. 🔄 For `f32`/`f64`
   **vector reductions**, the strict tier will fix the reduction order (canonical

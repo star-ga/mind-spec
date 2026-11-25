@@ -173,7 +173,7 @@ BCI and neuroscience applications have stricter determinism requirements than ty
    - Verification against reported metrics (no floating-point drift across platforms)
 
 **Proposed guarantee**:
-> MIND Core v1 with `--deterministic` flag guarantees bitwise-identical IR, MLIR, and LLVM output for identical source and compiler version. Scalar IEEE-754 `f32`/`f64` arithmetic (`+ − × ÷ √`) on the strict no-FMA path is bit-exact (0 ULP) and run-to-run bit-identical; the 1-ULP allowance applies to transcendental functions and vector reductions, whose canonical/correctly-rounded implementations are on the roadmap.
+> MIND Core v1 with `--deterministic` flag guarantees bitwise-identical IR, MLIR, and LLVM output for identical source and compiler version. Scalar IEEE-754 `f32`/`f64` arithmetic (+ − × ÷ √) on the strict no-FMA path is bit-exact (0 ULP) and run-to-run bit-identical; the 1-ULP allowance applies to transcendental functions and vector reductions, whose canonical/correctly-rounded implementations are on the roadmap.
 
 #### 5. Integration with Existing Features
 

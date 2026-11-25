@@ -88,13 +88,13 @@ bit pattern on every substrate. This section does not require any other operatio
 
 ## Typing judgements
 
-Typing rules are written using natural deduction. The primary judgement `Γ ⊢ e : T` reads “under
+Typing rules are written using natural deduction. The primary judgement Γ ⊢ e : T reads “under
 context Γ, expression e has type T”. Implementations MUST reject programs that violate any
 applicable rule. Selected core rules include:
 
-- **Variable**: if `x : T ∈ Γ` then `Γ ⊢ x : T`.
-- **Let binding**: if `Γ ⊢ e1 : T1` and `Γ, x : T1 ⊢ e2 : T2` then `Γ ⊢ let x = e1 in e2 : T2`.
-- **Function abstraction**: if `Γ, x1 : T1, ..., xn : Tn ⊢ e : U` then `Γ ⊢ fn(x1 : T1, ..., xn : Tn) -> U { e } : (T1, ..., Tn) -> U`.
+- **Variable**: if x : T ∈ Γ then Γ ⊢ x : T.
+- **Let binding**: if Γ ⊢ e1 : T1 and Γ, x : T1 ⊢ e2 : T2 then Γ ⊢ let x = e1 in e2 : T2.
+- **Function abstraction**: if Γ, x1 : T1, ..., xn : Tn ⊢ e : U then Γ ⊢ fn(x1 : T1, ..., xn : Tn) -> U { e } : (T1, ..., Tn) -> U.
 
 ### Fixed-array literal cardinality
 

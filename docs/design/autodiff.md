@@ -86,7 +86,7 @@ that produces gradient modules from forward computation modules.
 **Decision:** Vector-Jacobian Product (VJP) is the fundamental primitive.
 
 **Rationale:**
-- VJP computes `v^T @ J` efficiently without forming full Jacobian
+- VJP computes vᵀ @ J efficiently without forming full Jacobian
 - Composes naturally with chain rule
 - Standard interface for custom gradients
 

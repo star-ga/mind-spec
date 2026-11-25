@@ -59,7 +59,7 @@ Given two shapes `A` and `B`, broadcasting proceeds as:
    - otherwise broadcasting fails.
 
 Formally, let `A'` and `B'` be the aligned shapes of the same rank `k`. Then
-for each `i ∈ {0, ..., k-1}`:
+for each i ∈ {0, ..., k-1}:
 
 ```text
 if A'[i] == B'[i]      → C[i] = A'[i]
