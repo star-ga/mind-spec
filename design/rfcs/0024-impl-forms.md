@@ -21,7 +21,7 @@ limitations under the License.
 | State | Draft (2026-11-24). Not yet accepted. The specification owner decided the questions of this draft on 2026-11-24 (see [Questions](#questions-for-the-specification-owner)). |
 | Number | Provisional. The specification owner assigns the final number. |
 | Edition | Core v1.1, together with [RFC 0023](./0023-type-parameters-on-user-types.md) and [RFC 0027](./0027-function-generics.md). |
-| Changes | `grammar-syntax.ebnf` (new `ImplDeclaration` with an optional `TypeParameterList`; unmarks `TraitDeclaration`, `TraitItem` and `FunctionSignature`; associated constants and types; `SelfType`), `lexical.md` and `grammar-lexical.ebnf` (`Self` joins the keyword list), `types.md` (Traits and generics), `errors.md` (codes of the impl checks) |
+| Changes | `grammar-syntax.ebnf` (new `ImplDeclaration` with an optional `TypeParameterList`; unmarks `TraitDeclaration`, `TraitItem` and `FunctionSignature`; associated constants and types; `SelfType`), `lexical.md` and `grammar-lexical.ebnf` (`Self` joins the keyword list; `impl` joins the contextual words), `language.md` (the list of words that the grammar spells out), `types.md` (Traits and generics), `errors.md` (codes of the impl checks) |
 | Depends on | [RFC 0023](./0023-type-parameters-on-user-types.md) (`TraitRef`, `TypeParameterList`, the rules of type parameters and the instance names), in the same edition. |
 | Related | [RFC 0023](./0023-type-parameters-on-user-types.md), [RFC 0025](./0025-patterns.md), [RFC 0026](./0026-module-items.md), [RFC 0027](./0027-function-generics.md) (bounds) |
 
@@ -84,7 +84,11 @@ AssociatedValue   = ( "Self" | Identifier ) , "::" , Identifier ;
 ```
 
 The lexical grammar adds `"Self"` to `Keyword`, and [Lexical Structure](../../spec/v1.0/lexical.md#keywords) adds
-`Self` to the keyword list.
+`Self` to the keyword list. It adds `"impl"` to `ContextualWord`: like the item words `const`, `enum`, `module` and
+`use`, `impl` is not reserved, and a source is read by the rule of
+[Words that the grammar spells out](../../spec/v1.0/language.md#words-that-the-grammar-spells-out), which then lists
+`impl` too. Where an item starts, no production derives an `Identifier`, so `impl` there begins an
+`ImplDeclaration`, and `let impl = 1;` binds a name.
 
 This RFC unmarks `TraitDeclaration`, `TraitItem` and `FunctionSignature`. The supertrait list of the old
 `TraitDeclaration` (`trait B: A`), the trait bounds and the bounds of an associated type are owned by
@@ -185,6 +189,11 @@ canonical spelling of [RFC 0023](./0023-type-parameters-on-user-types.md#instanc
 `C(Type)::C(Trait)::item`, where `C(Trait)` is `D(Trait)` with the trait arguments in the same form:
 `P::Conv<f64>::conv` for the function `conv` of `impl Conv<f64> for P`. An item name holds `::`, which no identifier
 holds, so it never equals a name of the program; an inherent name has one `::` and a trait impl name has two.
+A function of an inherent block that has type parameters of its own ([RFC 0027](./0027-function-generics.md)) has one
+instance for each list of its own arguments, named by the item name followed by those arguments in the form of
+[RFC 0023](./0023-type-parameters-on-user-types.md#instance-names): `Box<i64>::map<f64>` for `fn map<U>` of
+`impl<T> Box<T>` with `T` = `i64` and `U` = `f64`. A function of a trait impl has no type parameters of its own,
+because a `FunctionSignature` has none (rule 4).
 
 ```mind
 struct P { x: i64, }
