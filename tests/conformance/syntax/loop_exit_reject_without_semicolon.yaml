@@ -1,9 +1,9 @@
-# MIND Conformance Test: a loop exit needs its ;, so break - 1; uses break as a name
-# Specification reference: spec/v1.0/language.md#loop-exits
+# MIND Conformance Test: a loop exit needs its ;
+# Specification reference: spec/v1.0/language.md#statement-separators
 # Category: syntax
 # Profile: cpu
 
-description: "break - 1; has no derivation with the loop exit, so break is a name, and no name break is declared"
+description: "the loop exit needs its ;, so while c { break } is refused"
 category: syntax
 profile: cpu
 
@@ -13,12 +13,10 @@ input:
         let mut i = 0;
         while i < 3 {
             i = i + 1;
-            break - 1;
+            break
         }
         return i;
     }
 
 expected:
   status: error
-  error:
-    code: E2002

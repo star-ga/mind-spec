@@ -43,13 +43,15 @@ implementation MAY accept or refuse those.
 | [`loop_exit_accept_while`](./loop_exit_accept_while.yaml) | accept, returns 8 | `LoopExitStatement` and [Loop exits](../../../spec/v1.0/language.md#loop-exits) |
 | [`loop_exit_accept_for_array`](./loop_exit_accept_for_array.yaml) | accept | as above |
 | [`loop_exit_accept_statement_after_break`](./loop_exit_accept_statement_after_break.yaml) | accept, returns 1 | as above: the statement after `break;` is the next statement |
-| [`loop_exit_accept_name_break_assigned`](./loop_exit_accept_name_break_assigned.yaml) | accept, returns 5 | as above: `break = 5;` has no derivation with the loop exit, so `break` is a name |
+| [`loop_exit_reject_break_as_name`](./loop_exit_reject_break_as_name.yaml) | reject | as above: `break` is a keyword, so `let break = 4;` has no derivation and MUST be refused |
+| [`loop_exit_reject_continue_as_name`](./loop_exit_reject_continue_as_name.yaml) | reject | as above: `continue` is a keyword |
+| [`loop_exit_reject_break_as_operand`](./loop_exit_reject_break_as_operand.yaml) | reject | as above: `break - 1;` uses the keyword as an operand |
 | [`loop_exit_reject_label`](./loop_exit_reject_label.yaml) | reject | as above: a label is an invalid token and MUST be diagnosed |
 | [`loop_exit_reject_continue_label`](./loop_exit_reject_continue_label.yaml) | reject | as above |
 | [`loop_exit_reject_label_in_for`](./loop_exit_reject_label_in_for.yaml) | reject | as above |
 | [`loop_exit_reject_break_outside_loop`](./loop_exit_reject_break_outside_loop.yaml) | reject, `E2401` | [Loop exits](../../../spec/v1.0/language.md#loop-exits): a loop exit outside a loop MUST be refused |
 | [`loop_exit_reject_continue_after_loop`](./loop_exit_reject_continue_after_loop.yaml) | reject, `E2401` | as above |
-| [`loop_exit_reject_without_semicolon`](./loop_exit_reject_without_semicolon.yaml) | reject, `E2002` | as above: the loop exit needs its `;`, so in `break - 1;` the word is a name, and no name `break` is declared |
+| [`loop_exit_reject_without_semicolon`](./loop_exit_reject_without_semicolon.yaml) | reject | [Statement separators](../../../spec/v1.0/language.md#statement-separators): the `;` of a loop exit is required, so `while c { break }` MUST be refused |
 | [`loop_reject_loop_block`](./loop_reject_loop_block.yaml) | reject, `E2405` | as above: Core v1 has no `loop` statement |
 | [`loop_accept_name_loop`](./loop_accept_name_loop.yaml) | accept, returns 1 | as above: `loop` is not a keyword |
 | [`loop_value_accept_unit`](./loop_value_accept_unit.yaml) | accept, returns 7 | `WhileExpression`, `ForExpression` and [Loops](../../../spec/v1.0/language.md#loops): a loop has the type `unit` |

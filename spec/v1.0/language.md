@@ -401,19 +401,18 @@ of a `while` or a `for` MUST be refused at check time with
 [`E2401`](./errors.md#e2401-loop-exit-outside-a-loop). A loop exit takes no value and no label, and its
 `;` is required ([Statement separators](#statement-separators)): no token of the
 [lexical grammar](./grammar-lexical.ebnf) starts with `'`, so `break 'a;` contains an invalid token and
-MUST be diagnosed, and `break 7;` has no derivation and MUST be refused. Core v1 has no `loop` statement:
-`loop` is a name, and `loop { ... }` is the name `loop` followed by a block with no `;` between them, which
-no rule derives. It MUST be refused at check time with [`E2405`](./errors.md#e2405-no-loop-statement), and
-the diagnostic MUST say that Core v1 has no `loop` statement and name the form `while true { ... }`. The words
-`break`, `continue` and `loop` are not in the keyword list of [Lexical Structure](./lexical.md#keywords); this
-edition does not reserve them. A source is read by the reading rule of
-[Words that the grammar spells out](#words-that-the-grammar-spells-out): where the grammar derives the source
-with a `LoopExitStatement`, the word is the loop exit, and a source with no such derivation uses the word as a
-name. `break;` is the loop exit. `break - 1;` and `break = 5;` have no derivation with the loop exit, because
-the loop exit needs its `;` directly after the word, so `break` is a name there: after `let mut break = 4;`,
-the statement `break = 5;` assigns 5 to that name. In `while c { break }` the word is the tail expression of
-the body and so a name; the loop exit is `break;`. `let break = 4; return break;` is valid for the same
-reason. The range after `in` (`for i in a..b`) is not defined by the grammar; it is an extension.
+MUST be diagnosed, and `break 7;` has no derivation and MUST be refused.
+
+`break` and `continue` are keywords ([Lexical Structure](./lexical.md#keywords)), and `LoopExitStatement` is
+the only rule of the grammar that holds them. A source in which one of them stands where the grammar needs a
+name or an expression has no derivation and MUST be refused: `let break = 4;`, `break - 1;` and
+`break = 5;` are refused. `while c { break }` is refused because the `;` of the loop exit is missing.
+
+Core v1 has no `loop` statement: `loop` is a name and not a keyword, and `loop { ... }` is the name `loop`
+followed by a block with no `;` between them, which no rule derives. It MUST be refused at check time with
+[`E2405`](./errors.md#e2405-no-loop-statement), and the diagnostic MUST say that Core v1 has no `loop`
+statement and name the form `while true { ... }`. As a name, `loop` is valid: `let loop = 1; return loop;`.
+The range after `in` (`for i in a..b`) is not defined by the grammar; it is an extension.
 
 ## Tuple index
 
@@ -447,9 +446,8 @@ MUST NOT accept that source.
 
 ## Words that the grammar spells out
 
-The syntactic grammar spells out words that are not keywords (`in`, `as`, `break`, `continue`, `const`,
-`enum`, `module`, `use`, `assert`, `mut`, `diff`, `dyn`, `Tensor`, `tensor`, `dtype`, the primitive type
-names and `_`). [`grammar-lexical.ebnf`](./grammar-lexical.ebnf) lists them as `ContextualWord`: the lexer
+The syntactic grammar spells out words that are not keywords (`in`, `as`, `const`, `enum`, `module`,
+`use`, `assert`, `mut`, `diff`, `dyn`, `Tensor`, `tensor`, `dtype`, the primitive type names and `_`). [`grammar-lexical.ebnf`](./grammar-lexical.ebnf) lists them as `ContextualWord`: the lexer
 produces each of them as an identifier, and this edition does not reserve them. A source is read by the
 derivation in which a rule of the syntactic grammar spells the word out, when such a derivation exists. A
 source with no such derivation reads the word as an identifier. This is the only rule for these words. The

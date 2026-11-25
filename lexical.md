@@ -37,6 +37,8 @@ The following tokens are reserved:
 | :--- | :--- | :--- | :--- | :--- |
 | `fn` | `let` | `type` | `struct` | `trait` |
 | `if` | `else` | `match` | `while` | `for` |
+| `return` | `defer` | `import` | `export` | `where` |
+| `break` | `continue` | | | |
 
 ## 5. Literals
 - **Integers:** `123`, `0xFF`, `0b101`

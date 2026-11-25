@@ -174,12 +174,10 @@ BlockLikeStatement = IfExpression
 (* ForExpression; elsewhere it is refused (language.md, "Loop exits").*)
 (* It ends the innermost loop (break) or starts its next iteration    *)
 (* (continue). It takes no value and no label, and its ";" is         *)
-(* required. The words are not reserved. A source is read by the rule *)
-(* of ContextualWord in grammar-lexical.ebnf: where the source has a  *)
-(* derivation with a LoopExitStatement, the word is the loop exit,    *)
-(* and a source with no such derivation uses it as a name. `break;`   *)
-(* is the loop exit. `break - 1;` and `break = 5;` have no such       *)
-(* derivation, so `break` is a name there.                            *)
+(* required. "break" and "continue" are keywords (Keyword in          *)
+(* grammar-lexical.ebnf), so no rule reads them as a name:            *)
+(* `let break = 4;`, `break - 1;`, `break = 5;` and                   *)
+(* `while c { break }` are not derived.                               *)
 LoopExitStatement = ( "break" | "continue" ) , ";" ;
 
 (* Expressions *)

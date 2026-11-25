@@ -67,6 +67,7 @@ The following keywords are reserved and MAY NOT be used as identifiers:
 fn    let    type    struct    trait
 if    else   match   while     for
 return defer import  export    where
+break continue
 ```
 
 Keywords MUST be matched prior to identifiers.

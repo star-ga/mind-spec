@@ -41,6 +41,7 @@ Digit = ? Unicode XID_Continue & Nd ? | "0" | "1" | "2" | "3" | "4" | "5" | "6" 
 Keyword = "fn" | "let" | "type" | "struct" | "trait"
         | "if" | "else" | "match" | "while" | "for"
         | "return" | "defer" | "import" | "export" | "where"
+        | "break" | "continue"
         ;
 
 (* Contextual words. The syntactic grammar spells these words out. The   *)
@@ -48,11 +49,11 @@ Keyword = "fn" | "let" | "type" | "struct" | "trait"
 (* does not include them, so they are not reserved. A source is read by   *)
 (* the derivation in which a rule of the syntactic grammar spells the     *)
 (* word out, when such a derivation exists. A source with no such         *)
-(* derivation reads the word as an Identifier (`let break = 4;` binds a   *)
+(* derivation reads the word as an Identifier (`let in = 4;` binds a      *)
 (* name).                                                                  *)
 ContextualWord = "i32" | "i64" | "f32" | "f64" | "bool" | "unit"
                | "Tensor" | "tensor" | "dtype" | "diff" | "dyn"
-               | "in" | "as" | "break" | "continue" | "_"
+               | "in" | "as" | "_"
                | "const" | "enum" | "module" | "use" | "assert"
                | "mut"
                ;

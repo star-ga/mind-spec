@@ -1,0 +1,22 @@
+# MIND Conformance Test: break is a keyword, so break - 1; is not derived
+# Specification reference: spec/v1.0/language.md#loop-exits
+# Category: syntax
+# Profile: cpu
+
+description: "break is a keyword; break - 1; uses it as an operand, has no derivation and is refused"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let mut i = 0;
+        while i < 3 {
+            i = i + 1;
+            break - 1;
+        }
+        return i;
+    }
+
+expected:
+  status: error
