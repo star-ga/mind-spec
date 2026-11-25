@@ -102,7 +102,8 @@ truncated remainder `a - n * b`, where `n` is `a / b` truncated toward zero; the
 gives `a`; a zero `a` with a `b` that is not zero and not NaN gives `a` with its sign; any NaN operand gives NaN.
 This NaN is the canonical NaN of [Types](../../spec/v1.0/types.md#canonical-nan), which this decision adds: one bit
 pattern for each float type, `0x7FC00000` for `f32` and `0x7FF8000000000000` for `f64` (sign bit clear, quiet bit
-set, other payload bits clear). Operands of two different float types are a dtype mismatch (`E2004`).
+set, other payload bits clear). Operands of two different float types are a dtype mismatch and MUST be refused at
+check time with `E2004`.
 [Floating-point remainder](../../spec/v1.0/language.md#floating-point-remainder) gives the rule and its table of
 special cases.
 
@@ -173,8 +174,8 @@ a row for `as`. `a * b as f64` is `a * (b as f64)`, and `-x as f64` is `(-x) as 
 too: `e as T` is a `CastExpression` of the grammar, and its result has the type `T`. The rule is the same on every
 substrate, bit for bit ([Casts](../../spec/v1.0/language.md#casts)):
 
-1. Integer to integer: the value modulo 2^N of the width N of the target. A signed source is sign-extended, and an
-   unsigned source is zero-extended.
+1. Integer to integer: the value modulo 2 to the power `N`, the width of the target. A signed source is
+   sign-extended, and an unsigned source is zero-extended.
 2. Integer to float: round to nearest, ties to even.
 3. Float to integer: truncate toward zero. A value outside the range of the target, an infinity too, gives the
    nearest bound of the target. NaN gives 0.
@@ -184,9 +185,10 @@ substrate, bit for bit ([Casts](../../spec/v1.0/language.md#casts)):
 5. `bool` to integer: `false` is 0 and `true` is 1.
 6. A cast to the same type is the identity: the value of `e`, bit for bit, except that a NaN gives the canonical NaN.
 
-Every cast whose value is a floating-point NaN gives the canonical NaN of the target type: rule 4 in both directions,
-and rule 6 for `f32` and `f64`. Every other cast is refused at check time with `E2016` (invalid cast). A cast of an
-integer or a float to `bool` is refused too: the program writes a comparison, such as `x != 0`.
+A cast that these six rules do not list MUST be refused at check time with `E2016` (invalid cast). An integer or a
+float has no cast to `bool`: the program writes a comparison, such as `x != 0`. Every cast whose value is a
+floating-point NaN gives the canonical NaN of the target type: rule 4 in both directions, and rule 6 for `f32` and
+`f64`.
 
 **Form status.** The precedence of `as` (`a * b as f64` is `a * (b as f64)`): Core v1. `e as T` for a pair of types
 of the cast table: Core v1; reference gap (the native backend refuses `i64 as i32` and `i32 as i64` with
@@ -368,20 +370,23 @@ no sign, no prefix and no suffix (`t.0`). The type of `t` must be a tuple type a
 number of elements; otherwise the source is refused at check time with `E2404`.
 Where the parser expects the `DecimalInteger` of a tuple index and the next token is a float literal of the form
 digits "." digits (no exponent, no suffix), the token is read as two tuple indices: `t.0.1` means `(t.0).1`.
-After an access dot, a float literal token with an exponent is not a tuple index, because only the form digits "."
-digits is read as two indices: a source such as `t.0.1e0` is not derived and MUST be refused.
+After an access dot, a float literal token with an exponent or a suffix is not a tuple index, because only the form
+digits "." digits is read as two indices (the lexical grammar gives a float literal no suffix, so in Core v1 such a
+token has an exponent): a source such as `t.0.1e0` is not derived and MUST be refused.
 [RFC 0025](./0025-patterns.md#tuple-index) states the same rule in the same words. `t[0]` on a tuple has no meaning:
-it is refused with `E2404`, and the diagnostic names the form `e.N`. `a[e1:e2]` is the only slice form: it takes the
-elements from the index `e1` up to, and not including, the index `e2`, so `a[1:3]` takes the elements 1 and 2. The
-grammar has no range index: `a[1..3]` is refused at check time with `E2406`, and the diagnostic names the slice form
-`a[1:3]`.
+it is refused with `E2404`, and the diagnostic names the form `e.N`. `a[e1:e2]` is the only slice form that this
+edition defines: it takes the elements from the index `e1` up to, and not including, the index `e2`, so `a[1:3]` takes
+the elements 1 and 2. `SliceExpression` also derives `a[:e2]`, `a[e1:]`, `a[:]` and `a[e1:e2:e3]`, and no sentence of
+the specification gives them a meaning. The grammar has no range index: `a[1..3]` is refused at check time with
+`E2406`, and the diagnostic names the slice form `a[1:3]`.
 
 **Form status.** `t.0` and `t.0.1` on a tuple: Core v1; reference gap (the native backend refuses tuples with
 `lane.source.tuple`). `t.0.1e0`: Core v1 refuses; reference conforms (`mindc check` refuses it with `E2002`, as the
 unknown identifier `e0`). `x.0` where `x` is not a tuple, `t.N` with `N` not less than the number of elements, and
 `t[0]` on a tuple: Core v1 refuses; reference gap (`mindc check` accepts all three). `t[a:b]`, the slice form: Core
 v1; reference gap (`mindc check` refuses `let b = a[1:3];` on the array `[1, 2, 3, 4]` with `E1001`, "expected `]` to
-close index expression"). `a[1..3]`: Core v1 refuses; reference gap (`mindc check` accepts it).
+close index expression"). `a[:e2]`, `a[e1:]`, `a[:]`, `a[e1:e2:e3]`, the other forms of `SliceExpression`: Open.
+`a[1..3]`: Core v1 refuses; reference gap (`mindc check` accepts it).
 
 ## DN-12. Compound assignment operators
 
@@ -413,9 +418,10 @@ different integer types for `&`, `|` or `^` are refused at check time with `E200
 integer type with `E2005`.
 
 The lexer reads the longest operator, so `<<=` and `>>=` are one token each
-([Lexical Structure](../../spec/v1.0/lexical.md#tokens)). Where the grammar expects the `>` that closes a list in
-angle brackets and the next token starts with `>`, the first `>` closes the list and the rest of the token is read
-again, so `let o: Option<Option<i64>>= p;` is derived as before these operators were added.
+([Lexical Structure](../../spec/v1.0/lexical.md#tokens)). Where the grammar expects the `>` that closes a
+type-argument list and the next token starts with `>`, the first `>` closes the list and the rest of the token is
+read again, so `let o: Option<Option<i64>>= p;` is derived as before these operators were added. The `>` that closes
+the type parameters of a declaration is not read so: `type X<T>= T;` holds the token `>=` and is not derived.
 
 **Form status.** `a %= b;`, `a <<= b;`, `a >>= b;`, `a &= b;`, `a |= b;` and `a ^= b;` where the root of `a` is bound by
 `let mut`: Core v1; reference gap (the native backend builds `%=` and refuses the other five). `a & b`, `a | b` and
