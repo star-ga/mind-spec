@@ -1,5 +1,5 @@
 # MIND Conformance Test: a library function that is not a raw memory function needs no mark
-# Specification reference: spec/v1.0/stdlib.md#raw-memory-functions
+# Specification reference: spec/v1.0/memory.md#library-functions-that-check
 # Category: syntax
 # Profile: cpu
 

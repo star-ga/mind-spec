@@ -126,7 +126,7 @@ implementation MAY accept or refuse those.
 | [`struct_reject_holds_itself_through_other`](./struct_reject_holds_itself_through_other.yaml) | reject, `E2407` | as above |
 | [`rawmem_accept_marked_load`](./rawmem_accept_marked_load.yaml) | accept, returns 9 | [Raw memory](../../../spec/v1.0/memory.md#raw-memory): a raw memory use is allowed in a function declared with `#[raw_memory]` |
 | [`rawmem_accept_sealed_called`](./rawmem_accept_sealed_called.yaml) | accept, returns 5 | as above: a call of a `#[raw_memory(sealed)]` function is not a raw memory use |
-| [`rawmem_accept_std_safe_call`](./rawmem_accept_std_safe_call.yaml) | accept | [Raw memory functions](../../../spec/v1.0/stdlib.md#raw-memory-functions): a function of the list needs the mark, another library function does not |
+| [`rawmem_accept_std_safe_call`](./rawmem_accept_std_safe_call.yaml) | accept | [Raw memory functions](../../../spec/v1.0/memory.md#raw-memory-functions): a function of the list needs the mark, another library function does not |
 | [`rawmem_reject_unmarked_load`](./rawmem_reject_unmarked_load.yaml) | reject, `E2501` | [Raw memory](../../../spec/v1.0/memory.md#raw-memory): any other raw memory use MUST be refused |
 | [`rawmem_reject_unmarked_vec_addr`](./rawmem_reject_unmarked_vec_addr.yaml) | reject, `E2501` | as above: `vec_addr` gives an address |
 | [`rawmem_reject_unmarked_calls_marked`](./rawmem_reject_unmarked_calls_marked.yaml) | reject, `E2501` | as above: a call of a `#[raw_memory]` function is a raw memory use |
