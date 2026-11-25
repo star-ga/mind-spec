@@ -48,6 +48,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   of size 0 is valid and a negative one is refused; the `-1` of a reshape is a marker, not a dimension; a
   negative length of a fixed array type is refused with `E3006`
   ([Fixed-array literal cardinality](../spec/v1.0/types.md#fixed-array-literal-cardinality)).
+- **Values and labels.** `map_len` gives the number of pairs and `string_len` the number of bytes. The label
+  of `E2402` is "Invalid target of a change": it covers an assignment and a method call that changes a
+  container. The memory chapter names the string functions as the library list does (`string_push_i`,
+  `string_slice_from`).
 
 ### Changed: raw memory, the string type, elementwise operands, the tensor constructor, slice bounds, literal types, cast and method readings (2026-11-25)
 

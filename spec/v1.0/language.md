@@ -423,7 +423,7 @@ The left operand of an assignment or of a compound assignment is a place: a name
 field and tuple-index accesses on a name (`x`, `a[i]`, `p.f`, `t.0`, `a[i].f.1`). The name at the start of
 the chain is the root of the place. An assignment or a compound assignment to a place needs the root name to
 be declared with `let mut`. A left operand that is not a place, or a place whose root is not mutable, MUST
-be refused at check time with [`E2402`](./errors.md#e2402-invalid-assignment-target): after
+be refused at check time with [`E2402`](./errors.md#e2402-invalid-target-of-a-change): after
 `let a = [1, 2];`, the statement `a[0] = 5;` is refused.
 
 The compound assignment operators are `+=`, `-=`, `*=`, `/=`, `%=`, `<<=`, `>>=`, `&=`, `|=` and `^=`.

@@ -522,7 +522,7 @@ so this resolution is the default behaviour of a shipped `mindc`; building with
   ([Type formation](./types.md#type-formation)). The container stores raw bytes; UTF-8 well-formedness is a documented
   invariant the producer MUST uphold. Signatures: `string_new() -> String`,
   `string_push_byte(s: String, b: i64) -> String` (appends the byte `b` to the record of `s` in place and returns `s`),
-  `string_len(s: String) -> i64`, `string_get_byte(s: String, i: i64) -> i64`,
+  `string_len(s: String) -> i64` (the number of bytes of `s`), `string_get_byte(s: String, i: i64) -> i64`,
   `string_slice_from(s: String, start: i64) -> String` (a new record with a copy of the bytes from `start`). The
   reference implementation (mindc v0.10.0, `std/string.mind`) ships: `string_new`, `string_push_byte`,
   `string_push_str`, `string_push_i`, `string_get_byte`, `string_len`, `string_cap`, `string_addr`, `string_eq`,
@@ -544,16 +544,13 @@ so this resolution is the default behaviour of a shipped `mindc`; building with
   for determinism.
 
   A `Map` value is a [container record](./memory.md#records-and-containers). Signatures: `map_new() -> Map`,
-  `map_insert(m: Map, key: i64, value: i64) -> Map` (adds the pair to the record of `m` in place and returns
-  `m`), `map_len(m: Map) -> i64`, `map_get(m: Map, key: i64) -> i64`. The reference implementation ships ten
-  public **free functions**:
-  `map_new`, `map_insert`, `map_get`, `map_contains_key`, `map_len`,
-  `map_cap`, `map_key_at`, `map_value_at`, `map_get_str`,
-  `map_contains_key_str`. The `_str` variants compare String **key contents**
-  (byte equality) rather than i64 handle identity, for a map whose keys are `String` values.
-  `map_insert` is currently insert-at-tail (append) semantics; it does not
-  yet update an existing key's value in place. Two accessor helpers
-  `map_keys_addr` / `map_vals_addr` expose the opaque array base addresses.
+  `map_insert(m: Map, key: i64, value: i64) -> Map` (adds the pair to the record of `m` in place and returns `m`),
+  `map_len(m: Map) -> i64` (the number of pairs of `m`), `map_get(m: Map, key: i64) -> i64`. The reference
+  implementation ships ten public **free functions**: `map_new`, `map_insert`, `map_get`, `map_contains_key`, `map_len`,
+  `map_cap`, `map_key_at`, `map_value_at`, `map_get_str`, `map_contains_key_str`. The `_str` variants compare String
+  **key contents** (byte equality) rather than i64 handle identity, for a map whose keys are `String` values.
+  `map_insert` is currently insert-at-tail (append) semantics; it does not yet update an existing key's value in place.
+  Two accessor helpers `map_keys_addr` / `map_vals_addr` expose the opaque array base addresses.
 
   > **Planned (not yet shipped).** Key removal, in-place key update, and an
   > explicit free function — e.g. `map_remove`, an updating `map_insert`,

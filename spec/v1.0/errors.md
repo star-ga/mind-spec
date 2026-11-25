@@ -302,16 +302,18 @@ exclusivity analysis; those guarantees remain future work.
 - **Example**: `E2401: 'break' is not inside a while or a for loop at line 2, column 5`
 - **Check/build contract**: checking and artifact-producing builds MUST refuse the same source with `E2401`.
 
-### E2402: Invalid assignment target
+### E2402: Invalid target of a change
 
 - **Trigger**: an assignment, a compound assignment, or a method call that changes a container, whose left
   operand or receiver is not a place, or is a place whose root name is not declared with `let mut`: a name that a
   `let` without `mut`, a parameter, the pattern of a `for` or the pattern of a `match` arm binds
   ([Bindings and assignment](./language.md#bindings-and-assignment),
   [Changing a container](./memory.md#changing-a-container)).
-- **Required context**: the left operand, the location of the assignment and, for a place, the location of
-  the binding of its root, with the fix: declare the root with `let mut`, or assign to a place.
-- **Example**: `E2402: cannot assign to 'x', which is not declared with 'let mut', at line 3, column 5`
+- **Required context**: the left operand or the receiver, the location of the assignment or of the call and, for
+  a place, the location of the binding of its root, with the fix: declare the root with `let mut`, or change a
+  place.
+- **Example**: `E2402: cannot assign to 'x', which is not declared with 'let mut', at line 3, column 5`;
+  `E2402: cannot change 'xs' by 'push': 'xs' is not declared with 'let mut', at line 3, column 5`
 - **Check/build contract**: checking and artifact-producing builds MUST refuse the same source with `E2402`.
 
 ### E2403: Invalid entry function

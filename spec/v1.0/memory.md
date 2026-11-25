@@ -29,13 +29,13 @@ record with identity, as a value of a struct type does. An array literal where a
 literal, and a library function that makes a container (`vec_new`, `map_new`, `string_new`) create a new record.
 Binding, assigning, passing and returning keep the record; none of them copies the elements.
 
-`push`, the insert function of a map and the string push functions change the record in place, and a change
-through one reference is visible through every other reference to that record. A library function that changes a
-container and returns a container returns the handle that it received (`vec_push`, `map_insert`,
-`string_push_byte`, `string_push_str`, `string_push_i64`). Each evaluation of a string literal creates a new string
-record; an implementation MAY share one read-only record when no change can reach it. A function that gives a part
-of a string (`string_slice`, `string_slice_from`) creates a new record with a copy of the bytes. A map keeps the
-bytes that a string key had when it was inserted.
+`push`, the insert function of a map and the string push functions change the record in place, and a change through one
+reference is visible through every other reference to that record. A library function that changes a container and
+returns a container returns the handle that it received (`vec_push`, `map_insert`, `string_push_byte`,
+`string_push_str`, `string_push_i`). Each evaluation of a string literal creates a new string record; an implementation
+MAY share one read-only record when no change can reach it. A function that gives a part of a string
+(`string_slice_from`) creates a new record with a copy of the bytes. A map keeps the bytes that a string key had when it
+was inserted.
 
 On a value `xs` of type `array<T>`, `xs[i]` is the element `i`, counted from 0, and `xs.push(v)` appends the value
 `v` of type `T` to the record and has the value `xs`. An index outside the container is the case of
@@ -50,7 +50,7 @@ record: after a push through another reference it shows the grown container, and
 A method call that changes a container (`xs.push(v)`) is a change of the place `xs`
 ([Bindings and assignment](./language.md#bindings-and-assignment)). The receiver must be a place whose root name is
 declared with `let mut`, as for an assignment; otherwise the call MUST be refused at check time with
-[`E2402`](./errors.md#e2402-invalid-assignment-target). A parameter is not mutable: a function changes a container
+[`E2402`](./errors.md#e2402-invalid-target-of-a-change). A parameter is not mutable: a function changes a container
 that it receives through a binding such as `let mut w = p;`. A `push` stands as a statement or in the update
 `xs = xs.push(v)` of the same place; any other use MUST be refused at check time with
 [`E2300`](./errors.md#e2300-collection-mutation-in-expression-position): after `let mut xs: array<i64> = [1];`, the
@@ -105,9 +105,9 @@ address rule.
 
 ## Raw memory functions
 
-These functions of the standard library and intrinsics of the lowering take or give an address, or release the
-storage of a container. Each is a raw memory function: a call of one is allowed only in a function declared with
-`#[raw_memory]` or `#[raw_memory(sealed)]`, or in a function of the standard library.
+These functions of the standard library and intrinsics of the lowering ([MLIR lowering](./mlir-lowering.md)) take or
+give an address, or release the storage of a container. Each is a raw memory function: a call of one is allowed only in
+a function declared with `#[raw_memory]` or `#[raw_memory(sealed)]`, or in a function of the standard library.
 
 | Function | Takes or gives |
 | --- | --- |
@@ -116,7 +116,7 @@ storage of a container. Each is a raw memory function: a call of one is allowed 
 | `__mind_load_i8`, `__mind_load_i16`, `__mind_load_i32`, `__mind_load_i64` | take an address |
 | `__mind_store_i8`, `__mind_store_i16`, `__mind_store_i32`, `__mind_store_i64` | take an address |
 | `__mind_read`, `__mind_write` | take the address of a buffer |
-| `__mind_group_bank_i64`, `__mind_group_acc32_i64`, `__mind_group_accrows_i64` | take addresses and write memory ([MLIR lowering](./mlir-lowering.md)) |
+| `__mind_group_bank_i64`, `__mind_group_acc32_i64`, `__mind_group_accrows_i64` | take addresses and write memory |
 | `vec_addr`, `string_addr`, `map_keys_addr`, `map_vals_addr`, `vec_zeroed` | give the address of a buffer |
 | `vec_free` | releases the storage of a container, which other references to the record can still reach |
 | `print_bytes`, `eprint_bytes`, `read_stdin_bytes`, `file_read`, `file_write` | take the address of a buffer |
