@@ -21,7 +21,7 @@ limitations under the License.
 | State | Draft (2026-11-24). Not yet accepted. The specification owner decided the questions of this draft on 2026-11-24 (see [Questions](#questions-for-the-specification-owner)). |
 | Number | Provisional. The specification owner assigns the final number. |
 | Edition | Core v1.1, one edition together with [RFC 0023](./0023-type-parameters-on-user-types.md) and [RFC 0024](./0024-impl-forms.md). |
-| Changes | `grammar-syntax.ebnf` (`FunctionDeclaration` gets `[ GenericParameters ]` and `[ WhereClause ]`; `GenericParameters`, `WhereClause`, `GenericFunctionRef`, the supertrait list of `TraitDeclaration` and the bounds of `TraitType` added; `TraitBounds` and `TraitBound` unmarked), `types.md` (Traits and generics, Type inference, the predeclared numeric bounds), `errors.md` (the trigger of `E2701` also covers a bound and a supertrait that name no declared trait; the new code `E2716`) |
+| Changes | `grammar-syntax.ebnf` (`FunctionDeclaration` gets `[ GenericParameters ]` and `[ WhereClause ]`; `GenericParameters`, `WhereClause`, `GenericFunctionRef`, the supertrait list of `TraitDeclaration` and the bounds of `TraitType` added; `TraitBounds` and `TraitBound` unmarked), `types.md` (Traits and generics, Type inference, the predeclared numeric bounds), `errors.md` (the trigger of `E2701`, whose heading [RFC 0024](./0024-impl-forms.md) makes "Trait name that names no declared trait", also covers a bound, a `where` predicate and a supertrait that name no declared trait; the new code `E2716`) |
 | Owns | Bounds, the `where` clause, explicit type arguments at a call, **supertraits** (`trait B: A`), the predeclared numeric bounds and the bounds of an associated type. No other draft defines them. |
 | Depends on | [RFC 0024](./0024-impl-forms.md) (a bound names a trait; the meaning of a method call on a bounded value). The plain parameter list and the instance names of [RFC 0023](./0023-type-parameters-on-user-types.md) are used here. |
 | Related | [RFC 0023](./0023-type-parameters-on-user-types.md), [RFC 0025](./0025-patterns.md) |
@@ -103,7 +103,8 @@ identifier after `::`. A placeholder `_` is not a `Type`, so `f::<_, i64>(x)` is
    type, not a value. The list has at least one name: `fn id<>(…)` is not derived (the reference accepts it).
 2. **Bounds.** A `TraitBound` MUST name a declared trait or a predeclared bound (rule 4) with the right number of
    arguments (`E2701` for an unknown trait, `E2038` for the argument count). A `WherePredicate` MUST name a type
-   parameter of the same function (`E2002` otherwise). `T: A + B` and `where T: A, T: B` mean the same. A type
+   parameter of the same function: its name is looked up among the type parameters of the function only, so another
+   name is an unresolved name there (`E2002`). `T: A + B` and `where T: A, T: B` mean the same. A type
    parameter that has no bound MAY be moved (passed, returned, bound to a name) and nothing else.
 3. **What a bounded value can do.** A value of type `T` with the bound `B` supports the method calls
    `x.m(args)` where `m` is a method of `B`. An operator is defined on a value of type `T` only through a
@@ -183,7 +184,9 @@ identifier after `::`. A placeholder `_` is not a `Type`, so `f::<_, i64>(x)` is
 
 **Codes.** `E2001`, `E2002`, `E2003` and `E2006` exist. `E2038`, `E2039`, `E2040` and `E2042` are the codes of
 [RFC 0023](./0023-type-parameters-on-user-types.md); this draft uses them as RFC 0023 defines them, and `E2040` for a
-trait that names itself in its supertrait list. `E2701` and `E2712` are the codes of [RFC 0024](./0024-impl-forms.md).
+trait that names itself in its supertrait list. `E2701` (a trait name that names no declared trait) and `E2712`
+(ambiguous method or associated item) are the codes of [RFC 0024](./0024-impl-forms.md), with the headings that it
+gives them.
 This draft proposes one code, `E2716`: a method call on a value of a type parameter whose bounds declare no such
 method (rule 8). It is free in the catalog, and it is the next code after the codes of RFC 0024.
 

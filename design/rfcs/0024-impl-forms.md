@@ -21,7 +21,7 @@ limitations under the License.
 | State | Draft (2026-11-24). Not yet accepted. The specification owner decided the questions of this draft on 2026-11-24 (see [Questions](#questions-for-the-specification-owner)). |
 | Number | Provisional. The specification owner assigns the final number. |
 | Edition | Core v1.1, together with [RFC 0023](./0023-type-parameters-on-user-types.md) and [RFC 0027](./0027-function-generics.md). |
-| Changes | `grammar-syntax.ebnf` (new `ImplDeclaration` with an optional `TypeParameterList`; unmarks `TraitDeclaration`, `TraitItem` and `FunctionSignature`; associated constants and types; `SelfType`), `lexical.md` and `grammar-lexical.ebnf` (`Self` joins the keyword list; `impl` joins the contextual words), `language.md` (the list of words that the grammar spells out), `types.md` (Traits and generics), `errors.md` (codes of the impl checks) |
+| Changes | `grammar-syntax.ebnf` (new `ImplDeclaration` with an optional `TypeParameterList`; unmarks `TraitDeclaration`, `TraitItem` and `FunctionSignature`; associated constants and types; `SelfType`), `lexical.md` and `grammar-lexical.ebnf` (`Self` joins the keyword list; `impl` joins the contextual words), `language.md` (the list of words that the grammar spells out), `types.md` (Traits and generics), `errors.md` (the headings of `E2701`, `E2702` and `E2707` become "Trait name that names no declared trait", "Duplicate or overlapping impl" and "Trait item missing from an impl", and their triggers cover the uses of the [Codes](#static-rules) paragraph; the new codes `E2710` to `E2715`) |
 | Depends on | [RFC 0023](./0023-type-parameters-on-user-types.md) (`TraitRef`, `TypeParameterList`, the rules of type parameters and the instance names), in the same edition. |
 | Related | [RFC 0023](./0023-type-parameters-on-user-types.md), [RFC 0025](./0025-patterns.md), [RFC 0026](./0026-module-items.md), [RFC 0027](./0027-function-generics.md) (bounds) |
 
@@ -171,9 +171,13 @@ arguments ([RFC 0027](./0027-function-generics.md)).
     `module m { impl T for S { } }` is refused. A primitive type is declared by no module, so `impl T for i64` stands
     in the module or the block that declares `T`. A violation is refused with `E2715`.
 
-**Codes.** Codes that the reference already uses, now in the catalog: `E2701` (the trait of an impl is not a
-trait that the program declares), `E2702` (duplicate or overlapping impl), `E2703` (function that the trait does
-not declare), `E2707` (trait item missing in an impl). Codes reserved for this draft by the specification owner:
+**Codes.** Codes that the reference already uses, now in the catalog: `E2701` (a trait name that names no declared
+trait: here the trait of an impl, rule 7; [RFC 0027](./0027-function-generics.md) gives the same code to a bound, a
+`where` predicate and a supertrait), `E2702` (duplicate or overlapping impl, rule 6), `E2703` (function that the trait
+does not declare, rule 3), `E2707` (trait item missing from an impl: a function, a constant or a type, rule 3). This
+draft changes the catalog headings of three of them so that each heading covers every use: `E2701` "Trait name that
+names no declared trait", `E2702` "Duplicate or overlapping impl", `E2707` "Trait item missing from an impl". Codes
+reserved for this draft by the specification owner:
 `E2710` unknown or unsupported type in an impl, `E2711` duplicate name, `E2712` ambiguous method or associated item,
 `E2713` signature differs from the trait, `E2714` associated constant or type that the trait does not declare,
 `E2715` trait impl in a module that declares neither the trait nor the type. The published catalog does not define
@@ -596,7 +600,8 @@ expected:
    [RFC 0023](./0023-type-parameters-on-user-types.md), in the same edition.
 5. **Visibility.** A method is visible where its type is visible. A module MAY implement a trait for a type only
    when it declares the trait or the type (rule 10, `E2715`).
-6. **Codes (settled).** `E2701`, `E2702`, `E2703` and `E2707` are in the catalog as released behaviour.
+6. **Codes (settled).** `E2701`, `E2702`, `E2703` and `E2707` are in the catalog as released behaviour; this draft
+   widens the headings of `E2701`, `E2702` and `E2707` to their uses (the Codes paragraph of the static rules).
    `E2710` to `E2715` are reserved for this draft.
 7. **Bounds on an associated type.** They come with the bounds of [RFC 0027](./0027-function-generics.md), in the
    same edition.

@@ -118,7 +118,7 @@ or infers them.
    `struct`, `enum`, `type` or `trait` declaration MUST NOT take a predeclared type name: a name of
    `PrimitiveType` (`i32`, `i64`, `f32`, `f64`, `bool`, `unit`), `Tensor`, `Option`, `Result`, or a predeclared
    bound of [RFC 0027](./0027-function-generics.md) (`Numeric`, `Integer`, `Float`). Such a declaration is refused
-   with `E2042` ("predeclared type name"). A user type never shadows a predeclared one.
+   with `E2042` ("predeclared type or bound name"). A user type never shadows a predeclared one.
 
 ## Instance names
 
@@ -482,7 +482,7 @@ The desugaring is the oracle for the equality test. No other oracle is needed fo
 6. **Codes.** `E2038` (wrong number of type arguments), `E2039` (duplicate type parameter), `E2040`
    (declaration contains itself: a type by value or an alias in its right-hand side here, a trait in its own
    supertrait list in RFC 0027), `E2041`
-   (unused type parameter) and `E2042` (predeclared type name) are assigned to this draft.
+   (unused type parameter) and `E2042` (predeclared type or bound name) are assigned to this draft.
    The published catalog does not define any of them.
 7. **Defaults and const parameters.** There are no defaults (`struct Box<T = i64>`). Const parameters (`[T; N]`
    with a named `N`) get their own RFC, because shapes need them.
