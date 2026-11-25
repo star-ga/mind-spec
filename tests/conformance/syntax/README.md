@@ -66,6 +66,7 @@ implementation MAY accept or refuse those.
 | [`let_mut_reject_compound_without_mut`](./let_mut_reject_compound_without_mut.yaml) | reject, `E2402` | as above |
 | [`let_mut_reject_assign_parameter`](./let_mut_reject_assign_parameter.yaml) | reject, `E2402` | as above: a parameter is not mutable |
 | [`let_mut_reject_assign_for_variable`](./let_mut_reject_assign_for_variable.yaml) | reject, `E2402` | as above: a `for` pattern binding is not mutable |
+| [`let_mut_reject_assign_match_binding`](./let_mut_reject_assign_match_binding.yaml) | reject, `E2402` | as above: a `match` arm binding is not mutable |
 | [`let_mut_reject_index_store_without_mut`](./let_mut_reject_index_store_without_mut.yaml) | reject, `E2402` | as above: the root of `a[0]` is not mutable |
 | [`let_mut_reject_not_a_place`](./let_mut_reject_not_a_place.yaml) | reject, `E2402` | as above: the left operand MUST be a place |
 | [`colon_assign_reject`](./colon_assign_reject.yaml) | reject | [Tokens](../../../spec/v1.0/lexical.md#tokens): MIND has no operator `:=`; the accept side is `let_mut_accept_assignment` |

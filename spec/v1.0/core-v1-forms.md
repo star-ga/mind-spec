@@ -47,7 +47,7 @@ reference.
 | `return e;`, `return;`, `defer { }` | Core v1 |
 | `a = b;`, `a += b;`, `a -= b;`, `a *= b;`, `a /= b;`, `a[i] = b;`, `t.0 = b;` where the root of the place is bound by `let mut` ([Bindings and assignment](./language.md#bindings-and-assignment)) | Core v1; reference gap (the native backend refuses `a[i] = b;` with `lane.source.index_store` and `t.0 = b;` as a struct field assignment) |
 | `a %= b;`, `a <<= b;`, `a >>= b;`, `a &= b;`, `a \|= b;`, `a ^= b;` where the root of `a` is bound by `let mut` | Core v1; reference gap (the native backend builds `%=` and refuses the other five) |
-| An assignment or a compound assignment to a place whose root a `let` without `mut`, a parameter or a `for` pattern binds | Core v1 refuses; reference gap (`mindc check` accepts `let x = 1; x = 2;`, `x += 1` on such an `x`, `let a = [1, 2, 3]; a[0] = 5;`, and an assignment to a parameter and to a `for` variable) |
+| An assignment or a compound assignment to a place whose root is not declared with `let mut` (a `let` without `mut`, a parameter, a `for` pattern or a `match` arm binds it) | Core v1 refuses; reference gap (`mindc check` accepts `let x = 1; x = 2;`, `x += 1` on such an `x`, `let a = [1, 2, 3]; a[0] = 5;`, and an assignment to a parameter, to a `for` variable and to a `match` arm binding) |
 | An assignment whose left operand is not a place (`x + 1 = 3;`) | Core v1 refuses; reference gap (`mindc check` refuses it with `E1001`, not `E2402`) |
 | `x := e` (no operator `:=`, [Lexical Structure](./lexical.md#tokens)) | Core v1 refuses |
 | `while c { }`, `for v in xs { }`: loops, expressions of the type `unit` ([Loops](./language.md#loops)) | Core v1 |

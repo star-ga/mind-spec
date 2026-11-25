@@ -346,8 +346,8 @@ of `main` is `unit`, the process status is 0.
 ## Bindings and assignment
 
 `let p = e;` binds the names of the pattern `p`. `let mut p = e;` binds every name of `p` as a mutable
-binding. A name that a `let` without `mut`, a parameter of a function or the pattern of a `for` binds is
-not mutable. A later `let` of the same name is a new binding and not an assignment, so
+binding. A name that a `let` without `mut`, a parameter of a function, the pattern of a `for` or the
+pattern of a `match` arm binds is not mutable. A later `let` of the same name is a new binding and not an assignment, so
 `let x = 1; let x = 2;` is valid.
 
 The left operand of an assignment or of a compound assignment is a place: a name, or a chain of index,

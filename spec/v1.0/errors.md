@@ -299,7 +299,8 @@ exclusivity analysis; those guarantees remain future work.
 ### E2402: Invalid assignment target
 
 - **Trigger**: an assignment or a compound assignment whose left operand is not a place, or is a place whose
-  root name is bound by a `let` without `mut`, by a parameter, or by the pattern of a `for`
+  root name is not declared with `let mut`: a name that a `let` without `mut`, a parameter, the pattern of a
+  `for` or the pattern of a `match` arm binds
   ([Bindings and assignment](./language.md#bindings-and-assignment)).
 - **Required context**: the left operand, the location of the assignment and, for a place, the location of
   the binding of its root, with the fix: declare the root with `let mut`, or assign to a place.

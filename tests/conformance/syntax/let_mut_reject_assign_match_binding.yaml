@@ -1,0 +1,25 @@
+# MIND Conformance Test: an assignment to a name that a match arm binds is refused with E2402
+# Specification reference: spec/v1.0/language.md#bindings-and-assignment
+# Category: syntax
+# Profile: cpu
+
+description: "the name that the pattern of a match arm binds is not mutable; x = 4; is refused with E2402"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let v = match 3 {
+            x => {
+                x = 4;
+                x
+            }
+        };
+        return v;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2402
