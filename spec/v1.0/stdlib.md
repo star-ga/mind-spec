@@ -508,7 +508,7 @@ so this resolution is the default behaviour of a shipped `mindc`; building with
 `--no-default-features` opts back out to the low-level-only subset.
 
 - **`std.vec`** — Growable `Vec` over `i64`-shaped slots. Eight-byte stride, doubling growth from an initial capacity of
-  **4** slots. `Vec` is the type `array<i64>`, and a `Vec` value is a
+  **4** slots. Its signatures write `Vec` for `array<i64>`, and a value of that type is a
   [container record](./memory.md#records-and-containers) with three `i64` fields `addr`, `len` and `cap` (Option-C
   struct ABI). The functions: `vec_new() -> Vec`, `vec_push(v: Vec, value: i64) -> Vec`,
   `vec_get(v: Vec, i: i64) -> i64`, `vec_set(v: Vec, i: i64, value: i64) -> i64`, `vec_len(v: Vec) -> i64`,
@@ -550,10 +550,9 @@ so this resolution is the default behaviour of a shipped `mindc`; building with
   `map_len(m: Map) -> i64` (the number of pairs of `m`), `map_get(m: Map, key: i64) -> i64` (gives 0 when `m` holds no
   pair with the key; `map_contains_key` tests whether `m` holds a key). The reference implementation ships ten public
   **free functions**: `map_new`, `map_insert`, `map_get`, `map_contains_key`, `map_len`, `map_cap`, `map_key_at`,
-  `map_value_at`, `map_get_str`, `map_contains_key_str`. The `_str` variants compare String **key contents** (byte
-  equality) rather than i64 handle identity, for a map whose keys are `String` values. `map_insert` is currently
-  insert-at-tail (append) semantics; it does not yet update an existing key's value in place. Two accessor helpers
-  `map_keys_addr` / `map_vals_addr` expose the opaque array base addresses.
+  `map_value_at`, `map_get_str`, `map_contains_key_str`. `map_insert` is currently insert-at-tail (append) semantics;
+  it does not yet update an existing key's value in place. Two accessor helpers `map_keys_addr` / `map_vals_addr`
+  expose the opaque array base addresses.
 
   > **Planned (not yet shipped).** Key removal, in-place key update, and an
   > explicit free function — e.g. `map_remove`, an updating `map_insert`,

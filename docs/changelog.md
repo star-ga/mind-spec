@@ -35,8 +35,9 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `xs.set(i, v)` needs a `let mut` root as `push` does. The defined stop ends the process with the exit status 77,
   the same for every cause and on every substrate; a negative dimension or slice step that is known only at
   run time makes the defined stop with the code of the fault (`E3006`, `E4008`). After the `}` that ends a
-  block-like statement a sign is part of the literal. The sentence on string keys of a map is removed until a
-  function inserts a `String` key.
+  block-like statement a sign is part of the literal. The sentences on string keys of a map, also the one on the
+  `_str` variants, are removed until a function inserts a `String` key. The standard library and the Surface
+  language chapters say, as the Types chapter does, that the signatures write `Vec` for `array<i64>`.
 - **Small corrections.** The Security chapter says that outside a raw memory use no container handle shows the old
   storage released when the container needed more storage; a use of a container after its explicit release is an
   error of the program. A function whose attribute `raw_memory` `E2502` refuses gets no `E2501`, in each sentence

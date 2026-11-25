@@ -629,10 +629,10 @@ documentation MUST NOT present these as complete:
 - **Traits**: **not implemented** in the executable subset (no `trait` declarations, no `dyn Trait`).
 - **Slices**: stubbed; byte-level work goes through the `std.string`/`std.vec` heap records and the
   byte-precise intrinsics.
-- **Collections**: `array<T>`, `Vec`, `Map` and `String` are container records that change in place
-  ([Memory model](./memory.md#records-and-containers)); `std.map` is insert-only (no removal) — see
-  [Standard Library](./stdlib.md#four-pure-mind-modules) for the precise shipped surface. These are
-  not full `Vec`/`String`/`HashMap` equivalents.
+- **Collections**: `array<T>` (whose library signatures write `Vec` for `array<i64>`), `Map` and `String` are
+  container records that change in place ([Memory model](./memory.md#records-and-containers)); `std.map` is
+  insert-only (no removal) — see [Standard Library](./stdlib.md#four-pure-mind-modules) for the precise shipped
+  surface. These are not full `Vec`/`String`/`HashMap` equivalents.
 - **Range `for` loops**: the range form `for v in s..e { ... }` is not yet in the grammar:
   [`grammar-syntax.ebnf`](./grammar-syntax.ebnf) has a `ForExpression` over an arbitrary
   `Expression` but no range expression. The reference interpreter evaluates `e` once and binds `v`
