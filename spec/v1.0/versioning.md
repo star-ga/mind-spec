@@ -207,10 +207,14 @@ To maximize compatibility across v1.x implementations:
 
 Programs MAY declare their required specification version:
 
-```mind
+```text
 #[requires(mind_spec = "1.2")]
 module my_program;
 ```
+
+The Core v1 grammar derives neither an attribute before an item (`AttributedItem`) nor the module line
+`module m;` ([Core v1 forms](./core-v1-forms.md)), so the sample above is written as text: in Core v1 a
+version declaration is an extension.
 
 Implementations MUST reject programs requiring newer specification versions than supported.
 

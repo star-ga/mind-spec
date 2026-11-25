@@ -261,7 +261,7 @@ signed or unsigned. `N` is the width in bits of the target type. "Canonical NaN"
 
 | Row | Type of `e` | Type `T` | Value of `e as T` |
 |-----|-------------|----------|-------------------|
-| 1 | integer type | integer type | The value modulo 2^N: a signed `e` is sign-extended and an unsigned `e` is zero-extended, and the low `N` bits are the result, in two's complement for a signed `T`. `4294967297 as i32` is 1, and `2147483648 as i32` is -2147483648. |
+| 1 | integer type | integer type | The value modulo 2 to the power `N`: a signed `e` is sign-extended and an unsigned `e` is zero-extended, and the low `N` bits are the result, in two's complement for a signed `T`. `4294967297 as i32` is 1, and `2147483648 as i32` is -2147483648. |
 | 2 | integer type | `f32` or `f64` | The value rounded to the nearest value of `T`, ties to even. |
 | 3 | `f32` or `f64` | integer type | The value truncated toward zero. A value outside the range of `T`, an infinity too, gives the nearest bound of `T`. NaN gives 0. `2.9 as i64` is 2, `(0.0 - 2.9) as i64` is -2, and `1.0e30 as i32` is 2147483647. |
 | 4 | `f32` | `f64` | The same value, exact. NaN gives the canonical NaN. |

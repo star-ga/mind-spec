@@ -319,10 +319,10 @@ as implementation-defined.
   - **Dtype rules**: input MUST be a numeric dtype; output has the same dtype
   - **Semantics**: `Neg(x)[i] = -x[i]` for all indices i
 - **`Exp(input) -> ValueId`**
-  - Computes elementwise exponential: `e^x`
+  - Computes elementwise exponential: eˣ (e to the power `x`)
   - **Shape rules**: output shape equals input shape
   - **Dtype rules**: input MUST be a floating-point dtype; output has the same dtype
-  - **Semantics**: `Exp(x)[i] = e^(x[i])` for all indices i
+  - **Semantics**: `Exp(x)[i] = exp(x[i])` for all indices i
 - **`Log(input) -> ValueId`**
   - Computes elementwise natural logarithm: `ln(x)`
   - **Shape rules**: output shape equals input shape

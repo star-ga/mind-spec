@@ -56,7 +56,7 @@ Integer arithmetic is fully deterministic and byte-identical across substrates.
 | `x % 0` | `= 0` (defined) |
 | `INT_MIN / -1` | `= INT_MIN` (defined; no overflow trap) |
 | Integer overflow | wraps two's-complement (defined; identical on x86 and ARM) |
-| Declared narrow width (`i8`, `u8`, `i16`, `u16`, `i32`, `u32`) | a value wraps at the declared width where it is materialised (binding, assignment, argument, return, struct field): two's-complement for signed widths, modulo 2^N for unsigned widths. An 8- or 16-bit arithmetic intermediate (`+ - * / %` and shifts) is re-wrapped to the widest 8- or 16-bit operand width; an operand that is a wider variable, or a cast to a wider type, leaves it unwrapped. ✅ on the MLIR build path for the 8- and 16-bit widths since v0.10.2 (not v0.10.0); the wider-operand rule holds since `732edb0f` (v0.10.3), and v0.10.2 re-wrapped such an intermediate to the narrow width (`i64` 1000 + `u8` 1 gave 233). The native backend is not covered by this evidence. |
+| Declared narrow width (`i8`, `u8`, `i16`, `u16`, `i32`, `u32`) | a value wraps at the declared width where it is materialised (binding, assignment, argument, return, struct field): two's-complement for signed widths, modulo 2 to the power N for unsigned widths. An 8- or 16-bit arithmetic intermediate (`+ - * / %` and shifts) is re-wrapped to the widest 8- or 16-bit operand width; an operand that is a wider variable, or a cast to a wider type, leaves it unwrapped. ✅ on the MLIR build path for the 8- and 16-bit widths since v0.10.2 (not v0.10.0); the wider-operand rule holds since `732edb0f` (v0.10.3), and v0.10.2 re-wrapped such an intermediate to the narrow width (`i64` 1000 + `u8` 1 gave 233). The native backend is not covered by this evidence. |
 | Integer type the implementation does not compute at its written width (e.g. `i128`, `u128`, `i256`) | never computed at a narrower width: it is either computed at its written width as a documented extension, or refused at check time. 📋 The reference compiler refuses `iN`/`uN` with N > 64 at check time since `4fd65cfb` (v0.10.3); v0.10.2 accepted them outside extern function signatures, and a `let` binding of one was computed in 64 bits. Widths of 64 or less that it does not recognise (e.g. `i24`) are not covered by this check (see [types.md](spec/v1.0/types.md#type-formation)). |
 | Oversized shift (`count ≥ bit-width`) | given a defined result (never UB) |
 | Condition truthiness (`if c`) | tests `c != 0` — the whole value, not the low bit |
@@ -90,28 +90,30 @@ substrates (x86 == ARM) today.
 | `-1.0 / 0.0` | `-Inf` (IEEE) | 🔄 |
 | `0.0 / 0.0` | `NaN` (IEEE) | 🔄 |
 | `sqrt(-1.0)` | `NaN` (IEEE); `strict_domain` → defined domain error | 🔄 (`strict_domain` error 📋) |
-| `pow(0.0, 0.0)` | `1.0` — IEEE `pow`: `x^0 == 1` for **all** `x` (including `0` and `NaN`) | 📋 (transcendental) |
+| `pow(0.0, 0.0)` | `1.0` — IEEE `pow`: `pow(x, 0.0)` is `1.0` for **all** `x` (including `0` and `NaN`) | 📋 (transcendental) |
 | `powr(0.0, 0.0)` | `NaN` — IEEE `powr` (= `exp(0·log 0)`), the strict real-power form | 📋 (transcendental) |
-| `limit_form(0^0)` | indeterminate — symbolic/calculus context, not a number | 📋 |
+| 0⁰ as a limit form | indeterminate — symbolic/calculus context, not a number | 📋 |
 | Float comparisons (NaN operand, signed zero) | `<`, `<=`, `>`, `>=`, `==` are `false` and `!=` is `true`; `-0.0 == +0.0` is `true` | 📋 compiled MLIR path since `2597ee9c` (v0.10.3) (the v0.10.2 release lowered `!=` as ordered, so `NaN != NaN` was `false` there); native x86-64 `f64` since `ccbb00b8` (v0.10.3; the native backend refuses `f32`); the `mindc test` evaluator has an open `f64` comparison defect |
 | `min` / `max` / `sort` with NaN | use a defined total order (NaN sorts last) so results are deterministic | 📋 |
 | Rounding | round-to-nearest-even (IEEE default), fixed | 🔄 |
 | Q16.16 fixed-point | fully deterministic, byte-identical x86 == ARM | ✅ |
 
-### `0^0` — worked example
+### 0⁰ — worked example
 
-`0^0` is the canonical "vague" case. MIND removes the vagueness by choosing the
+Zero to the power zero (0⁰) is the canonical "vague" case. MIND removes the vagueness by choosing the
 function, not the mood:
 
 ```mind
-pow(0, 0)        // 1     — integer / exact arithmetic, deterministic
-pow(0.0, 0.0)    // 1.0   — IEEE pow, deterministic (x^0 == 1 for all x)
-powr(0.0, 0.0)   // NaN   — IEEE powr (real power), deterministic
-limit_form(0^0)  //        indeterminate — symbolic/calculus, not a runtime number
+let a = pow(0, 0);        // 1    — integer / exact arithmetic, deterministic
+let b = pow(0.0, 0.0);    // 1.0  — IEEE pow, deterministic (pow(x, 0.0) is 1.0 for all x)
+let c = powr(0.0, 0.0);   // NaN  — IEEE powr (real power), deterministic
 ```
 
+As a limit form of calculus, 0⁰ is indeterminate: a symbolic question, not a runtime number, so no
+function call stands for it. (In MIND source, `^` is the bitwise exclusive or, and `0 ^ 0` is 0.)
+
 `pow(0,0) = 1` matches the empty-product convention and every mainstream language,
-and keeps polynomial / tensor `x^0` well-behaved. `powr` is the honestly-NaN real
+and keeps polynomial / tensor x⁰ well-behaved. `powr` is the honestly-NaN real
 power. Both are deterministic — you pick which one. Mathematically honest **and**
 never an accident.
 
@@ -219,9 +221,10 @@ a reduction can change the result. MIND's rule:
 - **Fast is opt-in and labelled non-deterministic.**
 
 ```mind
-sum(x)                 // strict: defined reduction order, reproducible
-sum(x, mode = "fast")  // explicitly non-deterministic
+let s = sum(x);   // strict: defined reduction order, reproducible
 ```
+
+The fast mode is explicitly non-deterministic; its spelling in source is planned and not yet defined. 📋
 
 Fixed-reduction-order kernels are the active work (Phase 13.6). 📋
 

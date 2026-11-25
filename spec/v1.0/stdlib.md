@@ -156,7 +156,7 @@ Scalar mathematical functions. When applied to tensors, these operate elementwis
 ### Exponential and logarithmic
 
 - **`exp<T: Float>(x: T) -> T`**
-  - Exponential function: `e^x`
+  - Exponential function: eˣ (e to the power `x`)
   - Differentiable: `∂exp/∂x = exp(x)`
   - Supported dtypes: f32, f64
   - Semantics: matches exp() from ir.md#activation-and-elementwise-unary-operations
@@ -185,8 +185,8 @@ Scalar mathematical functions. When applied to tensors, these operate elementwis
   - Domain: x ≥ 0; returns Err(DomainError) for x < 0
 
 - **`pow<T: Float>(base: T, exponent: T) -> T`**
-  - Power function: `base^exponent`
-  - Differentiable: `∂pow/∂base = exponent · base^(exponent-1)`
+  - Power function: `base` to the power `exponent`
+  - Differentiable: `∂pow/∂base = exponent · pow(base, exponent - 1)`
   - Special cases: `pow(0, 0) = 1`, `pow(x, 0) = 1`
 
 ### Trigonometric
@@ -229,11 +229,11 @@ Scalar mathematical functions. When applied to tensors, these operate elementwis
 ### Hyperbolic
 
 - **`sinh<T: Float>(x: T) -> T`**
-  - Hyperbolic sine: `(e^x - e^(-x)) / 2`
+  - Hyperbolic sine: `(exp(x) - exp(-x)) / 2`
   - Differentiable: `∂sinh/∂x = cosh(x)`
 
 - **`cosh<T: Float>(x: T) -> T`**
-  - Hyperbolic cosine: `(e^x + e^(-x)) / 2`
+  - Hyperbolic cosine: `(exp(x) + exp(-x)) / 2`
   - Differentiable: `∂cosh/∂x = sinh(x)`
 
 - **`tanh<T: Float>(x: T) -> T`**
@@ -387,7 +387,7 @@ These functions map directly to IR operations from ir.md#shape-manipulation:
   - Differentiable: gradient is 1 for x>0, 0 otherwise
 
 - **`sigmoid(input: Tensor<T>) -> Tensor<T>`**
-  - Sigmoid function: `σ(x) = 1 / (1 + e^(-x))`
+  - Sigmoid function: `σ(x) = 1 / (1 + exp(-x))`
   - Differentiable: `∂σ/∂x = σ(x)(1 - σ(x))`
   - Output range: (0, 1)
 
