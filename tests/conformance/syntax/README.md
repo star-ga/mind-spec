@@ -121,3 +121,6 @@ implementation MAY accept or refuse those.
 | [`cast_reject_named_type_then_less`](./cast_reject_named_type_then_less.yaml) | reject | as above: after any other type name the type reading wins |
 | [`method_call_accept_option_unwrap_or`](./method_call_accept_option_unwrap_or.yaml) | accept | [Field access and method calls](../../../spec/v1.0/language.md#field-access-and-method-calls): `x.m(a)` has one derivation, the method call |
 | [`method_call_reject_field_then_call`](./method_call_reject_field_then_call.yaml) | reject | as above: a field access whose name is not a field of the type MUST be refused |
+| [`struct_accept_field_of_other_struct`](./struct_accept_field_of_other_struct.yaml) | accept | [Type formation](../../../spec/v1.0/types.md#type-formation): only a struct that holds itself is refused |
+| [`struct_reject_holds_itself`](./struct_reject_holds_itself.yaml) | reject, `E2407` | as above: a struct that holds itself MUST be refused |
+| [`struct_reject_holds_itself_through_other`](./struct_reject_holds_itself_through_other.yaml) | reject, `E2407` | as above |

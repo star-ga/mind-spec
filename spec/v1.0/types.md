@@ -36,6 +36,12 @@ The following forms are part of the core language:
 
 Implementations MAY extend the set of primitive types but MUST document the extensions.
 
+A struct holds itself when the type of one of its fields is the struct itself, or a type that holds a value of it:
+an array, a tuple, `Option` or `Result` of it, or another struct whose fields hold it (`struct N { next: N, }`, or
+`struct A { b: B, }` with `struct B { a: A, }`). A struct that holds itself has no size and MUST be refused at check
+time with [`E2407`](./errors.md#e2407-struct-with-no-layout). This rule holds for every struct, with or without an
+attribute.
+
 ### The unit value
 
 The type `unit` has one value. Its expression is `()` (`UnitExpression` of

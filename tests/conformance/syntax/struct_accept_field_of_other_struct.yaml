@@ -1,0 +1,30 @@
+# MIND Conformance Test: a struct may hold another struct
+# Specification reference: spec/v1.0/types.md#type-formation
+# Category: syntax
+# Profile: cpu
+
+description: "struct B holds the struct A, which does not hold B"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    struct A {
+        x: i64,
+    }
+
+    struct B {
+        a: A,
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0

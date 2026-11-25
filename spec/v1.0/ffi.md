@@ -43,11 +43,11 @@ The FFI is **feature-gated** (enabled via `--features=ffi-c` compiler flag) and 
   alignment 1. The size and the alignment of a field type are the ones of the table below.
 - **Field types.** The type of every field is `bool`, `i32`, `i64`, `f32` or `f64`, an array type `[T; n]` whose
   element type `T` is one of these field types, or a struct type that has the attribute `#[repr(C)]`. A struct
-  with the attribute MUST be refused at check time with
-  [`E2407`](./errors.md#e2407-field-type-with-no-layout-in-a-reprc-struct) when one of its fields has another
-  type (`unit`, a tuple, a tensor, `diff T`, `Option` or `Result`, a struct without the attribute, or a
-  primitive type that an implementation adds as an extension), and when it holds itself, directly or through
-  the fields of other structs. The layout is the same on every substrate.
+  with the attribute MUST be refused at check time with [`E2407`](./errors.md#e2407-struct-with-no-layout) when
+  one of its fields has another type (`unit`, a tuple, a tensor, `diff T`, `Option` or `Result`, a struct without
+  the attribute, or a primitive type that an implementation adds as an extension). A struct that holds itself is
+  refused for every struct ([Type formation](./types.md#type-formation)). The layout is the same on every
+  substrate.
 - **Examples.** `#[repr(C)] struct P { a: i32, b: f32, }` has `a` at offset 0 and `b` at offset 4, the
   alignment 4 and the size 8. `#[repr(C)] struct Q { a: bool, b: i64, c: [i32; 3], }` has `a` at offset 0,
   `b` at offset 8 and `c` at offset 16; `c` ends at 28, the alignment is 8, and the size is 32.
@@ -84,22 +84,9 @@ Generated headers include:
 
 #### Primitive types
 
-This list is informative and defines no layout: it records which primitive types the reference compiler exports
-through the C header. The layout of a `#[repr(C)]` struct is the rule of
-[Struct layout attribute](#struct-layout-attribute).
-
-As observed at compiler v0.10.2, and unchanged in the generated C header of v0.10.4 (`MindDType`), the reference compiler exports these primitive types via FFI:
-
-| MIND Type | C Type | Size | Alignment | Status |
-|-----------|--------|------|-----------|--------|
-| `i32` | `int32_t` | 4 bytes | 4 bytes | ✅ Supported |
-| `f32` | `float` | 4 bytes | 4 bytes | ✅ Supported |
-
-**Not yet emitted** (planned for future releases):
-- `i64` / `int64_t`
-- `f64` / `double`
-- `bool` / `uint8_t`
-- `unit` / `void`
+The layout of a primitive type in a `#[repr(C)]` struct is the rule of
+[Struct layout attribute](#struct-layout-attribute). This chapter does not define which primitive types a generated
+C header names.
 
 #### Tensor descriptors
 

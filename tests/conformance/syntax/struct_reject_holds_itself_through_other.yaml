@@ -1,0 +1,27 @@
+# MIND Conformance Test: a struct that holds itself through another struct
+# Specification reference: spec/v1.0/types.md#type-formation
+# Category: syntax
+# Profile: cpu
+
+description: "struct A holds B, and B holds A"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    struct A {
+        b: B,
+    }
+
+    struct B {
+        a: A,
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2407

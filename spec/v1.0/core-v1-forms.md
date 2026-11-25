@@ -43,6 +43,7 @@ does not change the status. A row without a mark makes no claim about the refere
 | `fn main() -> i64 { }`, `fn main() { }`, `fn main() -> unit { }` ([Entry function](./language.md#entry-function)) | Core v1; reference gap (the native backend refuses `fn main() -> unit` with `lane.type.named`, and the image of `fn main() { let x = 1; }` exits with the status 1, and with 7 for `let x = 7;`, not 0) |
 | `fn main() -> f64 { }`, `fn main(n: i64) -> i64 { }`: an entry function with another result type or a parameter | Core v1 refuses; reference gap (`mindc check` accepts both) |
 | `Tensor<dtype, [dims]>`, `(T, U)`, `[T; n]`, `diff T` | Core v1 |
+| `struct N { next: N, }`, and `struct A { b: B, }` with `struct B { a: A, }`: a struct that holds itself ([Type formation](./types.md#type-formation)) | Core v1 refuses; reference gap (`mindc check` accepts both) |
 | `let x = e;`, `let x: T = e;`, `let _ = e;`, `let (a, b) = e;`, `let mut x = e;` | Core v1 |
 | `let x = 1; let x = 2;`: a later `let` of the same name is a new binding ([Bindings and assignment](./language.md#bindings-and-assignment)) | Core v1; reference conforms (`mindc check` accepts it, and the image of `let x = 1; let x = 2; return x;` exits with the status 2) |
 | `return e;`, `return;` | Core v1 |
