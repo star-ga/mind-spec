@@ -26,8 +26,9 @@ let y = if x > 0 { 1 } else { -1 };
 - **while**: Condition-based loop.
 - **for**: Iterator-based loop.
 
-Core v1 has no `loop` statement: write `while true { ... }`. The text `loop { ... }` is refused with `E2405`
-([Loop exits](spec/v1.0/language.md#loop-exits)).
+Core v1 has no `loop` statement: write `while true { ... }`. Where a statement can start, the name `loop` directly
+followed by `{` is refused with `E2405` ([Loop exits](spec/v1.0/language.md#loop-exits)). In every other place `loop`
+is a valid name: in `while loop { }` it is the condition of the `while`.
 
 ## Match
 Pattern matching is exhaustive.

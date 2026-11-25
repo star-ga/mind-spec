@@ -435,11 +435,14 @@ the only rule of the grammar that holds them. A source in which one of them stan
 name or an expression has no derivation and MUST be refused: `let break = 4;`, `break - 1;` and
 `break = 5;` are refused. `while c { break }` is refused because the `;` of the loop exit is missing.
 
-Core v1 has no `loop` statement: `loop` is a name and not a keyword, and `loop { ... }` is the name `loop` followed by
-a block with no `;` between them, which no rule derives. A source with `loop { ... }` MUST be refused at check time
-with [`E2405`](./errors.md#e2405-no-loop-statement), and the diagnostic MUST say that Core v1 has no `loop` statement
-and name the form `while true { ... }`. As a name, `loop` is valid: `let loop = 1; return loop;`. The range after `in`
-(`for i in a..b`) is not defined by the grammar; it is an extension.
+Core v1 has no `loop` statement: `loop` is a name and not a keyword. Where a statement can start, the name `loop`
+directly followed by `{` (the form `loop { ... }`) is a name followed by a block with no `;` between them, which no
+rule derives. Where a statement can start, the name `loop` directly followed by `{` MUST be refused at check time with
+[`E2405`](./errors.md#e2405-no-loop-statement), and the diagnostic MUST say that Core v1 has no `loop` statement and
+name the form `while true { ... }`. In every other place `loop` is a valid name: `let loop = 1; return loop;` and
+`let loop = false; while loop { } return 3;` are valid, because in the second source `loop` stands after `while`,
+where an expression starts and not a statement. The range after `in` (`for i in a..b`) is not defined by the
+grammar; it is an extension.
 
 ## Tuple index
 
@@ -458,8 +461,9 @@ number of elements; otherwise the source MUST be refused at check time with
 `a[:e2]`, `a[e1:]`, `a[:]` and `a[e1:e2:e3]`, and no sentence of this specification gives them a meaning. `a[e1:e2]`
 lowers to the `Slice` operation of [Core IR](./ir.md#indexing-and-slicing), which takes the elements from the index
 `e1` up to, and not including, the index `e2`: `a[1:3]` takes the elements 1 and 2. The grammar has no range index:
-`a[1..3]` is not derived, it MUST be refused at check time with [`E2406`](./errors.md#e2406-range-index), and the
-diagnostic MUST name the slice form `a[1:3]`.
+an index operator whose index is two expressions with `..` between them, such as `a[1..3]`, is not derived; it MUST be
+refused at check time with [`E2406`](./errors.md#e2406-range-index), and the diagnostic MUST name the slice form
+`a[1:3]`.
 
 ## Statement separators
 

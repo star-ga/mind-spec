@@ -79,7 +79,10 @@ Type errors occur during type checking and type inference.
 ### E2002: Unresolved name or qualified owner
 - **Trigger**: reference to an undeclared variable, or to a qualified type or
   enum variant whose owner is unknown, unimported, ambiguous, or does not
-  export that declaration. This covers a bare-headed `Enum::Variant` (or
+  export that declaration, or a reference `q.m` or a call `q.m(args)` whose
+  head `q` is an import qualifier and whose module exports no member `m`
+  ([Module-qualified references](./language.md#module-qualified-references)).
+  This covers a bare-headed `Enum::Variant` (or
   `Enum.Variant`) value or pattern whose head names an enum declared by another
   project module, when the current module declares no type of that name and
   (a) no import exports a type of that name, including when the module that
@@ -130,7 +133,8 @@ Type errors occur during type checking and type inference.
 - **Example**: `E2004: Dtype mismatch in Add at line 10, column 15: i32 + f64`
 
 ### E2005: Invalid dtype for operation
-- **Trigger**: Operation applied to unsupported dtype (e.g., Log on integers)
+- **Trigger**: Operation applied to an operand whose type or dtype the operation does not support (e.g., Log on
+  integers, or a `bool`, `f32` or `f64` operand of `&`, `|`, `^`, `<<` or `>>`)
 - **Required context**: operation name, actual dtype, supported dtypes
 - **Example**: `E2005: Log requires floating-point dtype, found i32 at line 20, column 10`
 
@@ -171,8 +175,11 @@ Type errors occur during type checking and type inference.
   [slice call boundary](./types.md#slice-call-implementation-boundary).
 - **Trigger**: unsupported slice layout, a call argument without proven
   compatible dynamic-array provenance, or a slice/array result that is not
-  proven on every required path. Explicit slice-typed local bindings are also
-  outside the current lowering boundary.
+  proven on every required path, or the scalar result of `set` assigned back
+  to an owned array (`xs = xs.set(index, value)`, see the
+  [slice call boundary](./types.md#slice-call-implementation-boundary)).
+  Explicit slice-typed local bindings are also outside the current lowering
+  boundary.
 - **Required context**: the affected declaration, argument, or result; the
   unsupported layout or missing provenance; and a source span. The compiler
   refuses before artifact emission.
