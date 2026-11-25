@@ -54,9 +54,10 @@ Measured with the reference compiler v0.10.4 (`mindc check --no-fmt`; a `struct 
 | `get(1)` for a function declared only inside `impl T for P` | `E2003`, ``unsupported call to `get` `` |
 | `p.get()` with such a function | accepted |
 
-The codes `E2701`, `E2702`, `E2703` and `E2707` are in the [Error Catalog](../../spec/v1.0/errors.md#e2701-impl-of-an-undeclared-trait)
-as a record of the released behaviour. This RFC specifies the `impl` forms, the trait declaration and the
-associated items, so that the grammar, the catalog and the reference agree.
+The codes `E2701`, `E2702`, `E2703` and `E2707` are in the
+[Error Catalog](../../spec/v1.0/errors.md#e2701-impl-of-an-undeclared-trait) as a record of the released behaviour. This
+RFC specifies the `impl` forms, the trait declaration and the associated items, so that the grammar, the catalog and the
+reference agree.
 
 ## Grammar change
 
@@ -163,9 +164,12 @@ arguments ([RFC 0027](./0027-function-generics.md)).
    Trait` stays NOT IN CORE v1.
 10. **Visibility.** A method and an associated item are visible wherever their type is visible: an export of the
     type makes them visible, and an export list does not name them ([RFC 0026](./0026-module-items.md)). An impl of
-    a trait for a type MUST stand in a module that declares the trait or the type. The module is the source module
-    or the module block that holds the impl. A primitive type is declared by no module, so `impl T for i64` stands
-    in the module that declares `T`. A violation is refused with `E2715`.
+    a trait for a type MUST stand in a module that declares the trait or the type. For an impl that stands in a
+    module block ([RFC 0026](./0026-module-items.md)), the module of this rule is the innermost module block that
+    holds the impl; for an impl outside every module block, it is the file module. A declaration counts only for the
+    module or the block in which it stands directly: with `trait T` and `struct S` declared outside every block,
+    `module m { impl T for S { } }` is refused. A primitive type is declared by no module, so `impl T for i64` stands
+    in the module or the block that declares `T`. A violation is refused with `E2715`.
 
 **Codes.** Codes that the reference already uses, now in the catalog: `E2701` (the trait of an impl is not a
 trait that the program declares), `E2702` (duplicate or overlapping impl), `E2703` (function that the trait does
