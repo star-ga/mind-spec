@@ -96,8 +96,10 @@ This RFC does not change it; its plain forms use it. `t.i`, with `i` a `DecimalI
 reads component `i` of a tuple value, counted from 0. It needs a tuple type and an index below the arity of that
 type; otherwise it is refused with `E2404`. Where the parser expects the `DecimalInteger` of a tuple index and
 the next token is a float literal of the form digits "." digits (no exponent, no suffix), the token is read as two
-tuple indices: `t.0.1` means `(t.0).1`. `t[i]` on a tuple has no meaning and is refused with `E2404`, and the
-diagnostic names the form `e.N`.
+tuple indices: `t.0.1` means `(t.0).1`. After an access dot, a float literal token with an exponent is not a tuple
+index, because only the form digits "." digits is read as two indices: a source such as `t.0.1e0` is not derived and
+MUST be refused. `t[i]` on a tuple has no meaning and is refused with `E2404`, and the diagnostic names the form
+`e.N`.
 
 ### Record literal
 
@@ -111,9 +113,10 @@ This rule makes `if b { }` and `match x { }` valid, which the reference refuses 
 **`loop { … }`.** [Loop exits](../../spec/v1.0/language.md#loop-exits) says that no rule derives the text
 `loop { ... }`. `loop` is not a keyword, so with `RecordLiteral` the texts `loop { }` and `loop { f: e }` derive as a
 record literal where an expression can stand. This RFC changes that sentence of Language: such a text is a record
-literal of a struct named `loop`. When the program declares no struct `loop`, the text MUST be refused at check time,
-and the diagnostic still says that Core v1 has no `loop` statement and names the form `while true { ... }`. A body
-with statements, such as `loop { x = 1; }`, has no derivation as before.
+literal of a struct named `loop`. When the program declares no struct `loop`, the text MUST be refused at check time
+with `E2405` ([No loop statement](../../spec/v1.0/errors.md#e2405-no-loop-statement)), and the diagnostic still says
+that Core v1 has no `loop` statement and names the form `while true { ... }`. A body with statements, such as
+`loop { x = 1; }`, has no derivation as before, and it keeps `E2405`. `loop` stays a name, not a keyword.
 
 ### For-loop pattern
 
@@ -130,7 +133,10 @@ A loop that needs an index and a value uses a library function that yields pairs
 2. **Bindings.** A name is bound at most once in one pattern (`E2313`). A binding has the type of the
    part of the scrutinee that it matches. Its scope depends on the position of the pattern:
    in a `match` arm it is the guard and the arm body, and nowhere else; in a `let` it is the rest of the
-   enclosing block, from the end of the `let` statement; in a `for` it is the body of the loop.
+   enclosing block, from the end of the `let` statement; in a `for` it is the body of the loop. A name that the
+   pattern of a `match` arm or of a `for` binds is not mutable, and `let mut p = e;` binds every name of `p` as
+   mutable ([Bindings and assignment](../../spec/v1.0/language.md#bindings-and-assignment)). A later `let` of the
+   same name is a new binding, as for a plain name.
 3. **Irrefutable positions.** The pattern of a `let` and of a `for` MUST be
    irrefutable: an identifier, `_`, a tuple of irrefutable patterns, or a record pattern whose field
    patterns are irrefutable. A refutable pattern there is refused with `E2310`.
@@ -177,8 +183,9 @@ bytes of the program with the plain form written out.
 ## Proposed conformance rows
 
 Proposals. The reference refuses the first two accept rows today. The codes `E2310`, `E2311`, `W2312`, `E2313`
-and `E2314` are the codes of this draft; `E2001`, `E2002` and `E2301` exist, and `E2404` is the code of the tuple index
-([decision note DN-11](./decision-notes.md#dn-11-tuple-index-and-range-index)).
+and `E2314` are the codes of this draft; `E2001`, `E2002` and `E2301` exist, `E2404` is the code of the tuple index
+([decision note DN-11](./decision-notes.md#dn-11-tuple-index-and-range-index)), and `E2405` is the code of the text
+`loop { … }` ([decision note DN-7](./decision-notes.md#dn-7-loop-exits-outside-a-loop-loop-labels-and-values)).
 
 ```yaml
 description: "A tuple pattern as the for-loop variable destructures each element"
@@ -384,9 +391,10 @@ expected:
    ([Variant path](#variant-path)).
 5. **Float and `String` literal patterns.** A `String` literal pattern is allowed. A float literal pattern is not.
 6. **Record pattern with `..`.** Not here. It comes with the later RFC of question 3.
-7. **Tuple index.** The grammar defines `t.0` ([decision note DN-11](./decision-notes.md#dn-11-tuple-index-and-range-index),
-   [Tuple index](../../spec/v1.0/language.md#tuple-index)).
-   `t[0]` on a tuple is not defined. The plain form of the tuple `let` uses the tuple index.
+7. **Tuple index.** The grammar defines `t.0`
+   ([decision note DN-11](./decision-notes.md#dn-11-tuple-index-and-range-index),
+   [Tuple index](../../spec/v1.0/language.md#tuple-index)). `t[0]` on a tuple is not defined. The plain form of the
+   tuple `let` uses the tuple index.
 8. **Codes.** The proposed codes are assigned, because they are free in the catalog: `E2310` (refutable pattern in
    `let` or `for`), `E2311` (`match` not exhaustive), `W2312` (arm that no value can reach), `E2313` (name bound
    twice). Question 9 takes `E2314` from the same block.
