@@ -613,9 +613,9 @@ E6xxx errors occur during backend execution or while producing a runnable artifa
 - **Example**: `E6004: Failed to allocate tensor [10000, 10000, f32] on Gpu: out of memory`
 
 ### E6005: Numeric overflow
-- **Trigger**: Operation produces overflow (integer sum, exp on large value)
+- **Trigger**: no operation of Core v1: integer overflow wraps in two's complement
+  ([Numeric precision](./stdlib.md#numeric-precision)), and a floating-point overflow gives an infinity (IEEE 754)
 - **Required context**: operation, operands (summary), result
-- **Example**: `E6005: Integer overflow in Sum: i32 accumulator exceeded bounds`
 
 ### E6006: Invalid numeric value
 - **Trigger**: Operation produces NaN or Inf when not expected

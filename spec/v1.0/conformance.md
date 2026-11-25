@@ -169,8 +169,8 @@ array or slice type is not narrowed by the evaluator (only struct fields are
 narrowed element by element); fields of structs that are not registered in the
 evaluated module are not narrowed at construction; signed 64-bit
 `INT_MIN / -1` makes the evaluator panic (`mindc test` reports the test as
-failed) where compiled output defines `INT_MIN`; and `x / 0` and `x % 0` are
-evaluation errors where compiled output defines 0, except where the evaluator
+failed) where section 1 of `determinism.md` gives `INT_MIN`; and `x / 0` and `x % 0` are
+evaluation errors where that section gives 0, except where the evaluator
 treats an operand as `u64` (see section 1 of
 [`determinism.md`](../../determinism.md)). Agreement is claimed only for the
 covered cases. Commits `97c0d273`, `74004786`, `2575c1e9` and `a7f9520a` change

@@ -801,7 +801,8 @@ run-to-run bit-identical and verified byte-identical across x86_64 + ARM64 on re
 - **f32 transcendental / vector-reduction operations**: Error MUST be within 1e-6 relative tolerance or 1e-9 absolute
 - **f64 transcendental / vector-reduction operations**: Error MUST be within 1e-12 relative tolerance or 1e-15 absolute
 - **Integer operations**: Exact (no approximation)
-  - Overflow behavior: implementation-defined (MAY wrap, saturate, or error)
+  - Overflow wraps in two's complement, and a division or a remainder by zero gives 0, as section 1 of
+    [`determinism.md`](../../determinism.md) says
 
 Implementation evidence (informative): the reference implementation's fixed-order strict `f32` dot (length 4093) and 64×64 matrix-vector kernels carry committed output hashes that are identical for x86_64 AVX2 and ARM64 NEON (RFC 0015 section 5A.3, `c8efcf9a`); this covers those fixtures only and does not remove the tolerance allowance above for other vector reductions or transcendental functions.
 

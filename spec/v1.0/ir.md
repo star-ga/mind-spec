@@ -350,7 +350,8 @@ slice gives one); a negative dimension MUST be refused with [`E3006`](./errors.m
   - **Shape rules**: output shape equals input shape
   - **Dtype rules**: input MUST be a floating-point dtype; output has the same dtype
   - **Semantics**: `Log(x)[i] = ln(x[i])` for all indices i
-  - **Runtime behaviour**: `Log(x)` where x ≤ 0 is implementation-defined (may produce NaN or error)
+  - **Runtime behaviour**: `Log(x)` follows IEEE 754: the logarithm of 0 is negative infinity, and the logarithm of a
+    negative number is the [canonical NaN](./types.md#canonical-nan)
 
 ## Canonicalisation
 

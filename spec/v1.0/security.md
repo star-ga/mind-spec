@@ -80,7 +80,7 @@ greater than the extent. No bound is clamped, and no index counts from the end. 
 slice gives one); a negative dimension MUST be refused with [`E3006`](./errors.md#e3006-negative-dimension).
 
 **Numeric overflow**:
-- Integer arithmetic overflow behavior MUST be defined (wrap, saturate, or error)
+- Integer overflow wraps in two's complement, and a division or a remainder by zero gives 0
   ([Numeric precision](./stdlib.md#numeric-precision))
 - Floating-point operations follow IEEE 754 semantics (NaN propagation, infinities)
 - Implementations SHOULD warn on potential overflow in constant folding

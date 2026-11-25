@@ -21,6 +21,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   there and are refused at check time when the type gives the shape, else they make the defined stop
   ([Empty axes](../spec/v1.0/ir.md#empty-axes)). The IR tool of the repository accepts a dimension of size 0,
   and the reshape row of the IR verification rows names `E3007`.
+- **Integer arithmetic.** The standard library and Security chapters give the rule of section 1 of
+  [`determinism.md`](https://github.com/star-ga/mind-spec/blob/main/determinism.md): integer overflow wraps in two's
+  complement, and a division or a remainder by zero gives 0; `E6005` has no trigger in Core v1. `Log(x)` follows IEEE
+  754: the logarithm of 0 is negative infinity and of a negative number the canonical NaN.
 
 ### Changed: the memory model, containers, index bounds and attribute codes (2026-11-25)
 
