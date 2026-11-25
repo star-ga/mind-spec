@@ -16,16 +16,17 @@ limitations under the License.
 
 # Decision Notes (Informative)
 
-This page lists points where the specification text did not decide the meaning of a form that it
-names. A note records the text, the behaviour of the reference compiler v0.10.4 (measured with
-`mindc check --no-fmt`, and `mindc build --backend native` where it is named), and the options. **A note
-does not give a meaning, except where it records a decision.** The specification owner decided every point on
-2026-11-24; each note records the decision in its **Decision** paragraph, and an RFC or an editorial change carries
-it into the normative text. The tables of options stay as the record of the choice. Each note ends with the status
-of its forms after the decision, in the words of [Core v1 form status](../../spec/v1.0/core-v1-forms.md); that page
-gives the same status to the same form. The status is **Open** only where the note says so. The paragraph **Text
-before the decision** records the specification text on which the decision was taken, as it stood before the change
-that carries the decision; its links lead to the place that now holds the decided rule.
+This page lists points where the specification text did not decide the meaning of a form that it names. A note records
+the text, the behaviour of the reference compiler v0.10.4 (measured with `mindc check --no-fmt`, and
+`mindc build --backend native` where it is named), and the options. **A note does not give a meaning, except where it
+records a decision.** The specification owner decided DN-1 to DN-13 on 2026-11-24 and DN-14 and DN-16 to DN-20 on
+2026-11-25; each note records the decision in its **Decision** paragraph, and an RFC or an editorial change carries it
+into the normative text. DN-15 is reserved for the container model, and this page records no decision on it yet. The
+tables of options stay as the record of the choice. Each note ends with the status of its forms after the decision, in
+the words of [Core v1 form status](../../spec/v1.0/core-v1-forms.md); that page gives the same status to the same form.
+The status is **Open** only where the note says so. The paragraph **Text before the decision** records the specification
+text on which the decision was taken, as it stood before the change that carries the decision; its links lead to the
+place that now holds the decided rule.
 
 ## DN-1. The operator `:=`
 
@@ -163,7 +164,8 @@ the comment belonged to the v1.1 candidate additions.
 
 **Reference.** `as` binds tighter than `*` (measured with v0.10.4). The two
 sources disagree for an expression such as `a * b as f64`. The reference refuses `1 as bool` at check time
-(`E2016`, "cast to `bool` is not permitted") and accepts `300 as u8`.
+(`E2016`, "cast to `bool` is not permitted") and accepts `300 as u8`. It accepts `x as i64 < y`,
+`x as Option<i64>> z` and `let b = x as Option < y;`.
 
 **Options.** (A) Keep the reference and change the comment. (B) Keep the comment and change the reference.
 Either choice changes the meaning of existing programs that mix `as` with `*`, `/`, `+` or `-`.
@@ -190,11 +192,22 @@ float has no cast to `bool`: the program writes a comparison, such as `x != 0`. 
 floating-point NaN gives the canonical NaN of the target type: rule 4 in both directions, and rule 6 for `f32` and
 `f64`.
 
+A later decision of the specification owner, on 2026-11-25, gives the reading rule for the type of a cast
+([Casts](../../spec/v1.0/language.md#casts)). A primitive type name ends the type of a cast: `x as i64 < y` is the
+comparison of `x as i64` with `y`. After any other type name, a `<` opens a type-argument list (the type reading
+wins), and the rule of [Tokens](../../spec/v1.0/lexical.md#tokens) for the closing angle closes it. So
+`x as Option<y>> z` is the cast `x as Option<y>` compared by `>` with `z`, and that cast is refused with `E2016`, as
+a cast that the table does not list; `let b = x as Option < y;` has no reading and MUST be refused, because the list
+that the `<` opens is not closed. To compare a cast to a type that is not a primitive type by `<`, a program writes
+parentheses: `(x as T) < y`.
+
 **Form status.** The precedence of `as` (`a * b as f64` is `a * (b as f64)`): Core v1. `e as T` for a pair of types
 of the cast table: Core v1; reference gap (the native backend refuses `i64 as i32` and `i32 as i64` with
 `lane.type.int_width`, `f64 as i32` and `f64 as f32` with `lane.source.cast`, and `f32 as f64` with
-`lane.type.non_f64_float`). A cast that the table does not list (`1 as bool`, `true as f64`): Core v1 refuses;
-reference gap (`mindc check` accepts `true as f64`; it refuses a cast to `bool` with `E2016`).
+`lane.type.non_f64_float`). A cast that the table does not list (`1 as bool`, `true as f64`, `x as Option<i64>> z`):
+Core v1 refuses; reference gap (`mindc check` accepts `true as f64` and `x as Option<i64>> z`; it refuses a cast to
+`bool` with `E2016`). `x as i64 < y`: Core v1; reference conforms (`mindc check` accepts it).
+`let b = x as Option < y;`: Core v1 refuses; reference gap (`mindc check` accepts it).
 
 ## DN-7. Loop exits outside a loop, `loop`, labels and values
 
@@ -209,7 +222,8 @@ exit.
 (`lane.source.loop_exit_scope`). The text `loop { … }` is accepted by `mindc check --no-fmt`. With a statement in its
 block (`loop { i = i + 1; }`) the native backend refuses it without a key; with an empty block the native build builds
 it, and the image of `loop { } return 7;` exits with the status 7. `let loop = 1;` runs. A label `break 'a;` is refused
-with `E1001`. `break 7;` is read as `break` followed by `7;`. `let break = 4;` and `let continue = 1;` are accepted, and
+with `E1001`. `break 7;` is read as `break` followed by `7;`. `let loop = false; while loop { } return 3;` is
+refused with `E1001`, "expected '{', found Some('r')". `let break = 4;` and `let continue = 1;` are accepted, and
 the image of `let break = 4; return break;` exits with the status 4; in a loop, `break - 1;` is read as the loop exit,
 and `break = 5;` is refused with `E1001`.
 
@@ -217,12 +231,13 @@ and `break = 5;` is refused with `E1001`.
 production and a rule that it only ends with a `break`. (C) Add labels and a value to `break`. These options
 are independent.
 
-**Decision.** Decided by the specification owner on 2026-11-24, one answer for each option
-([Loop exits](../../spec/v1.0/language.md#loop-exits)). (A) Yes: a loop exit outside a loop is refused at check time
-with `E2401`. (B) No: `loop` is not a keyword in Core v1, and the text `loop { … }` is refused at check time with
-`E2405`; the diagnostic says that Core v1 has no `loop` statement and names the form `while true { … }`. `loop` stays
-a name: `let loop = 1; return loop;` is valid. (C) No: Core v1 has no labels and no value form of `break`; a later RFC
-may add them. `break 'a;` holds an invalid token, and `break 7;` has no derivation; both are refused.
+**Decision.** Decided by the specification owner on 2026-11-24, one answer for each option ([Loop
+exits](../../spec/v1.0/language.md#loop-exits)). (A) Yes: a loop exit outside a loop is refused at check time with
+`E2401`. (B) No: `loop` is not a keyword in Core v1. Where a statement can start, the name `loop` directly followed by
+`{` (the text `loop { … }`) is refused at check time with `E2405`; the diagnostic says that Core v1 has no `loop`
+statement and names the form `while true { … }`. In every other place `loop` is a name: `let loop = 1; return loop;` and
+`let loop = false; while loop { } return 3;` are valid. (C) No: Core v1 has no labels and no value form of `break`; a
+later RFC may add them. `break 'a;` holds an invalid token, and `break 7;` has no derivation; both are refused.
 
 A later decision of the specification owner on the same day reserves `break` and `continue`. The first form of this
 decision kept them as names where no derivation reads them as a loop exit. Now they are keywords
@@ -239,8 +254,9 @@ where the grammar needs a name or an expression (`let break = 4;`, `let continue
 Core v1 refuses; reference gap (`mindc check` accepts `let break = 4;` and `let continue = 1;`, and the image of
 `let break = 4; return break;` exits with the status 4; in a loop it reads `break - 1;` as the loop exit; it refuses
 `break = 5;` with `E1001`). `loop { }`: Core v1 refuses; reference gap (`mindc check` accepts it; with an empty block
-the native build also builds it, and the image runs on past it: `loop { } return 7;` exits with the status 7). The
-missing `;` of a loop exit (`while c { break }`) is in the status of
+the native build also builds it, and the image runs on past it: `loop { } return 7;` exits with the status 7).
+`let loop = false; while loop { } return 3;`: Core v1; reference gap (`mindc check` refuses it with `E1001`,
+"expected '{', found Some('r')"). The missing `;` of a loop exit (`while c { break }`) is in the status of
 [DN-10](#dn-10-separators-that-the-grammar-requires-and-the-reference-does-not).
 
 ## DN-8. `let mut` and assignment to a binding
@@ -374,19 +390,19 @@ After an access dot, a float literal token with an exponent or a suffix is not a
 digits "." digits is read as two indices (the lexical grammar gives a float literal no suffix, so in Core v1 such a
 token has an exponent): a source such as `t.0.1e0` is not derived and MUST be refused.
 [RFC 0025](./0025-patterns.md#tuple-index) states the same rule in the same words. `t[0]` on a tuple has no meaning:
-it is refused with `E2404`, and the diagnostic names the form `e.N`. `a[e1:e2]` is the only slice form that this
-edition defines: it takes the elements from the index `e1` up to, and not including, the index `e2`, so `a[1:3]` takes
-the elements 1 and 2. `SliceExpression` also derives `a[:e2]`, `a[e1:]`, `a[:]` and `a[e1:e2:e3]`, and no sentence of
-the specification gives them a meaning. The grammar has no range index: `a[1..3]` is refused at check time with
-`E2406`, and the diagnostic names the slice form `a[1:3]`.
+it is refused with `E2404`, and the diagnostic names the form `e.N`. `a[e1:e2]` takes the elements from the index
+`e1` up to, and not including, the index `e2`, so `a[1:3]` takes the elements 1 and 2. This decision gave no meaning
+to the other forms that `SliceExpression` derives; [DN-19](#dn-19-slice-bounds-and-step) gives them one. The grammar
+has no range index: `a[1..3]` is refused at check time with `E2406`, and the diagnostic names the slice form
+`a[1:3]`.
 
 **Form status.** `t.0` and `t.0.1` on a tuple: Core v1; reference gap (the native backend refuses tuples with
 `lane.source.tuple`). `t.0.1e0`: Core v1 refuses; reference conforms (`mindc check` refuses it with `E2002`, as the
 unknown identifier `e0`). `x.0` where `x` is not a tuple, `t.N` with `N` not less than the number of elements, and
 `t[0]` on a tuple: Core v1 refuses; reference gap (`mindc check` accepts all three). `t[a:b]`, the slice form: Core
 v1; reference gap (`mindc check` refuses `let b = a[1:3];` on the array `[1, 2, 3, 4]` with `E1001`, "expected `]` to
-close index expression"). `a[:e2]`, `a[e1:]`, `a[:]`, `a[e1:e2:e3]`, the other forms of `SliceExpression`: Open.
-`a[1..3]`: Core v1 refuses; reference gap (`mindc check` accepts it).
+close index expression"). The other forms of `SliceExpression` are in the status of
+[DN-19](#dn-19-slice-bounds-and-step). `a[1..3]`: Core v1 refuses; reference gap (`mindc check` accepts it).
 
 ## DN-12. Compound assignment operators
 
@@ -462,3 +478,243 @@ carries the rule into the normative text. No warning period comes before the err
 **Form status.** `fn f<T>(x: T) -> T { }`, a generic function, and so a call of it: Extension. The rule of this
 decision applies in the edition that adds function generics ([RFC 0027](./0027-function-generics.md)). The reference
 accepts the calls measured above.
+
+## DN-14. Raw memory and its mark
+
+**Text before the decision.** [Standard Library](../../spec/v1.0/stdlib.md#raw-memory-functions) gave the
+`__mind_*` intrinsics, which take and give opaque `i64` addresses, and named `vec_addr` and the other functions that
+give the address of a buffer. No sentence said how long an address stays valid, and any function could call the
+intrinsics. The determinism rule of that chapter covered "any program written against these intrinsics", also a
+program that reads through an address of freed memory. [Security](../../spec/v1.0/security.md#core-language-safety)
+said that the surface language inherits the memory safety model of another language and that a use after a free and
+a buffer overflow are refused before IR generation; no rule of the language did that. An attribute stood only in the
+"v1.1 candidate additions" block of the grammar, which `Module` does not reach.
+
+**Reference.** `mindc check` accepts every source of this note: a `#[raw_memory]` function that calls
+`__mind_load_i64`, called from a `#[raw_memory]` `main`; a `#[raw_memory(sealed)]` function that calls the
+intrinsics, called from an unmarked `main`; `vec_get` in an unmarked `main`; a call of `__mind_load_i64` in an
+unmarked function; a call of `vec_addr` in an unmarked `main`; a call of a `#[raw_memory]` function from an unmarked
+`main`; `#[raw_memory]` before a `struct`; `#[raw_memory(open)]` before a function; and `#[fast]` before a function.
+The native backend refuses each source with an attributed function with `lane.source.function_contract`, the source
+with `#[raw_memory]` before a `struct` with `lane.source.top_level`, and the sources that call `vec_get` and
+`vec_addr` with `lane.call.unknown`. It builds the source with the unmarked call of `__mind_load_i64`, and its image
+exits with the status 0.
+
+**Options.** (A) Only a sentence on address validity. (B) An attribute on a function that allows raw memory uses in
+its body; a use elsewhere is refused at check time. (C) A block form with a new keyword. (D) Raw memory uses only in
+the standard library. (E) As (B), and a function of the standard library may make raw memory uses without the
+attribute, while the library functions that give or take an address are raw memory functions themselves.
+
+**Decision.** Option E, decided by the specification owner on 2026-11-25.
+
+- Address validity ([Address validity](../../spec/v1.0/stdlib.md#address-validity)). An address that a function
+  gives for the storage of a buffer (`vec_addr`, `string_addr`, `map_keys_addr`, `map_vals_addr`, `vec_zeroed`) is
+  valid until the next operation that can grow, shrink or free that buffer. An address from `__mind_alloc` or
+  `__mind_realloc` is valid until it is passed to `__mind_free` or `__mind_realloc`. A read or a write through an
+  address that is not valid, and a read of memory that the program did not write after the allocation, is an error
+  of the program. An implementation does not have to detect it, and this specification gives the value of such a
+  read no meaning. The determinism rule of the standard library covers the programs that keep these rules.
+- The mark ([Raw memory](../../spec/v1.0/language.md#raw-memory)). A raw memory function is a function that the list
+  of [raw memory functions](../../spec/v1.0/stdlib.md#raw-memory-functions) of the standard library names, or a
+  function declared with `#[raw_memory]`; an external function that an implementation adds as an extension is one
+  when its signature has a pointer type or the tag `unsafe fn`. A call of a raw memory function is a raw memory use.
+  A raw memory use is allowed only in the body of a function declared with `#[raw_memory]` or
+  `#[raw_memory(sealed)]`, or in a function of the standard library. Any other raw memory use MUST be refused at
+  check time with `E2501`. `#[raw_memory(sealed)]` states that no parameter and no result of the function carries an
+  address and that the function keeps no address after it returns; a call of a sealed function is not a raw memory
+  use, and an implementation does not check the statement. The attribute `raw_memory` stands only directly before a
+  function declaration and takes no argument or the one argument `sealed`; any other use MUST be refused at check
+  time with `E2502`.
+- Attributes ([Attributes](../../spec/v1.0/language.md#attributes)). `FunctionDeclaration` takes
+  `{ Attribute }` before `fn`. An attribute before a function declaration is part of Core v1 when the specification
+  defines its name for that position; another name MUST be refused at check time.
+- The library is safe without the mark. A function of the standard library that is not a raw memory function is
+  safe for every argument: no argument makes it read or write memory outside the storage that its containers own. An
+  index function (`vec_get`, `vec_set`, `string_get_byte`, `map_key_at`, `map_value_at`) MUST stop the program when
+  the index is not less than the length of the container or is negative, as a false `assert` stops it, and the
+  diagnostic names `E6001`. A form of an index function that does not check the index has its own name and is
+  declared with `#[raw_memory]`.
+- [Security](../../spec/v1.0/security.md#core-language-safety) says only what the language checks: no pointer type,
+  the mark of raw memory uses, and the stop of the index functions. It says that the address rules are not checked.
+- What a value of a container that a program keeps sees after a change of the container is the container model,
+  which this decision does not decide.
+
+**Form status.** `#[raw_memory] fn f(p: i64) -> i64 { }`, `#[raw_memory(sealed)] fn g() -> i64 { }`: Core v1;
+reference gap (`mindc check` accepts both; the native backend refuses an attributed function with
+`lane.source.function_contract`). A call of a raw memory function in a function without the attribute, outside the
+standard library (`fn r(p: i64) -> i64 { return __mind_load_i64(p); }`, `vec_addr(v)` in an unmarked `main`, a call of
+a `#[raw_memory]` function from an unmarked `main`): Core v1 refuses; reference gap (`mindc check` accepts all three;
+the native backend builds the first, and its image exits with the status 0). `#[raw_memory] struct S { a: i64, }`,
+`#[raw_memory(open)] fn f() { }`: Core v1 refuses; reference gap (`mindc check` accepts both). `#[fast] fn f() { }`:
+Core v1 refuses; reference gap (`mindc check` accepts it).
+
+**Codes.** [`E2501`](../../spec/v1.0/errors.md#e2501-raw-memory-use-outside-a-raw-memory-function) (raw memory use
+outside a raw memory function) and [`E2502`](../../spec/v1.0/errors.md#e2502-invalid-raw_memory-attribute) (invalid
+`raw_memory` attribute) are new; the published catalog defines neither.
+[`E6001`](../../spec/v1.0/errors.md#e6001-out-of-bounds-index) (out-of-bounds index) exists, and its trigger now
+names an index function of the standard library too. The refusal of an attribute name that the specification does
+not define has no code.
+
+## DN-16. The string type
+
+**Text before the decision.** [Standard Library](../../spec/v1.0/stdlib.md) wrote the type of the message of `panic`
+as `string` (`panic(message: string) -> !`) and the keys of a map as `map<string, _>`, and it named the type of the
+module `std.string` `String`. No sentence made either name usable in a type position, and no sentence gave a string
+literal a type.
+
+**Reference.** `mindc check` accepts `fn echo(s: String) -> String { return s; }` with `let t: String = echo("a");`,
+it accepts `let n: i64 = "a";`, and it accepts `let s: string = "a";`. The native backend refuses the first source
+with `lane.string.result`, the second with `lane.source.string` and the third with `lane.type.named`.
+
+**Options.** (A) The name is `String`, the type of the module `std.string`, and a string literal has that type.
+(B) The name is `string`, a primitive type. (C) No name: a string literal stands only where a function of the
+standard library takes one.
+
+**Decision.** Option A, decided by the specification owner on 2026-11-25. The string type is `String`, the type of
+the module `std.string` of the standard library ([Type formation](../../spec/v1.0/types.md#type-formation)). Like
+every entity of the standard library, `String` is available without an import. A string literal has the type
+`String`, so `let s: String = "a";` is valid and `let n: i64 = "a";` MUST be refused at check time with `E2001`. The
+lower-case spelling leaves the text: [Standard Library](../../spec/v1.0/stdlib.md) writes
+`panic(message: String) -> !` and "a map whose keys are `String` values".
+
+**Form status.** `fn echo(s: String) -> String { }`, `let t: String = "a";`: Core v1; reference gap (`mindc check`
+accepts it; the native backend refuses a `String` result with `lane.string.result`). `let n: i64 = "a";`: Core v1
+refuses; reference gap (`mindc check` accepts it).
+
+**Codes.** [`E2001`](../../spec/v1.0/errors.md#e2001-type-mismatch) (type mismatch) exists.
+
+## DN-17. Elementwise operators
+
+**Text before the decision.** The precedence table of
+[Language](../../spec/v1.0/language.md#operator-precedence-and-associativity) listed `.*` and `./` with `*` and `/`,
+and `.+` and `.-` with `+` and `-`, and the grammars had them as tokens and as productions at those levels. No
+sentence gave them an operand rule, a result type or a value, for scalar or for tensor operands, and
+[Core v1 forms](../../spec/v1.0/core-v1-forms.md) gave them the status Open.
+
+**Reference.** `mindc check` accepts each of the four operators on two `i64` scalars, and it accepts `a .* b` with an
+`f64` and an `i64` operand. The native backend refuses each of these sources with `lane.source.tensor`. `mindc check`
+refuses `t .* s` with `t = tensor([1.0, 2.0])` and a scalar `s` with `E2003`, "unsupported call to `tensor`".
+
+**Options.** (A) The operand rule of the arithmetic operators of
+[Tensor operations](../../spec/v1.0/language.md#tensor-operations), and on two scalar operands the value of the
+plain operator. (B) Tensor operands only: a scalar operand is refused. (C) Remove the four operators, because `*`,
+`/`, `+` and `-` already broadcast.
+
+**Decision.** Option A, decided by the specification owner on 2026-11-25
+([Tensor operations](../../spec/v1.0/language.md#tensor-operations)). `.*`, `./`, `.+` and `.-` follow the operand
+rule of the arithmetic operators: the operands share a dtype, the shapes follow the
+[broadcasting rules](../../spec/v1.0/shapes.md#broadcasting), and a scalar extends to the shape of the other
+operand. Operands of two different dtypes MUST be refused at check time with `E2004`. On two scalar operands of one
+numeric type, the result is the value of the plain operator with that type: `a .* b` is `a * b`, `a ./ b` is
+`a / b`, `a .+ b` is `a + b`, and `a .- b` is `a - b`.
+
+**Form status.** `a .* b`, `a ./ b`, `a .+ b`, `a .- b`: Core v1; reference gap (`mindc check` accepts the four on
+two `i64` scalars; the native backend refuses each with `lane.source.tensor`). `a .* b` with an `f64` and an `i64`
+operand: Core v1 refuses; reference gap (`mindc check` accepts it).
+
+**Codes.** [`E2004`](../../spec/v1.0/errors.md#e2004-dtype-mismatch-in-binary-operation) (dtype mismatch in binary
+operation) exists.
+
+## DN-18. The tensor constructor
+
+**Text before the decision.** `tensor(e)` and `tensor(e, dtype: D)` (`TensorConstructor`) were productions of the
+grammar, and [Core v1 forms](../../spec/v1.0/core-v1-forms.md) gave `tensor(e)` and `tensor(e, dtype: f64)` the
+status Core v1. No sentence gave the dtype of `tensor(e)` without a dtype argument, its shape, or the meaning of a
+dtype argument that differs from the type of `e`.
+
+**Reference.** `mindc check` refuses `tensor([[1, 2], [3, 4]])` and `tensor(true)` with `E2003`, "unsupported call
+to `tensor`", and it refuses `tensor(3, dtype: f32)` and `tensor(true, dtype: f32)` with `E1001`, "expected ')',
+found Some(':')".
+
+**Options.** (A) The dtype is the dtype argument when one is written, else the dtype of `e`; the shape is the shape
+of `e`; a dtype argument that differs from the dtype of `e` converts as a cast where the cast table gives one, and
+is refused where it gives none. (B) A fixed dtype, such as `f32`, when no dtype argument is written. (C) The dtype
+argument MUST equal the dtype of `e`; no conversion.
+
+**Decision.** Option A, decided by the specification owner on 2026-11-25
+([Tensor operations](../../spec/v1.0/language.md#tensor-operations)). `tensor(e)` and `tensor(e, dtype: D)` make a
+tensor from the value of `e`. Its shape is the shape of `e`: a scalar `e` gives rank 0, and an array literal gives
+its dimensions (`tensor([[1, 2], [3, 4]])` has the shape `[2, 2]`). With a dtype argument the dtype is `D`; without
+one it is the type of a scalar `e` or the element type of an array `e`, which MUST be a dtype (`i32`, `i64`, `f32` or
+`f64`); another element type, such as `bool`, MUST be refused at check time with `E2005`. The dtype argument is not
+an expected type for `e`. When `D` differs from the element type of `e`, each element is converted as `as` converts
+it where the cast table gives a cast from that type to `D` (`tensor(3, dtype: f32)` holds `3.0`); where the table
+gives no such cast, the constructor MUST be refused at check time with `E2016`.
+
+**Form status.** `tensor([[1, 2], [3, 4]])`, `tensor(3, dtype: f32)`: Core v1; reference gap (`mindc check` refuses
+the first with `E2003`, "unsupported call to `tensor`", and the second with `E1001`, "expected ')', found Some(':')").
+`tensor(true, dtype: f32)`, `tensor(true)`: Core v1 refuses; reference gap (`mindc check` refuses the first with
+`E1001` and the second with `E2003`, not with `E2016` and `E2005`).
+
+**Codes.** [`E2005`](../../spec/v1.0/errors.md#e2005-invalid-dtype-for-operation) (invalid dtype for operation) and
+[`E2016`](../../spec/v1.0/errors.md#e2016-invalid-cast) (invalid cast) exist; their triggers now name the tensor
+constructor too.
+
+## DN-19. Slice bounds and step
+
+**Text before the decision.** `SliceExpression` derived `a[s:e]`, `a[:e]`, `a[s:]`, `a[:]` and `a[s:e:k]`.
+[Language](../../spec/v1.0/language.md#tuple-index) gave a meaning only to `a[e1:e2]`
+([DN-11](#dn-11-tuple-index-and-range-index)), and no sentence said what an omitted start, end or step is.
+[Core v1 forms](../../spec/v1.0/core-v1-forms.md) gave the other forms the status Open.
+
+**Reference.** On the array `[1, 2, 3, 4]`, `mindc check` refuses `a[:2]` and `a[:]` with `E1001`, "unexpected `:`,
+expected an expression", and `a[1:]`, `a[0:4:2]` and `a[0:4:0]` with `E1001`, "expected `]` to close index
+expression".
+
+**Options.** (A) An omitted start is 0, an omitted end is the length of the axis, and an omitted step is 1.
+(B) Only `a[s:e]` is in the language, and the grammar loses the other forms.
+
+**Decision.** Option A, decided by the specification owner on 2026-11-25
+([Tuple index](../../spec/v1.0/language.md#tuple-index)). `a[s:e:k]` is a slice: it takes the elements of the axis
+from the index `s` up to, and not including, the index `e`, with the step `k`. An omitted `s` is 0, an omitted `e` is
+the length of the axis, and an omitted `k` is 1, so for an axis of length `n`, `a[:e]` is `a[0:e:1]`, `a[s:]` is
+`a[s:n:1]`, `a[:]` is `a[0:n:1]` and `a[s:e]` is `a[s:e:1]`. The form lowers to the `Slice` operation of
+[Core IR](../../spec/v1.0/ir.md#indexing-and-slicing) with these bounds and this step, and the shape of the result
+follows the shape rule of that operation: `a[0:4:2]` takes the elements 0 and 2. A step 0 has no slice: the `Slice`
+operation needs steps that are not zero, and its catalog code is `E4008`. The lexer reads `::` as one token, so
+`a[::2]` is not derived; with the start and the end omitted, a step is written `a[: :2]`.
+
+**Form status.** `a[:e2]`, `a[e1:]`, `a[:]`, `a[e1:e2:e3]`: Core v1; reference gap (`mindc check` refuses each of
+`a[:2]`, `a[1:]`, `a[:]` and `a[0:4:2]` with `E1001`). `a[0:4:0]`: Core v1 refuses; reference gap (`mindc check`
+refuses it with `E1001`, "expected `]` to close index expression", not with `E4008`).
+
+**Codes.** [`E4008`](../../spec/v1.0/errors.md#e4008-invalid-slice-step) (invalid slice step) exists.
+
+## DN-20. The type of a literal
+
+**Text before the decision.** [Types](../../spec/v1.0/types.md#type-inference) said that expressions without
+annotations are checked by "propagating expected types from their context". No sentence gave the type of a literal
+with no expected type, and no sentence said what happens to a literal whose value its type cannot hold, or to an
+integer literal where a floating-point type is expected.
+
+**Reference.** `mindc check` accepts `let a = 5; let b: i32 = 7; let c = 1.5; let d: f32 = 2.5;`, and it accepts
+`let b: i32 = 3000000000;`, `let b: i32 = -2147483648;` and `let d: f32 = 1.0e39;`. It refuses `let y: f64 = 1;` and
+`let z: i64 = 1.5;` with `E2015`, "no implicit int↔float conversion", a code that the catalog does not define.
+
+**Options.** (A) A literal takes the type of its kind that its context expects, else `i64` or `f64`; a value that
+its type cannot hold and a literal of the other kind are refused. (B) As (A), but a literal of the other kind is
+converted to the expected type. (C) A literal always has the type `i64` or `f64`, and a program writes a cast for
+every other type.
+
+**Decision.** Option A, decided by the specification owner on 2026-11-25
+([Type of a literal](../../spec/v1.0/types.md#type-of-a-literal)).
+
+1. An integer literal takes the integer type that its context expects. With no expected type, it has the type
+   `i64`: in `let a = 5;` the type of `a` is `i64`.
+2. A floating-point literal takes the floating-point type that its context expects. With no expected type, it has
+   the type `f64`: in `let c = 1.5;` the type of `c` is `f64`.
+3. An integer literal whose value is outside the range of its type, and a floating-point literal whose value,
+   rounded to its type to the nearest value with ties to even, is greater in magnitude than the largest finite
+   value of that type, MUST be refused at check time with `E2408`: `let b: i32 = 3000000000;` is refused. The value
+   of a literal is the value of its token.
+4. An integer literal where a floating-point type is expected, and a floating-point literal where an integer type is
+   expected, MUST be refused at check time with `E2001`: `let y: f64 = 1;` and `let z: i64 = 1.5;` are refused.
+
+**Form status.** `let a = 5;`, `let c = 1.5;`, `let b: i32 = 7;`: Core v1; reference conforms (`mindc check`
+accepts them). `let b: i32 = 3000000000;`: Core v1 refuses; reference gap (`mindc check` accepts it).
+`let y: f64 = 1;`, `let z: i64 = 1.5;`: Core v1 refuses; reference gap (`mindc check` refuses both with `E2015`,
+"no implicit int↔float conversion", a code that the catalog does not define, not with `E2001`).
+
+**Codes.** [`E2408`](../../spec/v1.0/errors.md#e2408-literal-out-of-range) (literal out of range) is new; the
+published catalog defines no code for a literal outside the range of its type.
+[`E2001`](../../spec/v1.0/errors.md#e2001-type-mismatch) (type mismatch) exists.
