@@ -1,0 +1,25 @@
+# MIND Conformance Test: a scalar operand extends to the shape of the tensor
+# Specification reference: spec/v1.0/language.md#tensor-operations
+# Category: syntax
+# Profile: cpu
+
+description: "t .* s with an f64 tensor and an f64 scalar"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let t = tensor([1.0, 2.0]);
+        let s = 2.0;
+        let u = t .* s;
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0

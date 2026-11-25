@@ -135,3 +135,6 @@ implementation MAY accept or refuse those.
 | [`attribute_reject_unknown_name`](./attribute_reject_unknown_name.yaml) | reject | [Attributes](../../../spec/v1.0/language.md#attributes): an attribute name that the specification does not define MUST be refused |
 | [`string_type_accept_named`](./string_type_accept_named.yaml) | accept | [Type formation](../../../spec/v1.0/types.md#type-formation): the string type `String` |
 | [`string_type_reject_literal_as_integer`](./string_type_reject_literal_as_integer.yaml) | reject, `E2001` | as above: a string literal has the type `String` |
+| [`elementwise_accept_scalar_values`](./elementwise_accept_scalar_values.yaml) | accept, returns 24 | [Tensor operations](../../../spec/v1.0/language.md#tensor-operations): elementwise operators |
+| [`elementwise_accept_tensor_scalar`](./elementwise_accept_tensor_scalar.yaml) | accept | as above |
+| [`elementwise_reject_mixed_dtypes`](./elementwise_reject_mixed_dtypes.yaml) | reject, `E2004` | as above: operands of two different dtypes MUST be refused |

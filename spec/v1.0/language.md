@@ -308,6 +308,12 @@ Surface syntax maps to the Core IR instruction set:
   [IR spec](./ir.md#binary-operations)).
 - **Type checking for arithmetic**: operands MUST share a dtype; shape inference uses broadcasting
   rules so scalars implicitly extend to the non-scalar operand's shape.
+- **Elementwise operators**: `.*`, `./`, `.+` and `.-` follow the operand rule of the arithmetic operators above:
+  the operands share a dtype, the shapes follow the [broadcasting rules](./shapes.md#broadcasting), and a scalar
+  extends to the shape of the other operand. Operands of two different dtypes MUST be refused at check time with
+  [`E2004`](./errors.md#e2004-dtype-mismatch-in-binary-operation). On two scalar operands of one numeric type, the
+  result is the value of the plain operator with that type: `a .* b` is `a * b`, `a ./ b` is `a / b`, `a .+ b` is
+  `a + b`, and `a .- b` is `a - b`.
 - **Reductions**: `sum(x, axes, keepdims)` and `mean(x, axes, keepdims)` lower to `Sum`/`Mean`.
 - **Shape ops**: `reshape`, `transpose`, `expand_dims`, and `squeeze` mirror their IR counterparts.
 - **Indexing**: slicing/index expressions lower to `Index`, `Slice`, or `Gather` depending on syntax.
