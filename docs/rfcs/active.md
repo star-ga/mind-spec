@@ -17,7 +17,7 @@ limitations under the License.
 # Active Proposals
 
 > **Status:** Stable
-> **Last updated:** 2026-11-24
+> **Last updated:** 2026-11-25
 
 This page tracks RFCs that are currently under active discussion. Once an RFC
 reaches consensus, it moves to [Implemented RFCs](./implemented.md).
