@@ -9,6 +9,40 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed: raw memory, the string type, elementwise operands, the tensor constructor, slice bounds, literal types, cast and method readings (2026-11-25)
+
+- **Raw memory.** An address from a buffer function is valid until the next operation that can grow, shrink or free
+  the buffer, and an address from `__mind_alloc` until it is freed or reallocated; the determinism rule of the
+  standard library covers the programs that keep these rules
+  ([Address validity](../spec/v1.0/stdlib.md#address-validity)).
+  The functions that take or give an address are listed as raw memory functions; a call of one stands only in a
+  function declared with `#[raw_memory]` or `#[raw_memory(sealed)]`, or in the standard library, else `E2501`; a wrong
+  use of the attribute is `E2502` ([Raw memory](../spec/v1.0/language.md#raw-memory)). An attribute before a function
+  declaration is in the Core v1 grammar; an attribute name that the specification does not define is refused. An index
+  function of the library stops the program when the index is outside the container. The Security chapter says only
+  what the language checks ([Security](../spec/v1.0/security.md#core-language-safety)).
+- **The string type.** Its name is `String`, available without an import; a string literal has this type
+  ([Type formation](../spec/v1.0/types.md#type-formation)). The lower-case spelling left the signatures.
+- **Elementwise operators.** `.*`, `./`, `.+` and `.-` follow the operand rule of the arithmetic operators; on two
+  scalars they are `*`, `/`, `+` and `-` ([Tensor operations](../spec/v1.0/language.md#tensor-operations)).
+- **Tensor constructor.** `tensor(e)` has the shape of `e` and the dtype of `e` or of its dtype argument; a dtype
+  argument converts as the cast table does, else `E2016`.
+- **Slices.** In `a[s:e:k]` an omitted `s` is 0, an omitted `e` is the length of the axis and an omitted `k` is 1
+  ([Tuple index](../spec/v1.0/language.md#tuple-index)).
+- **Type of a literal.** An integer literal is `i64` and a floating-point literal `f64` when no type is expected; a
+  literal out of range of its type is `E2408`; a literal of the other kind is `E2001`
+  ([Type of a literal](../spec/v1.0/types.md#type-of-a-literal)).
+- **Casts and method calls.** A primitive type name ends the type of a cast, and after another type name `<` opens a
+  type-argument list ([Casts](../spec/v1.0/language.md#casts)). `x.m(a)` is a method call with one derivation; a call
+  of the value of a field is `(x.m)(a)`
+  ([Field access and method calls](../spec/v1.0/language.md#field-access-and-method-calls)).
+- **Refusals and their codes.** The `loop` refusal (`E2405`) names only the name `loop` directly followed by `{` where
+  a statement can start. A struct that holds itself is refused for every struct (`E2407`, now "Struct with no
+  layout"). The triggers of `E2002`, `E2005`, `E2016` and `E2032` cover every sentence that names them.
+- **Samples.** Every code block of a published page is MIND source with the tag `mind`, or text whose first line says
+  that the form is not Core v1. Math notation is written as text, not as code. The FFI chapter no longer holds an
+  observation of the reference compiler.
+
 ### Changed: loop exit keywords, bitwise and shift operators, closing angle, elementwise tokens (2026-11-24)
 
 - **`break` and `continue` are keywords.** They join the keyword list and leave the contextual words. `let break = 4;`, `break - 1;` and `break = 5;` are refused, and `while c { break }` is refused because the `;` of the loop exit is missing. `loop` stays a name ([Loop exits](../spec/v1.0/language.md#loop-exits)).
