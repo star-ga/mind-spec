@@ -40,7 +40,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `let m: i32 = -2147483648;` is accepted ([Literals](../spec/v1.0/lexical.md#literals)).
 - **Small corrections.** Inside the brackets of a slice `::` is two `:`, so `a[::2]` is derived (`SliceColon`).
   The trigger of `E2005` names the tensor constructor, whose dtype rule covers a scalar, an array and a tensor
-  argument. A variant path is written `Enum::Variant` and a qualified type with its import qualifier. The
+  argument. A variant path is written `Enum::Variant` and a qualified type with its import qualifier; both, and
+  the slice parameters `&[T]` and `&mut [T]`, are extensions that the Core v1 grammar does not derive. The
   contexts that expect a type for a literal are listed. A field access on an import qualifier is not refused as
   an unknown field. The legend of the form status page names the MLIR build. Two links of this changelog to the
   root README use the address of the public repository.

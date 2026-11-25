@@ -317,14 +317,15 @@ The type checker participates directly in Core IR construction:
 > bare-headed enum variant resolution described below. The published v0.10.2
 > artifact does not have them.
 
-For a manifest project, the defining source module owns each enum, struct, and
-type alias. A qualifier MUST resolve to the current module or to exactly one
-imported module, and a type referenced from another module MUST be exported by
-that owner. A qualified type is written with its import qualifier, the last segment of the import path
-(`defs.Color` after `import nested.defs;`), as a qualified reference is
+For a manifest project, the defining source module owns each enum, struct, and type alias. A qualifier MUST resolve to
+the current module or to exactly one imported module, and a type referenced from another module MUST be exported by that
+owner. A qualified type and an enum variant path are extensions: the Core v1 grammar derives neither (a type position
+takes one identifier, and enums are among the v1.1 candidate additions of the grammar), and the rules of this section
+hold for an implementation that provides them. A qualified type is written with its import qualifier, the last segment
+of the import path (`defs.Color` after `import nested.defs;`), as a qualified reference is
 ([Module-qualified references](./language.md#module-qualified-references)). The rule applies recursively in reference,
-fixed-array, tuple, generic-argument, raw-pointer, and external-function type
-positions. Same-named types in different modules remain distinct.
+fixed-array, tuple, generic-argument, raw-pointer, and external-function type positions. Same-named types in different
+modules remain distinct.
 
 An unknown, unimported, non-exported, or ambiguous owner MUST be refused with
 `E2002` during both checking and artifact-producing builds. A refused build
@@ -351,16 +352,13 @@ resolution matters most when several project modules declare an enum of the same
 name, because the reference keys each such enum by its owner. The reference
 locates the diagnostic at the path, or at the match arm for a pattern.
 
-Implementation gap: the reference check inspects a bare `Enum::Variant` used as
-a plain value and in patterns, including payload patterns. It does not inspect a
-payload-constructor call such as `Table::Text(9)` or a struct-variant literal
-(`Table::Text { ... }`), and the name resolver accepts any `::`-qualified callee
-and does not resolve a struct-literal name, so checking reports no `E2002` for
-those spellings on another module's enum; no compiler control records what a
-build then does with them. The parser rewrites `Table.Raw` to `Table::Raw` only
-when the enum is visible to the module, so for the dot spelling the check
-refuses an unknown variant of an imported enum but not an unimported or
-ambiguous enum.
+Implementation gap: the reference check inspects a bare `Enum::Variant` used as a plain value and in patterns, including
+payload patterns. It does not inspect a payload-constructor call such as `Table::Text(9)` or a struct-variant literal
+(`Table::Text { ... }`), and the name resolver accepts any `::`-qualified callee and does not resolve a struct-literal
+name, so checking reports no `E2002` for those spellings on another module's enum; no compiler control records what a
+build then does with them. The parser rewrites `Table.Raw` (a spelling that this specification does not define) to
+`Table::Raw` only when the enum is visible to the module, so for the dot spelling the check refuses an unknown variant
+of an imported enum but not an unimported or ambiguous enum.
 
 Coverage: the compiler control `cross_module_enum_variant_lowering` builds a
 four-module project with colliding enum names and runs it when the MLIR
@@ -392,6 +390,8 @@ controls in `parse_match_and_ref`.
 > ABI. This describes the integration that ships in v0.10.3; the published
 > v0.10.2 artifact does not have it.
 
+The slice types `&[T]` and `&mut [T]` are an extension: the Core v1 grammar does not derive
+them, and the rules of this section hold for an implementation that provides them.
 A compatible `array<T>` value or array literal MAY be passed to `&[T]` or
 `&mut [T]` parameters. Both use the existing `std.vec` Option-C dynamic-array
 handle layout, an opaque handle to the `[addr, len, cap]` record. A mutable

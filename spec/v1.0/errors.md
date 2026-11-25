@@ -81,7 +81,9 @@ Type errors occur during type checking and type inference.
   enum variant whose owner is unknown, unimported, ambiguous, or does not
   export that declaration, or a reference `q.m` or a call `q.m(args)` whose
   head `q` is an import qualifier and whose module exports no member `m`
-  ([Module-qualified references](./language.md#module-qualified-references)).
+  ([Module-qualified references](./language.md#module-qualified-references)). A qualified type and an enum
+  variant path are extensions of Core v1
+  ([Module-qualified type ownership](./types.md#module-qualified-type-ownership)).
   This covers a bare-headed `Enum::Variant`
   value or pattern whose head names an enum declared by another
   project module, when the current module declares no type of that name and

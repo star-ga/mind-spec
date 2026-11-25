@@ -41,9 +41,11 @@ On a value `xs` of type `array<T>`, `xs[i]` is the element `i`, counted from 0, 
 `v` of type `T` to the record and has the value `xs`. An index outside the container is the case of
 [Index bounds](./ir.md#index-bounds).
 
-A slice made from a container at a call (a `&[T]` or `&mut [T]` parameter,
-[Slice call implementation boundary](./types.md#slice-call-implementation-boundary)) refers to the container
-record: after a push through another reference it shows the grown container, and it never shows released storage.
+A slice parameter (`&[T]` or `&mut [T]`,
+[Slice call implementation boundary](./types.md#slice-call-implementation-boundary)) is an extension: the Core v1
+grammar does not derive it. Where an implementation provides it, a slice made from a container at a call refers to the
+container record: after a push through another reference it shows the grown container, and it never shows released
+storage.
 
 ## Changing a container
 

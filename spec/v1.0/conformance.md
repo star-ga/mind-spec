@@ -97,20 +97,16 @@ same short name. Bundled standard-library imports use explicit `std.*` paths;
 dependencies' standard-library imports are part of the captured evaluator
 closure. A bare import names a project module and does not imply `std.*`.
 
-**Implementation coverage (informative, released in v0.10.3).** On such builds the
-reference runner applies that resolution rule to the dot spelling (`dep.f(x)`,
-`dep.K`) and, from compiler commit `953d7233`, to the path spelling `dep::f(x)`,
-`dep::K` and `crate::a::b::f(x)`, where the qualifier names a declared import by
-its import name or by the full `use` path written with `::` separators. A path
-to a non-exported symbol, and a standalone path import without a manifest, fail
-test preparation; a path call with the wrong number of arguments is refused.
-Enum-variant paths whose leading segment is a type (`Side::Left(3)`,
-`Color::Red`) are not treated as imports and resolve as before. Commit
-`953d7233` changes only the evaluator-side import capture, which `mindc test`
-and the opt-in canonical source-lowering bridge read; the ordinary parse result
-is unchanged. The ordinary parse of the path spelling for `mindc check` and
-`mindc build` is described under imports and module-qualified references in
-[`language.md`](./language.md#module-qualified-references) (`cd150ae7`).
+**Implementation coverage (informative, released in v0.10.3).** On such builds the reference runner applies that
+resolution rule to the dot spelling (`dep.f(x)`, `dep.K`) and, from compiler commit `953d7233`, to the path spelling
+`dep::f(x)`, `dep::K` and `crate::a::b::f(x)` (spellings that this specification does not define), where the qualifier
+names a declared import by its import name or by the full `use` path written with `::` separators. A path to a
+non-exported symbol, and a standalone path import without a manifest, fail test preparation; a path call with the wrong
+number of arguments is refused. Enum-variant paths whose leading segment is a type (`Side::Left(3)`, `Color::Red`) are
+not treated as imports and resolve as before. Commit `953d7233` changes only the evaluator-side import capture, which
+`mindc test` and the opt-in canonical source-lowering bridge read; the ordinary parse result is unchanged. The ordinary
+parse of the path spelling for `mindc check` and `mindc build` is described under imports and module-qualified
+references in [`language.md`](./language.md#module-qualified-references) (`cd150ae7`).
 
 Functions MUST read initialized module-level bindings from their defining
 module. Caller-local bindings MUST NOT supply a missing global or override
