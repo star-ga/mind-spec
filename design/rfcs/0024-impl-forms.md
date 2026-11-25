@@ -21,7 +21,7 @@ limitations under the License.
 | State | Draft (2026-11-24). Not yet accepted. The specification owner decided the questions of this draft on 2026-11-24 (see [Questions](#questions-for-the-specification-owner)). |
 | Number | Provisional. The specification owner assigns the final number. |
 | Edition | Core v1.1, together with [RFC 0023](./0023-type-parameters-on-user-types.md) and [RFC 0027](./0027-function-generics.md). |
-| Changes | `grammar-syntax.ebnf` (new `ImplDeclaration` with an optional `TypeParameterList`; unmarks `TraitDeclaration`, `TraitItem` and `FunctionSignature`; associated constants and types; `SelfType`), `lexical.md` and `grammar-lexical.ebnf` (`Self` joins the keyword list; `impl` joins the contextual words), `language.md` (the list of words that the grammar spells out), `types.md` (Traits and generics), `errors.md` (the headings of `E2701`, `E2702` and `E2707` become "Trait name that names no declared trait", "Duplicate or overlapping impl" and "Trait item missing from an impl", and their triggers cover the uses of the [Codes](#static-rules) paragraph; the new codes `E2710` to `E2715`) |
+| Changes | `grammar-syntax.ebnf` (new `ImplDeclaration` with an optional `TypeParameterList`; unmarks `TraitDeclaration`, `TraitItem` and `FunctionSignature`; associated constants and types; `SelfType`), `lexical.md` and `grammar-lexical.ebnf` (`Self` joins the keyword list; `impl` joins the contextual words), `language.md` (the list of words that the grammar spells out), `types.md` (Traits and generics), `errors.md` (the headings of `E2701`, `E2702`, `E2703` and `E2707` become "Trait name that names no trait that the program declares", "Duplicate or overlapping impl", "Function that the trait does not declare" and "Trait item missing from an impl", and their triggers cover the uses of the [Codes](#static-rules) paragraph; the new codes `E2710` to `E2715`) |
 | Depends on | [RFC 0023](./0023-type-parameters-on-user-types.md) (`TraitRef`, `TypeParameterList`, the rules of type parameters and the instance names), in the same edition. |
 | Related | [RFC 0023](./0023-type-parameters-on-user-types.md), [RFC 0025](./0025-patterns.md), [RFC 0026](./0026-module-items.md), [RFC 0027](./0027-function-generics.md) (bounds) |
 
@@ -127,10 +127,14 @@ arguments ([RFC 0027](./0027-function-generics.md)).
 
 1. **Method and associated function.** A function of an `impl` block whose first parameter has the type of
    the block (or `Self`) is a method. Another function of the block is an associated function. A method is
-   called as `x.m(args)`; an associated function is called as `Type::f(args)`.
+   called as `x.m(args)`; an associated function is called as `Type::f(args)`. `x.m(args)` is the method call of the
+   grammar (`MethodCallOperator`,
+   [Field access and method calls](../../spec/v1.0/language.md#field-access-and-method-calls)), its one derivation;
+   `(x.m)(args)` is the call of the value of a field `m` and never calls a method.
 2. **Unique names.** Two items of the inherent blocks of one type MUST NOT have the same name. This also holds for
    two generic blocks that have an instance in common (`impl<T> Box<T>` and `impl Box<i64>`). A violation is
-   refused with `E2711`.
+   refused with `E2711`. The items of the blocks of a type are named through the type, and they are not items of a
+   namespace of [RFC 0026](./0026-module-items.md) (rule 3), so `E2720` does not apply to them.
 3. **Trait block.** The block MUST define every function, constant and type that the trait declares, and
    MUST NOT define an item that the trait does not declare. A missing item is refused with `E2707` (the
    reference uses it for a missing method; this RFC extends it to constants and types). An extra function is
@@ -171,19 +175,19 @@ arguments ([RFC 0027](./0027-function-generics.md)).
     `module m { impl T for S { } }` is refused. A primitive type is declared by no module, so `impl T for i64` stands
     in the module or the block that declares `T`. A violation is refused with `E2715`.
 
-**Codes.** Codes that the reference already uses, now in the catalog: `E2701` (a trait name that names no declared
-trait: here the trait of an impl, rule 7; [RFC 0027](./0027-function-generics.md) gives the same code to a bound, a
-`where` predicate and a supertrait), `E2702` (duplicate or overlapping impl, rule 6), `E2703` (function that the trait
-does not declare, rule 3), `E2707` (trait item missing from an impl: a function, a constant or a type, rule 3). This
-draft changes the catalog headings of three of them so that each heading covers every use: `E2701` "Trait name that
-names no declared trait", `E2702` "Duplicate or overlapping impl", `E2707` "Trait item missing from an impl". Codes
-reserved for this draft by the specification owner:
-`E2710` unknown or unsupported type in an impl, `E2711` duplicate name, `E2712` ambiguous method or associated item,
-`E2713` signature differs from the trait, `E2714` associated constant or type that the trait does not declare,
-`E2715` trait impl in a module that declares neither the trait nor the type. The published catalog does not define
-`E2715`, so it has no other meaning. Codes of
-[RFC 0023](./0023-type-parameters-on-user-types.md) that this draft uses: `E2038` (number of type arguments),
-`E2039` (duplicate parameter of a block), `E2041` (unused parameter of a block); all three are assigned there.
+**Codes.** Codes that the reference already uses, now in the catalog: `E2701` (a trait name that names no trait that the
+program declares: here the trait of an impl, rule 7; [RFC 0027](./0027-function-generics.md) gives the same code to a
+bound, a `where` predicate and a supertrait), `E2702` (duplicate or overlapping impl, rule 6), `E2703` (function that
+the trait does not declare, rule 3), `E2707` (trait item missing from an impl: a function, a constant or a type, rule
+3). This draft changes the catalog headings of all four so that each heading covers every use: `E2701` "Trait name that
+names no trait that the program declares", `E2702` "Duplicate or overlapping impl", `E2703` "Function that the trait
+does not declare" (a method or an associated function, rule 1), `E2707` "Trait item missing from an impl". Codes
+reserved for this draft by the specification owner: `E2710` unknown or unsupported type in an impl, `E2711` duplicate
+name, `E2712` ambiguous method or associated item, `E2713` signature differs from the trait, `E2714` associated constant
+or type that the trait does not declare, `E2715` trait impl in a module that declares neither the trait nor the type.
+The published catalog does not define `E2715`, so it has no other meaning. Codes of [RFC
+0023](./0023-type-parameters-on-user-types.md) that this draft uses: `E2038` (number of type arguments), `E2039`
+(duplicate parameter of a block), `E2041` (unused parameter of a block); all three are assigned there.
 
 ## Meaning as a desugaring
 
@@ -601,7 +605,8 @@ expected:
 5. **Visibility.** A method is visible where its type is visible. A module MAY implement a trait for a type only
    when it declares the trait or the type (rule 10, `E2715`).
 6. **Codes (settled).** `E2701`, `E2702`, `E2703` and `E2707` are in the catalog as released behaviour; this draft
-   widens the headings of `E2701`, `E2702` and `E2707` to their uses (the Codes paragraph of the static rules).
+   widens the headings of `E2701`, `E2702`, `E2703` and `E2707` to their uses (the Codes paragraph of the static
+   rules).
    `E2710` to `E2715` are reserved for this draft.
 7. **Bounds on an associated type.** They come with the bounds of [RFC 0027](./0027-function-generics.md), in the
    same edition.
