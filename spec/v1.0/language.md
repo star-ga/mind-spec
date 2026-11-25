@@ -402,17 +402,17 @@ of a `while` or a `for` MUST be refused at check time with
 [lexical grammar](./grammar-lexical.ebnf) starts with `'`, so `break 'a;` contains an invalid token and
 MUST be diagnosed, and `break 7;` has no derivation and MUST be refused. Core v1 has no `loop` statement:
 `loop` is a name, and `loop { ... }` is the name `loop` followed by a block with no `;` between them, which
-no rule derives. It MUST be refused at check time, and the diagnostic MUST say that Core v1 has no `loop`
-statement and name the form `while true { ... }`. The words `break`, `continue` and `loop` are not in the
-keyword list of [Lexical Structure](./lexical.md#keywords); this edition does not reserve them. A source is
-read by the reading rule of [Words that the grammar spells out](#words-that-the-grammar-spells-out): where
-the grammar derives the source with a `LoopExitStatement`, the word is the loop exit, and a source with no
-such derivation uses the word as a name. `break;` is the loop exit. `break - 1;` and `break = 5;` have no
-derivation with the loop exit, because the loop exit needs its `;` directly after the word, so `break` is a
-name there: after `let mut break = 4;`, the statement `break = 5;` assigns 5 to that name. In
-`while c { break }` the word is the tail expression of the body and so a name; the loop exit is `break;`.
-`let break = 4; return break;` is valid for the same reason. The range after `in` (`for i in a..b`) is not
-defined by the grammar; it is an extension.
+no rule derives. It MUST be refused at check time with [`E2405`](./errors.md#e2405-no-loop-statement), and
+the diagnostic MUST say that Core v1 has no `loop` statement and name the form `while true { ... }`. The words
+`break`, `continue` and `loop` are not in the keyword list of [Lexical Structure](./lexical.md#keywords); this
+edition does not reserve them. A source is read by the reading rule of
+[Words that the grammar spells out](#words-that-the-grammar-spells-out): where the grammar derives the source
+with a `LoopExitStatement`, the word is the loop exit, and a source with no such derivation uses the word as a
+name. `break;` is the loop exit. `break - 1;` and `break = 5;` have no derivation with the loop exit, because
+the loop exit needs its `;` directly after the word, so `break` is a name there: after `let mut break = 4;`,
+the statement `break = 5;` assigns 5 to that name. In `while c { break }` the word is the tail expression of
+the body and so a name; the loop exit is `break;`. `let break = 4; return break;` is valid for the same
+reason. The range after `in` (`for i in a..b`) is not defined by the grammar; it is an extension.
 
 ## Tuple index
 
@@ -420,10 +420,11 @@ defined by the grammar; it is an extension.
 `let t = (4, 5);`, `t.0` is 4 and `t.1` is 5. `N` is a decimal integer literal with no sign and no prefix.
 Where the parser expects the `DecimalInteger` of a tuple index and the next token is a float literal of the
 form digits "." digits (no exponent, no suffix), the token is read as two tuple indices: `t.0.1` means
-`(t.0).1`. A float literal with an exponent is not read so: `t.0.1e0` is not derived. The type of `e` MUST be a tuple type and `N` MUST be less than its number of elements; otherwise the
-source MUST be refused at check time with [`E2404`](./errors.md#e2404-invalid-tuple-index). An index
-operator `e[i]` on a tuple has no meaning: when the type of `e` is a tuple type, `e[i]` MUST be refused with
-`E2404`, and the diagnostic MUST name the form `e.N`.
+`(t.0).1`. A float literal with an exponent is not read so: `t.0.1e0` is not derived. The type of `e` MUST be
+a tuple type and `N` MUST be less than its number of elements; otherwise the source MUST be refused at check
+time with [`E2404`](./errors.md#e2404-invalid-tuple-index). An index operator `e[i]` on a tuple has no
+meaning: when the type of `e` is a tuple type, `e[i]` MUST be refused with `E2404`, and the diagnostic MUST
+name the form `e.N`.
 
 `a[e1:e2]` (`SliceExpression`) is the only slice form. The grammar has no range index: `a[1..3]` is not
 derived, it MUST be refused at check time, and the diagnostic MUST name the slice form `a[1:3]`.

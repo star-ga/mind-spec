@@ -60,7 +60,7 @@ reference.
 | `break;`, `continue;` outside the body of every loop | Core v1 refuses; reference gap (`mindc check` accepts both) |
 | `break 'a;`, `continue 'a;` (a label), `break 7;` (a value) | Core v1 refuses; reference gap (`mindc check` accepts `break 7;`) |
 | `break - 1;`, `break = 5;`, `while c { break }`: `break` with no `;` directly after it is a name | Core v1; reference gap (`mindc check` reads the loop exit in `break - 1;` and in `while c { break }`, and refuses `break = 5;` with `E1001`) |
-| `loop { }`: `loop` is a name, and a block follows it with no `;` | Core v1 refuses; reference gap (`mindc check` accepts it) |
+| `loop { }`: `loop` is a name, and a block follows it with no `;` | Core v1 refuses; reference gap (`mindc check` accepts it; with an empty block the native build also builds it, and the image runs on past it: `loop { } return 7;` exits with the status 7) |
 | A missing `;` after a `let`, a `return`, a loop exit or an expression statement; a missing `,` after an expression arm of a `match` ([Statement separators](./language.md#statement-separators)) | Core v1 refuses; reference gap (`mindc check` accepts a missing `;` after a `let`, an expression statement and a `return`, and a missing `,`) |
 | `if a > b { } else { }`, `match e { x => y, }`, `match e { x => { y } }` | Core v1 |
 | `t[i]`, `t[a:b]`, `f(x)`, `x.m(a)`, `tensor(e)`, `tensor(e, dtype: f64)`, `(a, b)`, `[a, b]` | Core v1 |

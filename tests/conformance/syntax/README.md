@@ -26,8 +26,9 @@ A row exists only where a normative sentence decides the result.
   Every implementation of Core v1 MUST accept it. A row that gives a returned value gives the value that the
   program has by the rules of the specification.
 - A **reject** row has a source that a normative sentence forbids. Every implementation of Core v1 MUST refuse it.
-  A row gives an error code only where the [error catalog](../../../spec/v1.0/errors.md) has the code for the
-  fault. A reject row whose source the grammar does not derive gives the status only.
+  A row gives an error code where the [error catalog](../../../spec/v1.0/errors.md) has the code for the
+  fault, also when the grammar does not derive the source (`loop { }` gives `E2405`). A reject row whose fault
+  has no code in the catalog gives the status only. A reject row holds one fault.
 
 No row's verdict depends on a form that is marked NOT IN CORE v1, an extension or an open form: an
 implementation MAY accept or refuse those.
@@ -49,7 +50,7 @@ implementation MAY accept or refuse those.
 | [`loop_exit_reject_break_outside_loop`](./loop_exit_reject_break_outside_loop.yaml) | reject, `E2401` | [Loop exits](../../../spec/v1.0/language.md#loop-exits): a loop exit outside a loop MUST be refused |
 | [`loop_exit_reject_continue_after_loop`](./loop_exit_reject_continue_after_loop.yaml) | reject, `E2401` | as above |
 | [`loop_exit_reject_without_semicolon`](./loop_exit_reject_without_semicolon.yaml) | reject, `E2002` | as above: the loop exit needs its `;`, so in `break - 1;` the word is a name, and no name `break` is declared |
-| [`loop_reject_loop_block`](./loop_reject_loop_block.yaml) | reject | as above: Core v1 has no `loop` statement |
+| [`loop_reject_loop_block`](./loop_reject_loop_block.yaml) | reject, `E2405` | as above: Core v1 has no `loop` statement |
 | [`loop_accept_name_loop`](./loop_accept_name_loop.yaml) | accept, returns 1 | as above: `loop` is not a keyword |
 | [`loop_value_accept_unit`](./loop_value_accept_unit.yaml) | accept, returns 7 | `WhileExpression`, `ForExpression` and [Loops](../../../spec/v1.0/language.md#loops): a loop has the type `unit` |
 | [`loop_value_reject_other_type`](./loop_value_reject_other_type.yaml) | reject, `E2001` | as above: the value of a loop is not an `i64` |

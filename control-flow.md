@@ -23,9 +23,11 @@ let y = if x > 0 { 1 } else { -1 };
 ```
 
 ## Loops
-- **loop**: Infinite loop.
 - **while**: Condition-based loop.
 - **for**: Iterator-based loop.
+
+Core v1 has no `loop` statement: write `while true { ... }`. The text `loop { ... }` is refused with `E2405`
+([Loop exits](spec/v1.0/language.md#loop-exits)).
 
 ## Match
 Pattern matching is exhaustive.

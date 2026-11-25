@@ -325,6 +325,15 @@ exclusivity analysis; those guarantees remain future work.
 - **Example**: `E2404: a tuple is indexed with '.N', not '[i]': write 't.0' at line 3, column 12`
 - **Check/build contract**: checking and artifact-producing builds MUST refuse the same source with `E2404`.
 
+### E2405: No loop statement
+
+- **Trigger**: where a statement can start, the name `loop` directly followed by `{` (the form
+  `loop { ... }`), which no rule of the grammar derives. Core v1 has no `loop` statement
+  ([Loop exits](./language.md#loop-exits)).
+- **Required context**: the location of `loop`, with the fix: the form `while true { ... }`.
+- **Example**: `E2405: Core v1 has no 'loop' statement; write 'while true { ... }' at line 2, column 5`
+- **Check/build contract**: checking and artifact-producing builds MUST refuse the same source with `E2405`.
+
 ### E2701: Impl of an undeclared trait
 
 - **Trigger**: an `impl Trait for Type` block names a trait that no `trait` declaration declares.
