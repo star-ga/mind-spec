@@ -175,7 +175,8 @@ extension that [Language](../../spec/v1.0/language.md#executable-subset-status-i
 **Module block.** A module block is a prefix on the names of its members. The item name of a member is its qualified
 spelling, as in the declaration name `D` of [RFC 0023](./0023-type-parameters-on-user-types.md#instance-names):
 
-```mind
+```text
+// Not Core v1: a source in the form that this RFC proposes
 module m {
     fn f() -> i64 { return 1; }
 }
@@ -185,6 +186,7 @@ fn main() -> i64 { return m.f(); }
 has the written-out form below (not source text, because `m.f` in a declaration is not an identifier):
 
 ```text
+// Not Core v1: the written-out form, not source text (a name in it is not an identifier)
 fn m.f() -> i64 { return 1; }
 fn main() -> i64 { return m.f(); }
 ```

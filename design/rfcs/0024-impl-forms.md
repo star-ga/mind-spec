@@ -207,7 +207,8 @@ instance for each list of its own arguments, named by the item name followed by 
 `impl<T> Box<T>` with `T` = `i64` and `U` = `f64`. A function of a trait impl has no type parameters of its own,
 because a `FunctionSignature` has none (rule 4).
 
-```mind
+```text
+// Not Core v1: a source in the form that this RFC proposes
 struct P { x: i64, }
 impl P {
     fn get(p: P) -> i64 { return p.x; }
@@ -221,6 +222,7 @@ fn main() -> i64 {
 has the written-out form below (not source text, because `P::get` in a declaration is not an identifier):
 
 ```text
+// Not Core v1: the written-out form, not source text (a name in it is not an identifier)
 struct P { x: i64, }
 fn P::get(p: P) -> i64 { return p.x; }
 fn main() -> i64 {

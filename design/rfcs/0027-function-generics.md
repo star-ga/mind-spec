@@ -200,7 +200,8 @@ A bound and a supertrait list are checks and have no run-time form. A generic ca
 one for each distinct list of arguments, in the way that [RFC 0023](./0023-type-parameters-on-user-types.md) gives for
 types.
 
-```mind
+```text
+// Not Core v1: a source in the form that this RFC proposes
 trait Zero {
     fn zero(s: Self) -> i64;
 }
@@ -222,6 +223,7 @@ fn main() -> i64 {
 has the written-out form below (not source text, because an instance name and an item name are not identifiers):
 
 ```text
+// Not Core v1: the written-out form, not source text (a name in it is not an identifier)
 struct P { x: i64, }
 fn P::Zero::zero(s: P) -> i64 { return 0; }
 fn first<P,P>(a: P, b: P) -> P {

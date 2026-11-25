@@ -175,7 +175,8 @@ A trailing `,` of the source is not written.
 `D(N)<C(A1),…,C(An)>`, which is `C(N<A1, …, An>)`. Nested arguments nest in the same way. Two uses whose arguments
 are the same types after the replacement name one instance. An example:
 
-```mind
+```text
+// Not Core v1: a source in the form that this RFC proposes
 struct Box<T> { v: T, }
 struct Pair<A, B> { a: A, b: B, }
 fn f(p: Pair<Box<i64>, (f64, bool)>) -> i64 { return p.a.v; }
@@ -187,7 +188,8 @@ of an `impl` block with these spellings. A diagnostic writes the source spelling
 
 With aliases:
 
-```mind
+```text
+// Not Core v1: a source in the form that this RFC proposes
 struct Box<T> { v: T, }
 struct Pair<A, B> { a: A, b: B, }
 type Num = i64;
@@ -206,7 +208,8 @@ way that keeps this equality: a program with generic types and the program in wh
 written out as a plain declaration under its instance name have the same behaviour and the same canonical IR
 bytes.
 
-```mind
+```text
+// Not Core v1: a source in the form that this RFC proposes
 struct Pair<A, B> { a: A, b: B, }
 type Twice<T> = Pair<T, T>;
 fn first(p: Pair<i64, f64>) -> i64 { return p.a; }
@@ -218,6 +221,7 @@ no written-out declaration: its use `Twice<i64>` is replaced by `Pair<i64, i64>`
 The written-out form is not source text, because an instance name is not an identifier.
 
 ```text
+// Not Core v1: the written-out form, not source text (a name in it is not an identifier)
 struct Pair<i64,f64> { a: i64, b: f64, }
 struct Pair<i64,i64> { a: i64, b: i64, }
 fn first(p: Pair<i64,f64>) -> i64 { return p.a; }
