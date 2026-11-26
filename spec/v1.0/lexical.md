@@ -160,7 +160,8 @@ be refused with `E1007`; `tensor` stays a valid name of a value.
   inside it with `E1008` (the escape `\t` writes a tab). A string literal has no prefix and no suffix: a string
   literal directly followed by a letter, a digit, `_` or `"`, and an identifier directly followed by `"`, MUST be
   refused with [`E1009`](./errors.md#e1009-reserved-literal-prefix-or-suffix) (`"a"b`, `b"a"`). The escape
-  sequences are listed in [String escapes](./language.md#string-escapes); any other escape sequence MUST be diagnosed with
+  sequences are listed in [String escapes](./language.md#string-escapes); any other escape sequence MUST be
+  diagnosed with
   [`E1004`](./errors.md#e1004-invalid-escape-sequence). The escape `\u{...}` holds one to six hexadecimal digits,
   and its value is at most `10FFFF` and outside `D800` to `DFFF`; any other `\u{...}` MUST be refused with `E1004`.
 - **Line strings.** A raw text, also one of several lines, is written as line strings: `\\` followed by every
