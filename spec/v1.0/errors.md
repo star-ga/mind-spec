@@ -164,7 +164,9 @@ a `let` with no `;` it inserts the `;` (probe `e4_b_fix_semi`).
 Lexical errors (E10xx) occur during tokenization, before syntactic or semantic analysis. Syntax errors (E11xx) occur
 when the token sequence has no derivation in [`grammar-syntax.ebnf`](./grammar-syntax.ebnf). Each top-level item gets
 at most one lexical or syntax diagnostic, at its first fault; the parser continues at the next token in column 1 that
-can start an item, and no type diagnostic follows from the fault ([Diagnostics](./lexical.md#diagnostics)). A syntax fault never has the code `E1001`.
+can start an item, and no type diagnostic follows from the fault ([Diagnostics](./lexical.md#diagnostics)). When the
+trigger of `E1107` and the trigger of `E1103` both fit one fault, as in `a = b = 7;` and `f(x = 1)`, the code is
+`E1107`; `E1101` is given only when no other E11xx code fits the fault. A syntax fault never has the code `E1001`.
 
 ### E1001: Invalid UTF-8 sequence
 - **Trigger**: Source file contains ill-formed UTF-8 byte sequences. This is the only trigger of `E1001`: a fault
