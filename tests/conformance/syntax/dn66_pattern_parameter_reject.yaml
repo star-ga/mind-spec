@@ -1,0 +1,28 @@
+# MIND Conformance Test: a pattern as a parameter has no derivation
+# Specification reference: spec/v1.0/language.md#patterns-and-match
+# Decision: DN-66 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "a parameter is a name or _; a tuple pattern as a parameter has no derivation and is refused with E1101 at the first token"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn f((a, b): (i64, i64)) -> i64 {
+        return a;
+    }
+
+    fn main() -> i64 {
+        return f((1, 2));
+    }
+
+expected:
+  status: error
+  error:
+    code: E1101
+    location:
+      line: 1
+      column: 6
+    count: 1

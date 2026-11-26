@@ -783,8 +783,8 @@ member (probe `module_block_call_colon`).
 ## DN-66. Or-patterns and nested patterns
 
 **Decision.** `p | q` (no leading `|`) tries the alternatives from left to right; each binds the same names with the
-same types (`E2313`). The guard runs at most once per `match`. `let`, `for`, parameters and arms use one `Pattern`, so
-nested tuple patterns are valid; `mut` stays one per `let` (DN-8). The pattern of a `let` and of a `for` MUST be
+same types (`E2313`). The guard runs at most once per `match`. `let`, `for` and arms use one `Pattern`; a parameter is a
+name or `_`. So nested tuple patterns are valid at every pattern site; `mut` stays one per `let` (DN-8). The pattern of a `let` and of a `for` MUST be
 irrefutable (a name, `_`, or a tuple or record pattern of irrefutable parts); a refutable pattern there is `E2310`, and
 the help text names `match`.
 
@@ -793,12 +793,12 @@ the help text names `match`.
 **Reason.** Option B: one form at every site, and a guard with effects runs at most once.
 
 **Refused forms.** `(x, 0) | (0, y) => ...` (`E2313`); `| 1 => ...`; `let Some(x) = o;` and `for 0 in xs { }`
-(`E2310`).
+(`E2310`); `fn f((a, b): (i64, i64))` (a pattern in a parameter position has no derivation).
 
 **Reference.** `mindc check` refuses `let ((a, b), c) = ...` with `E1001`, "expected variable name in tuple binding"
 (probe `a5_let_nested`, also `j12_let_nested_wild`). It refuses `let Some(x) = o;` with `E1001`, "expected '=', found
 Some('(')" (probe `e4_p_let_some`), and `for 0 in xs { }` with `E1001`, "expected loop variable name" (probe
-`e4_p_for_lit`).
+`e4_p_for_lit`), and a tuple pattern as a parameter with `E1001`, "expected parameter name" (probe `e4_p_param_pat`).
 
 ## DN-67. Predeclared variant names
 
