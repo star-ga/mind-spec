@@ -362,7 +362,9 @@ against the type.
 
 **Refused forms.** `let t: Tensor<f32, [2]> = [1.0, 2.0, 3.0];`; `[[1.0], [2.0, 3.0]]` as a tensor.
 
-**Reference.** No probe; the published text had no literal rule (read).
+**Reference.** `mindc check` accepts `let t: Tensor<f32, [2]> = [1.0, 2.0];`, and the native build refuses it with
+`lane.source.array_element` (probe `e3_dn40_literal_ok`); it accepts three elements for the shape `[2]` (probe
+`e3_dn40_literal_shape`) and a ragged literal, which the native build refuses as ragged (probe `e3_dn40_ragged`).
 
 ## DN-41. A tail `if` followed by a minus
 
@@ -673,7 +675,8 @@ unit type is written `unit` only, and `()` is the unit value (DN-4).
 
 **Refused forms.** `(i64) -> i64` as a type.
 
-**Reference.** Not measured; the form is not in Core v1 (`E2037`).
+**Reference.** `mindc check` refuses `fn f(g: fn(i64) -> i64)` with `E1001`, "expected type annotation, found keyword
+`fn`" (probe `e3_dn59_fn_type`); the form is not in Core v1 (`E2037`).
 
 ## DN-60. Reserved and contextual words
 
@@ -861,7 +864,8 @@ compiler.
 **Refused forms.** `a[1.5]`.
 
 **Reference.** `mindc check` accepts `a[i as i64]` with a float `i` and the image exits with 2 (probe
-`e15_cast_in_index`); the text `a[1.5]` was not measured.
+`e15_cast_in_index`); it accepts `a[1.5]`, and the native build refuses it with `lane.type.mismatch` (probe
+`e3_dn70_float_index`).
 
 ## DN-71. Tensor shape rules
 
@@ -877,7 +881,11 @@ type `D`. `==` on two tensors compares the whole values and gives one `bool` (no
 **Refused forms.** `Tensor<f32, [N]>` with no `const N`; `Tensor<f32, [?]>`; a dimension above 2^63 - 1; `a < b` on
 tensors.
 
-**Reference.** No probe of this line measured these forms on the release.
+**Reference.** `mindc check` accepts `Tensor<f32, [N]>` with `const N: i64`, `Tensor<f32, []>` and `a == b` on two
+tensors, and the native build refuses each with `lane.type.tensor` or `binop.array_operand` (probes `e3_dn71_const_dim`,
+`e3_dn71_rank0`, `e3_dn71_tensor_eq`). It accepts an unknown dimension name (probe `e3_dn71_unknown_dim`), the
+dimension 2^63 (probe `e3_dn71_dim_overflow`) and `a < b` on two tensors (probe `e3_dn71_tensor_less`), and it refuses
+`?` as a dimension with `E1001`, "expected dimension (integer or symbol)" (probe `e3_dn71_question_dim`).
 
 ## DN-72. Named arguments with a colon
 
@@ -1024,7 +1032,8 @@ pattern names the values that it takes, so one closed form is enough there.
 pattern.
 
 **Reference.** `mindc check` refuses `for i in 0..=3` with `E1001`, "unexpected `=`, expected an expression" (probe
-`c_for_range_incl`); a range pattern was not measured.
+`c_for_range_incl`), and the range pattern `0..=5 =>` with `E1001`, "expected `=>` after match pattern" (probe
+`e3_dn80_range_pattern`).
 
 **Replaces.** Amends DN-47 (adds the closed form).
 
@@ -1045,8 +1054,11 @@ of `[3, 1] * [1, 4]` cannot happen.
 `a .+ b` on two scalars; `t.-1` on a tuple.
 
 **Reference.** `mindc check` accepts `return a .+ b;` on two `i64` operands (probe `a6_dot_plus_scalar`) and `a.*b` on
-integers, which the native build refuses with `lane.source.tensor` (probe `p49_mun_dotstar_ints`). The count of plain
-operators on two non-scalar shapes in existing sources needs types and was not measured.
+integers, which the native build refuses with `lane.source.tensor` (probe `p49_mun_dotstar_ints`). It accepts
+`col .+ row` and `col * row` on `Tensor<f32, [3, 1]>` and `Tensor<f32, [1, 4]>`, and the native build refuses both
+with `binop.array_operand` (probes `e3_dn81_dotted_shapes`, `e3_dn81_plain_shapes`); it accepts `t.-1` on a tuple, and
+the native build refuses it with `lane.source.tuple` (probe `a6_tuple_dot_minus`). The count of plain operators on two
+non-scalar shapes in existing sources needs types and was not measured.
 
 **Replaces.** DN-51 and option A of DN-17 (the dotted operators stay, with one meaning).
 
@@ -1064,7 +1076,9 @@ of the IR with a fixed signature, so its result is bit-identical by the same rul
 **Refused forms.** `diff Tensor<f32, [2]>`, `diff f64`.
 
 **Reference.** `mindc check` refuses `diff Tensor<f32, [2]>` with `E1001`, "expected 'tensor' after 'diff'" (probe
-`a6_diff_type`, also `f03_diff_Tensor_alone`, `i07_diff_f64`); the attribute `#[grad]` was not measured.
+`a6_diff_type`, also `f03_diff_Tensor_alone`, `i07_diff_f64`, `e3_dn82_diff_param`). With the attribute
+`#[grad(dsq, x)]` before `fn sq`, it refuses the call `dsq(3.0)` with `E2003`, "unsupported call to `dsq`" (probe
+`e3_dn82_grad_attr`).
 
 ## DN-83. `pub` on the item
 
@@ -1118,7 +1132,9 @@ only. The container model of DN-15 does not change.
 
 **Refused forms.** `array<i64>`, `Vec`, `Map`, `string`, `str`.
 
-**Reference.** No probe of this line measured these names on the release.
+**Reference.** `mindc check` accepts `let xs: Vec<i64> = [1, 2];`, and the native build refuses it with
+`lane.type.array` (probe `e3_dn85_vec`); it accepts the bare names `Vec` (probe `e3_dn85_bare_vec`) and `Map` (probe
+`e3_dn85_map_bare`), the name `string` (probe `e3_dn85_string_lower`) and `array<i64>` (probe `e3_dn85_array`).
 
 **Replaces.** The type names of DN-15 and DN-16.
 
