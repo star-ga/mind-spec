@@ -89,9 +89,10 @@ The parameter `x` has the shape `[3]`; `k` is a scalar and extends to that shape
 An array literal whose expected type is `Tensor<D, S>` is a tensor literal. Its nesting depth is the rank, and the
 lengths of its nested lists are the dimensions; they MUST equal the shape `S`, else the literal MUST be refused at
 check time with [`E3010`](./errors.md#e3010-invalid-shape-in-literal). A ragged literal, whose nested lists at one
-depth have different lengths, MUST be refused with `E3010` as well. A cast to a tensor type (`e as Tensor<f32, [2]>`)
-MUST be refused with [`E2016`](./errors.md#e2016-invalid-cast); the tensor constructor `tensor(e, dtype: D)`
-([Tensor operations](./language.md#tensor-operations)) converts the dtype.
+depth have different lengths, MUST be refused with `E3010` as well. A cast to a tensor type, written with a type name
+(`e as V` after `type V = Tensor<f32, [2]>;`), MUST be refused with [`E2016`](./errors.md#e2016-invalid-cast); the type
+of a cast has no type-argument list, so `e as Tensor<f32, [2]>` has no derivation ([Casts](./language.md#casts)). The
+tensor constructor `tensor(e, dtype: D)` ([Tensor operations](./language.md#tensor-operations)) converts the dtype.
 
 ```mind
 let m: Tensor<f32, [2, 3]> = [[1.0, 2.0, 3.0],
