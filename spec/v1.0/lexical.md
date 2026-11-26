@@ -176,7 +176,8 @@ be refused with `E1007`; `tensor` stays a valid name of a value.
 
 ### Comments and whitespace
 
-- Line comments begin with `//` and continue to the end of the line.
+- Line comments begin with `//` and continue to the end of the line. Outside a string, two slashes always start a
+  comment: `return 8 // 2;` is `return 8` followed by a comment, and `"a//b"` is a string that holds two slashes.
 - There is no block comment: `/*` MUST be refused with `E1010`, whose message names line comments `//`.
 - A comment that begins with `///` is a doc comment: it documents the item or the field that follows it, and in any
   other place it MUST be refused. A comment that begins with `//!` documents the module and stands only before the

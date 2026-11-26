@@ -399,7 +399,7 @@ build refuses that source with `lane.source.unbound` (probe `e4_i_path_const`).
 ## DN-43. No block comments
 
 **Decision.** There is no block comment. `/*` is refused with `E1010`, whose message names line comments `//`. The code
-`E1006` is withdrawn and stays in the table with its history.
+`E1006` is withdrawn and stays in the table with its history. Outside a string, two slashes always start a comment.
 ([Comments and whitespace](../../spec/v1.0/lexical.md#comments-and-whitespace).)
 
 **Options.** (A) Block comments that nest. (B) Block comments that do not nest. (C) No block comments.
