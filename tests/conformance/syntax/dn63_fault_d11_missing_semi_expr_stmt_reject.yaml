@@ -27,3 +27,15 @@ expected:
     location:
       line: 7
       column: 14
+  fix:
+    class: EXACT
+    source: |
+      fn add(a: i64, b: i64) -> i64 {
+          let s = a + b;
+          return s;
+      }
+
+      fn main() -> i64 {
+          add(1, 2);
+          return 3;
+      }

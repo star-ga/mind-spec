@@ -2,7 +2,7 @@ import re
 import unittest
 from pathlib import Path
 
-from tools.check_error_codes import check, check_table, table_codes
+from tools.check_error_codes import check, check_fix_rows, check_table, table_codes
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 
@@ -10,10 +10,10 @@ SAMPLE = """# Errors
 
 ## Code table
 
-| Code | Name | Status |
-|------|------|--------|
-| [`E1001`](#e1001-a) | A | in force |
-| [`E1002`](#e1002-b) | B | withdrawn by DN-1; the entry keeps its history |
+| Code | Name | Status | Fix class |
+|------|------|--------|-----------|
+| [`E1001`](#e1001-a) | A | in force | EXACT |
+| [`E1002`](#e1002-b) | B | withdrawn by DN-1; the entry keeps its history | NONE |
 
 ## E1xxx
 
@@ -37,6 +37,28 @@ class TestErrorCodes(unittest.TestCase):
 
     def test_sample_is_clean(self) -> None:
         self.assertEqual(check_table(SAMPLE), [])
+
+    def test_fix_class_outside_the_four_is_found(self) -> None:
+        bad = SAMPLE.replace("| in force | EXACT |", "| in force | MAYBE |")
+        self.assertTrue(any("E1001 has the fix class 'MAYBE'" in f for f in check_table(bad)), check_table(bad))
+
+    def test_exact_row_without_fix_block_is_found(self) -> None:
+        row = "expected:\n  status: error\n  error:\n    code: E1001\n"
+        self.assertEqual(check_fix_rows({"r.yaml": row}, SAMPLE),
+                         ["r.yaml: E1001 has the fix class EXACT, and the row has no fix block"])
+        fixed = row + "  fix:\n    class: EXACT\n    source: |\n      fn main() { }\n"
+        self.assertEqual(check_fix_rows({"r.yaml": fixed}, SAMPLE), [])
+
+    def test_fix_block_with_another_class_is_found(self) -> None:
+        row = "expected:\n  status: error\n  error:\n    code: E1001\n  fix:\n    class: TYPED\n    source: |\n      x\n"
+        self.assertTrue(check_fix_rows({"r.yaml": row}, SAMPLE))
+
+    def test_repository_has_fix_rows(self) -> None:
+        text = (ROOT / "spec" / "v1.0" / "errors.md").read_text(encoding="utf-8")
+        rows = {str(p): p.read_text(encoding="utf-8") for p in (ROOT / "tests" / "conformance").rglob("*.yaml")}
+        with_fix = [p for p, t in rows.items() if "\n  fix:\n" in t]
+        self.assertGreater(len(with_fix), 20)  # positive control: the fix blocks were read
+        self.assertEqual(check_fix_rows(rows, text), [])
 
     def test_code_twice_in_table_is_found(self) -> None:
         bad = SAMPLE.replace("| [`E1002`](#e1002-b) | B |", "| [`E1001`](#e1001-a) | A |")

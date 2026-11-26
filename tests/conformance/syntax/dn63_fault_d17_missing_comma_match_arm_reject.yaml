@@ -26,3 +26,14 @@ expected:
     location:
       line: 4
       column: 15
+  fix:
+    class: EXACT
+    source: |
+      fn main() -> i64 {
+          let x = 1;
+          let y = match x {
+              1 => 5,
+              _ => 6,
+          };
+          return y;
+      }

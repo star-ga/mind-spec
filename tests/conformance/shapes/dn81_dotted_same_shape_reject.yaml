@@ -25,3 +25,13 @@ expected:
     location:
       line: 2
       column: 14
+  fix:
+    class: TYPED
+    source: |
+      fn f(a: Tensor<f32, [3]>, b: Tensor<f32, [3]>) -> Tensor<f32, [3]> {
+          return a + b;
+      }
+
+      fn main() -> i64 {
+          return 0;
+      }

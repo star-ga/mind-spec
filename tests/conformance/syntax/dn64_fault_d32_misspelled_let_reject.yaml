@@ -23,3 +23,10 @@ expected:
     location:
       line: 2
       column: 5
+  fix:
+    class: EXACT
+    source: |
+      fn main() -> i64 {
+          let x = 1;
+          return x;
+      }

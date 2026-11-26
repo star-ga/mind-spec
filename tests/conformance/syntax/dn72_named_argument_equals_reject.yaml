@@ -23,3 +23,10 @@ expected:
     location:
       line: 2
       column: 29
+  fix:
+    class: EXACT
+    source: |
+      fn main() -> i64 {
+          let t = tensor(3, dtype: f32);
+          return 0;
+      }

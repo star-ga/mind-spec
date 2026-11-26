@@ -41,110 +41,124 @@ that a decision withdraws stays in the table with its history and is never given
 specification repository asserts that this table and the entries of this chapter hold the same codes with the same
 names, and that a code that a chapter or a conformance row names is a code of this table.
 
-| Code | Name | Status |
-|------|------|--------|
-| [`E1001`](#e1001-invalid-utf-8-sequence) | Invalid UTF-8 sequence | in force |
-| [`E1002`](#e1002-invalid-character-in-identifier) | Invalid character in identifier | in force |
-| [`E1003`](#e1003-unterminated-string-literal) | Unterminated string literal | in force |
-| [`E1004`](#e1004-invalid-escape-sequence) | Invalid escape sequence | in force |
-| [`E1005`](#e1005-invalid-numeric-literal) | Invalid numeric literal | in force |
-| [`E1006`](#e1006-unterminated-block-comment) | Unterminated block comment | withdrawn by DN-43; the entry keeps its history |
-| [`E1007`](#e1007-reserved-word-as-a-name) | Reserved word as a name | in force |
-| [`E1008`](#e1008-forbidden-character) | Forbidden character | in force |
-| [`E1009`](#e1009-reserved-literal-prefix-or-suffix) | Reserved literal prefix or suffix | in force |
-| [`E1010`](#e1010-block-comment) | Block comment | in force |
-| [`E1101`](#e1101-unexpected-token) | Unexpected token | in force |
-| [`E1102`](#e1102-unclosed-delimiter) | Unclosed delimiter | in force |
-| [`E1103`](#e1103-missing-separator) | Missing separator | in force |
-| [`E1104`](#e1104-misspelled-keyword) | Misspelled keyword | in force |
-| [`E1105`](#e1105-form-that-mind-writes-another-way) | Form that MIND writes another way | in force |
-| [`E1106`](#e1106-operators-that-need-parentheses) | Operators that need parentheses | in force |
-| [`E1107`](#e1107-assignment-where-an-expression-stands) | Assignment where an expression stands | in force |
-| [`E1108`](#e1108-nesting-too-deep) | Nesting too deep | in force |
-| [`E2001`](#e2001-type-mismatch) | Type mismatch | in force |
-| [`E2002`](#e2002-unresolved-name-or-qualified-owner) | Unresolved name or qualified owner | in force |
-| [`E2003`](#e2003-cannot-infer-type) | Cannot infer type | in force |
-| [`E2004`](#e2004-dtype-mismatch-in-binary-operation) | Dtype mismatch in binary operation | in force |
-| [`E2005`](#e2005-invalid-dtype-for-operation) | Invalid dtype for operation | in force |
-| [`E2006`](#e2006-trait-bound-not-satisfied) | Trait bound not satisfied | in force |
-| [`E2007`](#e2007-arity-mismatch) | Arity mismatch | in force |
-| [`E2008`](#e2008-operator-not-defined-for-tensor-operands) | Operator not defined for tensor operands | in force |
-| [`E2016`](#e2016-invalid-cast) | Invalid cast | in force |
-| [`E2026`](#e2026-numeric-scalar-used-as-a-known-struct) | Numeric scalar used as a known struct | in force |
-| [`E2032`](#e2032-unsupported-slice-call-abi) | Unsupported slice call ABI | in force |
-| [`E2033`](#e2033-borrowed-slice-capability-violation) | Borrowed slice capability violation | in force |
-| [`E2036`](#e2036-non-integer-value-stored-into-a-narrow-integer-element) | Non-integer value stored into a narrow integer element | in force |
-| [`E2037`](#e2037-function-name-used-as-a-value) | Function name used as a value | in force |
-| [`E2042`](#e2042-predeclared-name-taken-by-a-declaration-or-a-binding) | Predeclared name taken by a declaration or a binding | in force |
-| [`E2300`](#e2300-collection-mutation-in-expression-position) | Collection mutation in expression position | in force |
-| [`E2301`](#e2301-non-final-enum-variant-binding-collision) | Non-final enum-variant binding collision | in force |
-| [`E2310`](#e2310-refutable-pattern-in-a-binding) | Refutable pattern in a binding | in force |
-| [`E2311`](#e2311-match-not-exhaustive) | Match not exhaustive | in force |
-| [`E2312`](#e2312-arm-that-no-value-can-reach) | Arm that no value can reach | in force |
-| [`E2313`](#e2313-alternatives-that-bind-different-names) | Alternatives that bind different names | in force |
-| [`E2314`](#e2314-final-binding-arm-that-names-a-variant-or-a-constant) | Final binding arm that names a variant or a constant | in force |
-| [`E2401`](#e2401-loop-exit-outside-a-loop) | Loop exit outside a loop | in force |
-| [`E2402`](#e2402-invalid-target-of-a-change) | Invalid target of a change | in force |
-| [`E2403`](#e2403-invalid-entry-function) | Invalid entry function | in force |
-| [`E2404`](#e2404-invalid-tuple-index) | Invalid tuple index | in force |
-| [`E2405`](#e2405-no-loop-statement) | No loop statement | withdrawn by DN-54; the entry keeps its history |
-| [`E2406`](#e2406-range-index) | Range index | withdrawn by DN-47; the entry keeps its history |
-| [`E2407`](#e2407-struct-with-no-layout) | Struct with no layout | in force |
-| [`E2408`](#e2408-literal-out-of-range) | Literal out of range | in force |
-| [`E2409`](#e2409-callee-is-not-a-function) | Callee is not a function | in force |
-| [`E2410`](#e2410-no-such-method) | No such method | in force |
-| [`E2501`](#e2501-raw-memory-use-outside-a-raw-memory-function) | Raw memory use outside a raw memory function | in force |
-| [`E2502`](#e2502-invalid-attribute) | Invalid attribute | in force |
-| [`E2701`](#e2701-impl-of-an-undeclared-trait) | Impl of an undeclared trait | in force |
-| [`E2702`](#e2702-duplicate-impl) | Duplicate impl | in force |
-| [`E2703`](#e2703-method-that-the-trait-does-not-declare) | Method that the trait does not declare | in force |
-| [`E2707`](#e2707-trait-method-missing-from-an-impl) | Trait method missing from an impl | in force |
-| [`E2720`](#e2720-duplicate-name) | Duplicate name | in force |
-| [`E2730`](#e2730-binding-that-hides-a-module-name) | Binding that hides a module name | in force |
-| [`E2731`](#e2731-path-separator-after-a-module) | Path separator after a module | in force |
-| [`E3001`](#e3001-broadcasting-failure) | Broadcasting failure | in force |
-| [`E3002`](#e3002-rank-mismatch) | Rank mismatch | in force |
-| [`E3003`](#e3003-dimension-mismatch) | Dimension mismatch | in force |
-| [`E3004`](#e3004-invalid-axis) | Invalid axis | in force |
-| [`E3005`](#e3005-duplicate-axis) | Duplicate axis | in force |
-| [`E3006`](#e3006-negative-dimension) | Negative dimension | in force |
-| [`E3007`](#e3007-element-count-mismatch) | Element count mismatch | in force |
-| [`E3008`](#e3008-invalid-permutation) | Invalid permutation | in force |
-| [`E3009`](#e3009-squeeze-dimension-not-1) | Squeeze dimension not 1 | in force |
-| [`E3010`](#e3010-invalid-shape-in-literal) | Invalid shape in literal | in force |
-| [`E3011`](#e3011-index-outside-its-axis) | Index outside its axis | in force |
-| [`E3012`](#e3012-shape-too-large) | Shape too large | in force |
-| [`E3013`](#e3013-unknown-dimension-name) | Unknown dimension name | in force |
-| [`E3014`](#e3014-too-many-index-items) | Too many index items | in force |
-| [`E3015`](#e3015-plain-operator-on-two-shapes) | Plain operator on two shapes | in force |
-| [`E3016`](#e3016-dotted-operator-with-no-expansion) | Dotted operator with no expansion | in force |
-| [`E4001`](#e4001-ssa-violation-use-before-definition) | SSA violation (use before definition) | in force |
-| [`E4002`](#e4002-ssa-violation-multiple-definitions) | SSA violation (multiple definitions) | in force |
-| [`E4003`](#e4003-undefined-output) | Undefined output | in force |
-| [`E4004`](#e4004-invalid-input-declaration) | Invalid input declaration | in force |
-| [`E4005`](#e4005-constant-verification-failure) | Constant verification failure | in force |
-| [`E4006`](#e4006-index-list-length-mismatch) | Index list length mismatch | in force |
-| [`E4007`](#e4007-slice-parameters-length-mismatch) | Slice parameters length mismatch | in force |
-| [`E4008`](#e4008-invalid-slice-step) | Invalid slice step | in force |
-| [`E4009`](#e4009-conv2d-channel-mismatch) | Conv2d channel mismatch | in force |
-| [`E4010`](#e4010-conv2d-invalid-strides) | Conv2d invalid strides | in force |
-| [`E4011`](#e4011-gather-invalid-indices-dtype) | Gather invalid indices dtype | in force |
-| [`E5001`](#e5001-unsupported-operation) | Unsupported operation | in force |
-| [`E5002`](#e5002-gradient-verification-failure) | Gradient verification failure | in force |
-| [`E5003`](#e5003-invalid-axis-in-gradient) | Invalid axis in gradient | in force |
-| [`E5004`](#e5004-unsupported-shape-in-gradient) | Unsupported shape in gradient | in force |
-| [`E5005`](#e5005-non-differentiable-input) | Non-differentiable input | in force |
-| [`E6001`](#e6001-out-of-bounds-index) | Out-of-bounds index | in force |
-| [`E6002`](#e6002-backend-unavailable) | Backend unavailable | in force |
-| [`E6003`](#e6003-unsupported-operation-on-backend) | Unsupported operation on backend | in force |
-| [`E6004`](#e6004-allocation-failure) | Allocation failure | in force |
-| [`E6005`](#e6005-numeric-overflow) | Numeric overflow | in force |
-| [`E6006`](#e6006-invalid-numeric-value) | Invalid numeric value | in force |
-| [`E6007`](#e6007-execution-timeout) | Execution timeout | in force |
-| [`E6008`](#e6008-device-error) | Device error | in force |
-| [`E6009`](#e6009-compiler-materialization-refusal) | Compiler materialization refusal | in force |
-| [`E6010`](#e6010-invalid-manifest-export) | Invalid manifest export | in force |
+**Fix classes (DN-88).** The repair table is permanent: a refused form keeps its repair in every later edition. Each
+code has one fix class, in the column "Fix class":
 
+- **EXACT**: one rewrite, found from the tokens alone.
+- **TYPED**: one rewrite, and the checker must know a type or the kind of a name to find it.
+- **CHOICE**: two candidates, in a fixed order.
+- **NONE**: no rewrite; the message names the form to write.
+
+The class holds for every trigger of the code. `E1105` has one class for each row of its table. The record of a
+diagnostic whose class is EXACT or TYPED carries the edit (the start and the end of the replaced text, and the new
+text); a CHOICE diagnostic carries its two edits in the fixed order. A conformance row whose code has the class EXACT
+or TYPED carries the text after the fix (`fix`), and the gate applies the edit and checks the result against it. The
+check command with the fix mode is the entry for tools and agents: release 0.10.4 has it as `mindc check --fix`, and on
+a `let` with no `;` it inserts the `;` (probe `e4_b_fix_semi`).
+
+| Code | Name | Status | Fix class |
+|------|------|--------|-----------|
+| [`E1001`](#e1001-invalid-utf-8-sequence) | Invalid UTF-8 sequence | in force | NONE |
+| [`E1002`](#e1002-invalid-character-in-identifier) | Invalid character in identifier | in force | NONE |
+| [`E1003`](#e1003-unterminated-string-literal) | Unterminated string literal | in force | NONE |
+| [`E1004`](#e1004-invalid-escape-sequence) | Invalid escape sequence | in force | NONE |
+| [`E1005`](#e1005-invalid-numeric-literal) | Invalid numeric literal | in force | NONE |
+| [`E1006`](#e1006-unterminated-block-comment) | Unterminated block comment | withdrawn by DN-43; the entry keeps its history | NONE |
+| [`E1007`](#e1007-reserved-word-as-a-name) | Reserved word as a name | in force | NONE |
+| [`E1008`](#e1008-forbidden-character) | Forbidden character | in force | NONE |
+| [`E1009`](#e1009-reserved-literal-prefix-or-suffix) | Reserved literal prefix or suffix | in force | NONE |
+| [`E1010`](#e1010-block-comment) | Block comment | in force | NONE |
+| [`E1101`](#e1101-unexpected-token) | Unexpected token | in force | NONE |
+| [`E1102`](#e1102-unclosed-delimiter) | Unclosed delimiter | in force | NONE |
+| [`E1103`](#e1103-missing-separator) | Missing separator | in force | EXACT |
+| [`E1104`](#e1104-misspelled-keyword) | Misspelled keyword | in force | EXACT |
+| [`E1105`](#e1105-form-that-mind-writes-another-way) | Form that MIND writes another way | in force | by row |
+| [`E1106`](#e1106-operators-that-need-parentheses) | Operators that need parentheses | in force | CHOICE |
+| [`E1107`](#e1107-assignment-where-an-expression-stands) | Assignment where an expression stands | in force | NONE |
+| [`E1108`](#e1108-nesting-too-deep) | Nesting too deep | in force | NONE |
+| [`E2001`](#e2001-type-mismatch) | Type mismatch | in force | NONE |
+| [`E2002`](#e2002-unresolved-name-or-qualified-owner) | Unresolved name or qualified owner | in force | NONE |
+| [`E2003`](#e2003-cannot-infer-type) | Cannot infer type | in force | NONE |
+| [`E2004`](#e2004-dtype-mismatch-in-binary-operation) | Dtype mismatch in binary operation | in force | NONE |
+| [`E2005`](#e2005-invalid-dtype-for-operation) | Invalid dtype for operation | in force | NONE |
+| [`E2006`](#e2006-trait-bound-not-satisfied) | Trait bound not satisfied | in force | NONE |
+| [`E2007`](#e2007-arity-mismatch) | Arity mismatch | in force | NONE |
+| [`E2008`](#e2008-operator-not-defined-for-tensor-operands) | Operator not defined for tensor operands | in force | NONE |
+| [`E2016`](#e2016-invalid-cast) | Invalid cast | in force | NONE |
+| [`E2026`](#e2026-numeric-scalar-used-as-a-known-struct) | Numeric scalar used as a known struct | in force | NONE |
+| [`E2032`](#e2032-unsupported-slice-call-abi) | Unsupported slice call ABI | in force | NONE |
+| [`E2033`](#e2033-borrowed-slice-capability-violation) | Borrowed slice capability violation | in force | NONE |
+| [`E2036`](#e2036-non-integer-value-stored-into-a-narrow-integer-element) | Non-integer value stored into a narrow integer element | in force | NONE |
+| [`E2037`](#e2037-function-name-used-as-a-value) | Function name used as a value | in force | NONE |
+| [`E2042`](#e2042-predeclared-name-taken-by-a-declaration-or-a-binding) | Predeclared name taken by a declaration or a binding | in force | NONE |
+| [`E2300`](#e2300-collection-mutation-in-expression-position) | Collection mutation in expression position | in force | NONE |
+| [`E2301`](#e2301-non-final-enum-variant-binding-collision) | Non-final enum-variant binding collision | in force | NONE |
+| [`E2310`](#e2310-refutable-pattern-in-a-binding) | Refutable pattern in a binding | in force | NONE |
+| [`E2311`](#e2311-match-not-exhaustive) | Match not exhaustive | in force | NONE |
+| [`E2312`](#e2312-arm-that-no-value-can-reach) | Arm that no value can reach | in force | NONE |
+| [`E2313`](#e2313-alternatives-that-bind-different-names) | Alternatives that bind different names | in force | NONE |
+| [`E2314`](#e2314-final-binding-arm-that-names-a-variant-or-a-constant) | Final binding arm that names a variant or a constant | in force | NONE |
+| [`E2401`](#e2401-loop-exit-outside-a-loop) | Loop exit outside a loop | in force | NONE |
+| [`E2402`](#e2402-invalid-target-of-a-change) | Invalid target of a change | in force | NONE |
+| [`E2403`](#e2403-invalid-entry-function) | Invalid entry function | in force | NONE |
+| [`E2404`](#e2404-invalid-tuple-index) | Invalid tuple index | in force | NONE |
+| [`E2405`](#e2405-no-loop-statement) | No loop statement | withdrawn by DN-54; the entry keeps its history | NONE |
+| [`E2406`](#e2406-range-index) | Range index | withdrawn by DN-47; the entry keeps its history | NONE |
+| [`E2407`](#e2407-struct-with-no-layout) | Struct with no layout | in force | NONE |
+| [`E2408`](#e2408-literal-out-of-range) | Literal out of range | in force | NONE |
+| [`E2409`](#e2409-callee-is-not-a-function) | Callee is not a function | in force | NONE |
+| [`E2410`](#e2410-no-such-method) | No such method | in force | NONE |
+| [`E2501`](#e2501-raw-memory-use-outside-a-raw-memory-function) | Raw memory use outside a raw memory function | in force | NONE |
+| [`E2502`](#e2502-invalid-attribute) | Invalid attribute | in force | NONE |
+| [`E2701`](#e2701-impl-of-an-undeclared-trait) | Impl of an undeclared trait | in force | NONE |
+| [`E2702`](#e2702-duplicate-impl) | Duplicate impl | in force | NONE |
+| [`E2703`](#e2703-method-that-the-trait-does-not-declare) | Method that the trait does not declare | in force | NONE |
+| [`E2707`](#e2707-trait-method-missing-from-an-impl) | Trait method missing from an impl | in force | NONE |
+| [`E2720`](#e2720-duplicate-name) | Duplicate name | in force | NONE |
+| [`E2730`](#e2730-binding-that-hides-a-module-name) | Binding that hides a module name | in force | NONE |
+| [`E2731`](#e2731-path-separator-after-a-module) | Path separator after a module | in force | TYPED |
+| [`E3001`](#e3001-broadcasting-failure) | Broadcasting failure | in force | NONE |
+| [`E3002`](#e3002-rank-mismatch) | Rank mismatch | in force | NONE |
+| [`E3003`](#e3003-dimension-mismatch) | Dimension mismatch | in force | NONE |
+| [`E3004`](#e3004-invalid-axis) | Invalid axis | in force | NONE |
+| [`E3005`](#e3005-duplicate-axis) | Duplicate axis | in force | NONE |
+| [`E3006`](#e3006-negative-dimension) | Negative dimension | in force | NONE |
+| [`E3007`](#e3007-element-count-mismatch) | Element count mismatch | in force | NONE |
+| [`E3008`](#e3008-invalid-permutation) | Invalid permutation | in force | NONE |
+| [`E3009`](#e3009-squeeze-dimension-not-1) | Squeeze dimension not 1 | in force | NONE |
+| [`E3010`](#e3010-invalid-shape-in-literal) | Invalid shape in literal | in force | NONE |
+| [`E3011`](#e3011-index-outside-its-axis) | Index outside its axis | in force | NONE |
+| [`E3012`](#e3012-shape-too-large) | Shape too large | in force | NONE |
+| [`E3013`](#e3013-unknown-dimension-name) | Unknown dimension name | in force | NONE |
+| [`E3014`](#e3014-too-many-index-items) | Too many index items | in force | NONE |
+| [`E3015`](#e3015-plain-operator-on-two-shapes) | Plain operator on two shapes | in force | TYPED |
+| [`E3016`](#e3016-dotted-operator-with-no-expansion) | Dotted operator with no expansion | in force | TYPED |
+| [`E4001`](#e4001-ssa-violation-use-before-definition) | SSA violation (use before definition) | in force | NONE |
+| [`E4002`](#e4002-ssa-violation-multiple-definitions) | SSA violation (multiple definitions) | in force | NONE |
+| [`E4003`](#e4003-undefined-output) | Undefined output | in force | NONE |
+| [`E4004`](#e4004-invalid-input-declaration) | Invalid input declaration | in force | NONE |
+| [`E4005`](#e4005-constant-verification-failure) | Constant verification failure | in force | NONE |
+| [`E4006`](#e4006-index-list-length-mismatch) | Index list length mismatch | in force | NONE |
+| [`E4007`](#e4007-slice-parameters-length-mismatch) | Slice parameters length mismatch | in force | NONE |
+| [`E4008`](#e4008-invalid-slice-step) | Invalid slice step | in force | NONE |
+| [`E4009`](#e4009-conv2d-channel-mismatch) | Conv2d channel mismatch | in force | NONE |
+| [`E4010`](#e4010-conv2d-invalid-strides) | Conv2d invalid strides | in force | NONE |
+| [`E4011`](#e4011-gather-invalid-indices-dtype) | Gather invalid indices dtype | in force | NONE |
+| [`E5001`](#e5001-unsupported-operation) | Unsupported operation | in force | NONE |
+| [`E5002`](#e5002-gradient-verification-failure) | Gradient verification failure | in force | NONE |
+| [`E5003`](#e5003-invalid-axis-in-gradient) | Invalid axis in gradient | in force | NONE |
+| [`E5004`](#e5004-unsupported-shape-in-gradient) | Unsupported shape in gradient | in force | NONE |
+| [`E5005`](#e5005-non-differentiable-input) | Non-differentiable input | in force | NONE |
+| [`E6001`](#e6001-out-of-bounds-index) | Out-of-bounds index | in force | NONE |
+| [`E6002`](#e6002-backend-unavailable) | Backend unavailable | in force | NONE |
+| [`E6003`](#e6003-unsupported-operation-on-backend) | Unsupported operation on backend | in force | NONE |
+| [`E6004`](#e6004-allocation-failure) | Allocation failure | in force | NONE |
+| [`E6005`](#e6005-numeric-overflow) | Numeric overflow | in force | NONE |
+| [`E6006`](#e6006-invalid-numeric-value) | Invalid numeric value | in force | NONE |
+| [`E6007`](#e6007-execution-timeout) | Execution timeout | in force | NONE |
+| [`E6008`](#e6008-device-error) | Device error | in force | NONE |
+| [`E6009`](#e6009-compiler-materialization-refusal) | Compiler materialization refusal | in force | NONE |
+| [`E6010`](#e6010-invalid-manifest-export) | Invalid manifest export | in force | NONE |
 ## E1xxx: Lexical and syntax errors
 
 Lexical errors (E10xx) occur during tokenization, before syntactic or semantic analysis. Syntax errors (E11xx) occur
@@ -1087,6 +1101,10 @@ pub struct CompilerError {
     pub related: Vec<RelatedInfo>,
 }
 ```
+
+The record of a diagnostic whose code has the fix class EXACT or TYPED also carries its edit: the start and the end
+of the replaced text and the new text ([Code table](#code-table)). A CHOICE diagnostic carries its two edits in the
+fixed order, and a NONE diagnostic carries none.
 
 ## Error recovery
 

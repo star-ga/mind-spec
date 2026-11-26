@@ -166,6 +166,7 @@ measurements that the decision note cites.
 tensor spellings, type names, arm commas, precedence parentheses, module separators): the formatter with a migration
 mode. A decided form that needs a rewrite of existing sources is enforced by the reference only in a release that
 ships this tool, so the rows below stay "reference pending" until that release and the front end that enforces them.
+The repair table is permanent, and each code has one fix class ([Code table](./errors.md#code-table)).
 
 | Decision | Form | Status | Reference v0.10.4 (measured) |
 |----------|------|--------|------------------------------|
@@ -265,4 +266,4 @@ ships this tool, so the rows below stay "reference pending" until that release a
 | DN-85 | `Vec`, `Map` (no arguments), `array<i64>`, `string`, `str` | Core v1 refuses; the message gives the rewrite | Reference pending: `mindc check` accepts `Vec` (`e3_dn85_bare_vec`), `Map` (`e3_dn85_map_bare`), `string` (`e3_dn85_string_lower`) and `array<i64>` (`e3_dn85_array`) |
 | DN-86 | The grammar with at most 3 undecided choices, the 3 named ones | Core v1 (a gate of the specification repository) | The grammar lint finds exactly the 3 named choices (`Block`, `NamePath`, `Statement`) |
 | DN-87 | An accept and a reject row for each decision; equal lists of reserved words and the `Keyword` rule, of the attribute table of [Attributes](./language.md#attributes) and the names of its accept rows, and of the code table and the entries of [errors.md](./errors.md) | Core v1 (a gate of the specification repository) | No compiler verdict |
-| DN-88 | The migration tool | See the paragraph "Migration" above | No compiler verdict |
+| DN-88 | The migration tool; one fix class for each code; the edit in the record of a diagnostic | See the paragraph "Migration" above | `mindc check --fix` inserts the missing `;` of `let x = 1`, and the check of the result passes (`e4_b_fix_semi`) |

@@ -24,3 +24,12 @@ expected:
     location:
       line: 3
       column: 14
+  fix:
+    class: EXACT
+    source: |
+      fn main() -> i64 {
+          while true {
+              break;
+          }
+          return 0;
+      }

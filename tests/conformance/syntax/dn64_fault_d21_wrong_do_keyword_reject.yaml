@@ -25,3 +25,13 @@ expected:
     location:
       line: 3
       column: 17
+  fix:
+    class: EXACT
+    source: |
+      fn main() -> i64 {
+          let x = 1;
+          while x < 3 {
+              return 2;
+          }
+          return 0;
+      }

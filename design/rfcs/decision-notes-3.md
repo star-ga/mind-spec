@@ -1181,7 +1181,11 @@ its rows; the error code table and the errors chapter.
 
 **Decision.** One tool rewrites the mechanical changes (suffixes, terminators, tensor spellings, type names, arm
 commas, precedence parentheses, module separators): the formatter with a migration mode. A decided form that needs a
-rewrite is enforced by the reference only in a release that ships this tool.
+rewrite is enforced by the reference only in a release that ships this tool. The repair table is permanent: each
+diagnostic code has one fix class in the catalog, EXACT (one rewrite from the tokens alone), TYPED (one rewrite; the
+checker must know a type or the kind of a name), CHOICE (two candidates in a fixed order) or NONE. The record of a
+diagnostic carries the edit (start, end, text). A conformance row of the class EXACT or TYPED carries the text after
+the fix, and the gate applies the edit and checks it. `mindc check --fix` is the named entry for agents.
 
 **Options.** (A) Enforce at once. (B) Enforce with the tool.
 
@@ -1190,4 +1194,5 @@ not refuse a program that its own tool cannot fix.
 
 **Refused forms.** None.
 
-**Reference.** No compiler verdict applies.
+**Reference.** `mindc check --fix` inserts the missing `;` of `let x = 1`, reports "Fixed 1 file, 0 unfixable
+diagnostics remaining.", and the check of the result passes (probe `e4_b_fix_semi`).

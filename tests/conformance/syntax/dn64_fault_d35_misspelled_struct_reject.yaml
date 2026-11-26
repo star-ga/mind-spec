@@ -26,3 +26,13 @@ expected:
     location:
       line: 1
       column: 1
+  fix:
+    class: EXACT
+    source: |
+      struct S {
+          a: i64,
+      }
+
+      fn main() -> i64 {
+          return 1;
+      }

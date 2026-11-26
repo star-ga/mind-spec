@@ -319,6 +319,10 @@ expected:
     # OR, where no rule of the specification fixes the point of the diagnostic:
     # location: "not fixed by the text"
     count: 1  # The number of diagnostics: required for a lexical or a syntax code (E1xxx)
+  fix:  # Required when the fix class of the code is EXACT or TYPED (errors.md, "Code table")
+    class: "EXACT"
+    source: |
+      # The source text after the edit of the diagnostic
 ```
 
 Implementations MAY use alternative test formats internally but MUST be able to demonstrate

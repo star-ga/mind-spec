@@ -22,3 +22,9 @@ expected:
     location:
       line: 2
       column: 5
+  fix:
+    class: EXACT
+    source: |
+      fn main() -> i64 {
+          return 1;
+      }
