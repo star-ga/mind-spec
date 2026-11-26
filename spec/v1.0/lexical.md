@@ -153,8 +153,10 @@ be refused with `E1007`; `tensor` stays a valid name of a value.
   [`E1005`](./errors.md#e1005-invalid-numeric-literal) at the first character that no form allows. A run of digits
   and `_` directly after the token `.` is a tuple index, and **Tuple index** (above) decides it: `t.01` is `E2404`,
   not `E1005`. A literal has no
-  type suffix: `1.5f32` and `7u8` are refused; a literal takes its type from its context, or from a cast
-  (`1.5 as f32`).
+  type suffix: `1.5f32` and `7u8` are refused; a literal takes its type from its context
+  ([Type of a literal](./types.md#type-of-a-literal)). A floating-point literal that is the operand of `as` with a
+  floating-point target type takes the target type and is rounded once (`1.5 as f32`); every other literal operand of
+  `as` has its default type, `i64` or `f64`, and the cast table gives the value: `4294967297 as i32` is 1.
 - **String literals** are enclosed in double quotes. A quoted string ends on the line where it starts: a line end inside it
   MUST be refused with [`E1003`](./errors.md#e1003-unterminated-string-literal) at the opening `"`, and a raw TAB
   inside it with `E1008` (the escape `\t` writes a tab). A string literal has no prefix and no suffix: a string

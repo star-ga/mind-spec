@@ -272,7 +272,8 @@ messages when inference requires additional annotations.
 
 A context expects a type in these places: the annotation of a `let` or a `const`, a parameter (for the
 argument of a call), the result type of a function (for the operand of `return` and the tail of the body), the
-other operand of a binary operator, and an element of an array or a tensor whose type is given.
+other operand of a binary operator, an element of an array or a tensor whose type is given, and the operand of a
+cast when the operand is a floating-point literal and the target type is a floating-point type (rule 5).
 
 1. An integer literal takes the integer type that its context expects. With no expected type, it has the type
    `i64`: in `let a = 5;` the type of `a` is `i64`.
@@ -288,6 +289,11 @@ other operand of a binary operator, and an element of an array or a tensor whose
 4. An integer literal where a floating-point type is expected, and a floating-point literal where an integer type is
    expected, MUST be refused at check time with [`E2001`](./errors.md#e2001-type-mismatch): `let y: f64 = 1;` and
    `let z: i64 = 1.5;` are refused.
+5. A floating-point literal that is the operand of `as` with a floating-point target type takes the target type and
+   is rounded once to it: `1.5 as f32` is the `f32` value nearest to 1.5. Every other literal operand of `as` has its
+   default type, `i64` for an integer literal and `f64` for a floating-point literal, and the
+   [cast table](./language.md#casts) gives the value: `4294967297 as i32` is 1, `2.9 as i64` is 2, and
+   `1.0e30 as i32` is 2147483647. Rules 3 and 4 apply to that default type, not to the target type of the cast.
 
 ### Struct literal bindings
 

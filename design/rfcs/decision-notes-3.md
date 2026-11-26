@@ -266,7 +266,9 @@ specification had no form `~`.
 **Decision.** A numeric literal is one longest run that must match one form, else `E1005` at the first character
 that no form allows. A literal has no type suffix (DN-10 is kept). One `_` stands only between two digits of one digit
 sequence. A decimal integer of more than one digit does not start with `0`. The exponent is `e` with an optional `-`
-only. A literal operand of `as` takes the target type and is rounded once (DN-20).
+only. A floating-point literal operand of `as` with a floating-point target type takes the target type and is
+rounded once (DN-20); every other literal operand of `as` has its default type, `i64` or `f64`, and the cast table
+gives the value: `4294967297 as i32` is 1 and `2.9 as i64` is 2.
 ([Literals](../../spec/v1.0/lexical.md#literals).)
 
 **Options.** (A) The lexer stops at the first character that does not fit and starts a new token. (B) One run, one
