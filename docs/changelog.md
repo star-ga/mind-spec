@@ -9,7 +9,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-### Changed: the grammar decisions DN-22 to DN-88 (2026-11-26)
+### Changed: the grammar decisions DN-22 to DN-89 (2026-11-26)
 
 - **Decisions.** [Decision Notes, Part 3](../design/rfcs/decision-notes-3.md) states 67 decisions of the specification
   owner on the grammar; each older note that a decision replaces keeps its text and names the new decision. The three
@@ -45,6 +45,16 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   checks of the
   repository run the grammar lint, whose budget is the three named undecided choices, and assert that the reserved
   word list equals the `Keyword` rule and that the code table equals the entries of the error catalog.
+- **Amendments.** A dotted operator that expands no operand is `E3016`, and a plain operator on two shapes is `E3015`.
+  Each top-level item gets at most one syntax diagnostic. Each error code has one fix class (EXACT, TYPED, CHOICE,
+  NONE), and a row of the class EXACT or TYPED carries the text after the fix. The table of `E1105` is the table of
+  habit forms, with the status, the fix class and the measured verdict of each row. Outside a string `//` always
+  starts a comment. DN-89: a glob import is refused for good. `const`, `enum` and the `extern` block are Core v1
+  items; `use` is a repair row to `import`; `pub import` and type arguments at a call have no derivation. A float
+  literal cast to a float type takes that type, and every other literal cast uses the default type of the literal.
+  `a[E::B]` is a slice. The pattern of a `let` and of a `for` is irrefutable (`E2310`), and a parameter is a name or
+  `_`. Two colons after a module name are `E2731`. A lint asserts that the attribute table equals the names of its
+  accept rows.
 
 ### Changed: check-time index bounds, empty axes, integer arithmetic, loops and the defined stop (2026-11-25)
 
