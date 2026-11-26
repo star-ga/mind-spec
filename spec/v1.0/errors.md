@@ -23,7 +23,8 @@ implementations. All errors MUST be deterministic and MUST include sufficient co
 
 Core v1 defines six primary error categories:
 
-1. **Lexical errors (E1xxx)**: malformed source text, invalid tokens
+1. **Lexical and syntax errors (E1xxx)**: malformed source text and invalid tokens (E10xx), and faults of the
+   syntax (E11xx)
 2. **Type errors (E2xxx)**: type mismatches, unresolved types, trait violations
 3. **Shape errors (E3xxx)**: broadcasting failures, dimension mismatches, invalid shapes
 4. **Verification errors (E4xxx)**: IR verification failures, SSA violations
@@ -33,39 +34,258 @@ Core v1 defines six primary error categories:
 Each error code follows the pattern `E[category][number]` where category is 1-6 and number is a
 three-digit identifier.
 
-## E1xxx: Lexical errors
+## Code table
 
-Lexical errors occur during tokenization before syntactic or semantic analysis.
+This table lists every code of the catalog, once. A code has one meaning: the meaning of its entry below. A code
+that a decision withdraws stays in the table with its history and is never given another meaning. A check of the
+specification repository asserts that this table and the entries of this chapter hold the same codes with the same
+names, and that a code that a chapter or a conformance row names is a code of this table.
+
+| Code | Name | Status |
+|------|------|--------|
+| [`E1001`](#e1001-invalid-utf-8-sequence) | Invalid UTF-8 sequence | in force |
+| [`E1002`](#e1002-invalid-character-in-identifier) | Invalid character in identifier | in force |
+| [`E1003`](#e1003-unterminated-string-literal) | Unterminated string literal | in force |
+| [`E1004`](#e1004-invalid-escape-sequence) | Invalid escape sequence | in force |
+| [`E1005`](#e1005-invalid-numeric-literal) | Invalid numeric literal | in force |
+| [`E1006`](#e1006-unterminated-block-comment) | Unterminated block comment | withdrawn by DN-43; the entry keeps its history |
+| [`E1007`](#e1007-reserved-word-as-a-name) | Reserved word as a name | in force |
+| [`E1008`](#e1008-forbidden-character) | Forbidden character | in force |
+| [`E1009`](#e1009-reserved-literal-prefix-or-suffix) | Reserved literal prefix or suffix | in force |
+| [`E1010`](#e1010-block-comment) | Block comment | in force |
+| [`E1101`](#e1101-unexpected-token) | Unexpected token | in force |
+| [`E1102`](#e1102-unclosed-delimiter) | Unclosed delimiter | in force |
+| [`E1103`](#e1103-missing-separator) | Missing separator | in force |
+| [`E1104`](#e1104-misspelled-keyword) | Misspelled keyword | in force |
+| [`E1105`](#e1105-form-that-mind-writes-another-way) | Form that MIND writes another way | in force |
+| [`E1106`](#e1106-operators-that-need-parentheses) | Operators that need parentheses | in force |
+| [`E1107`](#e1107-assignment-where-an-expression-stands) | Assignment where an expression stands | in force |
+| [`E1108`](#e1108-nesting-too-deep) | Nesting too deep | in force |
+| [`E2001`](#e2001-type-mismatch) | Type mismatch | in force |
+| [`E2002`](#e2002-unresolved-name-or-qualified-owner) | Unresolved name or qualified owner | in force |
+| [`E2003`](#e2003-cannot-infer-type) | Cannot infer type | in force |
+| [`E2004`](#e2004-dtype-mismatch-in-binary-operation) | Dtype mismatch in binary operation | in force |
+| [`E2005`](#e2005-invalid-dtype-for-operation) | Invalid dtype for operation | in force |
+| [`E2006`](#e2006-trait-bound-not-satisfied) | Trait bound not satisfied | in force |
+| [`E2007`](#e2007-arity-mismatch) | Arity mismatch | in force |
+| [`E2008`](#e2008-operator-not-defined-for-tensor-operands) | Operator not defined for tensor operands | in force |
+| [`E2016`](#e2016-invalid-cast) | Invalid cast | in force |
+| [`E2026`](#e2026-numeric-scalar-used-as-a-known-struct) | Numeric scalar used as a known struct | in force |
+| [`E2032`](#e2032-unsupported-slice-call-abi) | Unsupported slice call ABI | in force |
+| [`E2033`](#e2033-borrowed-slice-capability-violation) | Borrowed slice capability violation | in force |
+| [`E2036`](#e2036-non-integer-value-stored-into-a-narrow-integer-element) | Non-integer value stored into a narrow integer element | in force |
+| [`E2037`](#e2037-function-name-used-as-a-value) | Function name used as a value | in force |
+| [`E2042`](#e2042-predeclared-name-taken-by-a-declaration-or-a-binding) | Predeclared name taken by a declaration or a binding | in force |
+| [`E2300`](#e2300-collection-mutation-in-expression-position) | Collection mutation in expression position | in force |
+| [`E2301`](#e2301-non-final-enum-variant-binding-collision) | Non-final enum-variant binding collision | in force |
+| [`E2311`](#e2311-match-not-exhaustive) | Match not exhaustive | in force |
+| [`E2312`](#e2312-arm-that-no-value-can-reach) | Arm that no value can reach | in force |
+| [`E2313`](#e2313-alternatives-that-bind-different-names) | Alternatives that bind different names | in force |
+| [`E2314`](#e2314-final-binding-arm-that-names-a-variant-or-a-constant) | Final binding arm that names a variant or a constant | in force |
+| [`E2401`](#e2401-loop-exit-outside-a-loop) | Loop exit outside a loop | in force |
+| [`E2402`](#e2402-invalid-target-of-a-change) | Invalid target of a change | in force |
+| [`E2403`](#e2403-invalid-entry-function) | Invalid entry function | in force |
+| [`E2404`](#e2404-invalid-tuple-index) | Invalid tuple index | in force |
+| [`E2405`](#e2405-no-loop-statement) | No loop statement | withdrawn by DN-54; the entry keeps its history |
+| [`E2406`](#e2406-range-index) | Range index | withdrawn by DN-47; the entry keeps its history |
+| [`E2407`](#e2407-struct-with-no-layout) | Struct with no layout | in force |
+| [`E2408`](#e2408-literal-out-of-range) | Literal out of range | in force |
+| [`E2409`](#e2409-callee-is-not-a-function) | Callee is not a function | in force |
+| [`E2410`](#e2410-no-such-method) | No such method | in force |
+| [`E2501`](#e2501-raw-memory-use-outside-a-raw-memory-function) | Raw memory use outside a raw memory function | in force |
+| [`E2502`](#e2502-invalid-attribute) | Invalid attribute | in force |
+| [`E2701`](#e2701-impl-of-an-undeclared-trait) | Impl of an undeclared trait | in force |
+| [`E2702`](#e2702-duplicate-impl) | Duplicate impl | in force |
+| [`E2703`](#e2703-method-that-the-trait-does-not-declare) | Method that the trait does not declare | in force |
+| [`E2707`](#e2707-trait-method-missing-from-an-impl) | Trait method missing from an impl | in force |
+| [`E2720`](#e2720-duplicate-name) | Duplicate name | in force |
+| [`E2730`](#e2730-binding-that-hides-a-module-name) | Binding that hides a module name | in force |
+| [`E3001`](#e3001-broadcasting-failure) | Broadcasting failure | in force |
+| [`E3002`](#e3002-rank-mismatch) | Rank mismatch | in force |
+| [`E3003`](#e3003-dimension-mismatch) | Dimension mismatch | in force |
+| [`E3004`](#e3004-invalid-axis) | Invalid axis | in force |
+| [`E3005`](#e3005-duplicate-axis) | Duplicate axis | in force |
+| [`E3006`](#e3006-negative-dimension) | Negative dimension | in force |
+| [`E3007`](#e3007-element-count-mismatch) | Element count mismatch | in force |
+| [`E3008`](#e3008-invalid-permutation) | Invalid permutation | in force |
+| [`E3009`](#e3009-squeeze-dimension-not-1) | Squeeze dimension not 1 | in force |
+| [`E3010`](#e3010-invalid-shape-in-literal) | Invalid shape in literal | in force |
+| [`E3011`](#e3011-index-outside-its-axis) | Index outside its axis | in force |
+| [`E3012`](#e3012-shape-too-large) | Shape too large | in force |
+| [`E3013`](#e3013-unknown-dimension-name) | Unknown dimension name | in force |
+| [`E3014`](#e3014-too-many-index-items) | Too many index items | in force |
+| [`E4001`](#e4001-ssa-violation-use-before-definition) | SSA violation (use before definition) | in force |
+| [`E4002`](#e4002-ssa-violation-multiple-definitions) | SSA violation (multiple definitions) | in force |
+| [`E4003`](#e4003-undefined-output) | Undefined output | in force |
+| [`E4004`](#e4004-invalid-input-declaration) | Invalid input declaration | in force |
+| [`E4005`](#e4005-constant-verification-failure) | Constant verification failure | in force |
+| [`E4006`](#e4006-index-list-length-mismatch) | Index list length mismatch | in force |
+| [`E4007`](#e4007-slice-parameters-length-mismatch) | Slice parameters length mismatch | in force |
+| [`E4008`](#e4008-invalid-slice-step) | Invalid slice step | in force |
+| [`E4009`](#e4009-conv2d-channel-mismatch) | Conv2d channel mismatch | in force |
+| [`E4010`](#e4010-conv2d-invalid-strides) | Conv2d invalid strides | in force |
+| [`E4011`](#e4011-gather-invalid-indices-dtype) | Gather invalid indices dtype | in force |
+| [`E5001`](#e5001-unsupported-operation) | Unsupported operation | in force |
+| [`E5002`](#e5002-gradient-verification-failure) | Gradient verification failure | in force |
+| [`E5003`](#e5003-invalid-axis-in-gradient) | Invalid axis in gradient | in force |
+| [`E5004`](#e5004-unsupported-shape-in-gradient) | Unsupported shape in gradient | in force |
+| [`E5005`](#e5005-non-differentiable-input) | Non-differentiable input | in force |
+| [`E6001`](#e6001-out-of-bounds-index) | Out-of-bounds index | in force |
+| [`E6002`](#e6002-backend-unavailable) | Backend unavailable | in force |
+| [`E6003`](#e6003-unsupported-operation-on-backend) | Unsupported operation on backend | in force |
+| [`E6004`](#e6004-allocation-failure) | Allocation failure | in force |
+| [`E6005`](#e6005-numeric-overflow) | Numeric overflow | in force |
+| [`E6006`](#e6006-invalid-numeric-value) | Invalid numeric value | in force |
+| [`E6007`](#e6007-execution-timeout) | Execution timeout | in force |
+| [`E6008`](#e6008-device-error) | Device error | in force |
+| [`E6009`](#e6009-compiler-materialization-refusal) | Compiler materialization refusal | in force |
+| [`E6010`](#e6010-invalid-manifest-export) | Invalid manifest export | in force |
+
+## E1xxx: Lexical and syntax errors
+
+Lexical errors (E10xx) occur during tokenization, before syntactic or semantic analysis. Syntax errors (E11xx) occur
+when the token sequence has no derivation in [`grammar-syntax.ebnf`](./grammar-syntax.ebnf). A file with a lexical or
+a syntax fault gets one diagnostic, at the first fault, and no further diagnostic follows from it
+([Diagnostics](./lexical.md#diagnostics)). A syntax fault never has the code `E1001`.
 
 ### E1001: Invalid UTF-8 sequence
-- **Trigger**: Source file contains ill-formed UTF-8 byte sequences
+- **Trigger**: Source file contains ill-formed UTF-8 byte sequences. This is the only trigger of `E1001`: a fault
+  of the syntax has a code of E11xx (DN-63).
 - **Required context**: byte offset, invalid sequence (first 4 bytes in hex)
 - **Example**: `E1001: Invalid UTF-8 sequence at offset 42: [0xFF, 0xFE, 0x00, 0x01]`
 
 ### E1002: Invalid character in identifier
-- **Trigger**: Identifier contains characters outside `[\p{XID_Start}_][\p{XID_Continue}_]*`
-- **Required context**: source location, offending character
-- **Example**: `E1002: Invalid character '$' in identifier at line 5, column 12`
+- **Trigger**: in code, outside a string and a comment, a character that starts no token: a character outside
+  ASCII (identifiers are ASCII in Core v1, [Identifiers](./lexical.md#identifiers)), such as `α` in `let α = 1;` or
+  a typographic quote `“`, or an ASCII character that no token rule starts with, such as `$` or a backtick. A
+  forbidden code point is `E1008`.
+- **Required context**: source location, offending character (as `U+XXXX` with its name when it does not print)
+- **Example**: `E1002: the character '$' starts no token at line 5, column 12`
 
 ### E1003: Unterminated string literal
-- **Trigger**: String literal missing closing quote before EOF or newline
-- **Required context**: start location of string literal
+- **Trigger**: a quoted string literal that has no closing quote before the end of its line or the end of the file;
+  a quoted string ends on the line where it starts ([Literals](./lexical.md#literals))
+- **Required context**: start location of the string literal: the diagnostic stands at the opening quote
 - **Example**: `E1003: Unterminated string literal starting at line 10, column 8`
 
 ### E1004: Invalid escape sequence
-- **Trigger**: Unrecognized escape sequence in string literal (e.g., `\q`)
+- **Trigger**: Unrecognized escape sequence in string literal (e.g., `\q`), or an escape `\u{...}` that does not
+  hold one to six hexadecimal digits, or whose value is above `10FFFF` or in `D800` to `DFFF` (`"\u{110000}"`)
 - **Required context**: source location, invalid escape
 - **Example**: `E1004: Invalid escape sequence '\q' at line 10, column 15`
 
 ### E1005: Invalid numeric literal
-- **Trigger**: Malformed integer or floating-point literal (e.g., `0b2`, `1.2.3`)
-- **Required context**: source location, literal text
+- **Trigger**: Malformed integer or floating-point literal (e.g., `0b2`, `1.2.3`): a numeric run that matches no form
+  of the grammar ([Literals](./lexical.md#literals)), including a type suffix (`1.5f32`, `7u8`), a `_` that does
+  not stand between two digits of one digit sequence (`0x_FF`, `1__0`, `1_`), a decimal integer of more than one
+  digit that starts with `0` (`017`), an exponent other than `e` with an optional `-` (`1.5E3`, `1.5e+3`), and a
+  float token directly after the access dot of a tuple index (`t.0.1e0`)
+- **Required context**: source location of the first character that no form allows, literal text
 - **Example**: `E1005: Invalid binary literal '0b2' at line 3, column 10`
 
 ### E1006: Unterminated block comment
-- **Trigger**: Block comment `/* ... */` not closed before EOF
+- **Status**: withdrawn by DN-43: the language has no block comment, and `/*` is `E1010`. This entry keeps the
+  history; the code is never reused.
+- **Trigger (before DN-43)**: Block comment `/* ... */` not closed before EOF
 - **Required context**: start location of block comment
 - **Example**: `E1006: Unterminated block comment starting at line 20, column 1`
+
+### E1007: Reserved word as a name
+- **Trigger**: a keyword of [Keywords](./lexical.md#keywords) where the grammar needs a name: `let mut = 1;`,
+  `let loop = 2;`, `let true = 5;`, `fn f(false: i64)`; and a function, a parameter of a function type or an import
+  named `tensor` (`fn tensor(x: i64) -> i64`), because `tensor` followed by `(` is always the constructor
+- **Required context**: the word and its location: one diagnostic at the word
+- **Example**: `E1007: 'loop' is a keyword and cannot name a binding at line 2, column 9`
+
+### E1008: Forbidden character
+- **Trigger**: a forbidden code point anywhere in a source file, comments and strings included
+  ([Source text](./lexical.md#source-text)), or a raw TAB inside a quoted string
+- **Required context**: the location and the code point as `U+XXXX` with its Unicode name
+- **Example**: `E1008: forbidden character U+202E RIGHT-TO-LEFT OVERRIDE at line 3, column 14`
+
+### E1009: Reserved literal prefix or suffix
+- **Trigger**: a string literal directly followed by an identifier character or by `"`, or an identifier directly
+  followed by `"`: a prefix or a suffix of a string literal, which is reserved (`"a"b`, `b"a"`)
+- **Required context**: the literal, the prefix or suffix, and its location
+- **Example**: `E1009: a string literal takes no suffix 'b' at line 1, column 13`
+
+### E1010: Block comment
+- **Trigger**: the text `/*` outside a string and a comment; there is no block comment
+  ([Comments and whitespace](./lexical.md#comments-and-whitespace))
+- **Required context**: the location of `/*`, with the fix: line comments `//`
+- **Example**: `E1010: MIND has no block comment; write each line as a '//' comment at line 2, column 5`
+
+### E1101: Unexpected token
+- **Trigger**: the parser expects one token of a set and finds another, and no other E11xx code describes the
+  fault; this includes every form that has no derivation, for example `5(3)` (a value is not a function in this
+  edition), `a < b < c`, `+x`, `&x`, `(T)` as a type, `a[E::B]`, `a[1..3]` and `let r = 0..4;`
+- **Required context**: the found token text, the expected set (at most 4, in the order of the grammar), the position
+  of the found token, and the hint that a chapter names for the form
+- **Example**: ``E1101: unexpected `<`: a comparison is not an operand of a comparison; write `a < b && b < c` at line 2, column 14``
+
+### E1102: Unclosed delimiter
+- **Trigger**: a `(`, `[` or `{` that has no matching closer before a closer of another kind or the end of the file
+- **Required context**: the position where the parser stopped, and the opener as a related location
+- **Example**: ``E1102: the `{` at line 1, column 17 is not closed at end of file at line 4, column 1``
+
+### E1103: Missing separator
+- **Trigger**: a `;` or a `,` that the grammar requires is missing: after a `let`, a `return`, a loop exit or an
+  expression statement, after a match arm, between fields, arguments or items
+  ([Statement separators](./language.md#statement-separators))
+- **Required context**: the insertion point (the end of the previous token), the separator and the found token
+- **Example**: ``E1103: insert `;` after `1` at line 2, column 14``
+
+### E1104: Misspelled keyword
+- **Trigger**: a statement or an item that fails to parse, whose first word (or the word where an `else` can stand)
+  has 3 or more characters and is at the Damerau-Levenshtein distance 1 from a keyword that the grammar allows at
+  that place. Ties go to the first keyword in the order of [Keywords](./lexical.md#keywords).
+- **Required context**: the word, the keyword and the location of the word
+- **Example**: ``E1104: `lett` is not a keyword; did you mean `let`? at line 2, column 5``
+- A valid program never gets `E1104`: `let lets = 1;` is valid.
+
+### E1105: Form that MIND writes another way
+- **Trigger**: a form of the fixed table below, at the start of the form. The table is part of this specification,
+  so every implementation gives the same message.
+- **Required context**: the form, the MIND form of the table, the location
+- **Example**: ``E1105: MIND writes `else if`, not `elif` at line 5, column 7``
+
+| Form | MIND form |
+|------|-----------|
+| `elif`, `elsif`, `elseif` | `else if` |
+| `def`, `func`, `fun`, `function` where an item can start | `fn` |
+| `var`, `val` where a statement can start | `let` or `let mut` |
+| `do` after the condition of a loop | no word: the block follows the condition |
+| `then` after the condition of an `if` | no word: the block follows the condition |
+| `switch` | `match` |
+| `x++` | `x += 1` |
+| `===` | `==` |
+| `@` between two operands | `matmul(a, b)` (DN-39) |
+| `@name` before an item | `#[name]` (DN-39) |
+| `diff` in a type position | the attribute `#[grad(g, p)]` before the function ([Source form](./autodiff.md#source-form-the-gradient-attribute)) |
+| `tensor<f32[2]>` | `Tensor<f32, [2]>` ([The tensor type](./shapes.md#the-tensor-type)) |
+| `?` as a dimension | an integer literal or the name of a `const` of the type `i64` |
+| `name = value` as a named argument of an attribute or of the tensor constructor | `name: value` |
+
+### E1106: Operators that need parentheses
+- **Trigger**: a bit operator (`&`, `|`, `^`, `<<`, `>>`) beside another bit operator or beside `+`, `-`, `*`, `/`,
+  `%` or a dotted operator with no parentheses between them, or a chain of shifts (`a << 1 << 2`)
+  ([Operator precedence](./language.md#operator-precedence-and-associativity))
+- **Required context**: the two operators, their location, and both forms with parentheses
+- **Example**: ``E1106: `|` and `<<` need parentheses: write `1 | (2 << 1)` or `(1 | 2) << 1` at line 1, column 30``
+
+### E1107: Assignment where an expression stands
+- **Trigger**: `=` or a compound assignment operator inside an expression: a chain `a = b = 7;`, a condition
+  `if x = 1 { }`, an argument `f(x = 1)`; an assignment is a statement
+  ([Bindings and assignment](./language.md#bindings-and-assignment))
+- **Required context**: the operator and its location; in a condition, the hint `==`
+- **Example**: ``E1107: an assignment is a statement, not an expression; to compare, write `==` at line 2, column 10``
+
+### E1108: Nesting too deep
+- **Trigger**: an input that nests parentheses, brackets, braces, unary operators and block-like forms deeper than the
+  limit of the implementation, which is at least 256 and the same on every substrate
+  ([Nesting depth](./language.md#nesting-depth)); a left-associative chain of any length is not nesting
+- **Required context**: the location of the first token past the limit, and the limit
+- **Example**: `E1108: nesting deeper than 256 at line 1, column 270`
 
 ## E2xxx: Type errors
 
@@ -75,6 +295,9 @@ Type errors occur during type checking and type inference.
 - **Trigger**: Expression has type that doesn't match expected type
 - **Required context**: expression location, expected type, actual type
 - **Example**: `E2001: Type mismatch at line 15, column 10: expected 'f32', found 'i32'`
+- **Also**: a condition that is not a `bool` (`if 5 { }`); a pattern that does not fit its value, at every pattern
+  site (`let (a, b, c) = (1, 2);`, DN-36); a block-like statement that is not the tail and whose type is not `unit`;
+  a `const` initializer that is not a constant expression; an array repeat `[v; n]` whose `v` is a handle
 
 ### E2002: Unresolved name or qualified owner
 - **Trigger**: reference to an undeclared variable, or to a qualified type or
@@ -100,6 +323,12 @@ Type errors occur during type checking and type inference.
   `mlir-build` and `cross-module-imports` features on a unix host. Checking
   reports a located E2002, and the project build refuses to embed the module
   as a runtime fallback.
+- **Also**: the names `usize` and `isize` (fix `u64` or `i64`); the separator that does not follow its head (`::`
+  after a module or `.` after a type, [Module level](./language.md#module-level)); a qualified spelling of a
+  predeclared variant (`Option::Some(1)`, fix `Some(1)`).
+- **Suggestions**: at most one, chosen by a fixed rule: a name in scope at that place at an edit distance of 2 or
+  less, the least distance first, then the first in source order. No further diagnostic follows from the
+  unresolved name.
 - **Required context**: unresolved name or qualified path and source location
 - **Examples**: `E2002: Undefined variable 'x' at line 8, column 5`;
   ``E2002: unknown module-qualified type `config.Mode` ``;
@@ -138,6 +367,10 @@ Type errors occur during type checking and type inference.
   constructor `tensor(e)` without a dtype argument when the type of `e` gives no dtype
   ([Tensor operations](./language.md#tensor-operations))
 - **Required context**: operation name, actual dtype, supported dtypes
+- **Also**: an operand of `!`, `+`, `-`, `*`, `/`, `%` of a type that the operator does not take (`!5`, `true + 1`,
+  `~true`); a dtype of a tensor type outside the set of the profile (`Tensor<bool, [2]>`,
+  [The tensor type](./shapes.md#the-tensor-type)); an index or a slice bound that is not of an integer type
+  (`a[1.5]`, hint `as i64`)
 - **Example**: `E2005: Log requires floating-point dtype, found i32 at line 20, column 10`
 
 ### E2006: Trait bound not satisfied
@@ -150,12 +383,19 @@ Type errors occur during type checking and type inference.
 - **Required context**: function name, expected arity, actual arity, call location
 - **Example**: `E2007: Function 'matmul' expects 2 arguments, found 3 at line 18, column 12`
 
+### E2008: Operator not defined for tensor operands
+- **Trigger**: `<`, `<=`, `>` or `>=` with a tensor operand ([Comparison of tensors](./shapes.md#comparison-of-tensors));
+  `==` and `!=` on two tensors give one `bool`
+- **Required context**: the operator, the operand types and the location
+- **Example**: `E2008: '<' is not defined for 'Tensor<f32, [2]>' operands at line 1, column 70`
+
 ### E2016: Invalid cast
 
 - **Trigger**: a cast `e as T` whose pair of types is not a row of the cast table
   ([Casts](./language.md#casts)), for example an integer or a float cast to `bool`; or a tensor constructor
   `tensor(e, dtype: D)` where the table gives no cast from the element type of `e` to `D`
-  ([Tensor operations](./language.md#tensor-operations)).
+  ([Tensor operations](./language.md#tensor-operations)); or a cast to a tensor type
+  ([Tensor literals](./shapes.md#tensor-literals)).
 - **Required context**: the type of `e`, the type `T` and the location, with the fix: for a cast to `bool`,
   the comparison `e != 0`.
 - **Example**: `E2016: no cast from 'i64' to 'bool'; write 'x != 0' at line 2, column 13`
@@ -254,7 +494,9 @@ exclusivity analysis; those guarantees remain future work.
   `mlir-build` and `cross-module-imports` features on a unix host.
 - **Trigger**: a bare identifier in value position whose only meaning is a
   function of the current module or a function-only standard-surface export.
-  Function values are not part of the executable subset. Member-access
+  Function values are not part of the executable subset. A function type
+  `fn(T) -> U` written in a Core v1 source has the same code: it is the type of a
+  function value ([Type formation](./types.md#type-formation), DN-59). Member-access
   receivers such as `sha256.hash(...)` are not affected.
 - **Required context**: the function name and the source location of the
   reference.
@@ -265,6 +507,14 @@ exclusivity analysis; those guarantees remain future work.
 - **Check/build**: the reference refuses the build rather than lowering the
   module.
 - **Example**: ``E2037: `null` is a function, not a value: first-class functions are not yet supported``
+
+### E2042: Predeclared name taken by a declaration or a binding
+
+- **Trigger**: a declaration or a binding that takes a predeclared name: a user type named like a predeclared type
+  or bound name (`struct String { }`), and a binding or a declaration named `Some`, `None`, `Ok` or `Err`
+  (`let None = 1;`, DN-67)
+- **Required context**: the name, its location and what it names
+- **Example**: `E2042: 'None' is a predeclared variant and cannot name a binding at line 2, column 9`
 
 ### E2300: Collection mutation in expression position
 
@@ -286,14 +536,47 @@ exclusivity analysis; those guarantees remain future work.
 
 - **Implementation status**: implemented in the reference compiler v0.10.3.
 - **Trigger**: an unguarded bare-identifier match arm occurs before the final
-  arm and its identifier collides with a registered enum variant. Such an arm
-  is neither a qualified discriminant test nor a valid final catch-all.
+  arm and its identifier collides with a registered enum variant or with the
+  name of a `const` item in scope (DN-22). Such an arm is neither a qualified
+  discriminant test nor a valid final catch-all; for a `const`, the fix is
+  `n if n == K`.
 - **Required context**: the colliding identifier and source span, with guidance
   to qualify the variant, rename the binding, or move a catch-all binding to
   the final arm. A wildcard arm remains valid under first-match semantics.
 - **Check/build contract**: checking and artifact-producing builds MUST refuse
   the same source with `E2301`; a refused build MUST terminate as a user error
   and leave no artifact.
+
+### E2311: Match not exhaustive
+
+- **Trigger**: a `match` that does not cover every value of its operand ([Patterns and match](./language.md#patterns-and-match))
+- **Required context**: one missing case, chosen by a fixed order: the variants in declaration order, `false` before
+  `true`, the least uncovered integer
+- **Example**: ``E2311: `match` does not cover `false` at line 1, column 30``
+
+### E2312: Arm that no value can reach
+
+- **Trigger**: a match arm that no value can reach, because an earlier arm matches every value it matches; this
+  includes every arm after an unguarded bare binding arm, and a bare unguarded binding arm that is not the last arm
+- **Required context**: the arm, its location and the earlier arm
+- **History**: the draft [RFC 0025](../../design/rfcs/0025-patterns.md) named this fault the warning `W2312`; DN-36
+  makes it this error.
+- **Example**: `E2312: this arm is never reached: the arm at line 2, column 9 matches every value, at line 3, column 9`
+
+### E2313: Alternatives that bind different names
+
+- **Trigger**: an or-pattern `p | q` whose alternatives do not bind the same names with the same types, or a
+  pattern that binds one name twice
+- **Required context**: the pattern, the name and the two alternatives
+- **Example**: ``E2313: `x` is bound in one alternative and not in the other at line 3, column 9``
+
+### E2314: Final binding arm that names a variant or a constant
+
+- **Trigger**: an unguarded bare-identifier arm that is the last arm and whose name is the name of an enum variant or
+  of a `const` item in scope (DN-22)
+- **Required context**: the name and its location, with the fix: the variant pattern `E::A`, the guard
+  `n if n == K`, or another name for the binding
+- **Example**: ``E2314: `K` names a constant; to compare, write `n if n == K` at line 3, column 9``
 
 ### E2401: Loop exit outside a loop
 
@@ -314,6 +597,7 @@ exclusivity analysis; those guarantees remain future work.
 - **Required context**: the left operand or the receiver, the location of the assignment or of the call and, for
   a place, the location of the binding of its root, with the fix: declare the root with `let mut`, or change a
   place.
+- **Also**: a place whose root is a `const` item, and the target of a compound assignment that is not a place.
 - **Example**: `E2402: cannot assign to 'x', which is not declared with 'let mut', at line 3, column 5`;
   `E2402: cannot change 'xs' by 'push': 'xs' is not declared with 'let mut', at line 3, column 5`
 - **Check/build contract**: checking and artifact-producing builds MUST refuse the same source with `E2402`.
@@ -321,7 +605,8 @@ exclusivity analysis; those guarantees remain future work.
 ### E2403: Invalid entry function
 
 - **Trigger**: the entry function `main` has a parameter, or a result type other than `i64` and `unit`
-  ([Entry function](./language.md#entry-function)).
+  ([Entry function](./language.md#entry-function)); or a build of an executable from a module with no top-level
+  `main` ([Module level](./language.md#module-level)).
 - **Required context**: the location of `main`, the parameter or the result type that is not allowed, and the
   fix: no parameter, and the result type `i64` or `unit` (written or omitted).
 - **Example**: `E2403: the entry function 'main' must return i64 or unit, found 'f64' at line 1, column 14`
@@ -331,7 +616,8 @@ exclusivity analysis; those guarantees remain future work.
 
 - **Trigger**: a tuple index `e.N` where the type of `e` is not a tuple type, or where `N` is not less than the
   number of elements of the tuple; or an index operator `e[i]` where the type of `e` is a tuple type
-  ([Tuple index](./language.md#tuple-index)).
+  ([Tuple index](./language.md#tuple-index)); or a tuple index `N` that is not `0` or a digit 1 to 9 followed by
+  digits (`t.01`, `t.1_0`).
 - **Required context**: the expression, its type and the location, with the fix: an index `e.N` with `N`
   from 0 to the number of elements minus 1, written with `.` for a tuple.
 - **Example**: `E2404: a tuple is indexed with '.N', not '[i]': write 't.0' at line 3, column 12`
@@ -339,7 +625,9 @@ exclusivity analysis; those guarantees remain future work.
 
 ### E2405: No loop statement
 
-- **Trigger**: where a statement can start, the name `loop` directly followed by `{` (the form
+- **Status**: withdrawn by DN-54: `loop B` is a form of the language and `loop` is a keyword
+  ([Loops](./language.md#loops)). This entry keeps the history; the code is never reused.
+- **Trigger (before DN-54)**: where a statement can start, the name `loop` directly followed by `{` (the form
   `loop { ... }`), which no rule of the grammar derives. Core v1 has no `loop` statement
   ([Loop exits](./language.md#loop-exits)).
 - **Required context**: the location of `loop`, with the fix: the form `while true { ... }`.
@@ -348,7 +636,10 @@ exclusivity analysis; those guarantees remain future work.
 
 ### E2406: Range index
 
-- **Trigger**: an index operator whose index is two expressions with `..` between them (the form `a[1..3]`),
+- **Status**: withdrawn by DN-47: `..` stands only in the header of a `for` loop, and `a[1..3]` has no derivation, so
+  it is [`E1101`](#e1101-unexpected-token) with the slice form in the message ([Loops](./language.md#loops)). This
+  entry keeps the history; the code is never reused.
+- **Trigger (before DN-47)**: an index operator whose index is two expressions with `..` between them (the form `a[1..3]`),
   which no rule of the grammar derives. The slice forms are `a[s:e:k]` and its forms with omitted parts
   ([Tuple index](./language.md#tuple-index)).
 - **Required context**: the index expression and its location, with the fix: the slice form, for example
@@ -376,6 +667,20 @@ exclusivity analysis; those guarantees remain future work.
 - **Example**: `E2408: the literal 3000000000 is outside the range of i32 at line 2, column 18`
 - **Check/build contract**: checking and artifact-producing builds MUST refuse the same source with `E2408`.
 
+### E2409: Callee is not a function
+
+- **Trigger**: a call `x(args)` whose name `x` resolves to a value that is not a function, such as a binding or a
+  parameter (`let f = 1; f(2)`); Core v1 has no function values
+- **Required context**: the name, what it resolves to, and the location of the call
+- **Example**: ``E2409: `f` is a value of the type `i64`, not a function, at line 2, column 12``
+
+### E2410: No such method
+
+- **Trigger**: a method call `x.m(args)` whose `m` is not a method of the type of `x`
+  ([Field access and method calls](./language.md#field-access-and-method-calls)): `5.nosuchmethod()`
+- **Required context**: the method name, the type of `x` and the location
+- **Example**: ``E2410: no such method `nosuchmethod` on `i64` at line 1, column 30``
+
 ### E2501: Raw memory use outside a raw memory function
 
 - **Trigger**: a raw memory use in the body of a function that is not declared with `#[raw_memory]` or
@@ -399,6 +704,9 @@ exclusivity analysis; those guarantees remain future work.
   and `requires` ([Versioning](./versioning.md)).
 - **Required context**: the attribute, its location and the item after it, with the fix: an attribute that this
   specification defines, at a position and with an argument form that its definition gives.
+- **Also**: an attribute whose name has one segment and that the attribute table of
+  [Attributes](./language.md#attributes) does not list for its item kind and argument form (`#[fast]`,
+  `#[repr(packed)]`, `#[test] fn t(x: i64) { }`); an `extern` block with an ABI string other than `"C"`.
 - **Example**: `E2502: 'raw_memory' stands only before a function declaration at line 1, column 1`
 - **Check/build contract**: checking and artifact-producing builds MUST refuse the same source with `E2502`.
 
@@ -432,12 +740,27 @@ exclusivity analysis; those guarantees remain future work.
 - **Example**: `E2707: Impl of trait 'T' for type 'P' is missing method 'put' at line 8, column 1`
 - **Scope**: as for E2701.
 
+### E2720: Duplicate name
+
+- **Trigger**: a second declaration of a name in one namespace: the items of a module (all kinds together), the
+  parameters of a function, the fields of a struct, the variants of an enum ([Module level](./language.md#module-level))
+- **Required context**: the name, the location of the second declaration, and the first as a related location
+- **Example**: `E2720: 'f' is declared twice; the first declaration is at line 1, column 4, at line 3, column 4`
+
+### E2730: Binding that hides a module name
+
+- **Trigger**: a binding that takes the name of an import qualifier or of a module block in scope
+  ([Module level](./language.md#module-level))
+- **Required context**: the binding, its location and the import or module block that it would hide
+- **Example**: `E2730: the binding 'io' hides the import 'io' at line 4, column 9`
+
 ## E3xxx: Shape errors
 
 Shape errors occur during shape inference, broadcasting, or shape validation.
 
 ### E3001: Broadcasting failure
-- **Trigger**: Shapes incompatible for broadcasting
+- **Trigger**: Shapes incompatible for broadcasting: the operands of a dotted operator (`.+`, `.-`, `.*`, `./`, `.%`)
+  or the batch dimensions of `matmul` ([Elementwise binary](./shapes.md#elementwise-binary))
 - **Required context**: operand shapes, failing dimension index, extents at failing dimension
 - **Example**: `E3001: Broadcasting failed at dimension 1: shape [3, 4] incompatible with [3, 5]`
 
@@ -487,7 +810,8 @@ Shape errors occur during shape inference, broadcasting, or shape validation.
 - **Example**: `E3009: Squeeze axis 1 has extent 3, must be 1 in shape [2, 3, 1] at line 14, column 12`
 
 ### E3010: Invalid shape in literal
-- **Trigger**: Tensor literal shape doesn't match declared shape
+- **Trigger**: Tensor literal shape doesn't match declared shape, or a ragged literal, whose nested lists at one depth
+  have different lengths ([Tensor literals](./shapes.md#tensor-literals))
 - **Required context**: declared shape, inferred shape from data
 - **Example**: `E3010: Tensor literal shape mismatch: declared [2, 3], inferred [2, 2] at line 8, column 10`
 
@@ -498,6 +822,24 @@ Shape errors occur during shape inference, broadcasting, or shape validation.
 - **Required context**: the index or the bound, the extent of the axis, source location
 - **Example**: `E3011: index 4 is outside the axis of extent 4 at line 3, column 12`
 - **Check/build contract**: checking and artifact-producing builds MUST refuse the same source with `E3011`.
+
+### E3012: Shape too large
+- **Trigger**: a dimension, or the count of elements of a shape, above 2^63 - 1
+  ([The tensor type](./shapes.md#the-tensor-type))
+- **Required context**: the shape and its location
+- **Example**: `E3012: the shape [9223372036854775808] is larger than 2^63 - 1 at line 1, column 21`
+
+### E3013: Unknown dimension name
+- **Trigger**: an identifier in a shape that does not name a `const` of the type `i64` in scope
+  ([The tensor type](./shapes.md#the-tensor-type))
+- **Required context**: the name and its location
+- **Example**: `E3013: 'N' in a shape is not a const of the type i64 at line 1, column 22`
+
+### E3014: Too many index items
+- **Trigger**: an index of a tensor with more items than the rank of the tensor, or an index of an array with more
+  than one item ([Indexing a tensor](./shapes.md#indexing-a-tensor))
+- **Required context**: the index, the rank and the location
+- **Example**: `E3014: 3 index items for a tensor of rank 2 at line 1, column 45`
 
 ## E4xxx: Verification errors
 
@@ -663,6 +1005,11 @@ All error messages MUST include:
 3. **Source location**: File, line, column (when applicable)
 4. **Context**: Specific values mentioned in "Required context" above
 
+A message shows source text in backticks, writes "end of file" at the end of the input, and names a character
+that does not print as `U+XXXX` with its Unicode name; it never shows an internal form of an implementation, such as
+`Some('x')` or `Ident("A")`. A form that a later edition specifies gets one message that names its status. An item
+form inside a block is refused at its first word, and a fault at module level says "expected an item".
+
 Implementations SHOULD provide:
 
 - **Suggestion**: How to fix the error (when applicable)
@@ -702,13 +1049,14 @@ pub struct CompilerError {
 
 ## Error recovery
 
-Implementations MAY attempt error recovery to report multiple errors, but MUST NOT:
+A file with a lexical or a syntax fault gets one diagnostic, at the first fault. Implementations MAY attempt error
+recovery to report multiple type errors, but MUST NOT:
 
 - Execute IR after verification failure
 - Continue execution after runtime error
 - Silently ignore errors
 
-Recovery is ONLY permitted for lexical and type errors during compilation to improve diagnostics.
+Recovery is ONLY permitted for type errors during compilation to improve diagnostics.
 
 ## Stability guarantees
 
@@ -716,7 +1064,8 @@ Error codes in this catalog are **stable across Core v1 versions**:
 
 - Adding new error codes is permitted
 - Changing error messages is permitted (messages are not part of stability guarantee)
-- Renumbering or removing error codes is NOT permitted without major version change
+- Renumbering or removing error codes is NOT permitted without major version change; a code that a decision
+  withdraws stays in the [code table](#code-table) with its history and is never given another meaning
 - Context requirements MAY be expanded but MUST NOT be reduced
 
 ## Reference implementation (`star-ga/mind`) (informative)
@@ -731,6 +1080,8 @@ release binary (`mindc check --no-fmt --no-lint` on a probe source, or the comma
 | `E1001` | Invalid UTF-8 sequence | A source with an ill-formed UTF-8 sequence is refused with no code: `stream did not contain valid UTF-8` | the bytes `0xFF 0xFE` in a name |
 | `E2015` | No entry; an integer literal where a floating-point type is expected, and the reverse, is `E2001` | The code of that fault: `no implicit int↔float conversion (RFC 0011)` | `let y: f64 = 1;` and `let z: i64 = 1.5;` |
 | `E2101` | No entry; a broadcasting failure is `E3001` | The code of a broadcasting failure: ``cannot broadcast shapes (3,4) and (3,5) for `+` `` | `a + b` with `Tensor<f32, [3, 4]>` and `Tensor<f32, [3, 5]>` |
+| `E2620` | No entry; a pattern that does not fit its value is `E2001` (DN-36) | The code of that fault: `binder count must match the tuple arity` (measured on 2026-11-26) | `let (a, b, c) = (1, 2);` |
+| `E2621` | No entry; an index outside its axis is `E3011` where it is an integer literal and the type gives the extent, and the [defined stop](./memory.md#the-defined-stop) otherwise | The code of a check-time refusal of `xs[2]` after a call that pushes to a copy of the parameter: `index 2 out of bounds for array of length 2` (the measurement of [Decision Notes, part 2](../../design/rfcs/decision-notes-2.md)) | `let xs: Vec<i64> = [1, 2];`, a call that pushes to `let mut w = p;`, then `xs[2]` |
 | `E3003` | Dimension mismatch | A `matmul` whose contracting dimensions differ is accepted with no code (exit status 0) | `matmul(a, b)` with `a: Tensor<f32, [2, 3]>` and `b: Tensor<f32, [4, 2]>` |
 | `E4001` | SSA violation (use before definition) | The code of an autodiff failure: `function 'f' not found in module (only 'main' is supported)` | `mindc FILE --autodiff --func f --emit-grad-ir` |
 

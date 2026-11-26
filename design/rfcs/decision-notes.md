@@ -410,6 +410,8 @@ index expression"). The other forms of `SliceExpression` are in the status of
 [DN-19](./decision-notes-2.md#dn-19-slice-bounds-and-step). `a[1..3]`: Core v1 refuses; reference gap (`mindc check`
 accepts it).
 
+**Replaced in part by.** DN-47 and DN-52 ([Decision Notes, Part 3](./decision-notes-3.md)): `a[1..3]` has no derivation and is refused with `E1101`, with the slice form in the message, and the code `E2406` is withdrawn; `t.0.1e0` is refused with `E1005`.
+
 ## DN-12. Compound assignment operators
 
 **Text before the decision.** The assignment operator list was closed: `=`, `+=`, `-=`, `*=`, `/=`, `:=`. The
