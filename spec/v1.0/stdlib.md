@@ -29,7 +29,8 @@ The standard library is organized into five modules:
 1. **`core`**: Fundamental types and control flow primitives
 2. **`math`**: Scalar mathematical functions (elementwise when lifted to tensors)
 3. **`tensor`**: Tensor construction, manipulation, and linear algebra
-4. **`diff`**: Automatic differentiation entry points
+4. **`diff`**: Automatic differentiation entry points (not in Core v1; Core v1 writes a gradient with the
+   attribute `#[grad(g, p1, ..., pk)]`, [Source form](./autodiff.md#source-form-the-gradient-attribute))
 5. **`io`**: Minimal console I/O for debugging
 
 Two additive layers sit next to these five normative modules: the
@@ -261,6 +262,10 @@ Scalar mathematical functions. When applied to tensors, these operate elementwis
 
 Tensor construction, manipulation, and linear algebra operations.
 
+The signatures of this module use a short notation: `Tensor<T>` is a tensor of the dtype `T` with a shape that the
+signature does not name, and `[i64]` is a list of dimensions. A tensor type in a source writes both arguments, the
+dtype and the shape: `Tensor<f32, [2, 3]>` ([The tensor type](./shapes.md#the-tensor-type)).
+
 ### Construction
 
 - **`zeros(shape: [i64], dtype: DType = f32) -> Tensor<dtype>`**
@@ -400,7 +405,10 @@ These functions map directly to IR operations from ir.md#shape-manipulation:
 
 ## `diff` module
 
-Automatic differentiation entry points.
+Automatic differentiation entry points. These entry points take a function as a value; a function value and the
+function type `fn(T) -> U` are not in Core v1, so the entry points below are not Core v1 forms. Core v1 writes a
+gradient with the attribute `#[grad(g, p1, ..., pk)]` before a function, which declares the gradient function `g`
+([Source form](./autodiff.md#source-form-the-gradient-attribute)); the type `diff T` is not in Core v1 either.
 
 - **`grad<T, U>(f: fn(T) -> U, x: T) -> T'`**
   - Computes gradient of scalar-valued function f at point x
@@ -507,12 +515,13 @@ the reference implementation's v0.7.1 release `std-surface` is on by default,
 so this resolution is the default behaviour of a shipped `mindc`; building with
 `--no-default-features` opts back out to the low-level-only subset.
 
-- **`std.vec`** — Growable `Vec` over `i64`-shaped slots. Eight-byte stride, doubling growth from an initial capacity of
-  **4** slots. Its signatures write `Vec` for `array<i64>`, and a value of that type is a
+- **`std.vec`** — The growable sequence `Vec<i64>` over `i64`-shaped slots. Eight-byte stride, doubling growth from an
+  initial capacity of **4** slots. A value of the type `Vec<i64>` is a
   [container record](./memory.md#records-and-containers) with three `i64` fields `addr`, `len` and `cap` (Option-C
-  struct ABI). The functions: `vec_new() -> Vec`, `vec_push(v: Vec, value: i64) -> Vec`,
-  `vec_get(v: Vec, i: i64) -> i64`, `vec_set(v: Vec, i: i64, value: i64) -> i64`, `vec_len(v: Vec) -> i64`,
-  `vec_cap(v: Vec) -> i64`, `vec_addr(v: Vec) -> i64`, `vec_free(v: Vec) -> i64`, `vec_zeroed(n: i64) -> i64`.
+  struct ABI). The functions: `vec_new() -> Vec<i64>`, `vec_push(v: Vec<i64>, value: i64) -> Vec<i64>`,
+  `vec_get(v: Vec<i64>, i: i64) -> i64`, `vec_set(v: Vec<i64>, i: i64, value: i64) -> i64`,
+  `vec_len(v: Vec<i64>) -> i64`, `vec_cap(v: Vec<i64>) -> i64`, `vec_addr(v: Vec<i64>) -> i64`,
+  `vec_free(v: Vec<i64>) -> i64`, `vec_zeroed(n: i64) -> i64`.
   `vec_push` appends `value` to the record of `v` in place and returns `v`; `vec_set` replaces the element `i` and
   returns 0; `vec_len` gives the number of elements.
 
@@ -541,13 +550,14 @@ so this resolution is the default behaviour of a shipped `mindc`; building with
   > implementation as of v0.10.0.
 
 - **`std.map`** — Insertion-ordered map on parallel `i64`/`i64` arrays.
-  The `Map` struct is a four-field heap record: `keys_addr`, `vals_addr`,
+  The map type is `Map<i64, i64>`, a four-field heap record: `keys_addr`, `vals_addr`,
   `len`, `cap`. Iteration order MUST be insertion order — this is normative
   for determinism.
 
-  A `Map` value is a [container record](./memory.md#records-and-containers). Signatures: `map_new() -> Map`,
-  `map_insert(m: Map, key: i64, value: i64) -> Map` (adds the pair to the record of `m` in place and returns `m`),
-  `map_len(m: Map) -> i64` (the number of pairs of `m`), `map_get(m: Map, key: i64) -> i64` (gives 0 when `m` holds no
+  A `Map<i64, i64>` value is a [container record](./memory.md#records-and-containers). Signatures:
+  `map_new() -> Map<i64, i64>`, `map_insert(m: Map<i64, i64>, key: i64, value: i64) -> Map<i64, i64>` (adds the pair
+  to the record of `m` in place and returns `m`), `map_len(m: Map<i64, i64>) -> i64` (the number of pairs of `m`),
+  `map_get(m: Map<i64, i64>, key: i64) -> i64` (gives 0 when `m` holds no
   pair with the key; `map_contains_key` tests whether `m` holds a key). The reference implementation ships ten public
   **free functions**: `map_new`, `map_insert`, `map_get`, `map_contains_key`, `map_len`, `map_cap`, `map_key_at`,
   `map_value_at`, `map_get_str`, `map_contains_key_str`. `map_insert` is currently insert-at-tail (append) semantics;
@@ -615,10 +625,10 @@ When a call to an imported `pub fn` mismatches the declared signature
 on a parameter whose type annotation is a Named struct, conforming
 implementations SHOULD preserve the struct's name in the resulting
 error message rather than collapsing it to the lowered ABI type. For
-example, given `pub fn vec_set(v: Vec, i: i64, x: i64) -> i64`, a call
-that passes a tensor where `Vec` was declared SHOULD produce a message
-of the shape "expects Vec (heap-record i64 addr), got
-tensor<f32[3]>". This is a diagnostic-only contract — the underlying
+example, given `pub fn vec_set(v: Vec<i64>, i: i64, x: i64) -> i64`, a call
+that passes a tensor where `Vec<i64>` was declared SHOULD produce a message
+of the shape "expects Vec<i64> (heap-record i64 addr), got
+Tensor<f32, [3]>". This is a diagnostic-only contract — the underlying
 compatibility check stays permissive under the Option-C heap-record
 ABI (i64 values still accept into Named struct params). The reference
 implementation ships this behaviour from mindc 0.4.4 onwards (RFC 0005
