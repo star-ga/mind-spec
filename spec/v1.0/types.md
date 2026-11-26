@@ -114,6 +114,10 @@ applicable rule. Selected core rules include:
 
 ### Fixed-array literal cardinality
 
+The repeat form `[v; n]` (`ArrayExpression`) is an array of `n` elements: `v` is evaluated once, and each element is
+its value. `n` is an integer literal or the name of a `const` of the type `i64`. A `v` that is a handle MUST be refused
+with [`E2001`](./errors.md#e2001-type-mismatch).
+
 An array literal initializing an explicitly annotated `let` or `const` binding
 of type `[T; n]` MUST contain exactly `n` elements. This rule applies at every
 lexical depth, including function, branch, and loop bodies. Parentheses around
