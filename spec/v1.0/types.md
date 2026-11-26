@@ -42,16 +42,16 @@ The following forms are part of the core language:
 - **Container types**: `Vec<T>`, the growable sequence (the vector record of `std.vec`), `Map<K, V>`, the map of
   `std.map`, and `String`. A value of one of them is a container record
   ([Memory model](./memory.md#records-and-containers)). The word "array" names the fixed array `[T; n]` only.
+- **The string type**: `String`, the type of the module `std.string` of the
+  [standard library](./stdlib.md#four-pure-mind-modules). Like every entity of the standard library, `String` is
+  available without an import. A string literal has the type `String`, so `let s: String = "a";` is valid and
+  `let n: i64 = "a";` MUST be refused at check time with [`E2001`](./errors.md#e2001-type-mismatch).
 
 **Type names.** A scalar primitive type name is lower case, and every other type name is UpperCamel. A generic type
 always writes all its type arguments: the bare names `Vec` and `Map`, and the names `array<T>`, `string` and `str`,
 MUST be refused at check time, and the message gives the rewrite (`Vec<T>`, `Map<K, V>`, `String`). In Core v1 the
 type arguments belong to the predeclared generic types `Option<T>`, `Result<T, E>`, `Vec<T>`, `Map<K, V>` and
 `Tensor<D, S>`.
-- **The string type**: `String`, the type of the module `std.string` of the
-  [standard library](./stdlib.md#four-pure-mind-modules). Like every entity of the standard library, `String` is
-  available without an import. A string literal has the type `String`, so `let s: String = "a";` is valid and
-  `let n: i64 = "a";` MUST be refused at check time with [`E2001`](./errors.md#e2001-type-mismatch).
 
 Implementations MAY extend the set of primitive types but MUST document the extensions.
 
@@ -404,14 +404,14 @@ controls in `parse_match_and_ref`.
 ## Slice call implementation boundary
 
 > **Compiler integration update, released in v0.10.3.** The `std-surface` source
-> implementation defines a bounded dynamic-array-to-slice call
+> implementation defines a bounded `Vec<T>`-to-slice call
 > ABI. This describes the integration that ships in v0.10.3; the published
 > v0.10.2 artifact does not have it.
 
 The slice types `&[T]` and `&mut [T]` are an extension: the Core v1 grammar does not derive
 them, and the rules of this section hold for an implementation that provides them.
 A compatible `Vec<T>` value or array literal MAY be passed to `&[T]` or
-`&mut [T]` parameters. Both use the existing `std.vec` Option-C dynamic-array
+`&mut [T]` parameters. Both use the existing `std.vec` Option-C vector
 handle layout, an opaque handle to the `[addr, len, cap]` record. A mutable
 slice parameter accepts a `Vec<T>` value or a mutable slice value; a
 read-only parameter also accepts a mutable slice value. Read-only slices
@@ -424,7 +424,7 @@ transfers, including `break` and `continue` paths.
 The compiler MUST refuse an unproven or incompatible call-boundary layout
 with `E2032` before artifact emission. This includes an unsupported element
 form, an explicit slice-typed local binding, a scalar/map/opaque integer
-argument, an incompatible array, and a slice or array result that is not
+argument, an incompatible `Vec<T>` value or array literal, and a slice or `Vec<T>` result that is not
 proven on every required path. The current ABI guard refuses floating-point,
 tensor, fixed-array, and nested-slice element layouts. Opaque integer and map
 handles cannot establish slice provenance merely by annotation.
@@ -442,8 +442,8 @@ received. Where a push may stand, and when it needs a `let mut` root, is in
 
 `set` has a different result contract: it updates existing storage and returns
 a scalar status. Consequently `xs.set(index, value)` is valid as a statement
-for an owned array or mutable slice, while `xs = xs.set(index, value)` cannot
-replace an owned array and MUST be refused with `E2032`. Neither read-only nor
+for an owned `Vec<T>` or a mutable slice, while `xs = xs.set(index, value)` cannot
+replace an owned `Vec<T>` and MUST be refused with `E2032`. Neither read-only nor
 mutable borrowed slices provide `push`; attempts MUST be refused with `E2033`.
 
 The executable coverage of this integration (v0.10.3) is the compiler-side

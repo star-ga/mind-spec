@@ -327,6 +327,13 @@ three choices that a check of the grammar names as not decided by three tokens a
 specification: a change of the grammar that adds a fourth such choice is not accepted, and the grammar check of the
 specification repository is the gate that holds it.
 
+### Nesting depth
+
+An implementation MUST accept at least 256 levels of nesting of parentheses, brackets, braces, unary operators and
+block-like forms, and a left-associative chain of binary operators, such as `a + b + c`, of any length. Its limit
+is one fixed number, the same on every substrate, and it does not depend on the stack of the host. Input that nests
+deeper than the limit MUST be refused with `E1108` at the first token past the limit.
+
 ## Evaluation order
 
 A program is evaluated in one written order, from left to right, for every form:
@@ -352,8 +359,9 @@ The type system relevant to Core v1 consists of:
 
 - **Scalar types**: the primitive types `i8`, `i16`, `i32`, `i64`, `u8`, `u16`, `u32`, `u64`, `f32`, `f64`, `bool`
   and `unit` ([Type formation](./types.md#type-formation)).
-- **Tensor types**: parameterised by `dtype` and **shape**. Shape dimensions may be statically known
-  integers or implementation-defined symbolic sizes where supported.
+- **Tensor types**: `Tensor<D, S>`, parameterised by a `dtype` `D` and a **shape** `S`; both arguments are written. A
+  dimension of a shape is an integer literal or the name of a `const` of the type `i64` in scope (`Dimension` of
+  [`grammar-syntax.ebnf`](./grammar-syntax.ebnf)).
 - **Shape descriptors**: ordered lists of dimensions. Shapes appear in type annotations and IR
   metadata. Device placements MAY be attached but are otherwise outside the Core v1 scope.
 
