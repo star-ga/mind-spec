@@ -389,6 +389,7 @@ not a row.
 | DN-64 | [`dn64_habit_closure_bar_reject`](dn64_habit_closure_bar_reject.yaml) | reject, `E1105` at 2:13 | as above |
 | DN-64 | [`dn64_habit_if_let_reject`](dn64_habit_if_let_reject.yaml) | reject, `E1105` at 3:5 | as above |
 | DN-64 | [`dn64_habit_postfix_question_reject`](dn64_habit_postfix_question_reject.yaml) | reject, `E1105` at 6:16 | as above |
+| DN-64 | [`dn64_habit_use_reject`](dn64_habit_use_reject.yaml) | reject, `E1105` at 1:1 | as above: `use` is a repair row to `import` |
 | DN-64 | [`dn64_name_near_keyword_accept`](dn64_name_near_keyword_accept.yaml) | accept, returns 1 | [`E1104`](../../../spec/v1.0/errors.md#e1104-misspelled-keyword) |
 | DN-63 | [`dn63_one_diagnostic_for_each_item_reject`](dn63_one_diagnostic_for_each_item_reject.yaml) | reject, `E1101` at 2:18, count 3 | [Diagnostics](../../../spec/v1.0/lexical.md#diagnostics): one diagnostic for each top-level item |
 | DN-63 | [`dn63_valid_program_accept`](dn63_valid_program_accept.yaml) | accept, returns 2 | [E1xxx](../../../spec/v1.0/errors.md#e1xxx-lexical-and-syntax-errors) |

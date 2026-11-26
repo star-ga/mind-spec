@@ -436,7 +436,7 @@ an item can start is refused (`E1103` or `E1101`). `assert` is a keyword stateme
 **Reason.** Option B: each form has one printed text, and `const K = 1` followed by a line that starts with `-` has one
 reading.
 
-**Refused forms.** `use std.vec` with no `;`; `fn f() { };`; `const K = 1` with no `;`; `assert(c, "m")` as a second
+**Refused forms.** `import std.vec` with no `;`; `fn f() { };`; `const K = 1` with no `;`; `assert(c, "m")` as a second
 form.
 
 **Reference.** `mindc check` accepts `fn f() -> i64 { return 1; };` (probe `a1_stray_semi`, also `fn_stray_semi`),
@@ -758,7 +758,8 @@ runs to see the three faults.
 characters; ties by the keyword order of [Keywords](../../spec/v1.0/lexical.md#keywords)). `E1105` uses one fixed
 table (`elif`, `func`, `var`, `switch`, `x++`, `===`, `@`, `diff T`, `tensor<f32[2]>`, ...). It is the table of habit
 forms: each row gives the MIND form, the status, the fix class and the measured verdict of the release, and the
-rows hold a macro call, a reference type, a closure bar, `if let`, the postfix `?` and an inherent impl block.
+rows hold a macro call, a reference type, a closure bar, `if let`, the postfix `?` and an inherent impl block. `use` is
+not a second form of an import: `use a.b;` is a row of this table, and its fix is `import a.b;`.
 An item form in a block is refused at its first word. At module level the message says "expected an item". `E2002`
 suggests only names in scope at distance 2 or less.
 

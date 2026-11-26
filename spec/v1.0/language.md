@@ -24,7 +24,7 @@ Detailed lexical and type rules continue to live in the legacy chapters ([`lexic
 ## Syntax overview
 
 - **Modules and items**: a module holds items only: functions, type declarations, structs, enums, constants,
-  module blocks, imports, `use` declarations and extern blocks ([Items and modules](#items-and-modules)). Functions
+  module blocks, imports and extern blocks ([Items and modules](#items-and-modules)). Functions
   declare named parameters and a result type and compile to IR module inputs and outputs.
 - **Statements**: `let`, assignment, expression statements, `return`, `defer`, loop exits, `assert` and the
   block-like forms ([Bindings and assignment](#bindings-and-assignment), [Block-like statements](#block-like-statements),
@@ -712,9 +712,9 @@ The separators are the ones that [`grammar-syntax.ebnf`](./grammar-syntax.ebnf) 
 after a `return`, after a loop exit, after an `assert` and after an `ExpressionStatement`, an assignment too; a
 `BlockLikeStatement` and a `defer` statement take none ([Block-like statements](#block-like-statements)). Every `match`
 arm ends with `,`, the last arm too (`MatchArm`). An item that does not end with a block (`type`, `const`, `import`,
-`use`, a function signature) ends with `;`, and an item that ends with `}` takes none. Checking and building MUST
+a function signature) ends with `;`, and an item that ends with `}` takes none. Checking and building MUST
 refuse a source in which one of these separators is missing, with `E1103` at the point where the separator belongs:
-`let x = 1` followed by a line `return x;`, `return x }`, `break }`, `use std.vec` with no `;` and `const K = 1` with
+`let x = 1` followed by a line `return x;`, `return x }`, `break }`, `import std.vec` with no `;` and `const K = 1` with
 no `;` are refused. A missing separator has no meaning in the language. A `;` that stands where no statement and no
 item needs it, such as `fn f() { };` or a lone `;` in a block, MUST be refused, and the message says "remove the
 `;`". `mindc check` runs the check of the syntax before the check of the format, so a missing separator is reported as
@@ -735,7 +735,7 @@ The keywords are reserved ([Keywords](./lexical.md#keywords)); among them are `m
 and `pub`. A keyword where a name stands MUST be refused with `E1007`, one diagnostic at the word: `let mut = 1;`,
 `let loop = 1;`, `fn assert() { }` and `fn f(true: i64) { }` are refused.
 
-The syntactic grammar also spells out words that are not keywords (`in`, `as`, `const`, `enum`, `module`, `use`,
+The syntactic grammar also spells out words that are not keywords (`in`, `as`, `const`, `enum`, `module`,
 `extern`, `diff`, `dyn`, `tensor`, `dtype` and the primitive type names).
 [`grammar-lexical.ebnf`](./grammar-lexical.ebnf) lists them as `ContextualWord`, a rule for documentation: the lexer
 produces each of them as an identifier. Each of them has its own positions in the syntactic grammar, and at each
@@ -770,7 +770,8 @@ call and is not part of the language. Use the function form, for example the
 ### Module level
 
 A module holds items only (`Module` and `ModuleItem` of [`grammar-syntax.ebnf`](./grammar-syntax.ebnf)): a statement
-at module level, such as `let x = 1;`, MUST be refused. Every item form is reached from `Module`. The attributes of an
+at module level, such as `let x = 1;`, MUST be refused. An import has one form, `import a.b;`: `use a.b;` is a habit
+form of [`E1105`](./errors.md#e1105-form-that-mind-writes-another-way), and its fix is `import a.b;`. Every item form is reached from `Module`. The attributes of an
 item come first, then `pub`, then the word that starts the item ([Attributes](#attributes)). The external functions of
 a program are written in one form, the block `extern "C" { fn f(x: i64) -> i64; }` (`ExternDeclaration`): `extern "C"
 fn f();` has no derivation, and an ABI string other than `"C"` MUST be refused with

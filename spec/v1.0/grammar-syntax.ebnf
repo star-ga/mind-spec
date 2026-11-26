@@ -40,7 +40,6 @@ Module = { ModuleItem } ;
 
 ModuleItem = { Attribute } , ( [ "pub" ] , NamedItem
                              | ImportDeclaration
-                             | UseDeclaration
                              | ExternDeclaration ) ;
 
 NamedItem = FunctionDeclaration
@@ -141,8 +140,8 @@ ExternDeclaration = "extern" , StringLiteral , "{" , { FunctionSignature } , "}"
 (* Module block (compile-time grouping).                        *)
 ModuleBlock     = "module" , Identifier , "{" , { ModuleItem } , "}" ;
 
-(* Use-clause (lightweight import).                             *)
-UseDeclaration  = "use" , ImportPath , ";" ;
+(* There is no use-clause: `use a.b;` is a habit form of E1105,   *)
+(* and its fix is `import a.b;`.                                *)
 
 (* ============================================================ *)
 (* End of the v1.1 candidate items.                             *)
