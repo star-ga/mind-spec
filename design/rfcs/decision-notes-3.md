@@ -17,7 +17,7 @@ limitations under the License.
 # Decision Notes, Part 3 (Informative)
 
 This page continues [Decision Notes](./decision-notes.md) and [part 2](./decision-notes-2.md) with the notes DN-22 to
-DN-88, which the specification owner decided on 2026-11-26. They are the decisions on the grammar of the language: the
+DN-89, which the specification owner decided on 2026-11-26. They are the decisions on the grammar of the language: the
 lexical rules, the expression and statement forms, the items, the types and patterns, the tensor forms and the
 diagnostics. The grammar text of each decision is the left-factored form of the three grammar files
 ([`grammar-lexical.ebnf`](../../spec/v1.0/grammar-lexical.ebnf), [`grammar-syntax.ebnf`](../../spec/v1.0/grammar-syntax.ebnf),
@@ -1202,3 +1202,21 @@ not refuse a program that its own tool cannot fix.
 
 **Reference.** `mindc check --fix` inserts the missing `;` of `let x = 1`, reports "Fixed 1 file, 0 unfixable
 diagnostics remaining.", and the check of the result passes (probe `e4_b_fix_semi`).
+
+## DN-89. No glob import
+
+**Decision.** A glob import is refused for good: an import names one module (`import a.b;`), and a member of it is
+reached through the import qualifier (`b.f()`). `import a.*;` has no derivation. So a new export of a dependency
+changes no IR byte of the importer.
+([Module level](../../spec/v1.0/language.md#module-level).)
+
+**Options.** (A) A glob import that brings every export of a module into scope. (B) No glob import.
+
+**Reason.** Option B: with a glob import, a name that a dependency exports later can meet a name of the importer, so a
+change in another module changes the meaning or the bytes of a program that did not change. With option B every name of
+the importer is resolved by its own text and its import lines.
+
+**Refused forms.** `import a.*;` (`E1101`).
+
+**Reference.** `mindc check` refuses `import std.*;` with `E1001`, "expected module name after '.'" (probe
+`e4_h_glob_import`), and `use std.vec.*;` in the same way (probe `e4_h_glob_use`).

@@ -154,7 +154,7 @@ does not change the status. A row without a mark makes no claim about the refere
 
 ## Forms of the grammar decisions
 
-This table has one row for each form that the decisions DN-22 to DN-88 of
+This table has one row for each form that the decisions DN-22 to DN-89 of
 [Decision Notes, Part 3](../../design/rfcs/decision-notes-3.md) decide. The status is the status that the decision
 gives; the chapters that the decision names state the rule. "Reference pending" records that the reference compiler
 v0.10.4 does not yet follow the decided status; "reference conforms" records that it follows it for the probe. The
@@ -268,3 +268,4 @@ The repair table is permanent, and each code has one fix class ([Code table](./e
 | DN-86 | The grammar with at most 3 undecided choices, the 3 named ones | Core v1 (a gate of the specification repository) | The grammar lint finds exactly the 3 named choices (`Block`, `NamePath`, `Statement`) |
 | DN-87 | An accept and a reject row for each decision; equal lists of reserved words and the `Keyword` rule, of the attribute table of [Attributes](./language.md#attributes) and the names of its accept rows, and of the code table and the entries of [errors.md](./errors.md) | Core v1 (a gate of the specification repository) | No compiler verdict |
 | DN-88 | The migration tool; one fix class for each code; the edit in the record of a diagnostic | See the paragraph "Migration" above | `mindc check --fix` inserts the missing `;` of `let x = 1`, and the check of the result passes (`e4_b_fix_semi`) |
+| DN-89 | `import std.*;`: a glob import; a new export of a dependency changes no IR byte of the importer | Core v1 refuses; the grammar has no derivation, and the code is `E1101` | Reference pending for the code: `mindc check` refuses it with `E1001`, "expected module name after '.'" (`e4_h_glob_import`) |

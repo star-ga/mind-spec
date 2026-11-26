@@ -113,7 +113,8 @@ ImportDeclaration = "import" , ImportPath , ";" ;
 (* wrote "::", which no released reference compiler accepted for    *)
 (* `import`. "." follows a value or a module, and "::" follows a    *)
 (* type; the other separator is refused with the fix. Qualifier     *)
-(* semantics: language.md, "Module-qualified references".           *)
+(* semantics: language.md, "Module-qualified references". There is   *)
+(* no glob import (DN-89): `import a.*;` has no derivation.            *)
 ImportPath = Identifier , { "." , Identifier } ;
 
 (* ============================================================ *)

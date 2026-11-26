@@ -791,7 +791,11 @@ from it.
 `E::A` names a variant of the type `E`. `::` after a module MUST be refused with
 [`E2731`](./errors.md#e2731-path-separator-after-a-module), with the edit to the dot form: `m::f()` for a member of the
 module block `m` is refused, and the fix is `m.f()`. `.` after a type MUST be refused with
-[`E2002`](./errors.md#e2002-unresolved-name-or-qualified-owner), and the message gives the fix. A binding MUST NOT take the name of an import qualifier or of a module block in
+[`E2002`](./errors.md#e2002-unresolved-name-or-qualified-owner), and the message gives the fix.
+
+There is no glob import (DN-89): an import names one module, and its members are reached through the import qualifier.
+`import a.*;` has no derivation and MUST be refused with `E1101`. So a new export of a dependency changes no IR byte of
+the importer. A binding MUST NOT take the name of an import qualifier or of a module block in
 scope; such a binding MUST be refused with `E2730`.
 
 ### Visibility

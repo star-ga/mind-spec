@@ -1,0 +1,26 @@
+# MIND Conformance Test: a glob import has no derivation
+# Specification reference: spec/v1.0/language.md#module-level
+# Decision: DN-89 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "import std.*; is refused with E1101 at the star: there is no glob import, so a new export of a dependency changes no IR byte of the importer"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    import std.*;
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1101
+    location:
+      line: 1
+      column: 12
+    count: 1

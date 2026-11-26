@@ -200,7 +200,7 @@ specification repository asserts it ([Code table](../../../spec/v1.0/errors.md#c
 
 ## Rows of the grammar decisions
 
-Each decision DN-22 to DN-85 of [Decision Notes, Part 3](../../../design/rfcs/decision-notes-3.md) has rows here,
+Each decision DN-22 to DN-85 and DN-89 of [Decision Notes, Part 3](../../../design/rfcs/decision-notes-3.md) has rows here,
 in the folder of its category: the tensor forms in [`shapes`](../shapes), the gradient attribute in
 [`autodiff`](../autodiff), the lexical forms in [`lexical`](../lexical), the type and pattern rules in
 [`type_checker`](../type_checker), and the rest in this folder. The rows `dn63_fault_*`, `dn64_fault_*` and
@@ -455,6 +455,7 @@ not a row.
 | DN-83 | [`dn83_pub_item_accept`](dn83_pub_item_accept.yaml) | accept, returns 5 | [Visibility](../../../spec/v1.0/language.md#visibility) |
 | DN-83 | [`dn83_export_list_reject`](dn83_export_list_reject.yaml) | reject | as above: `export` is reserved with no production |
 | DN-83 | [`dn83_pub_as_name_reject`](dn83_pub_as_name_reject.yaml) | reject, `E1007` at 2:9 | as above |
+| DN-89 | [`dn89_glob_import_reject`](dn89_glob_import_reject.yaml) | reject, `E1101` at 1:12 | [Module level](../../../spec/v1.0/language.md#module-level): no glob import |
 | DN-84 | [`dn84_tool_attribute_listed_accept`](dn84_tool_attribute_listed_accept.yaml) | accept, returns 1 | [Attributes](../../../spec/v1.0/language.md#attributes): tool attributes; a gap of the reference |
 | DN-84 | [`dn84_three_segment_name_reject`](dn84_three_segment_name_reject.yaml) | reject, `E1101` at 1:6 | [Attributes](../../../spec/v1.0/language.md#attributes): tool attributes |
 | DN-84 | [`dn84_tool_attribute_not_listed_reject`](dn84_tool_attribute_not_listed_reject.yaml) | reject | as above |
