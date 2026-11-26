@@ -23,10 +23,10 @@ container follows the same rule.
 
 ## Records and containers
 
-The container types are `array<T>`, which is the type of the vector record of `std.vec` (its signatures write `Vec`
-for `array<i64>`), the type `Map` of `std.map` and `String`
+The container types are `Vec<T>`, the growable sequence, which is the type of the vector record of `std.vec`,
+`Map<K, V>`, the map of `std.map`, and `String`
 ([Four pure-MIND modules](./stdlib.md#four-pure-mind-modules)). A value of a container type denotes a container
-record with identity, as a value of a struct type does. An array literal where an `array<T>` is expected, a string
+record with identity, as a value of a struct type does. An array literal where a `Vec<T>` is expected, a string
 literal, and a library function that makes a container (`vec_new`, `map_new`, `string_new`) create a new record.
 Binding, assigning, passing and returning keep the record; none of them copies the elements.
 
@@ -37,7 +37,7 @@ returns a container returns the handle that it received (`vec_push`, `map_insert
 MAY share one read-only record when no change can reach it. A function that gives a part of a string
 (`string_slice_from`) creates a new record with a copy of the bytes.
 
-On a value `xs` of type `array<T>`, `xs[i]` is the element `i`, counted from 0, and `xs.push(v)` appends the value `v`
+On a value `xs` of type `Vec<T>`, `xs[i]` is the element `i`, counted from 0, and `xs.push(v)` appends the value `v`
 of type `T` to the record and has the value `xs`. `xs.set(i, v)` replaces the element `i` with the value `v` of type
 `T`. An index outside the container is the case of
 [Index bounds](./ir.md#index-bounds). An index or a slice bound that is outside its axis MUST be refused at check time
@@ -61,7 +61,7 @@ declared with `let mut`, as for an assignment; otherwise the call MUST be refuse
 [`E2402`](./errors.md#e2402-invalid-target-of-a-change). A parameter is not mutable: a function changes a container
 that it receives through a binding such as `let mut w = p;`. A `push` stands as a statement or in the update
 `xs = xs.push(v)` of the same place; any other use MUST be refused at check time with
-[`E2300`](./errors.md#e2300-collection-mutation-in-expression-position): after `let mut xs: array<i64> = [1];`, the
+[`E2300`](./errors.md#e2300-collection-mutation-in-expression-position): after `let mut xs: Vec<i64> = [1];`, the
 statement `let ys = xs.push(2);` is refused. These rules follow the type of the receiver; a method of the same name
 on a value that is not a container is not affected.
 

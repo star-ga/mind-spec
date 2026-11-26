@@ -25,17 +25,29 @@ with the reference notes in
 
 The following forms are part of the core language:
 
-- **Primitive types**: `i32`, `i64`, `f32`, `f64`, `bool`, `unit` (`PrimitiveType` of
-  [`grammar-syntax.ebnf`](./grammar-syntax.ebnf)).
-- **Composite types**: tuples `(T1, T2, ...)`, arrays `[T; n]`, and structs defined via `struct`.
-- **Function types**: `(T1, ..., Tn) -> U` *(not in Core v1; specified for a later edition)*.
+- **Primitive types**: the signed integer types `i8`, `i16`, `i32` and `i64`, the unsigned integer types `u8`, `u16`,
+  `u32` and `u64`, `f32`, `f64`, `bool` and `unit` (`PrimitiveType` of [`grammar-syntax.ebnf`](./grammar-syntax.ebnf)).
+  Each integer type has the same width on every substrate. `usize` and `isize` are not types: a platform width would
+  give one program two sizes on two machines. They MUST be refused at check time with
+  [`E2002`](./errors.md#e2002-undefined-identifier), and the message gives the fix `u64` or `i64`.
+- **Composite types**: tuples `(T1, T2, ...)`, arrays `[T; n]`, and structs defined via `struct`. `(T,)` is the tuple
+  type of one element. `(T)` is not a type and MUST be refused with `E1101`, and the message names `T` and `(T,)`:
+  `let t: (i64) = (5,);` is refused. The unit type is written `unit` only; `()` is the unit value, and `fn f() -> ()`
+  has no derivation.
+- **Function types**: `fn(T1, ..., Tn) -> U` *(not in Core v1; specified for a later edition)*. A type that starts
+  with `(` is a tuple type, so `(i64) -> i64` is not a type.
 - **Trait objects**: `dyn Trait` for traits marked as object-safe *(not in Core v1; specified for a
   later edition — see [Traits and generics](#traits-and-generics))*.
-- **Differentiable wrappers**: `diff T` identifies values that participate in differentiation (see
-  [Automatic differentiation](./autodiff.md)).
-- **Container types**: `array<T>` (the vector record of `std.vec`, whose signatures write `Vec` for `array<i64>`), `Map`
-  and `String`. A value of one of them is a container record
-  ([Memory model](./memory.md#records-and-containers)).
+- **Differentiable wrappers**: `diff T` *(not in Core v1; see [Differentiable types](#differentiable-types))*.
+- **Container types**: `Vec<T>`, the growable sequence (the vector record of `std.vec`), `Map<K, V>`, the map of
+  `std.map`, and `String`. A value of one of them is a container record
+  ([Memory model](./memory.md#records-and-containers)). The word "array" names the fixed array `[T; n]` only.
+
+**Type names.** A scalar primitive type name is lower case, and every other type name is UpperCamel. A generic type
+always writes all its type arguments: the bare names `Vec` and `Map`, and the names `array<T>`, `string` and `str`,
+MUST be refused at check time, and the message gives the rewrite (`Vec<T>`, `Map<K, V>`, `String`). In Core v1 the
+type arguments belong to the predeclared generic types `Option<T>`, `Result<T, E>`, `Vec<T>`, `Map<K, V>` and
+`Tensor<D, S>`.
 - **The string type**: `String`, the type of the module `std.string` of the
   [standard library](./stdlib.md#four-pure-mind-modules). Like every entity of the standard library, `String` is
   available without an import. A string literal has the type `String`, so `let s: String = "a";` is valid and
@@ -52,7 +64,7 @@ attribute.
 
 ### The unit value
 
-The type `unit` has one value. Its expression is `()` (`UnitExpression` of
+The type `unit` has one value. Its expression is `()` (`ParenExpression` with nothing between the parentheses, in
 [`grammar-syntax.ebnf`](./grammar-syntax.ebnf)), and the type of `()` is `unit`. A loop has the type `unit`
 and the value `()` ([Loops](./language.md#loops)). Where the context expects
 a type other than `unit` (an annotation, a parameter, a result type, an operand), `()` MUST be refused at check
@@ -98,7 +110,7 @@ applicable rule. Selected core rules include:
 
 - **Variable**: if x : T ∈ Γ then Γ ⊢ x : T.
 - **Let binding**: if Γ ⊢ e1 : T1 and Γ, x : T1 ⊢ e2 : T2 then Γ ⊢ let x = e1 in e2 : T2.
-- **Function abstraction**: if Γ, x1 : T1, ..., xn : Tn ⊢ e : U then Γ ⊢ fn(x1 : T1, ..., xn : Tn) -> U { e } : (T1, ..., Tn) -> U.
+- **Function abstraction**: if Γ, x1 : T1, ..., xn : Tn ⊢ e : U then Γ ⊢ fn(x1 : T1, ..., xn : Tn) -> U { e } : fn(T1, ..., Tn) -> U.
 
 ### Fixed-array literal cardinality
 
@@ -112,9 +124,10 @@ A cardinality mismatch MUST be rejected during static checking. The diagnostic
 MUST identify the literal and report both the required and actual element
 counts; execution failure at a later call site is not an adequate substitute.
 
-The length `n` of a fixed array type `[T; n]` is the extent of its one axis. A length of 0 is valid, and a
-negative length (`[i64; -1]`, one literal by [Literals](./lexical.md#literals)) MUST be refused at check time
-with [`E3006`](./errors.md#e3006-negative-dimension).
+The length `n` of a fixed array type `[T; n]` is the extent of its one axis; it is an integer literal or the name of a
+`const` (`ArrayLength`). A length of 0 is valid. A literal has no sign ([Literals](./lexical.md#literals)), so
+`[i64; -1]` has no derivation, and a `const` length whose value is negative MUST be refused at check time with
+[`E3006`](./errors.md#e3006-negative-dimension).
 This rule concerns literal cardinality; nonliteral initializers remain subject
 to the ordinary type compatibility rules.
 
@@ -219,7 +232,7 @@ address-dependent value. The eight-byte cell stride is this reference backend's
 layout, not a new language-level layout mandate.
 
 The pure-MIND native emitter has a separate, emitter-level, read-only slice for
-record fields of type `[i64; N]` and `[u8; N]` with `1 <= N <= 4096` (a
+record fields of type `[i64; N]` and `[u8; N]` with `N` from 1 to 4096 (a
 capability bound of that emitter, not a language limit). The `i64` form landed
 in `c4c7b034` and the `u8` form in `9b23e3fe`. The slice admits construction
 from a direct array literal, whole-field reads and bounds-checked indexed
@@ -269,7 +282,9 @@ other operand of a binary operator, and an element of an array or a tensor whose
    rounded to its type to the nearest value with ties to even, is greater in magnitude than the largest finite
    value of that type, MUST be refused at check time with [`E2408`](./errors.md#e2408-literal-out-of-range):
    `let b: i32 = 3000000000;` is refused. The value of a literal is the value of its token
-   ([Literals](./lexical.md#literals)).
+   ([Literals](./lexical.md#literals)). A literal has no sign; a unary `-` applied to a literal, with parentheses or
+   without, is checked as one negative value: `let m: i32 = -2147483648;` is valid, and
+   `let m: i32 = -2147483649;` is refused with `E2408`.
 4. An integer literal where a floating-point type is expected, and a floating-point literal where an integer type is
    expected, MUST be refused at check time with [`E2001`](./errors.md#e2001-type-mismatch): `let y: f64 = 1;` and
    `let z: i64 = 1.5;` are refused.
@@ -302,9 +317,9 @@ The type checker participates directly in Core IR construction:
 - **Shape validation** rejects tensors with a negative extent; an extent of 0 is valid
   ([Index bounds](./ir.md#index-bounds)). Scalars (rank-0) are exempt and remain represented with an empty shape.
 - **Operation typing** mirrors the IR instruction set. For arithmetic operations the operands MUST
-  share a dtype; shape compatibility follows the broadcasting rules in
-  [Shapes](./shapes.md#broadcasting). Scalar operands implicitly broadcast to the non-scalar
-  operand's shape. Batched `MatMul` operations additionally broadcast leading dimensions and enforce
+  share a dtype. A plain operator on two tensors needs one shape, and a scalar operand extends to the shape of the
+  tensor operand; a dotted operator follows the broadcasting rules in [Shapes](./shapes.md#broadcasting)
+  ([Tensor operators and broadcasting](./language.md#tensor-operators-and-broadcasting)). Batched `MatMul` operations additionally broadcast leading dimensions and enforce
   that the contracting dimension matches.
 - **Verification before emission**: translators are expected to reject programs with unknown dtypes,
   incompatible shapes, or undeclared symbols before emitting IR. This aligns the surface-language
@@ -319,16 +334,17 @@ The type checker participates directly in Core IR construction:
 > artifact does not have them.
 
 For a manifest project, the defining source module owns each enum, struct, and type alias. A qualifier MUST resolve to
-the current module or to exactly one imported module, and a type referenced from another module MUST be exported by that
-owner. A qualified type and an enum variant path are extensions: the Core v1 grammar derives neither (a type position
-takes one identifier, and enums are among the v1.1 candidate additions of the grammar), and the rules of this section
-hold for an implementation that provides them. A qualified type is written with its import qualifier, the last segment
+the current module or to exactly one imported module, and a type referenced from another module MUST be `pub` in that
+owner ([Visibility](./language.md#visibility)). A qualified type is an extension: the Core v1 grammar does not derive
+it (a type position takes one identifier). An enum variant path `E::A` is derived (`NamePath` and `VariantPattern`),
+and enums are among the v1.1 candidate additions of the grammar. The rules of this section hold for an implementation
+that provides these forms. A qualified type is written with its import qualifier, the last segment
 of the import path (`defs.Color` after `import nested.defs;`), as a qualified reference is
 ([Module-qualified references](./language.md#module-qualified-references)). The rule applies recursively in reference,
 fixed-array, tuple, generic-argument, raw-pointer, and external-function type positions. Same-named types in different
 modules remain distinct.
 
-An unknown, unimported, non-exported, or ambiguous owner MUST be refused with
+An unknown, unimported, not `pub`, or ambiguous owner MUST be refused with
 `E2002` during both checking and artifact-producing builds. A refused build
 MUST leave no artifact.
 
@@ -358,7 +374,8 @@ payload patterns. It does not inspect a payload-constructor call such as `Table:
 (`Table::Text { ... }`), and the name resolver accepts any `::`-qualified callee and does not resolve a struct-literal
 name, so checking reports no `E2002` for those spellings on another module's enum; no compiler control records what a
 build then does with them. The parser rewrites `Table.Raw` (a spelling that this specification does not define) to
-`Table::Raw` only when the enum is visible to the module, so for the dot spelling the check refuses an unknown variant
+`Table::Raw` only when the enum is visible to the module (this specification refuses the dot spelling after a type
+with `E2002`, [Module level](./language.md#module-level)), so for the dot spelling the check refuses an unknown variant
 of an imported enum but not an unimported or ambiguous enum.
 
 Coverage: the compiler control `cross_module_enum_variant_lowering` builds a
@@ -393,10 +410,10 @@ controls in `parse_match_and_ref`.
 
 The slice types `&[T]` and `&mut [T]` are an extension: the Core v1 grammar does not derive
 them, and the rules of this section hold for an implementation that provides them.
-A compatible `array<T>` value or array literal MAY be passed to `&[T]` or
+A compatible `Vec<T>` value or array literal MAY be passed to `&[T]` or
 `&mut [T]` parameters. Both use the existing `std.vec` Option-C dynamic-array
 handle layout, an opaque handle to the `[addr, len, cap]` record. A mutable
-slice parameter accepts an `array<T>` value or a mutable slice value; a
+slice parameter accepts a `Vec<T>` value or a mutable slice value; a
 read-only parameter also accepts a mutable slice value. Read-only slices
 permit indexing, `get`, and length queries. Mutable slices add indexed
 assignment and `set`; ownership operations such as `push`, `free`, and
@@ -419,7 +436,7 @@ may preserve a compatible slice capability. General lifetime and
 alias-exclusivity analysis remains outside this implementation. These limits
 are separate from the general byte-slice design in [Future Extensions](./future-extensions.md#systems-programming-primitives).
 
-An `array<T>` value is a container record: `push` changes the record in place and returns the handle that it
+A `Vec<T>` value is a container record: `push` changes the record in place and returns the handle that it
 received. Where a push may stand, and when it needs a `let mut` root, is in
 [Changing a container](./memory.md#changing-a-container).
 
@@ -438,7 +455,7 @@ yet shipped conformance artifacts.
 > **Implementation status (v0.10.x, honest boundary).** The rules in this section specify the
 > *full* v1.0 type system; they are **not yet implemented** in the reference implementation's
 > executable subset. Shipped today: generics limited to a **single type parameter over scalar
-> types** (a bounded slice — no multi-parameter generics, no generic containers, no `where`-clause
+> types** (a bounded slice — no multi-parameter generics, no generic containers, no trait
 > bounds). **Not shipped:** `trait` declarations, trait implementations, `dyn Trait` objects, and
 > closures / first-class function values. See
 > [Future Extensions](./future-extensions.md#deferred-core-language-features) for the roadmap.
@@ -448,13 +465,21 @@ yet shipped conformance artifacts.
   required items are provided by conforming types.
 - Trait implementations MUST be coherent: for any type and trait pair there MAY be at most one
   implementation in scope.
-- Generic type parameters use an explicit `where` clause to declare trait bounds.
+- A trait bound of a type parameter is written in the type-parameter list only (`<T: Bound>`, `TypeParameter` of
+  [`grammar-syntax.ebnf`](./grammar-syntax.ebnf)). There is no `where` clause: `where` is a reserved word that no rule
+  spells, so `fn f<T>(x: T) -> T where T: Numeric` has no derivation.
+- A method call gives a generic method its type arguments with `e.m::<A>(x)` (`MemberOperator`).
 
 Trait resolution strategies are implementation-defined but MUST respect lexical scoping. The reference
 implementation uses a Rust-level trait-based plugin architecture internally for backend selection;
 this is an implementation detail, not a MIND-language trait feature.
 
 ## Differentiable types
+
+`diff T` is not part of Core v1 (`DifferentiableType` is marked "NOT IN CORE v1" in
+[`grammar-syntax.ebnf`](./grammar-syntax.ebnf)): a Core v1 implementation refuses it, and the message names the
+attribute `#[grad(g, p)]`, which writes a gradient in Core v1 ([Attributes](./language.md#attributes)). The rest of
+this section is written for a later edition.
 
 The `diff T` wrapper marks values that participate in automatic differentiation. Implementations
 MUST track primal and tangent components as described in [Automatic differentiation](./autodiff.md).
