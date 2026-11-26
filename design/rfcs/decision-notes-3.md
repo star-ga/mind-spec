@@ -560,6 +560,10 @@ without a special token.
 also `p46_mun_typedecl_ge`); it accepts `t.0.1` (probe `c_tuple_pair`) and `Option<Option<i64>>= p` (probe
 `p44_mun_generic_gtgteq`).
 
+**Replaces.** The longest-match token rule for `<<=` and `>>=` and the split of a lexed `>>` or `>=` where a list
+closes, in DN-12 ([Decision Notes](./decision-notes.md)) and in the drafts [RFC 0023](./0023-type-parameters-on-user-types.md)
+and [RFC 0027](./0027-function-generics.md).
+
 ## DN-53. No type arguments after `as`
 
 **Decision.** The type after `as` is a primitive type name or a name with no type-argument list; a `<` after a cast is
@@ -734,8 +738,8 @@ right place.
 **Refused forms.** None; the decision names codes.
 
 **Reference.** `mindc check` gives `E1001` for every syntax fault of the measured set, for example "expected '}', found
-None" for a missing brace (probe `d01_missing_close_brace_eof`), and it gives 3 diagnostics for `lett x = 1;` (probe
-`d32_misspelled_let`).
+None" for a missing brace (probe `d01_missing_close_brace_eof`), and it gives 3 diagnostics for `lett x = 1;` with
+`--no-fmt` and 4 without it, the fourth the format drift (probe `d32_misspelled_let`).
 
 ## DN-64. Diagnostic tables
 
@@ -977,7 +981,8 @@ comment.
 
 **Decision.** The shadowing lint stays off for what DN-8 makes valid. An invalid compound-assignment target uses
 `E2402`. A lone `;` is refused with the fix "remove the `;`". `+=` and the other compound operators are one token each,
-so `x + = 2` is refused.
+so `x + = 2` is refused. (`<<=` and `>>=` are formed from joined one-character tokens by DN-52; a space breaks them
+too.)
 
 **Options.** (A) Keep the current behaviour. (B) The four fixes.
 

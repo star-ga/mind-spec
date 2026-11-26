@@ -408,7 +408,8 @@ IndexItem = Expression , [ SliceTail ]
 SliceTail = SliceColon , [ Expression ] , [ SliceColon , [ Expression ] ] ;
 
 (* Colon of a slice. Inside the brackets of an index and outside any   *)
-(* nested bracket, the text "::" is two SliceColon tokens: `a[::2]` is *)
+(* nested pair of "(" and ")", "[" and "]", or "{" and "}", the text   *)
+(* "::" is two SliceColon tokens: `a[::2]` is                          *)
 (* the slice with the step 2, and `a[s::k]` is the slice from s with   *)
 (* the step k. A path there is written in parentheses: `a[(E::B)]`     *)
 (* (lexical.md, "Tokens").                                             *)

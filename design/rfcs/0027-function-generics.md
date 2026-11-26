@@ -82,6 +82,7 @@ rule of [Lexical Structure](../../spec/v1.0/lexical.md#tokens) is for the `>` th
 (`TypeArguments`): in `fn f<T: Conv<i64>>(x: T)` the first `>` of `>>` closes the arguments of `Conv`, and the rest
 of the token, read again, is the `>` of `GenericParameters`; `id::<Box<i64>>(b)` ends two type-argument lists.
 `where` is already in the keyword list.
+*The split of a lexed `>>` is replaced by [DN-52](./decision-notes-3.md#dn-52-context-free-token-rules): `<` and `>` are tokens of one character marked joined, and every `>` closes one list.*
 *The `where` clause is replaced by [DN-68](./decision-notes-3.md#dn-68-no-where-clause-type-arguments-of-a-method): a bound is written in the parameter list only.*
 
 The supertrait list is a bound on the implementing type, and a bound on an associated type is a bound on the type

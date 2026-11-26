@@ -460,6 +460,8 @@ refuses the float operands with `lane.type.mismatch` and the mixed widths with `
 `let o: Option<Option<i64>>= p;`: Core v1; reference gap (the native backend refuses the type `Option<Option<i64>>` with
 `lane.type.generic`, also with a space before `=`); `mindc check` accepts it.
 
+**Replaced in part by.** DN-52 ([Decision Notes, Part 3](./decision-notes-3.md)): the lexer gives `<` and `>` as tokens of one character marked joined, so `<<=` and `>>=` are formed from joined tokens; every `>` closes one list, also in the type parameters of a declaration, so `type X<T>= T;` is derived.
+
 ## DN-13. A generic call whose type argument is not fixed
 
 **Text before the decision.** [Types](../../spec/v1.0/types.md#type-inference) said that a generic function MUST

@@ -82,6 +82,7 @@ list and the rest of the token is read again: `Pair<Box<i64>>` ends two lists, a
 derived. `TypeParameterList` ends with the token `>`, as the type parameters of a declaration do in the grammar
 today, so the rule does not apply to it: `type X<T>= T;` holds the token `>=` and is not derived. Elsewhere `>>` is
 the shift operator.
+*The split of a lexed `>>` and the reading of `type X<T>= T;` are replaced by [DN-52](./decision-notes-3.md#dn-52-context-free-token-rules): `<` and `>` are tokens of one character marked joined, and every `>` closes one list, so `type X<T>= T;` is derived.*
 
 This RFC adds no type argument in an expression. The type arguments of a record literal are inferred from the
 types of its fields; a parameter that the fields do not fix is refused with `E2003` (cannot infer type). A call of

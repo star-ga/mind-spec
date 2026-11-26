@@ -54,9 +54,10 @@ Tokens are classified as follows:
 
 The operators and the punctuation are the ones that `Operator` and `Punctuation` of
 [`grammar-lexical.ebnf`](./grammar-lexical.ebnf) list. The lexer reads the longest operator that the text
-spells (longest match): `x<<=1` holds the one token `<<=`, not `<<` and `=` and not `<` and `<=`, and
-`x>>=1` holds the one token `>>=`. Every compound assignment operator is one token, so `x + = 2` holds `+` and `=`
-and is not derived.
+spells (longest match), except that a token that starts with `<` or `>` is that one character (**Joined angles**,
+below): `x+=1` holds the one token `+=`, and `x<<=1` holds the joined tokens `<`, `<` and `=`, which the parser
+reads as the operator `<<=`. Every compound assignment operator is written with no space in it, so `x + = 2` holds
+`+` and `=` and is not derived.
 
 - **Range tokens.** `..` and `..=` are one token each, and `..=` is not `..` and `=`. They stand only in the header of
   a `for` loop (`for i in 0..n`, `for i in 0..=255`), and `..=` also in a range pattern (`1..=9 =>`); a range is not a
@@ -79,7 +80,8 @@ list, and `=` is left. A `>` closes only a list that is open: in `let o: Option<
 list, `>=` is left where the `let` needs `=`, and the source MUST be refused. `type X<T>= T;` is derived: the `>`
 closes the type parameters and `=` is left.
 
-**Colon of a slice.** Inside the brackets of an index and outside any nested bracket, the text `::` is two `:` of a
+**Colon of a slice.** Inside the brackets of an index and outside any nested pair of `(` and `)`, `[` and `]`, or `{`
+and `}`, the text `::` is two `:` of a
 slice (`SliceColon` of [`grammar-syntax.ebnf`](./grammar-syntax.ebnf)): `a[::2]` is the slice with the start and the
 end omitted and the step 2, and `a[s::k]` is the slice from `s` with the step `k`. A path there is written in
 parentheses: `a[(E::B)]`.
@@ -87,7 +89,9 @@ parentheses: `a[(E::B)]`.
 **Tuple index.** Directly after the token `.`, a run of digits is an integer token, never a floating-point literal:
 `t.0.1` is the tokens `t`, `.`, `0`, `.` and `1`, and it means `(t.0).1`. A tuple index is `0`, or a digit from `1`
 to `9` followed by digits, with no `_` and no leading `0`; `t.01` and `t.1_0` MUST be refused with
-[`E2404`](./errors.md#e2404-invalid-tuple-index).
+[`E2404`](./errors.md#e2404-invalid-tuple-index). This rule alone decides a run of digits and `_` directly after the
+token `.`, so such a run never gets `E1005`; a run there that holds a letter, as in `t.0.1e0`, MUST be refused with
+[`E1005`](./errors.md#e1005-invalid-numeric-literal).
 
 MIND has no operator `:=`. The text `:=` is the two tokens `:` and `=`, no rule of the syntactic grammar
 puts `=` directly after `:`, and an implementation MUST refuse a source such as `x := 1;`.
@@ -146,13 +150,17 @@ be refused with `E1007`; `tensor` stays a valid name of a value.
 - **One run, one form.** A numeric literal is the longest run of letters, digits, `_` and `.` that starts with a digit
   (a `.` only between two digits and never in a run directly after the token `.`, and a `-` only directly after the
   `e` of an exponent). The whole run MUST match one form of the grammar, else the source MUST be refused with
-  [`E1005`](./errors.md#e1005-invalid-numeric-literal) at the first character that no form allows. A literal has no
+  [`E1005`](./errors.md#e1005-invalid-numeric-literal) at the first character that no form allows. A run of digits
+  and `_` directly after the token `.` is a tuple index, and **Tuple index** (above) decides it: `t.01` is `E2404`,
+  not `E1005`. A literal has no
   type suffix: `1.5f32` and `7u8` are refused; a literal takes its type from its context, or from a cast
   (`1.5 as f32`).
 - **String literals** are enclosed in double quotes. A quoted string ends on the line where it starts: a line end inside it
   MUST be refused with [`E1003`](./errors.md#e1003-unterminated-string-literal) at the opening `"`, and a raw TAB
-  inside it with `E1008` (the escape `\t` writes a tab). The escape sequences are listed in
-  [String escapes](./language.md#string-escapes); any other escape sequence MUST be diagnosed with
+  inside it with `E1008` (the escape `\t` writes a tab). A string literal has no prefix and no suffix: a string
+  literal directly followed by a letter, a digit, `_` or `"`, and an identifier directly followed by `"`, MUST be
+  refused with [`E1009`](./errors.md#e1009-reserved-literal-prefix-or-suffix) (`"a"b`, `b"a"`). The escape
+  sequences are listed in [String escapes](./language.md#string-escapes); any other escape sequence MUST be diagnosed with
   [`E1004`](./errors.md#e1004-invalid-escape-sequence). The escape `\u{...}` holds one to six hexadecimal digits,
   and its value is at most `10FFFF` and outside `D800` to `DFFF`; any other `\u{...}` MUST be refused with `E1004`.
 - **Line strings.** A raw text, also one of several lines, is written as line strings: `\\` followed by every

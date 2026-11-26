@@ -19,10 +19,14 @@ This grammar corresponds to the normative lexical rules in lexical.md.
 
 (* Source text structure. A ByteOrderMark stands only at offset 0.    *)
 (* A Shebang line stands only at offset 0 (after a ByteOrderMark if     *)
-(* there is one); the lexer skips it (lexical.md, "Source text").       *)
+(* there is one); the lexer skips it (lexical.md, "Source text"). The   *)
+(* character after "#!" is not "[": `#![a]` is no Shebang, and its      *)
+(* tokens are "#", "!", "[", `a` and "]".                               *)
 SourceFile = [ ByteOrderMark ] , [ Shebang ] , { Token | Whitespace | Comment } ;
-Shebang = "#!" , [ ShebangStart , { ? any character except LF, CR and a ForbiddenCodePoint ? } ] ;
+Shebang = "#!" , [ ShebangStart , { ? any character except LF, CR and a ForbiddenCodePoint ? } ] ,
+          ( LineTerminator | EndOfInput ) ;
 ShebangStart = ? any character except "[", LF, CR and a ForbiddenCodePoint ? ;
+EndOfInput = ? the end of the source text ? ;
 
 (* Forbidden code points. None of them may appear anywhere in a source  *)
 (* file, comments and strings included: U+0000 to U+0008, U+000B,       *)
@@ -75,7 +79,8 @@ Keyword = "fn" | "let" | "type" | "struct" | "trait"
 (* each of them at most two tokens decide whether the word is the       *)
 (* spelled word or a name: `let in = 4;` binds a name. "tensor"         *)
 (* directly followed by "(" is always the tensor constructor, so no     *)
-(* function, parameter or import may take the name `tensor`.            *)
+(* function, no parameter of a function type and no import may take    *)
+(* the name `tensor`; it stays a valid name of a value.                *)
 ContextualWord = "i8" | "i16" | "i32" | "i64" | "u8" | "u16" | "u32" | "u64"
                | "f32" | "f64" | "bool" | "unit"
                | "tensor" | "dtype" | "diff" | "dyn"
@@ -116,7 +121,9 @@ HexDigit = DecimalDigit | "a" | "b" | "c" | "d" | "e" | "f" | "A" | "B" | "C" | 
 (* Floating-point literals. Directly after the token "." a digit run   *)
 (* is a DecimalInteger, never a FloatingPointLiteral, so `t.0.1` is     *)
 (* the tokens `t`, ".", `0`, "." and `1` (TupleIndexOperator of        *)
-(* grammar-syntax.ebnf).                                               *)
+(* grammar-syntax.ebnf). A run of digits and "_" there is decided by   *)
+(* the tuple index rule alone: `t.01` and `t.1_0` are refused with      *)
+(* E2404, not E1005 (lexical.md, "Tokens").                            *)
 FloatingPointLiteral = DecimalInteger , "." , DecimalDigits , [ Exponent ] ;
 DecimalDigits = DecimalDigit , { [ "_" ] , DecimalDigit } ;
 Exponent = "e" , [ "-" ] , DecimalDigits ;
@@ -139,17 +146,18 @@ LineString = "\\" , { ? any character except LF, CR and a ForbiddenCodePoint ? }
 BooleanLiteral = "true" | "false" ;
 
 (* Operators. The lexer reads the longest operator that the text      *)
-(* spells: `<<=` is one token (not "<<" and "=", not "<" and "<="),   *)
-(* `>>=` is one token (not ">>" and "="), `..=` is one token (not     *)
-(* ".." and "="), and each dotted operator is one token (not "." and  *)
-(* the plain operator). Every compound assignment operator is one     *)
-(* token: `x + = 2` is not derived. Joined angles: the lexer marks a   *)
-(* ">" or "<" as joined when the next character follows it with no    *)
-(* space. In an expression the two- and three-character operators     *)
-(* that start with ">" or "<" are spelled only by joined characters;  *)
-(* where a type-argument list or a type-parameter list is open, each  *)
-(* ">" closes one list, also the first ">" of ">>", ">=" and ">>="    *)
-(* (CloseAngle of grammar-syntax.ebnf; lexical.md, "Tokens").          *)
+(* spells, except that a token that starts with "<" or ">" is that    *)
+(* one character: `..=` is one token (not ".." and "="), each dotted   *)
+(* operator is one token (not "." and the plain operator), and each   *)
+(* compound assignment operator that does not start with "<" or ">"  *)
+(* is one token, so `x + = 2` is not derived. Joined angles: the      *)
+(* lexer marks a ">" or "<" as joined when the next character follows *)
+(* it with no space. In an expression the operators "<<", "<=", "<<=",*)
+(* ">>", ">=" and ">>=" are spelled only by joined one-character      *)
+(* tokens: `x<<=1` holds "<", "<" and "=", which form "<<=". Where a  *)
+(* type-argument list or a type-parameter list is open, each ">"      *)
+(* closes one list (CloseAngle of grammar-syntax.ebnf; lexical.md,    *)
+(* "Tokens").                                                         *)
 (* ".." and "..=" stand only in the header of a for loop, and "..="   *)
 (* also in a range pattern. The dotted operators ".+", ".-", ".*",    *)
 (* "./" and ".%" are the broadcast operators. "@" is reserved: no      *)
