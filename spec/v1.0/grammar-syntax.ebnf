@@ -117,6 +117,20 @@ ImportDeclaration = "import" , ImportPath , ";" ;
 (* no glob import (DN-89): `import a.*;` has no derivation.            *)
 ImportPath = Identifier , { "." , Identifier } ;
 
+(* Compile-time constant declaration (Core v1). Its initializer is a  *)
+(* constant expression, with no call.                                 *)
+ConstDeclaration = "const" , Identifier , [ ":" , Type ] , "=" , Expression , ";" ;
+
+(* Algebraic enums (Core v1).                                        *)
+(* NOT IN CORE v1: the [ TypeParameters ] part of EnumDeclaration.   *)
+EnumDeclaration = "enum" , Identifier , [ TypeParameters ] , "{" , [ EnumVariantList ] , "}" ;
+EnumVariantList = EnumVariant , { "," , EnumVariant } , [ "," ] ;
+EnumVariant     = Identifier , [ "(" , [ EnumPayloadList ] , ")" ] ;
+EnumPayloadList = Type , { "," , Type } , [ "," ] ;
+
+(* External functions (Core v1): one form, the block. *)
+ExternDeclaration = "extern" , StringLiteral , "{" , { FunctionSignature } , "}" ;
+
 (* ============================================================ *)
 (* v1.1 candidate additions (Phase 10.5 — Systems Programming   *)
 (* Foundation). Implemented in mindc 0.2.5+. Status: evolving — *)
@@ -124,25 +138,11 @@ ImportPath = Identifier , { "." , Identifier } ;
 (* implementations claiming v1.1 MUST.                          *)
 (* ============================================================ *)
 
-(* Compile-time constant declaration. Its initializer is a constant  *)
-(* expression, with no call.                                         *)
-ConstDeclaration = "const" , Identifier , [ ":" , Type ] , "=" , Expression , ";" ;
-
-(* Algebraic enums.                                                  *)
-(* NOT IN CORE v1: the [ TypeParameters ] part of EnumDeclaration.   *)
-EnumDeclaration = "enum" , Identifier , [ TypeParameters ] , "{" , [ EnumVariantList ] , "}" ;
-EnumVariantList = EnumVariant , { "," , EnumVariant } , [ "," ] ;
-EnumVariant     = Identifier , [ "(" , [ EnumPayloadList ] , ")" ] ;
-EnumPayloadList = Type , { "," , Type } , [ "," ] ;
-
 (* Module block (compile-time grouping).                        *)
 ModuleBlock     = "module" , Identifier , "{" , { ModuleItem } , "}" ;
 
 (* Use-clause (lightweight import).                             *)
 UseDeclaration  = "use" , ImportPath , ";" ;
-
-(* External functions: one form, the block. *)
-ExternDeclaration = "extern" , StringLiteral , "{" , { FunctionSignature } , "}" ;
 
 (* ============================================================ *)
 (* End of the v1.1 candidate items.                             *)

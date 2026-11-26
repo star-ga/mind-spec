@@ -621,7 +621,8 @@ size everywhere.
 ## DN-56. Every item reached, attributes first
 
 **Decision.** Every item form is reached from `Module`. Attributes come first, then `pub` (DN-83), then the word that
-starts the item, for every item kind. There is one extern form, the block `extern "C" { ... }`. An enum payload list
+starts the item, for every item kind. There is one extern form, the block `extern "C" { ... }`; `const`, `enum` and the
+`extern` block are Core v1 items. An enum payload list
 may end with `,`.
 
 **Options.** (A) Attributes before a function only, and a separate rule for other items. (B) One order for every item.
