@@ -407,7 +407,7 @@ pipeline:
 2. **Literals become constants**: scalar or tensor literals emit
    `ConstTensor` instructions with dtype and shape encoded explicitly.
 3. **Operators become IR instructions**: arithmetic expressions lower to `BinOp`
-   (with `Add`, `Sub`, or `Mul` semantics) and other intrinsic operations map to
+   (with `Add`, `Sub`, `Mul` or `Div` semantics) and other intrinsic operations map to
    the IR instruction set described in [Core IR](./ir.md).
 4. **Outputs are explicit**: the last produced `ValueId` is marked as the
    module output to preserve the single-definition rule.
@@ -521,10 +521,11 @@ statement is a [block-like statement](#block-like-statements) and takes no `;`.
 
 **Counting loops.** `for p in a..b B` counts from `a` up to `b`, `b` not included, and `for p in a..=b B` counts from
 `a` up to `b`, `b` included. `a` and `b` MUST have one integer type. They are evaluated once, `a` first, before the
-first iteration. The loop `a..b` is empty when `b <= a`, and the loop `a..=b` is empty when `b < a`. The counter never
-overflows: a loop `a..=b` whose `b` is the largest value of the type runs its last iteration with `b` and ends. `..` and `..=` stand only in the header of a
-`for` loop and, for `..=`, in a [range pattern](#patterns-and-match): a range is not a value, so `let r = 0..4;` and
-`a[1..3]` have no derivation and MUST be refused with `E1101`; the message for an index names the slice form `a[1:3]`.
+first iteration. The loop `a..b` is empty when `b <= a`, and the loop `a..=b` is empty when `b < a`. The counter
+never overflows: a loop `a..=b` whose `b` is the largest value of the type runs its last iteration with `b` and ends.
+`..` and `..=` stand only in the header of a `for` loop and, for `..=`, in a [range pattern](#patterns-and-match): a
+range is not a value, so `let r = 0..4;` and `a[1..3]` have no derivation and MUST be refused with `E1101`; the message
+for an index names the slice form `a[1:3]`.
 Without `..` or `..=`, the expression after `in` is an ordinary expression.
 
 A `for` loop over a container ([Records and containers](./memory.md#records-and-containers)) reads the length of
@@ -632,9 +633,10 @@ the message. So `if b { }` reads the same as every other head.
 
 ## Patterns and match
 
-A pattern (`Pattern` of [`grammar-syntax.ebnf`](./grammar-syntax.ebnf)) stands in a `let`, in the header of a `for`,
-in a `match` arm, and as a parameter name; every site uses the one `Pattern` rule, so a nested tuple pattern is valid at
-every site. The forms are:
+A pattern (`Pattern` of [`grammar-syntax.ebnf`](./grammar-syntax.ebnf)) stands in a `let`, in the header of a `for`
+and in a `match` arm; every site uses the one `Pattern` rule, so a nested tuple pattern is valid at every site. A
+parameter of a function is a name or `_` (`Parameter`); `_` may name several parameters of one function. The forms
+are:
 
 - **A name** (`IdentifierPattern`): a bare identifier always binds a new name, in every scope. The predeclared
   variant names `Some`, `None`, `Ok` and `Err` are never bound: a bare `None` is the variant `None`.
@@ -652,8 +654,9 @@ every site. The forms are:
 
 A pattern that does not fit the type of its value MUST be refused with [`E2001`](./errors.md#e2001-type-mismatch) at
 every site: `let (a, b, c) = (1, 2);` is refused. `Some`, `None`, `Ok` and `Err` are the only spellings of those
-variants: `Option::Some(1)` MUST be refused with [`E2002`](./errors.md#e2002-unresolved-name-or-qualified-owner), and a binding or
-a declaration that takes one of these names, such as `let None = 1;`, MUST be refused with `E2042`.
+variants: `Option::Some(1)` MUST be refused with
+[`E2002`](./errors.md#e2002-unresolved-name-or-qualified-owner), and a binding or a declaration that takes one of these
+names, such as `let None = 1;`, MUST be refused with `E2042`.
 
 **Match.** `match e { arms }` (`MatchExpression`) tries its arms in order. Every arm ends with `,`, the last one too
 (`MatchArm`): `0 => { 1 } _ => 2,` MUST be refused with `E1103`, at the point where the `,` belongs. An arm is a
@@ -710,7 +713,7 @@ and `pub`. A keyword where a name stands MUST be refused with `E1007`, one diagn
 `let loop = 1;`, `fn assert() { }` and `fn f(true: i64) { }` are refused.
 
 The syntactic grammar also spells out words that are not keywords (`in`, `as`, `const`, `enum`, `module`, `use`,
-`extern`, `diff`, `dyn`, `Tensor`, `tensor`, `dtype` and the primitive type names).
+`extern`, `diff`, `dyn`, `tensor`, `dtype` and the primitive type names).
 [`grammar-lexical.ebnf`](./grammar-lexical.ebnf) lists them as `ContextualWord`, a rule for documentation: the lexer
 produces each of them as an identifier. Each of them has its own positions in the syntactic grammar, and at each
 position at most two tokens decide whether the word is the spelled word or a name; there is no search for a derivation.
@@ -729,8 +732,8 @@ Where the grammar spells the word out at that position, the word is the spelled 
 ## String escapes
 
 The escape sequences of a string literal are `\n`, `\r`, `\t`, `\0`, `\\`, `\'`, `\"` and
-`\u{HEX}` (one to six hexadecimal digits, a value of at most `10FFFF` and outside `D800` to `DFFF`), as in `EscapeSequence` of
-[`grammar-lexical.ebnf`](./grammar-lexical.ebnf). Any other escape sequence MUST be diagnosed with
+`\u{HEX}` (one to six hexadecimal digits, a value of at most `10FFFF` and outside `D800` to `DFFF`), as in
+`EscapeSequence` of [`grammar-lexical.ebnf`](./grammar-lexical.ebnf). Any other escape sequence MUST be diagnosed with
 [`E1004`](./errors.md#e1004-invalid-escape-sequence).
 
 ## Macros are not part of the language (informative)
@@ -756,15 +759,16 @@ time with [`E2001`](./errors.md#e2001-type-mismatch).
 A module has one namespace for its items of every kind; the parameters of a function, the fields of a struct and the
 variants of an enum each have their own list. A second declaration of a name in one of them MUST be refused with
 `E2720` at the second declaration, and the message names the first: two functions `f`, a struct and a function with
-one name, two parameters with one name and two variants with one name are refused. Every type name MUST resolve;
-an unknown type name MUST be refused with [`E2002`](./errors.md#e2002-unresolved-name-or-qualified-owner), with at most one hint,
-chosen by a fixed rule (the least edit distance, then the source order), and no further diagnostic follows from it.
+one name, two parameters with one name and two variants with one name are refused. Every type name MUST resolve; an
+unknown type name MUST be refused with [`E2002`](./errors.md#e2002-unresolved-name-or-qualified-owner), with at most
+one hint, chosen by a fixed rule (the least edit distance, then the source order), and no further diagnostic follows
+from it.
 
 `.` follows a value or a module, and `::` follows a type: `q.f()` calls the member `f` of the module `q`, and
 `E::A` names a variant of the type `E`. The other separator MUST be refused with
-[`E2002`](./errors.md#e2002-unresolved-name-or-qualified-owner), and the message gives the fix: `m::f()` for a member of the module
-block `m` is refused. A binding MUST NOT take the name of an import qualifier or of a module block in scope; such a
-binding MUST be refused with `E2730`.
+[`E2002`](./errors.md#e2002-unresolved-name-or-qualified-owner), and the message gives the fix: `m::f()` for a member
+of the module block `m` is refused. A binding MUST NOT take the name of an import qualifier or of a module block in
+scope; such a binding MUST be refused with `E2730`.
 
 ### Visibility
 
@@ -861,5 +865,6 @@ documentation MUST NOT present these as complete:
   (informative): the reference also accepts `import a.b as c;` and `use a.b as c` (`f2fc890d`,
   v0.10.3), registering both the alias and the last path segment as qualifiers; the `as`
   form is not in [`grammar-syntax.ebnf`](./grammar-syntax.ebnf). The reference `use` also accepts `::`
-  between path segments, which this specification refuses ([Module level](#module-level)). A zero-argument `.sum()` or `.mean()` on a receiver named like an
+  between path segments, which this specification refuses ([Module level](#module-level)). A zero-argument
+  `.sum()` or `.mean()` on a receiver named like an
   import is a module call, not a tensor reduction (`f2fc890d`).
