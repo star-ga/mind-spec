@@ -29,7 +29,7 @@ The following forms are part of the core language:
   `u32` and `u64`, `f32`, `f64`, `bool` and `unit` (`PrimitiveType` of [`grammar-syntax.ebnf`](./grammar-syntax.ebnf)).
   Each integer type has the same width on every substrate. `usize` and `isize` are not types: a platform width would
   give one program two sizes on two machines. They MUST be refused at check time with
-  [`E2002`](./errors.md#e2002-undefined-identifier), and the message gives the fix `u64` or `i64`.
+  [`E2002`](./errors.md#e2002-unresolved-name-or-qualified-owner), and the message gives the fix `u64` or `i64`.
 - **Composite types**: tuples `(T1, T2, ...)`, arrays `[T; n]`, and structs defined via `struct`. `(T,)` is the tuple
   type of one element. `(T)` is not a type and MUST be refused with `E1101`, and the message names `T` and `(T,)`:
   `let t: (i64) = (5,);` is refused. The unit type is written `unit` only; `()` is the unit value, and `fn f() -> ()`

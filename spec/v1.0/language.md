@@ -197,7 +197,9 @@ type `bool`, `unit`, a tuple type or a struct type MUST be refused at check time
 [`E2005`](./errors.md#e2005-invalid-dtype-for-operation) (`true + 1`). `==` and `!=` compare two values of one type;
 two tuples or two arrays compare element by element from index 0. `<`, `<=`, `>` and `>=` take numbers only. A
 prefix `-` on an operand of an unsigned integer type MUST be refused at check time; `0 - x` writes the wrapping
-subtraction. `~e` is the bitwise complement of an integer `e` and has its type; `!` takes a `bool` only.
+subtraction. `~e` is the bitwise complement of an integer `e` and has its type; `!` takes a `bool` only. The unary
+operators are `-`, `!` and `~`: there is no unary `+`, and Core v1 has no references, so `+x` and `&x` have no
+derivation and MUST be refused with `E1101`.
 
 ### Floating-point comparisons
 
@@ -611,7 +613,8 @@ the call of the member `m` of that module ([Module-qualified references](#module
 resolves to a member of a module when `a` is an import qualifier, else to a method or to a field of the type of `a`.
 A method call whose `m` is not a method of the type of `x` MUST be refused at check time with `E2410` ("no such
 method"): `5.nosuchmethod()` is refused. A field access `x.f` whose `f` is not a field of the type of `x` MUST be
-refused at check time, unless `x` is an import qualifier.
+refused at check time, unless `x` is an import qualifier. A generic method takes its type arguments as
+`e.m::<A>(x)` (`MemberOperator`); this form is not in Core v1 ([Core v1 scope](#core-v1-scope)).
 
 A call follows only a function name, a variant path (`E::A(x)`) or a method name (`NamePath` and `MemberOperator` of
 the grammar). Core v1 has no function values, so a call of any other value has no derivation and MUST be refused with
@@ -649,7 +652,7 @@ every site. The forms are:
 
 A pattern that does not fit the type of its value MUST be refused with [`E2001`](./errors.md#e2001-type-mismatch) at
 every site: `let (a, b, c) = (1, 2);` is refused. `Some`, `None`, `Ok` and `Err` are the only spellings of those
-variants: `Option::Some(1)` MUST be refused with [`E2002`](./errors.md#e2002-undefined-identifier), and a binding or
+variants: `Option::Some(1)` MUST be refused with [`E2002`](./errors.md#e2002-unresolved-name-or-qualified-owner), and a binding or
 a declaration that takes one of these names, such as `let None = 1;`, MUST be refused with `E2042`.
 
 **Match.** `match e { arms }` (`MatchExpression`) tries its arms in order. Every arm ends with `,`, the last one too
@@ -754,12 +757,12 @@ A module has one namespace for its items of every kind; the parameters of a func
 variants of an enum each have their own list. A second declaration of a name in one of them MUST be refused with
 `E2720` at the second declaration, and the message names the first: two functions `f`, a struct and a function with
 one name, two parameters with one name and two variants with one name are refused. Every type name MUST resolve;
-an unknown type name MUST be refused with [`E2002`](./errors.md#e2002-undefined-identifier), with at most one hint,
+an unknown type name MUST be refused with [`E2002`](./errors.md#e2002-unresolved-name-or-qualified-owner), with at most one hint,
 chosen by a fixed rule (the least edit distance, then the source order), and no further diagnostic follows from it.
 
 `.` follows a value or a module, and `::` follows a type: `q.f()` calls the member `f` of the module `q`, and
 `E::A` names a variant of the type `E`. The other separator MUST be refused with
-[`E2002`](./errors.md#e2002-undefined-identifier), and the message gives the fix: `m::f()` for a member of the module
+[`E2002`](./errors.md#e2002-unresolved-name-or-qualified-owner), and the message gives the fix: `m::f()` for a member of the module
 block `m` is refused. A binding MUST NOT take the name of an import qualifier or of a module block in scope; such a
 binding MUST be refused with `E2730`.
 
