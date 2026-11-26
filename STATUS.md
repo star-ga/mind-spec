@@ -61,7 +61,7 @@ The formal Core v1 specification documents are located in `spec/v1.0/`. See [`ov
 | MIND Compiler | [`star-ga/mind`](https://github.com/star-ga/mind) | 🟢 Reference compiler v0.10.4 | **v0.10.4 (2026-11-23) — native lane.** The native lane mark is `nblane02` (a compiler without it is refused with `native.compiler_mark`). The native compiler alone judges an `extern "C"` signature and names the refusal with keys 64 to 67; the host no longer refuses a free in a loop; the handle of a string literal is written at compile time into the read-only literal segment; ten more libc rows of the extern table (89 to 98); the native AVX2 group kernels are complete (`__mind_group_bank_i64` kind 87, `__mind_group_acc32_i64` kind 88 and the new `__mind_group_accrows_i64` kind 89), and kinds 87 and 88 now stop the program with a trap (SIGILL) on a reserved argument bit, where v0.10.3 did not; seven bounded exact-integer example programs in `examples/formal_verification/` of the compiler repository; `mindc verify --json` prints `scope` (RFC 0017 section 4.7); the release archive holds `std/`, `stdlib_manifest.txt` and `SHA256SUMS` beside the binary; `std.x25519` releases its work buffers. Full list in the [`star-ga/mind CHANGELOG`](https://github.com/star-ga/mind/blob/v0.10.4/CHANGELOG.md#0104---2026-11-23). **v0.10.3 (2026-11-18) — native backend by default.** `mindc build` uses the native backend when no `--backend` flag and no `[build] backend` key is given; `std.https` (TLS 1.3 client, no revocation check); opt-in ML-DSA-87 + SLH-DSA-SHAKE-256s hybrid evidence signing, with classical evidence signing retired; `extern "C"` ABI resolution and refusals; the canonical mic@3 aggregate carrier and the `0x04` draft codec. Full list in the [`star-ga/mind CHANGELOG`](https://github.com/star-ga/mind/blob/v0.10.3/CHANGELOG.md). **v0.10.2 — correctness-hardening batch (`corr2`).** A differential + net-verified sweep of silent-miscompile and fail-open classes: the signedness/width-erasure family (`u8`/`u16` intermediate-op wrap, `u64` signed `compare`/`div`/`rem`/`shr`, `x as bool`), bounds/arity checks, bare enum-payload patterns now resolved against the scrutinee enum (`corr2/#287-F3`), a `continue`-in-match-arm forward-phi fix, and the `Mind.toml` version-parity keystone gate. Cardinal invariant held throughout: **0 wrong-bytes** on every gate. Per-item detail in the [`star-ga/mind CHANGELOG`](https://github.com/star-ga/mind/blob/main/CHANGELOG.md). **v0.10.0 — Native-ELF self-host fixed point closed (2026-06-25, fully closed 2026-07-01): pure-MIND front-end byte-identical on all three gates (mic@1 text, mic@3 binary flip 7/7, native-ELF full seeded module 1 055 777 B). Native-ELF backend is the normative self-host target; MLIR-text is downstream-interchange. `ir_trace_hash` PT_NOTE is now self-computed (zero Rust-oracle bytes fed); Rust src/native has been deleted (fixtures frozen). Also: `f64` enum-payload fields and multi-field enum-payload variants construct, match, and run end-to-end (records stay uniformly i64-slotted; `f64` round-trips bit-exactly via `arith.bitcast`). v0.9.0 — narrow-int (`i32`/`u32`/`bool`) lowering in EVERY context (control flow, mixed-width arithmetic, narrow returns/branches) with cross-substrate shift-count determinism and ~10% faster compile. Keystone 7/7 + cross-substrate byte-identity preserved across both. v0.8.1 — pure-MIND self-host front-end byte-exact on the full 66/66 gap corpus (0 wrong-bytes, 0 fail-closed); the `mic@3` binary-IR self-host fixed-point is byte-identical; RFC 0012 tensor-native surface syntax shipped; release gate `#306` cleared.** **v0.7.1 — high-level execution surface EXECUTES on the shipped compiler; `std-surface` promoted to the shipped default (`default = ["std-surface"]`).** Ten desugaring "bricks" lower the high-level surface onto the existing low-level pipeline, each keystone-verified 7/7 across substrates: integer/literal match, enum-discriminant match, `Option`/payload match, string literals, struct field-write, nested-struct + borrow field access, method-as-field accessors (`s.len()`), and method-with-args UFCS (`v.push(x)` → `vec_push(v, x)`; an unresolved method fails loud rather than miscompiling). With the feature on by default, the high-level surface runs on every shipped binary while cross-substrate Q16.16 byte-identity is preserved (keystone 7/7 across the flip). Unpromoted constructs (by-value tuple/aggregate returns, `region { }`) are re-gated behind `std-surface-experimental` and **fail loud by default**. Generics have no syntax yet (parser-rejected). `--no-default-features` restores the low-level-only subset, byte-identical to the pre-flip default build. **v0.7.0 — credibility-ladder rung 3 graduation. Mindcraft RFC 0007 fully shipped (all 6 phases + MINDCRAFT-001 keystone); RFC 0008 all 7/7 phases shipped (KEYSTONE: cargo retired from pure-MIND compile loop); RFC 0010 Phases A/B/C shipped + E/F scaffolded; 13 stdlib modules; mindc doc; standalone binary releases.** Six-step Phase 2A sequence landed: trivia layer (`4cfe7b9`), formatter walker (`bfeffbe`), stability tests (`434da71`), CLI subcommand (`696027a`), criterion bench (`d1f10f6`), normative docs (current). `mindc fmt [PATHS...] [--check] [--diff] [--stdin]` rewrites `.mind` files to canonical form deterministically; `--check` is the CI gate. Config: `[mindcraft.format]` in `Mind.toml` (indent_width/max_line_length/trailing_comma). All Phase 2A formatter rules operational: indentation, top-level spacing, trailing comma, whitespace normalisation, string passthrough, blank-line collapse, comment attachment, idempotence. Normative reference at `docs/mindcraft/fmt.md`; RFC 0007 status updated. Phase 2B (soft line-wrap) deferred. Full test suite passes, bench-gate held: `vec.mind` ~45us, `mindc_mind/main.mind` ~1.8ms, synthetic 1000-LOC ~446us on commodity x86 CPU. **v0.6.7 — RFC 0006 mind-blas alignment hardening (`mind@e921ed6`, tag `v0.6.7`).** Every std-surface `llvm.load → vector<…>` (dot_f32_v/dot_q16_v/dot_l1_q16_v/f32 L1·L∞/`VecLoad`·`VecLoadI32`) now emits explicit `{alignment = 4 : i64}` → `vmovups`, matching the inc-3b matmul fix; pre-empts the `vmovaps` GP-fault when the #230 encode rewire passes interior catalog-row pointers to `dot_q16_v`. Contract-neutral (changes the move, never the bytes): #57 byte-identity re-verified **exact** for dot_q16_v+dot_l1_q16_v, dot_f32_v 1e-4 intact; default release byte-identical + bootstrap fixed-point byte-identical (next_id 206) → bench-gate 0.0%. **v0.6.6 — RFC 0006 mind-blas Track B increment 3b (`mind@2dd896d`, tag `v0.6.6`).** Native vectorised row-major `matmul_rmajor_f32_v`: outer `scf.for` over rows + inlined inc-1 `dot_f32` 8-lane reduction + scalar tail, returns 0 like the Track A oracle; same 1e-4 f64 contract as `dot_f32_v`; verified `(1,1)`…`(128,384)` incl the `(2,17)` regression case. Root-caused+fixed a `vector<8xf32>` `llvm.load` natural-32B-alignment GP-fault (→ `{alignment = 4}` / `vmovups`); confirmed **not** a nested-`scf.for` lowering defect (valid MLIR, independently audited). default release binary byte-identical + bootstrap fixed-point byte-identical (next_id 206) → bench-gate 0.0%; `blas_vec_q16_smoke` 6/6. Direct latency lever for the mind-nerve native-encode GEMMs. **v0.6.5 — RFC 0006 mind-blas Track B increment 3a (`mind@38611f2`, tag `v0.6.5`, CI success).** Native Q16.16 **L1** vector path `dot_l1_q16_v` (`vector<8xi64>` widen → signed-subtract → arith-only `maxsi(d,0-d)` abs → i64-lane accumulate → associative `vector.reduction <add>` → scalar tail), byte-identical to the Track A scalar oracle `__mind_blas_dot_l1_q16` at all RFC lengths — **cross-arch bit-identity gate #57 now CLOSED for BOTH the thesis-pure vector dot and vector L1** (single-x86-host scope). No new IR variants (additive-only, like `dot_q16_v`); all `std-surface`-gated; default release binary byte-identical base↔inc-3a (reproducible) and bootstrap IR byte-identical (next_id 206) → bench-gate 0.0%; `blas_vec_q16_smoke` 5/5. **v0.6.4 — RFC 0006 mind-blas Track B increment 2 (`mind@8e4b925`, tag `v0.6.4`, CI 6/6 green).** Q16.16 vector path `dot_q16_v` byte-identical to the Track A scalar oracle at all lengths — **cross-arch bit-identity gate #57 CLOSED for the thesis-pure vector dot** (single-x86-host scope). Adds `Instr::VecStore`, `VecLoadI32`, `VecMulAddQ16`, `VecReduceAddI64`, and f32 `dot_l1_f32_v`/`dot_linf_f32_v`. v0.6.3 first landed Track B inc 1 (native vector-dialect `dot_f32`). Bootstrap fixed-point byte-identical (10,889 / 206 SSA, bootstrap uses no vector ops); bench-gate 0.0% (default binary byte-identical c130db3↔8e4b925); 519 std-surface tests; Track A `blas_smoke` 12/12 + inc-1 `blas_vec_smoke` 3/3 intact. Increment 3a (`dot_l1_q16_v`) shipped v0.6.5 and 3b (vectorised `matmul_rmajor_f32_v`) shipped v0.6.6, both above. Deferred to a later increment (RFC §9.3c): `@target(...)` per-call substrate annotation, cross-module `use std.blas` inlining, defensive `{alignment=4}` on the other `dot_*_v` kernels. **v0.6.2 — negative-literal correctness fix (bug #11) on the Bootstrap fixed-point.** v0.6.2 (`mind@969c2da`, tag `v0.6.2`) adds the missing `Node::Neg` arm in IR lowering: bare negative integer/float literals and any unary-minus expression were silently lowered to `const 0` (the catch-all path) — surfaced by the pure-MIND lookup-table work whose generated `-65536`/`-524288` entries were being zeroed. 519 tests pass; bench-gate improved (small_matmul −1.2 %, medium_mlp −1.8 %, large_network −0.2 %); the v0.6.1 fixed-point oracle is unchanged (bootstrap sources contain zero negative literals). Cumulative compiler bugs surfaced + closed by the pure-MIND self-host / end-to-end discipline: **11** (10 from the ladder + fixed-point, +1 negative-literal). **v0.6.1 — Bootstrap fixed-point REACHED.** The pure-MIND mindc — `examples/mindc_mind/main.mind` (1,084 LOC of `.mind` source merging the lexer + parser + type-checker + MLIR-text emitter, with helpers deduplicated) — compiled via `mindc --emit-shared` to a 78,488-byte cdylib, then fed its own source as input: the returned 10,889 bytes of MLIR text (206 SSA values) is **byte-identical to mindc-Rust's `--emit-ir` output on the same source**. v0.6.0 first proved self-host on a small fixture (148-byte MLIR byte-identical); v0.6.1 closes the loop. The Rust implementation is now decorative — only required for the initial bootstrap. Fixed-point closure surfaced + fixed two narrow emitter gaps (`UseDecl` stub emission + `StructDef` parsing + stub emission) at `e29b734`. Cumulative compiler bugs surfaced + closed by the self-host ladder + fixed-point: 0 (lexer) + 3 (parser) + 3 (typecheck) + 1 (emit_ir) + 0 (apex) + 3 (fixed-point: 1 UseDecl, 1 StructDef parse, 1 StructDef emit) = **10**. Frontend floor 2.80–17.10 µs (post-RFC-0005 baseline, +7% gate, preserved through every addition). |
 | MIND Runtime | `star-ga/mind-runtime` | 🟢 CPU backend shipped (open-core) | v0.2.x, 17-symbol C ABI under `--features ffi,eval,serving`, audit-hardened, cargo-deny supply chain audit. CPU backend is shipped; GPU + accelerator backends are available under the commercial license (open-core). **Cross-substrate bit-identical determinism across CPU/GPU/accelerators is the roadmap, not a shipped guarantee.** |
 
-### Notes moved from the Runtime and the Security chapters
+### Notes moved from the Runtime, the Security and the FFI chapters
 
 These notes describe the reference runtime and an audit of earlier versions of the reference
 implementations. They were part of the Runtime chapter and of the Security chapter, which are normative;
@@ -167,6 +167,102 @@ Audit hardening introduced negligible performance regression:
 - v0.2.0: 347,000 compilations/sec
 - v0.2.1: 338,000 compilations/sec (-2.6%)
 - 100% bit-level determinism preserved (4/4 tests, SHA256 verified)
+
+#### C interface of a generated header (moved from the FFI chapter)
+
+These notes describe the C interface that the reference compiler generates when it is built with its
+optional C interface feature. They were part of the FFI chapter, which is normative; they are not rules of
+the specification, and the release binary of the compiler cannot show them. The text is the text of that
+chapter as it was written for v0.10.0.
+
+##### Tensor descriptors
+
+The reference compiler (v0.10.0) emits the following C API (feature: `ffi-c`):
+
+```c
+// Data type enumeration (reference compiler v0.10.0)
+typedef enum {
+    MIND_I32 = 0,
+    MIND_F32 = 1,
+} MindDType;
+
+// Shape descriptor
+typedef struct {
+    uint32_t rank;              // Number of dimensions
+    const uint64_t* dims;       // Array of dimension sizes [d0, d1, ..., dN]
+} MindShape;
+
+// Tensor descriptor for FFI boundary
+typedef struct {
+    MindDType dtype;            // Data type enum
+    MindShape shape;            // Shape descriptor
+    void* data;                 // Pointer to contiguous data buffer
+    uint64_t byte_len;          // Total byte length of data buffer
+} MindTensor;
+
+// I/O descriptor (pairs a name with a tensor)
+typedef struct {
+    const char* name;           // Name of input or output
+    MindTensor tensor;          // The tensor data
+} MindIO;
+
+// Model metadata
+typedef struct {
+    uint32_t inputs_len;        // Number of inputs
+    uint32_t outputs_len;       // Number of outputs
+    const char* model_name;     // Name of the model
+    uint64_t model_version;     // Model version
+} MindModelMeta;
+```
+
+##### Function signatures
+
+The reference compiler (v0.10.0) generates the following core FFI functions:
+
+```c
+// Get model metadata
+int mind_model_meta(MindModelMeta* out);
+
+// Get model input/output descriptors
+int mind_model_io(
+    MindIO* inputs_out, uint32_t cap_inputs,
+    MindIO* outputs_out, uint32_t cap_outputs
+);
+
+// Run inference
+int mind_infer(
+    const MindIO* inputs, uint32_t inputs_len,
+    MindIO* outputs, uint32_t outputs_len
+);
+
+// Memory management
+void* mind_alloc(uint64_t size);
+void mind_free(void* p);
+
+// Error handling
+const char* mind_last_error(void);
+```
+
+**Return values**: Functions return 0 on success, negative values on error. Error details are available via `mind_last_error()`.
+
+##### Reference implementation C API
+
+The MIND compiler (feature flag: `--features ffi-c`) generates a stable C FFI interface. The reference runtime provides an open-core C API for model execution and memory management.
+
+##### Core API (open-core)
+
+The minimum stable API (as of v0.10.0) consists of:
+- 6 exported functions (lifecycle + memory + inference + errors)
+- 2 enumeration types (data types, model metadata)
+- 4 struct types (shape, tensor, I/O descriptor, model metadata)
+
+##### Memory semantics
+
+- **Tensor storage**: Heap-allocated via `mind_alloc()`
+- **Allocation**: Caller-managed; zero-initialization is not guaranteed
+- **Deallocation**: Caller must call `mind_free()` on all allocations
+- **Memory layout**: Row-major (C-style contiguous)
+- **Data pointer lifetime**: Caller retains ownership; buffers must remain valid for the duration of API calls
 
 ## Toolchain Features (mindc v0.10.4)
 
