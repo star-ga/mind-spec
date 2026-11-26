@@ -46,8 +46,9 @@ document may present them as shipped:
 - **Traits** — no `trait` declarations, implementations, or `dyn Trait` objects. The normative
   rules in [Types](./types.md#traits-and-generics) describe the target design.
 - **Full generics** — today's surface is a bounded slice: a single type parameter over scalar
-  types. Multi-parameter generics, generic containers (`map<K, V>`-style), and `where`-clause
-  trait bounds are future extensions.
+  types. Multi-parameter generics and generic containers (`map<K, V>`-style) are future
+  extensions. A trait bound is written in the type-parameter list only: the `where` clause is not a form of the
+  language, and `where` is a reserved word (DN-68).
 - **Slice call ABI** (`&[T]` / `&mut [T]`) — issue #234 is implemented in the reference compiler
   v0.10.3; see [its precise limits](./types.md#slice-call-implementation-boundary).
   The bounded `std.vec` handle boundary does not provide general lifetime or
