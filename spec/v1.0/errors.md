@@ -219,7 +219,7 @@ a syntax fault gets one diagnostic, at the first fault, and no further diagnosti
 ### E1101: Unexpected token
 - **Trigger**: the parser expects one token of a set and finds another, and no other E11xx code describes the
   fault; this includes every form that has no derivation, for example `5(3)` (a value is not a function in this
-  edition), `a < b < c`, `+x`, `&x`, `(T)` as a type, `a[E::B]`, `a[1..3]` and `let r = 0..4;`
+  edition), `a < b < c`, `+x`, `&x`, `(T)` as a type, `a[1..3]` and `let r = 0..4;`
 - **Required context**: the found token text, the expected set (at most 4, in the order of the grammar), the position
   of the found token, and the hint that a chapter names for the form
 - **Example**: ``E1101: unexpected `<`: a comparison is not an operand of a comparison; write `a < b && b < c` at line 2, column 14``

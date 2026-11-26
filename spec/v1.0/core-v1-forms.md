@@ -158,7 +158,7 @@ This table has one row for each form that the decisions DN-22 to DN-88 of
 [Decision Notes, Part 3](../../design/rfcs/decision-notes-3.md) decide. The status is the status that the decision
 gives; the chapters that the decision names state the rule. "Reference pending" records that the reference compiler
 v0.10.4 does not yet follow the decided status; "reference conforms" records that it follows it for the probe. The
-probe ids with the prefix `e3_` were measured on 2026-11-26 with the release binary (`mindc check --no-fmt --no-lint`,
+probe ids with the prefix `e3_` or `e4_` were measured on 2026-11-26 with the release binary (`mindc check --no-fmt --no-lint`,
 then `mindc build --backend native` and a run of the image when the check accepts); the other probe ids are the
 measurements that the decision note cites.
 
@@ -195,7 +195,7 @@ ships this tool, so the rows below stay "reference pending" until that release a
 | DN-40 | A tensor literal whose lengths differ from the shape, a ragged literal, a cast to a tensor type | Core v1 refuses; the codes are `E3010` and `E2016` | Reference pending: `mindc check` accepts three elements for `[2]` (`e3_dn40_literal_shape`) and a ragged literal, which the native build refuses as ragged (`e3_dn40_ragged`) |
 | DN-41 | `if c { 1 } else { 2 } - 3` at a statement start | Core v1 refuses; the code is `E2001` | Reference pending: the image exits with 254, a statement and the literal `-3` (`a2_tail_if_minus`) |
 | DN-42 | `a[1::2]`, `a[::2]`: two slice colons inside an index | Core v1 | Reference pending: `mindc check` refuses `a[1::2]` with `E1001` (`a1_slice_cc`) |
-| DN-42 | `a[E::B]` | Core v1 refuses; the code is `E1101` | Reference pending: `mindc check` accepts it as a path index (`c_index_path`) |
+| DN-42 | `a[E::B]` after `const E: i64 = 1;` and `const B: i64 = 2;`: the slice from `E` with the step `B` | Core v1 | Reference pending: `mindc check` accepts it, and the native build refuses it with `lane.source.unbound` (`e4_i_path_const`) |
 | DN-43 | `/* c */` | Core v1 refuses; the code is `E1010` | Reference pending: the code is `E1001`, "unexpected `/`" (`a1_block_nest`) |
 | DN-44 | `"\u{110000}"`, `"\u{D800}"` | Core v1 refuses; the code is `E1004` | Reference pending: the release has no `\u` escape (`a1_uesc_big`) |
 | DN-45 | `fn f() { };`, `const K = 1` and `use std.vec` with no `;`, `assert(c, "m")` | Core v1 refuses; a missing `;` is `E1103` | Reference pending: `mindc check` accepts the stray `;` (`a1_stray_semi`), the `const` (`const_nosemi_minus`) and the `use` (`use_nosemi_next`) |

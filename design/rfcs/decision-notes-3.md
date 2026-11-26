@@ -381,16 +381,18 @@ message names `(if c { 1 } else { 2 }) - 3`.
 ## DN-42. Two slice colons inside an index
 
 **Decision.** Inside the brackets of an index and outside any nested bracket, `::` is two slice colons. A path there is
-written in parentheses: `a[(E::B)]`. ([Tokens](../../spec/v1.0/lexical.md#tokens).)
+written in parentheses: `a[(E::B)]`, and `a[E::B]` is the slice from `E` with the step `B`.
+([Tokens](../../spec/v1.0/lexical.md#tokens).)
 
 **Options.** (A) `::` is a path everywhere. (B) `::` is two slice colons at index depth.
 
 **Reason.** Option B: `a[s::k]` has one reading, the slice from `s` with the step `k`.
 
-**Refused forms.** `a[E::B]` (`E1101`, with the hint).
+**Refused forms.** None at the token level; a slice bound that names a type is refused by the name rule.
 
 **Reference.** `mindc check` refuses `a[1::2]` with `E1001`, "expected `]` to close index expression" (probe
-`a1_slice_cc`, also `p50_mun_slice_colon2`); it accepts `a[E::B]` (probe `c_index_path`).
+`a1_slice_cc`, also `p50_mun_slice_colon2`); it accepts `a[E::B]` (probe `c_index_path`), also after `const E: i64 = 1;` and `const B: i64 = 2;`, and the native
+build refuses that source with `lane.source.unbound` (probe `e4_i_path_const`).
 
 ## DN-43. No block comments
 

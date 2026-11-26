@@ -274,7 +274,7 @@ byte rule, because the format has no project file that lists a tool.
 | DN-41 | [`dn41_unit_if_then_minus_accept`](dn41_unit_if_then_minus_accept.yaml) | accept, returns -1 | [Block-like statements](../../../spec/v1.0/language.md#block-like-statements) |
 | DN-41 | [`dn41_tail_if_then_minus_reject`](dn41_tail_if_then_minus_reject.yaml) | reject, `E2001` | as above: the message gives `(if c { 1 } else { 2 }) - 3` |
 | DN-42 | [`dn42_two_slice_colons_accept`](dn42_two_slice_colons_accept.yaml) | accept, returns 6 | [Tuple index](../../../spec/v1.0/language.md#tuple-index) |
-| DN-42 | [`dn42_path_in_index_reject`](dn42_path_in_index_reject.yaml) | reject, `E1101` | as above |
+| DN-42 | [`dn42_slice_bounds_named_by_constants_accept`](dn42_slice_bounds_named_by_constants_accept.yaml) | accept, returns 6 | as above: `a[E::B]` with two constants is a slice |
 | DN-43 | [`dn43_line_comment_accept`](../lexical/dn43_line_comment_accept.yaml) | accept, returns 0 | [Comments and whitespace](../../../spec/v1.0/lexical.md#comments-and-whitespace) |
 | DN-43 | [`dn43_block_comment_reject`](../lexical/dn43_block_comment_reject.yaml) | reject, `E1010` at 2:5 | as above: there is no block comment |
 | DN-44 | [`dn44_unicode_escape_accept`](../lexical/dn44_unicode_escape_accept.yaml) | accept, returns 0 | [Literals](../../../spec/v1.0/lexical.md#literals): `\u{...}` holds one to six hexadecimal digits |

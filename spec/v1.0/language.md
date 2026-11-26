@@ -616,8 +616,9 @@ an integer type, used exactly; another type MUST be refused at check time with
 Inside the brackets of an index and outside any nested pair of `(` and `)`, `[` and `]`, or `{` and `}`, the text `::`
 is two slice colons
 ([Tokens](./lexical.md#tokens)): `a[::2]` is `a[0:n:2]`, and `a[s::k]` is the slice from `s` with the step `k`. A path
-there is written in parentheses, `a[(E::B)]`; `a[E::B]` MUST be refused with `E1101`, and the message names the form
-with parentheses. The grammar has no range index: `a[1..3]` is not derived ([Loops](#loops)).
+there is written in parentheses, `a[(E::B)]`. So `a[E::B]` is the slice from `E` with the step `B`: after
+`const E: i64 = 1;` and `const B: i64 = 2;` it is `a[1::2]`. When `E` names a type and not a value, the bound is not a
+value, and the name rule refuses the source at check time. The grammar has no range index: `a[1..3]` is not derived ([Loops](#loops)).
 
 ## Field access and method calls
 
