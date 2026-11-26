@@ -1,0 +1,32 @@
+# MIND Conformance Test: a macro call is a habit form of E1105
+# Specification reference: spec/v1.0/errors.md#e1105-form-that-mind-writes-another-way
+# Decision: DN-64 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "vec![1, 2, 3] is refused with E1105 at the name; the fix is the array literal"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let v = vec![1, 2, 3];
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1105
+    location:
+      line: 2
+      column: 13
+    count: 1
+  fix:
+    class: EXACT
+    source: |
+      fn main() -> i64 {
+          let v = [1, 2, 3];
+          return 0;
+      }

@@ -755,7 +755,9 @@ runs to see the three faults.
 
 **Decision.** `E1104` fires at the Damerau-Levenshtein distance 1 from a keyword allowed at that place (3 or more
 characters; ties by the keyword order of [Keywords](../../spec/v1.0/lexical.md#keywords)). `E1105` uses one fixed
-table (`elif`, `func`, `var`, `switch`, `x++`, `===`, `@`, `diff T`, `tensor<f32[2]>`, ...).
+table (`elif`, `func`, `var`, `switch`, `x++`, `===`, `@`, `diff T`, `tensor<f32[2]>`, ...). It is the table of habit
+forms: each row gives the MIND form, the status, the fix class and the measured verdict of the release, and the
+rows hold a macro call, a reference type, a closure bar, `if let`, the postfix `?` and an inherent impl block.
 An item form in a block is refused at its first word. At module level the message says "expected an item". `E2002`
 suggests only names in scope at distance 2 or less.
 
@@ -766,7 +768,11 @@ suggests only names in scope at distance 2 or less.
 **Refused forms.** None; the decision fixes messages.
 
 **Reference.** `mindc check` refuses `lett x = 1;` with `E2002`, "unknown identifier `lett` — did you mean `Text`?"
-(probe `a6_typo_let`); a nested `fn inner` is refused only at its use with `E2003` (probe `a4_nested_fn`).
+(probe `a6_typo_let`); a nested `fn inner` is refused only at its use with `E2003` (probe `a4_nested_fn`). It refuses
+`vec![1, 2, 3]` with `E1001`, "macro invocation `vec!` is not supported; MIND has no macros" (probe `e4_h_macro_vec`),
+and `if let` and an inherent impl block with `E1001` (probes `e4_h_if_let`, `e4_h_impl`); it accepts `fn f(x: &i64)`
+and `g()?`, and the native build refuses them with `lane.type.reference` and `lane.type.generic` (probes
+`e4_h_ref_type`, `e4_h_question`).
 
 ## DN-65. Module forms
 

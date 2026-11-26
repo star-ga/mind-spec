@@ -1,0 +1,48 @@
+# MIND Conformance Test: the postfix question mark is a habit form of E1105
+# Specification reference: spec/v1.0/errors.md#e1105-form-that-mind-writes-another-way
+# Decision: DN-64 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "g()? is refused with E1105 at the start of the form; the fix is a match on the Result"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn g() -> Result<i64, i64> {
+        return Ok(1);
+    }
+
+    fn f() -> Result<i64, i64> {
+        let r = g()?;
+        return Ok(r);
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1105
+    location:
+      line: 6
+      column: 13
+    count: 1
+  fix:
+    class: TYPED
+    source: |
+      fn g() -> Result<i64, i64> {
+          return Ok(1);
+      }
+
+      fn f() -> Result<i64, i64> {
+          let r = match g() { Ok(v) => v, Err(x) => return Err(x), };
+          return Ok(r);
+      }
+
+      fn main() -> i64 {
+          return 0;
+      }

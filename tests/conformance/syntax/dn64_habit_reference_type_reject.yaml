@@ -1,0 +1,28 @@
+# MIND Conformance Test: a reference type is a habit form of E1105
+# Specification reference: spec/v1.0/errors.md#e1105-form-that-mind-writes-another-way
+# Decision: DN-64 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "&i64 as the type of a parameter is refused with E1105 at the &; Core v1 has no references"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn f(x: &i64) -> i64 {
+        return 0;
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1105
+    location:
+      line: 1
+      column: 9
+    count: 1

@@ -263,29 +263,39 @@ can start an item, and no type diagnostic follows from the fault ([Diagnostics](
 - A valid program never gets `E1104`: `let lets = 1;` is valid.
 
 ### E1105: Form that MIND writes another way
-- **Trigger**: a form of the fixed table below, at the start of the form. The table is part of this specification,
-  so every implementation gives the same message.
+- **Trigger**: a form of the fixed table below whose status is "Core v1 refuses", at the start of the form. The
+  table is part of this specification, so every implementation gives the same message. It is the table of habit
+  forms (DN-64): forms that writers produce, each with its MIND form, its status, its fix class
+  ([Code table](#code-table)) and the measured verdict of release 0.10.4 (`mindc check --no-fmt --no-lint`, then the
+  native build when the check passes; each verdict names its probe). A row with another status names the code or the
+  chapter that decides it.
 - **Required context**: the form, the MIND form of the table, the location
 - **Example**: ``E1105: MIND writes `else if`, not `elif` at line 5, column 7``
 - No word of the table is at the Damerau-Levenshtein distance 1 from a keyword, so no source gets both `E1104` and
   `E1105`: `fun` gets `E1104`, which names `fn`.
 
-| Form | MIND form |
-|------|-----------|
-| `elif`, `elsif`, `elseif` | `else if` |
-| `def`, `func`, `function` where an item can start | `fn` |
-| `var`, `val` where a statement can start | `let` or `let mut` |
-| `do` after the condition of a loop | no word: the block follows the condition |
-| `then` after the condition of an `if` | no word: the block follows the condition |
-| `switch` | `match` |
-| `x++` | `x += 1` |
-| `===` | `==` |
-| `@` between two operands | `matmul(a, b)` (DN-39) |
-| `@name` before an item | `#[name]` (DN-39) |
-| `diff` in a type position | the attribute `#[grad(g, p)]` before the function ([Source form](./autodiff.md#source-form-the-gradient-attribute)) |
-| `tensor<f32[2]>` | `Tensor<f32, [2]>` ([The tensor type](./shapes.md#the-tensor-type)) |
-| `?` as a dimension | an integer literal or the name of a `const` of the type `i64` |
-| `name = value` as a named argument of an attribute or of the tensor constructor | `name: value` |
+| Form | MIND form | Status | Fix class | Release 0.10.4 (measured) |
+|------|-----------|--------|-----------|---------------------------|
+| `elif`, `elsif`, `elseif` | `else if` | Core v1 refuses | EXACT | refused with `E1001`, "expected '}', found Some('2')" (`e4_x_elif`, `e4_x_elsif`, `e4_x_elseif`) |
+| `def`, `func`, `function` where an item can start | `fn` | Core v1 refuses | EXACT | refused with `E1001`, "unexpected `>`, expected an expression" (`e4_x_def`, `e4_x_func`, `e4_x_function`) |
+| `var`, `val` where a statement can start | `let` or `let mut` | Core v1 refuses | CHOICE | refused with `E2002`, "unknown identifier `var`", and two more diagnostics (`e4_x_var`, `e4_x_val`) |
+| `do` after the condition of a loop | no word: the block follows the condition | Core v1 refuses | EXACT | refused with `E1001`, "expected '{', found Some('d')" (`e4_x_do`) |
+| `then` after the condition of an `if` | no word: the block follows the condition | Core v1 refuses | EXACT | refused with `E1001`, "expected '{', found Some('t')" (`e4_x_then`) |
+| `switch` | `match` | Core v1 refuses | EXACT | refused with `E1001`, "expected '}', found Some('=')" (`e4_x_switch`) |
+| `x++` | `x += 1` | Core v1 refuses | EXACT | refused with `E1001`, "unexpected `+`, expected an expression" (`e4_x_plusplus`) |
+| `===` | `==` | Core v1 refuses | EXACT | refused with `E1001`, "unexpected `=`, expected an expression" (`e4_x_eqeqeq`) |
+| `@` between two operands | `matmul(a, b)` (DN-39) | Core v1 refuses | EXACT | accepted on `i64` operands; the native build refuses it with `lane.source.tensor` (`e4_x_at_infix`) |
+| `@name` before an item | `#[name]` (DN-39) | Core v1 refuses | EXACT | refused with `E1001`, "unexpected `@`" (`e4_x_at_name`) |
+| `diff` in a type position | the attribute `#[grad(g, p)]` before the function ([Source form](./autodiff.md#source-form-the-gradient-attribute)) | Core v1 refuses | NONE | refused with `E1001`, "expected 'tensor' after 'diff'" (`e4_x_diff`) |
+| `tensor<f32[2]>` | `Tensor<f32, [2]>` ([The tensor type](./shapes.md#the-tensor-type)) | Core v1 refuses | EXACT | accepted; the native build refuses it with `lane.type.tensor` (`e4_x_tensor_old`) |
+| `?` as a dimension | an integer literal or the name of a `const` of the type `i64` | Core v1 refuses | NONE | refused with `E1001`, "expected dimension (integer or symbol)" (`e4_x_qdim`) |
+| `name = value` as a named argument of an attribute or of the tensor constructor | `name: value` | Core v1 refuses | EXACT | the constructor is refused with `E2003`, "unsupported call to `tensor`" (`e4_x_named_eq`) |
+| A macro call `name!(...)`: `println!("x")`, `vec![1, 2]`, `assert!(c)` | the function call `println("x")`, the array literal `[1, 2]`, the statement `assert c;` ([Macros](./language.md#macros-are-not-part-of-the-language-informative)) | Core v1 refuses | EXACT | refused with `E1001`, "macro invocation `vec!` is not supported; MIND has no macros" (`e4_h_macro_vec`, `e4_h_macro_println`) |
+| A reference type `&T` or `&mut T` where `T` is not a slice type: `fn f(x: &i64)` | the type `T`: Core v1 has no references, and a value is passed by value; the slice types `&[T]` and `&mut [T]` are an extension ([Slice call implementation boundary](./types.md#slice-call-implementation-boundary)) | Core v1 refuses | NONE | accepted; the native build refuses `&i64` and `&mut i64` with `lane.type.reference` (`e4_h_ref_type`, `e4_h_ref_mut`) |
+| A closure bar `\|x: i64\| x + 1` | a function item `fn`; Core v1 has no function values | Core v1 refuses | NONE | refused with `E1001`, "expected ';', found Some(':')" (`e4_h_closure`) |
+| `if let P = e { B }` | `match e { P => { B }, _ => { }, }` | Core v1 refuses | EXACT | refused with `E1001`, "expected '{', found Some('S')" (`e4_h_if_let`) |
+| The postfix question mark `e?` | `match e { Ok(v) => v, Err(x) => return Err(x), }`, and the same with `Some` and `None` for an `Option` | Core v1 refuses | TYPED | accepted for `g()?` on a `Result<i64, i64>`; the native build refuses it with `lane.type.generic` (`e4_h_question`) |
+| An inherent impl block `impl S { fn get(s: S) -> i64 { } }` | functions at module level, `fn get(s: S) -> i64` | Extension ([Core v1 Forms](./core-v1-forms.md)); not `E1105` | NONE | refused with `E1001`, "expected `for` in `impl Trait for Type`" (`e4_h_impl`) |
 
 ### E1106: Operators that need parentheses
 - **Trigger**: a bit operator (`&`, `|`, `^`, `<<`, `>>`) beside another bit operator or beside `+`, `-`, `*`, `/`,
