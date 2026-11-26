@@ -1,0 +1,29 @@
+# MIND Conformance Test: two colons after a module name are refused with E2731
+# Specification reference: spec/v1.0/language.md#module-level
+# Decision: DN-65 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "m::f() for a member of the module block m is refused with E2731 at the path; the fix is m.f()"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    module m {
+        pub fn f() -> i64 {
+            return 1;
+        }
+    }
+
+    fn main() -> i64 {
+        return m::f();
+    }
+
+expected:
+  status: error
+  error:
+    code: E2731
+    location:
+      line: 8
+      column: 12

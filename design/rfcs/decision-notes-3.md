@@ -749,7 +749,7 @@ None" for a missing brace (probe `d01_missing_close_brace_eof`), and it gives 3 
 
 **Decision.** `E1104` fires at the Damerau-Levenshtein distance 1 from a keyword allowed at that place (3 or more
 characters; ties by the keyword order of [Keywords](../../spec/v1.0/lexical.md#keywords)). `E1105` uses one fixed
-table (`elif`, `func`, `var`, `switch`, `x++`, `===`, `@`, `diff T`, `tensor<f32[2]>`, `a::b` after a module, ...).
+table (`elif`, `func`, `var`, `switch`, `x++`, `===`, `@`, `diff T`, `tensor<f32[2]>`, ...).
 An item form in a block is refused at its first word. At module level the message says "expected an item". `E2002`
 suggests only names in scope at distance 2 or less.
 
@@ -765,8 +765,8 @@ suggests only names in scope at distance 2 or less.
 ## DN-65. Module forms
 
 **Decision.** Module level holds items only. A `const` initializer is a constant expression with no call. An executable
-build needs one top-level `main`. `.` follows a value or a module, `::` follows a type, and the other separator is
-`E2002` with the fix. A binding may not take the name of an import qualifier or of a module block in scope (`E2730`).
+build needs one top-level `main`. `.` follows a value or a module, and `::` follows a type: `::` after a module is
+`E2731`, with the edit to the dot form, and `.` after a type is `E2002` with the fix. A binding may not take the name of an import qualifier or of a module block in scope (`E2730`).
 Visibility is `pub` on the item (DN-83).
 
 **Options.** (A) Statements at module level. (B) Items only.
@@ -774,11 +774,12 @@ Visibility is `pub` on the item (DN-83).
 **Reason.** Option B: a module has no order of execution, and each separator has one meaning.
 
 **Refused forms.** `let x = 1;` at module level; `const K = f();`; a build with no `main` (`E2403`); `m::f()` for a
-module block member; a local named like an import qualifier.
+module block member (`E2731`); a local named like an import qualifier.
 
 **Reference.** `mindc check` accepts a `let` at module level (probe `a4_top_let`, also `top_level_stmt`), a build with
 no `main` (probe `fn_no_main`; the build refuses it with `closure.missing_entry_root`), and `m::f()` for a module block
-member (probe `module_block_call_colon`).
+member (probe `module_block_call_colon`; probe `e4_m_colon`: the native build refuses it with `lane.source.top_level`);
+it refuses the dot form `m.f()` with `E2002`, "unknown identifier `m`" (probe `e4_m_dot`).
 
 ## DN-66. Or-patterns and nested patterns
 

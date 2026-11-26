@@ -784,9 +784,10 @@ one hint, chosen by a fixed rule (the least edit distance, then the source order
 from it.
 
 `.` follows a value or a module, and `::` follows a type: `q.f()` calls the member `f` of the module `q`, and
-`E::A` names a variant of the type `E`. The other separator MUST be refused with
-[`E2002`](./errors.md#e2002-unresolved-name-or-qualified-owner), and the message gives the fix: `m::f()` for a member
-of the module block `m` is refused. A binding MUST NOT take the name of an import qualifier or of a module block in
+`E::A` names a variant of the type `E`. `::` after a module MUST be refused with
+[`E2731`](./errors.md#e2731-path-separator-after-a-module), with the edit to the dot form: `m::f()` for a member of the
+module block `m` is refused, and the fix is `m.f()`. `.` after a type MUST be refused with
+[`E2002`](./errors.md#e2002-unresolved-name-or-qualified-owner), and the message gives the fix. A binding MUST NOT take the name of an import qualifier or of a module block in
 scope; such a binding MUST be refused with `E2730`.
 
 ### Visibility

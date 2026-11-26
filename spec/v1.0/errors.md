@@ -101,6 +101,7 @@ names, and that a code that a chapter or a conformance row names is a code of th
 | [`E2707`](#e2707-trait-method-missing-from-an-impl) | Trait method missing from an impl | in force |
 | [`E2720`](#e2720-duplicate-name) | Duplicate name | in force |
 | [`E2730`](#e2730-binding-that-hides-a-module-name) | Binding that hides a module name | in force |
+| [`E2731`](#e2731-path-separator-after-a-module) | Path separator after a module | in force |
 | [`E3001`](#e3001-broadcasting-failure) | Broadcasting failure | in force |
 | [`E3002`](#e3002-rank-mismatch) | Rank mismatch | in force |
 | [`E3003`](#e3003-dimension-mismatch) | Dimension mismatch | in force |
@@ -328,9 +329,10 @@ Type errors occur during type checking and type inference.
   `mlir-build` and `cross-module-imports` features on a unix host. Checking
   reports a located E2002, and the project build refuses to embed the module
   as a runtime fallback.
-- **Also**: the names `usize` and `isize` (fix `u64` or `i64`); the separator that does not follow its head (`::`
-  after a module or `.` after a type, [Module level](./language.md#module-level)); a qualified spelling of a
-  predeclared variant (`Option::Some(1)`, fix `Some(1)`).
+- **Also**: the names `usize` and `isize` (fix `u64` or `i64`); `.` after a type, where `::` follows a type
+  ([Module level](./language.md#module-level)); `::` after a module is
+  [`E2731`](#e2731-path-separator-after-a-module); a qualified spelling of a predeclared variant (`Option::Some(1)`,
+  fix `Some(1)`).
 - **Suggestions**: at most one, chosen by a fixed rule: a name in scope at that place at an edit distance of 2 or
   less, the least distance first, then the first in source order. No further diagnostic follows from the
   unresolved name.
@@ -770,6 +772,13 @@ exclusivity analysis; those guarantees remain future work.
   ([Module level](./language.md#module-level))
 - **Required context**: the binding, its location and the import or module block that it would hide
 - **Example**: `E2730: the binding 'io' hides the import 'io' at line 4, column 9`
+
+### E2731: Path separator after a module
+
+- **Trigger**: `::` after the name of a module: an import qualifier or a module block, as in `m::f()` for the member
+  `f` of the module block `m` ([Module level](./language.md#module-level)); `.` follows a module
+- **Required context**: the path and its location, with the edit to the dot form (`m.f()`)
+- **Example**: ``E2731: `m` is a module; write `m.f()`, not `m::f()` at line 8, column 12``
 
 ## E3xxx: Shape errors
 

@@ -385,6 +385,7 @@ byte rule, because the format has no project file that lists a tool.
 | DN-65 | [`dn65_const_with_call_reject`](dn65_const_with_call_reject.yaml) | reject, `E2001` | as above |
 | DN-65 | [`dn65_build_without_main_reject`](dn65_build_without_main_reject.yaml) | reject, `E2403` | as above |
 | DN-65 | [`dn65_binding_hides_import_reject`](dn65_binding_hides_import_reject.yaml) | reject, `E2730` | as above |
+| DN-65 | [`dn65_module_path_colon_reject`](../type_checker/dn65_module_path_colon_reject.yaml) | reject, `E2731` at 8:12 | as above: `.` follows a module |
 | DN-66 | [`dn66_or_pattern_accept`](../type_checker/dn66_or_pattern_accept.yaml) | accept, returns 10 | [Patterns and match](../../../spec/v1.0/language.md#patterns-and-match) |
 | DN-66 | [`dn66_nested_let_pattern_accept`](../type_checker/dn66_nested_let_pattern_accept.yaml) | accept, returns 6 | as above |
 | DN-66 | [`dn66_alternatives_bind_differently_reject`](../type_checker/dn66_alternatives_bind_differently_reject.yaml) | reject, `E2313` | as above |
