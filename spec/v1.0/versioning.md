@@ -209,13 +209,13 @@ Programs MAY declare their required specification version:
 
 ```text
 // Not Core v1: in Core v1 a version declaration is an extension
-#[requires(mind_spec = "1.2")]
+#[requires(mind_spec: "1.2")]
 module my_program;
 ```
 
-The Core v1 grammar derives neither an attribute before an item (`AttributedItem`) nor the module line
-`module m;` ([Core v1 forms](./core-v1-forms.md)), so the sample above is written as text: in Core v1 a
-version declaration is an extension.
+The Core v1 grammar derives an attribute before an item (`ModuleItem`), but not the module line `module m;`
+([Core v1 forms](./core-v1-forms.md)), so the sample above is written as text: in Core v1 a version declaration is an
+extension. A named argument is written with `:`; the form `mind_spec = "1.2"` has no derivation.
 
 Implementations MUST reject programs requiring newer specification versions than supported.
 
@@ -358,7 +358,7 @@ One implementation version MAY support multiple specification versions (v1.0, v1
 ## Questions and answers
 
 **Q: Can I use v1.2 features and still claim v1.0 compatibility?**
-A: No. If you use v1.2 features, declare `#[requires(mind_spec = "1.2")]`. Programs using only v1.0 features can claim v1.0 compatibility.
+A: No. If you use v1.2 features, declare `#[requires(mind_spec: "1.2")]`. Programs using only v1.0 features can claim v1.0 compatibility.
 
 **Q: What if two minor versions conflict (v1.1 deprecates X, v1.2 adds new X)?**
 A: The v1.2 "X" is a different entity with different semantics. Use namespacing or different names to avoid confusion.

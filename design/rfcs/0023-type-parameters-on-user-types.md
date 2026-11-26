@@ -137,6 +137,8 @@ or infers them.
    never shadows a predeclared one. A predeclared name is not an item of a namespace of the program, so the
    duplicate-name rule of [RFC 0026](./0026-module-items.md) (rule 3, `E2720`) does not apply to it: each declaration
    with a predeclared name is refused with `E2042` only.
+   *The type names of this rule are replaced by [DN-85](./decision-notes-3.md#dn-85-type-names) (`Vec`, `Map`,
+   `String`) and [DN-55](./decision-notes-3.md#dn-55-the-primitive-integer-types) (the eight integer types).*
 
 ## Instance names
 

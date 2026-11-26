@@ -69,6 +69,7 @@ FieldPatternList = FieldPattern , { "," , FieldPattern } , [ "," ] ;
 FieldPattern     = Identifier , [ ":" , Pattern ] ;
 
 MatchArm         = Pattern , [ "if" , Expression ] , "=>" , ( Expression , "," | Block ) ;
+(* Replaced by DN-46: every arm ends with ",". *)
 
 RecordLiteral    = Identifier , "{" , [ FieldInitList ] , "}" ;
 FieldInitList    = FieldInit , { "," , FieldInit } , [ "," ] ;
@@ -80,6 +81,7 @@ PrimaryExpression = … | RecordLiteral ;
 pattern (equality on floats in a pattern has no single meaning). The binding pattern `x @ p`, the reference
 pattern `&p`, or-patterns (`1 | 2`), range patterns (`1..=3`) and `..` in a record pattern are not part of the
 language; none of them is derived.
+*Replaced in part by [DN-66](./decision-notes-3.md#dn-66-or-patterns-and-nested-patterns) (or-patterns) and [DN-80](./decision-notes-3.md#dn-80-the-closed-range) (the closed range pattern `a..=b`).*
 
 ### Sign of an integer pattern
 
@@ -94,6 +96,7 @@ integer literal after it as the sign of a literal does: `- L` is the pattern of 
 and `+ L` is the pattern of the value of `L`. So `-1` and `- 1` are one pattern, `+1` and `+ 1` are the pattern `1`, and
 `- -1` is the pattern `1`. The rules of this RFC on a literal pattern apply to that value, so a pattern has the same
 meaning after `}` and after `,`.
+*Replaced by [DN-46](./decision-notes-3.md#dn-46-the-form-of-a-match-arm) (every arm ends with `,`) and [DN-48](./decision-notes-3.md#dn-48-the-sign-is-not-part-of-a-literal) (a literal has no sign; no unary `+`).*
 
 ### Variant path
 
@@ -169,11 +172,13 @@ A loop that needs an index and a value uses a library function that yields pairs
    string scrutinee needs a catch-all arm (`_` or an identifier). An enum needs every variant or a
    catch-all arm. A missing case is an error, refused with `E2311`. An arm that no value can reach is a warning
    (`W2312`), not an error.
+   *The last sentence is replaced by [DN-36](./decision-notes-3.md#dn-36-exhaustiveness-and-pattern-codes): a dead arm is the error `E2312`.*
 5. **Variant against binding.** An unguarded arm whose pattern is a bare identifier equal to the name of a variant
    of the scrutinee's enum is refused. When the arm is not the final arm, the code is `E2301` (the existing rule of
    the [Error Catalog](../../spec/v1.0/errors.md#e2301-non-final-enum-variant-binding-collision)). When it is the
    final arm, the code is `E2314`. The message names the variant pattern `E::A` and the rename of the binding. An
    arm with a guard, `A if g => …`, is a binding and is not refused.
+   *Amended by [DN-22](./decision-notes-3.md#dn-22-a-const-name-as-a-pattern): `E2301` and `E2314` also cover the name of a `const` item.*
 6. **Guards.** A guard is an `Expression` of type `bool`. It MAY read the bindings of its pattern. It MUST
    NOT assign. It MAY call a function; the effects of the call happen when the guard runs (rule 7).
 7. **Order.** The arms are tried from the first to the last. For one arm the pattern is tested first, and the
@@ -430,6 +435,7 @@ expected:
 2. **Binding and reference patterns.** `x @ p` and `&p` are not part of the language.
 3. **Or-patterns and ranges.** `1 | 2` and `1..=3` are not in this RFC. One later RFC holds them, together with
    `..` in a record pattern (question 6).
+   *Decided by [DN-66](./decision-notes-3.md#dn-66-or-patterns-and-nested-patterns) and [DN-80](./decision-notes-3.md#dn-80-the-closed-range).*
 4. **Variant path spelling.** `E::B` is the only variant path. The dot form leaves the Types text
    ([Variant path](#variant-path)).
 5. **Float and `String` literal patterns.** A `String` literal pattern is allowed. A float literal pattern is not.
@@ -441,6 +447,7 @@ expected:
 8. **Codes.** The proposed codes are assigned, because they are free in the catalog: `E2310` (refutable pattern in
    `let` or `for`), `E2311` (`match` not exhaustive), `W2312` (arm that no value can reach), `E2313` (name bound
    twice). Question 9 takes `E2314` from the same block.
+   *`W2312` is replaced by `E2312` ([DN-36](./decision-notes-3.md#dn-36-exhaustiveness-and-pattern-codes)).*
 9. **A variant name as the final arm.** A final bare identifier arm whose name equals a variant of the matched
    enum is an error with its own code, `E2314`, not a warning (rule 5).
 

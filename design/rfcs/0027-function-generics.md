@@ -66,6 +66,7 @@ TraitBound          = TraitRef ;
 
 WhereClause         = "where" , WherePredicate , { "," , WherePredicate } , [ "," ] ;
 WherePredicate      = Identifier , ":" , TraitBounds ;
+(* Replaced by DN-68: no where clause; "where" stays reserved. *)
 
 GenericFunctionRef  = Identifier , "::" , TypeArguments ;
 PrimaryExpression   = … | GenericFunctionRef ;
@@ -81,6 +82,7 @@ rule of [Lexical Structure](../../spec/v1.0/lexical.md#tokens) is for the `>` th
 (`TypeArguments`): in `fn f<T: Conv<i64>>(x: T)` the first `>` of `>>` closes the arguments of `Conv`, and the rest
 of the token, read again, is the `>` of `GenericParameters`; `id::<Box<i64>>(b)` ends two type-argument lists.
 `where` is already in the keyword list.
+*The `where` clause is replaced by [DN-68](./decision-notes-3.md#dn-68-no-where-clause-type-arguments-of-a-method): a bound is written in the parameter list only.*
 
 The supertrait list is a bound on the implementing type, and a bound on an associated type is a bound on the type
 that an impl gives to it. Both are added to the productions of RFC 0023 and [RFC 0024](./0024-impl-forms.md):
@@ -108,6 +110,7 @@ identifier after `::`. A placeholder `_` is not a `Type`, so `f::<_, i64>(x)` is
    parameter of the same function: its name is looked up among the type parameters of the function only, so another
    name is an unresolved name there (`E2002`). `T: A + B` and `where T: A, T: B` mean the same. A type
    parameter that has no bound MAY be moved (passed, returned, bound to a name) and nothing else.
+   *The `where` forms of this rule are replaced by [DN-68](./decision-notes-3.md#dn-68-no-where-clause-type-arguments-of-a-method).*
 3. **What a bounded value can do.** A value of type `T` with the bound `B` supports the method calls
    `x.m(args)` where `m` is a method of `B`. An operator is defined on a value of type `T` only through a
    predeclared numeric bound (rule 4). Traits that a program declares for operators come in a later RFC. A call of a

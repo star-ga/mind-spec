@@ -120,12 +120,14 @@ extension that [Language](../../spec/v1.0/language.md#executable-subset-status-i
    comes first. A method and an
    associated item are exported with their type ([RFC 0024](./0024-impl-forms.md), rule 10), and an export list
    does not name them.
+   *Replaced by [DN-83](./decision-notes-3.md#dn-83-pub-on-the-item): `pub` on the item is the visibility mechanism, and the export list is refused.*
 5. **Forms that are not in the language.** The grammar does not derive them, and a check refuses each one with
    its own code and a message that names the replacement:
    - `pub` before an item is refused with `E2723`; the message names `export { … }`.
    - A `static` item is refused with `E2724`; the message names `const`, which holds constants.
    - An export in another form than `export { … }` (`export f;`, `export { f };`) is refused with `E2725`; the
      message names the list form.
+   *The first and the third item are replaced by [DN-83](./decision-notes-3.md#dn-83-pub-on-the-item).*
 6. **Import alias.** `import a.b as c;` binds the qualifier `c` and not `b`. The reference registers both
    (language.md); this RFC makes the alias the only qualifier of that import.
 7. **Attributes.** An attribute is defined by a chapter of the specification, by its name and by the item that it
@@ -172,6 +174,7 @@ extension that [Language](../../spec/v1.0/language.md#executable-subset-status-i
    - The changelog names the compiler attributes `#[deterministic]`, `#[target(...)]` and `#[q16]`, and
      `#[cfg(feature = "std-surface")]`, a gate in the source code of the compiler. This rule refuses each of their
      names with `E2502`.
+   *Amended by [DN-31](./decision-notes-3.md#dn-31-attribute-admission-by-what-an-attribute-denotes) (one table keyed by name, item kind and argument form) and [DN-84](./decision-notes-3.md#dn-84-tool-attributes) (tool attributes `tool.name`).*
 8. **Version attribute.** In `#[requires(mind_spec = "M.N")]` before `module m;`, `mind_spec` is the only key. Its
    value is a string literal that holds a version `major.minor`: two decimal numbers joined by one `.`. Another key, a
    second argument, or a value that is not `major.minor` is an argument form that the definition does not give, and is
@@ -182,6 +185,7 @@ extension that [Language](../../spec/v1.0/language.md#executable-subset-status-i
    `E2502` (rule 7) and its value is not compared: `#[requires(mind_spec = "9.0")] fn f() -> i64 { return 0; }` gets
    `E2502` only. The two refusals do not overlap: `E2502` is about the form and the position of the attribute, and
    `E2728` is about the version of a well-formed one before `module m;`.
+   *The spelling `mind_spec = "M.N"` is replaced by `mind_spec: "M.N"` ([DN-72](./decision-notes-3.md#dn-72-named-arguments-with-a-colon)).*
 
 ## Meaning as a desugaring
 
@@ -466,9 +470,11 @@ expected:
 2. **`module m;` and the project.** The file module name MUST equal the name from the project file (rule 1,
    `E2722`).
 3. **`pub`.** `export` is the only visibility mechanism. `pub` is refused (rule 5, `E2723`).
+   *Replaced by [DN-83](./decision-notes-3.md#dn-83-pub-on-the-item).*
 4. **`static`.** `static` is refused for good (rule 5, `E2724`). `const` holds constants.
 5. **Export spelling.** There is ONE export form, the list form `export { f }`, which formatted sources hold today.
    The grammar changes to it, and another form is refused (rule 5, `E2725`).
+   *Replaced by [DN-83](./decision-notes-3.md#dn-83-pub-on-the-item).*
 6. **Version attribute.** `mind_spec` is the only key. The value is parsed as `major.minor`. An implementation
    refuses another major and a higher minor than its own (`E2728`). An unknown key is an argument form that the
    definition does not give, and is refused with `E2502` (rule 8).

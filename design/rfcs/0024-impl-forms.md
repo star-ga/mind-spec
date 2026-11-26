@@ -174,6 +174,8 @@ arguments ([RFC 0027](./0027-function-generics.md)).
     module or the block in which it stands directly: with `trait T` and `struct S` declared outside every block,
     `module m { impl T for S { } }` is refused. A primitive type is declared by no module, so `impl T for i64` stands
     in the module or the block that declares `T`. A violation is refused with `E2715`.
+    *The export words of the first sentence are replaced by [DN-83](./decision-notes-3.md#dn-83-pub-on-the-item): a
+    `pub` type makes its methods visible.*
 
 **Codes.** Codes that the reference already uses, now in the catalog: `E2701` (a trait name that names no trait that the
 program declares: here the trait of an impl, rule 7; [RFC 0027](./0027-function-generics.md) gives the same code to a
