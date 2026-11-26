@@ -39,20 +39,96 @@ Shape = [d_0, d_1, ..., d_{n-1}]   where each d_i ∈ ℕ (0 included)
 Rank(Shape) = n
 ```
 
-Core v1 does not define symbolic or unknown dimensions in the base profile.
-Implementations may extend the shape system, but conformance is defined for
-fully-known shapes. A dimension that a program computes at run time (for example an
-argument of a constructor function) is a value, not a symbolic dimension.
+Core v1 has no symbolic or unknown dimension: every dimension of a type is known at check time
+([The tensor type](#the-tensor-type)). A dimension that a program computes at run time (for example an
+argument of a constructor function) is a value, not a dimension of a type.
 
 The verifier rejects tensors with a negative dimension; a negative dimension that
 is known only at run time makes the defined stop. Scalars remain
 rank-0 tensors with an empty `[]` shape and therefore have no dimension to
 check.
 
+## The tensor type
+
+`Tensor` is a predeclared generic type name. Its argument list holds a dtype and a shape, and both are required:
+`Tensor<f32, [2, 3]>` is the type of a tensor of `f32` elements with the shape `[2, 3]`. The grammar has no rule of its
+own for the tensor type: `IdentifierType` of [`grammar-syntax.ebnf`](./grammar-syntax.ebnf) takes the type arguments,
+and a `TypeArgument` is a type or a `Shape`.
+
+- **Dtype.** The dtype MUST be a dtype of the profile; in Core v1 the dtypes are `i32`, `i64`, `f32` and `f64`. Another
+  type MUST be refused at check time with [`E2005`](./errors.md#e2005-invalid-dtype-for-operation), and the message
+  names the set: `Tensor<bool, [2]>` is refused.
+- **Both arguments.** `Tensor<f32>` (no shape) MUST be refused at check time. `tensor<f32[2]>` is not a type: the
+  message of [`E1105`](./errors.md#e1105-form-that-mind-writes-another-way) gives `Tensor<f32, [2]>`.
+- **Dimensions.** A dimension is an integer literal or an identifier (`Dimension`). An identifier MUST name a `const`
+  of the type `i64` in scope; another name MUST be refused at check time with
+  [`E3013`](./errors.md#e3013-unknown-dimension-name). `?` is not a dimension and MUST be refused with
+  [`E1105`](./errors.md#e1105-form-that-mind-writes-another-way). A negative dimension is refused with
+  [`E3006`](./errors.md#e3006-negative-dimension).
+- **Size.** Each dimension, and the count of elements of the shape (the product of its dimensions), MUST be at most
+  2^63 - 1; a larger one MUST be refused at check time with [`E3012`](./errors.md#e3012-shape-too-large).
+- **Rank 0.** `Tensor<D, []>` is the type `D`: a rank-0 tensor and a scalar of the dtype `D` are one type.
+
+```mind
+const N: i64 = 3;
+
+fn scale(x: Tensor<f32, [N]>, k: f32) -> Tensor<f32, [N]> {
+    return x * k;
+}
+
+fn first(t: Tensor<f32, []>) -> f32 {
+    return t;
+}
+```
+
+The parameter `x` has the shape `[3]`; `k` is a scalar and extends to that shape
+([Elementwise binary](#elementwise-binary)); `t` has the type `f32`.
+
+## Tensor literals
+
+An array literal whose expected type is `Tensor<D, S>` is a tensor literal. Its nesting depth is the rank, and the
+lengths of its nested lists are the dimensions; they MUST equal the shape `S`, else the literal MUST be refused at
+check time with [`E3010`](./errors.md#e3010-invalid-shape-in-literal). A ragged literal, whose nested lists at one
+depth have different lengths, MUST be refused with `E3010` as well. A cast to a tensor type (`e as Tensor<f32, [2]>`)
+MUST be refused with [`E2016`](./errors.md#e2016-invalid-cast); the tensor constructor `tensor(e, dtype: D)`
+([Tensor operations](./language.md#tensor-operations)) converts the dtype.
+
+```mind
+let m: Tensor<f32, [2, 3]> = [[1.0, 2.0, 3.0],
+                              [4.0, 5.0, 6.0]];
+```
+
+`let t: Tensor<f32, [2]> = [1.0, 2.0, 3.0];` (three elements for the dimension 2) and
+`let r: Tensor<f32, [2, 2]> = [[1.0], [2.0, 3.0]];` (a ragged literal) are refused with `E3010`.
+
+## Indexing a tensor
+
+An index of a tensor holds one item for each leading axis, separated by `,` (`IndexOperator` and `IndexItem` of
+[`grammar-syntax.ebnf`](./grammar-syntax.ebnf)): `t[i, j]`. It holds at most rank items; a source with more MUST be
+refused at check time with [`E3014`](./errors.md#e3014-too-many-index-items). The axes after the last item are taken
+whole. An item that is a scalar index drops its axis, and an item that is a slice (`s:e:k` and its forms with omitted
+parts, [Tuple index](./language.md#tuple-index)) keeps it. An index of an array `[T; n]` holds one item.
+
+```mind
+fn pick(t: Tensor<f32, [4, 3]>) -> Tensor<f32, [4]> {
+    return t[:, 1];
+}
+```
+
+`t[2]` has the shape `[3]`, `t[2, 1]` is an `f32`, `t[:, 1]` has the shape `[4]` and `t[1:3, :]` has the shape
+`[2, 3]`. `t[0, 1, 2]` on this rank-2 tensor is refused with `E3014`.
+
+## Comparison of tensors
+
+`==` and `!=` on two tensors of one dtype and one shape compare the whole values and give one `bool`; there is no
+broadcast. `<`, `<=`, `>` and `>=` with a tensor operand MUST be refused at check time with
+[`E2008`](./errors.md#e2008-operator-not-defined-for-tensor-operands).
+
 ## Broadcasting
 
-Many Core v1 operators are **elementwise** and support broadcasting of their
-inputs. Broadcasting follows the standard "numpy-style" rules.
+Broadcasting is the rule by which the dotted operators `.+`, `.-`, `.*`, `./` and `.%` and the batch dimensions of
+`matmul` extend the shapes of two operands to one shape ([Elementwise binary](#elementwise-binary)). The plain
+operators do not broadcast. The rule aligns the two shapes from the right and extends a dimension of size 1.
 
 Given two shapes `A` and `B`, broadcasting proceeds as:
 
@@ -210,17 +286,41 @@ integer tensor where the implementation does not support it).
 
 ### Elementwise binary
 
-For **binary elementwise** operators (for example, `tensor.add`, `tensor.sub`,
-`tensor.mul`, `tensor.div`) the output shape is the broadcasted shape of the
-two inputs:
+A binary elementwise operation has two source forms, and the form says whether the shapes broadcast
+([Tensor operators and broadcasting](./language.md#tensor-operators-and-broadcasting)):
 
-```text
-Shape_out = Broadcast(Shape_lhs, Shape_rhs)
+- **Plain operators** `+`, `-`, `*`, `/` and `%` on two tensors need one dtype and one shape; the output has that
+  shape. A scalar operand extends to the shape of the tensor operand. A plain operator on two tensors of different
+  shapes MUST be refused at check time, and the message gives the dotted form as the fix.
+- **Dotted operators** `.+`, `.-`, `.*`, `./` and `.%` broadcast. The operands share a dtype, and the output shape is
+  the broadcasted shape of the two inputs:
+
+  ```text
+  Shape_out = Broadcast(Shape_lhs, Shape_rhs)
+  ```
+
+  If broadcasting fails (as defined above), the source MUST be refused with
+  [`E3001`](./errors.md#e3001-broadcasting-failure). A dotted operator with no tensor operand MUST be refused at
+  check time. A dotted operator has the precedence of its plain operator.
+
+Two operands of different dtypes MUST be refused with
+[`E2004`](./errors.md#e2004-dtype-mismatch-in-binary-operation) in both forms. So every expansion of a shape is
+written in the source, and one search for the dotted operators finds every one.
+
+```mind
+fn outer_sum(col: Tensor<f32, [3, 1]>, row: Tensor<f32, [1, 4]>) -> Tensor<f32, [3, 4]> {
+    return col .+ row;
+}
+
+fn add(a: Tensor<f32, [3, 4]>, b: Tensor<f32, [3, 4]>) -> Tensor<f32, [3, 4]> {
+    return a + b;
+}
 ```
 
-If broadcasting fails (as defined above), the compiler or runtime must report a
-shape error. The Core v1 conformance suite is expected to include examples of
-both successful and failing broadcasts.
+`col + row` (a plain operator on the shapes `[3, 1]` and `[1, 4]`) is refused, and the message gives `col .+ row`.
+`a .+ b` on two `i64` scalars is refused. The IR operations of both forms are the operations of
+[Core IR](./ir.md#binary-operations); the Core v1 conformance suite holds rows for both forms and for a failing
+broadcast.
 
 ## Reductions
 
@@ -239,8 +339,8 @@ instruction specification and `conformance.md` for required test coverage).
 A full reduction (`axes = []`, i.e. empty axes list) reduces all dimensions:
 
 ```text
-Input:  tensor<f32>[d_0, d_1, ..., d_{n-1}]
-Output: tensor<f32>[]    (rank-0 scalar)
+Input:  Tensor<f32, [d_0, d_1, ..., d_{n-1}]>
+Output: Tensor<f32, []>    (rank-0 scalar, the type f32)
 ```
 
 If the input is already a scalar (`[]`), the output is also a scalar of the
@@ -276,14 +376,18 @@ Core v1 defines a canonical **matrix multiplication** shape rule for
 Formally:
 
 ```text
-A: tensor<T>[M, K]
-B: tensor<T>[K, N]
+A: Tensor<T, [M, K]>
+B: Tensor<T, [K, N]>
 ----------------------------
-tensor.matmul(A, B): tensor<T>[M, N]
+matmul(A, B): Tensor<T, [M, N]>
 ```
 
 If either input has rank smaller than 2, or if `K` does not match between the
 inputs, the operator must produce a shape error.
+
+The source form of the matrix product is the call `matmul(a, b)`. The token `@` has no production: `a @ b` MUST be
+refused with [`E1105`](./errors.md#e1105-form-that-mind-writes-another-way), and the message gives `matmul(a, b)`
+([Tokens](./lexical.md#tokens)).
 
 For tensors with **batch dimensions**, leading dimensions follow the
 broadcasting rules described earlier. The resulting shape is therefore:

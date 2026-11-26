@@ -20,6 +20,59 @@ This chapter specifies the **Core v1 reverse-mode autodiff** pipeline that opera
 IR. The rules align with the implemented behaviour in the public compiler
 [`star-ga/mind`](https://github.com/star-ga/mind) and describe no additional proprietary features.
 
+## Source form: the gradient attribute
+
+A Core v1 source writes a gradient with the function attribute `#[grad(g, p1, ..., pk)]` before a function `f`
+([Attributes](./language.md#attributes)). The attribute declares the function `g`:
+
+- `g` has the parameters of `f`, with their names and types, in their order.
+- `p1` to `pk` (at least one) name parameters of `f`, each once. The result of `f` MUST be a floating-point scalar
+  (`f32`, `f64`, or a rank-0 tensor of one of them), and each named parameter MUST have the type `f32` or `f64` or a
+  tensor type of the dtype `f32` or `f64`.
+- The result of `g` is the gradient of the result of `f` with respect to the named parameters: for one named
+  parameter it has the type of that parameter, and for k named parameters it is the tuple of their types, in the
+  order of the attribute.
+- `g` is an ordinary function of the module. Its name MUST NOT be the name of another item of the module
+  ([Module level](./language.md#module-level), [`E2720`](./errors.md#e2720-duplicate-name)), and a call `g(args)` takes the arguments of `f`.
+- The value of `g` is the reverse-mode gradient that this chapter defines over the Core IR of `f`. `g` is a function
+  of the IR with a fixed signature, so its result is bit-identical on every backend by the same rule as every other
+  function.
+
+An attribute that breaks one of these rules MUST be refused at check time.
+
+```mind
+#[grad(dsq, x)]
+fn sq(x: f64) -> f64 {
+    return x * x;
+}
+
+fn main() -> i64 {
+    let d = dsq(3.0);
+    if d == 6.0 {
+        return 0;
+    }
+    return 1;
+}
+```
+
+`dsq` has the signature `fn dsq(x: f64) -> f64`, and `dsq(3.0)` is `6.0`, so the program returns 0.
+
+```mind
+#[grad(dloss, w)]
+fn loss(w: Tensor<f32, [3]>, x: Tensor<f32, [3]>) -> f32 {
+    return sum(w * x, [0], false);
+}
+```
+
+`dloss` has the signature `fn dloss(w: Tensor<f32, [3]>, x: Tensor<f32, [3]>) -> Tensor<f32, [3]>`, and its value is
+`x`.
+
+The gradient attribute needs no function value: the gradient function has a written name and a fixed signature. The
+entry points of the [`diff` module](./stdlib.md#diff-module), which take a function as a value, and the type `diff T`
+([Differentiable types](./types.md#differentiable-types)) are not in Core v1. A source that writes `diff` in a type
+position MUST be refused with [`E1105`](./errors.md#e1105-form-that-mind-writes-another-way), and the message gives
+the attribute `#[grad(g, p)]`.
+
 ## Model
 
 - Autodiff runs over verified **Core IR modules**, not over source syntax.
