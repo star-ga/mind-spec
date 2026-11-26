@@ -1105,10 +1105,12 @@ the attributes and before the word that starts a named item.
 
 **Reason.** Option B: the visibility of an item stands at the item, and a list is a second place kept by hand.
 
-**Refused forms.** `export { f }`, `export f;`, `pub` as a name.
+**Refused forms.** `export { f }`, `export f;`, `pub` as a name, `pub import a.b;` (`pub` stands only before a named
+item).
 
 **Reference.** `mindc check` accepts `pub fn` and the image exits with 5 (probe `fn_pub`), and `export { f }`, whose
-image exits with 1 (probe `a4_export_brace`).
+image exits with 1 (probe `a4_export_brace`); it accepts `pub import std.vec;`, and the native build refuses it as an
+"unsupported construct" (probe `e4_h_pub_import`).
 
 **Replaces.** Decisions 3 and 5 of the draft [RFC 0026](./0026-module-items.md) (the export list).
 

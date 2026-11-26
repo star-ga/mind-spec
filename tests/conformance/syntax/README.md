@@ -457,6 +457,7 @@ not a row.
 | DN-83 | [`dn83_export_list_reject`](dn83_export_list_reject.yaml) | reject | as above: `export` is reserved with no production |
 | DN-83 | [`dn83_pub_as_name_reject`](dn83_pub_as_name_reject.yaml) | reject, `E1007` at 2:9 | as above |
 | DN-89 | [`dn89_glob_import_reject`](dn89_glob_import_reject.yaml) | reject, `E1101` at 1:12 | [Module level](../../../spec/v1.0/language.md#module-level): no glob import |
+| DN-83 | [`dn83_pub_import_reject`](dn83_pub_import_reject.yaml) | reject, `E1101` at 1:5 | [Visibility](../../../spec/v1.0/language.md#visibility): `pub` stands only before a named item |
 | DN-84 | [`dn84_tool_attribute_listed_accept`](dn84_tool_attribute_listed_accept.yaml) | accept, returns 1 | [Attributes](../../../spec/v1.0/language.md#attributes): tool attributes; a gap of the reference |
 | DN-84 | [`dn84_three_segment_name_reject`](dn84_three_segment_name_reject.yaml) | reject, `E1101` at 1:6 | [Attributes](../../../spec/v1.0/language.md#attributes): tool attributes |
 | DN-84 | [`dn84_tool_attribute_not_listed_reject`](dn84_tool_attribute_not_listed_reject.yaml) | reject | as above |

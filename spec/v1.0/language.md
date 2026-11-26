@@ -805,7 +805,7 @@ scope; such a binding MUST be refused with `E2730`.
 its module. `pub` is a keyword, and it stands after the attributes of the item and before the word that starts a named
 item: a function, a `type`, a `struct`, an `enum`, a `const`, a `trait` or a module block (`pub fn f() -> i64 { 1 }`).
 There is no export list: `export` is a reserved word that no rule spells, so `export { f }` and `export f;` MUST be
-refused.
+refused. `pub` stands only before a named item: `pub import a.b;` has no derivation and MUST be refused with `E1101`.
 
 ### Module-qualified references
 
