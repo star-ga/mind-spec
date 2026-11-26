@@ -323,7 +323,10 @@ an identifier followed by `{` starts the block, and a record literal there is wr
 token `if`, `match`, `{`, `while`, `for` or `loop` starts a block-like statement
 ([Block-like statements](#block-like-statements)). With the tail expression of a block, which the token after the
 common form decides (a `;` or an assignment operator makes a statement, the closing `}` makes the tail), these are the
-three choices that a check of the grammar names as not decided by three tokens alone. This bound is a rule of the
+three choices that a check of the grammar names as not decided by three tokens alone. The check also names choices
+where a word of the grammar (such as `i64` or `tensor`) or the wildcard `_` could be read as an identifier; the token
+rules decide them: `_` is never an identifier ([Identifiers](./lexical.md#identifiers)), and a word is decided with at
+most two tokens ([Words that the grammar spells out](#words-that-the-grammar-spells-out)). This bound is a rule of the
 specification: a change of the grammar that adds a fourth such choice is not accepted, and the grammar check of the
 specification repository is the gate that holds it.
 
@@ -467,7 +470,7 @@ an implementation that provides the form; the module line is not derived by the 
 **Tool attributes.** An attribute whose name has two segments, `#[tool.name]` or `#[tool.name(arg, ...)]`, is a tool
 attribute. Its first segment MUST be listed in the project file; otherwise the attribute MUST be refused at check time.
 The compiler checks its form and gives it no meaning. A tool attribute MUST NOT change a byte of the artifact: the IR
-bytes and the native image of a program are the same with and without it, and a conformance row holds this. A name of
+bytes and the native image of a program are the same with and without it. A name of
 three or more segments, such as `#[a.b.c]`, has no derivation.
 
 ## Raw memory
@@ -507,8 +510,9 @@ time with [`E2402`](./errors.md#e2402-invalid-target-of-a-change): after `let a 
 is refused. The right operand of `=` MUST have the type of the place; otherwise the statement MUST be refused at check
 time with [`E2001`](./errors.md#e2001-type-mismatch): after `let mut x = 1;`, the statement `x = true;` is refused.
 
-The compound assignment operators are `+=`, `-=`, `*=`, `/=`, `%=`, `<<=`, `>>=`, `&=`, `|=` and `^=`; each is one
-token, so `x + = 2` is refused. `x op= e` means `x = x op e`, where `op` is the operator before the `=`, and the place
+The compound assignment operators are `+=`, `-=`, `*=`, `/=`, `%=`, `<<=`, `>>=`, `&=`, `|=` and `^=`; each is
+written with no space in it (`<<=` and `>>=` are formed from joined tokens, the others are one token each,
+[Tokens](./lexical.md#tokens)), so `x + = 2` is refused. `x op= e` means `x = x op e`, where `op` is the operator before the `=`, and the place
 `x` is evaluated once: in `a[f()] += 1` the call `f()` runs once. The order is that of
 [Evaluation order](#evaluation-order). The rules of `op` for the types of its operands apply.
 
@@ -608,7 +612,8 @@ slice bound outside its axis is the case of [Index bounds](./ir.md#index-bounds)
 an integer type, used exactly; another type MUST be refused at check time with
 [`E2005`](./errors.md#e2005-invalid-dtype-for-operation), and the message names `as i64`: `a[1.5]` is refused.
 
-Inside the brackets of an index and outside any nested bracket, the text `::` is two slice colons
+Inside the brackets of an index and outside any nested pair of `(` and `)`, `[` and `]`, or `{` and `}`, the text `::`
+is two slice colons
 ([Tokens](./lexical.md#tokens)): `a[::2]` is `a[0:n:2]`, and `a[s::k]` is the slice from `s` with the step `k`. A path
 there is written in parentheses, `a[(E::B)]`; `a[E::B]` MUST be refused with `E1101`, and the message names the form
 with parentheses. The grammar has no range index: `a[1..3]` is not derived ([Loops](#loops)).
@@ -684,10 +689,10 @@ let r = match x {
 };
 ```
 
-A bare unguarded name arm matches every value. When it is not the last arm it MUST be refused with `E2312`, because no
-later arm can run. When the name of a bare unguarded name arm is the name of a `const` item in scope, the arm MUST be
-refused, with `E2301` when it is not the last arm and with `E2314` when it is the last arm; the message gives the fix
-`n if n == K`. A dead arm, which no value can reach because the arms before it match every value it matches, MUST be
+A bare unguarded name arm matches every value. When its name is the name of an enum variant or of a `const` item in
+scope, the arm MUST be refused, with `E2301` when it is not the last arm and with `E2314` when it is the last arm; the
+message gives the fix `n if n == K`. Any other bare unguarded name arm that is not the last arm MUST be refused with
+`E2312`, because no later arm can run. A dead arm, which no value can reach because the arms before it match every value it matches, MUST be
 refused with `E2312`. A `match` that does not cover every value of its operand MUST be refused with `E2311`, and the
 message names one missing case, chosen by a fixed order: the variants in declaration order, `false` before `true`, and
 the least integer that no arm covers. `match b { true => 1, }` is refused, and the message names `false`.

@@ -179,7 +179,8 @@ a syntax fault gets one diagnostic, at the first fault, and no further diagnosti
   of the grammar ([Literals](./lexical.md#literals)), including a type suffix (`1.5f32`, `7u8`), a `_` that does
   not stand between two digits of one digit sequence (`0x_FF`, `1__0`, `1_`), a decimal integer of more than one
   digit that starts with `0` (`017`), an exponent other than `e` with an optional `-` (`1.5E3`, `1.5e+3`), and a
-  float token directly after the access dot of a tuple index (`t.0.1e0`)
+  float token directly after the access dot of a tuple index (`t.0.1e0`). A run of digits and `_` directly after the
+  token `.` is a tuple index and never gets this code: `t.01` is [`E2404`](#e2404-invalid-tuple-index)
 - **Required context**: source location of the first character that no form allows, literal text
 - **Example**: `E1005: Invalid binary literal '0b2' at line 3, column 10`
 
@@ -248,11 +249,13 @@ a syntax fault gets one diagnostic, at the first fault, and no further diagnosti
   so every implementation gives the same message.
 - **Required context**: the form, the MIND form of the table, the location
 - **Example**: ``E1105: MIND writes `else if`, not `elif` at line 5, column 7``
+- No word of the table is at the Damerau-Levenshtein distance 1 from a keyword, so no source gets both `E1104` and
+  `E1105`: `fun` gets `E1104`, which names `fn`.
 
 | Form | MIND form |
 |------|-----------|
 | `elif`, `elsif`, `elseif` | `else if` |
-| `def`, `func`, `fun`, `function` where an item can start | `fn` |
+| `def`, `func`, `function` where an item can start | `fn` |
 | `var`, `val` where a statement can start | `let` or `let mut` |
 | `do` after the condition of a loop | no word: the block follows the condition |
 | `then` after the condition of an `if` | no word: the block follows the condition |
@@ -274,9 +277,10 @@ a syntax fault gets one diagnostic, at the first fault, and no further diagnosti
 - **Example**: ``E1106: `|` and `<<` need parentheses: write `1 | (2 << 1)` or `(1 | 2) << 1` at line 1, column 30``
 
 ### E1107: Assignment where an expression stands
-- **Trigger**: `=` or a compound assignment operator inside an expression: a chain `a = b = 7;`, a condition
-  `if x = 1 { }`, an argument `f(x = 1)`; an assignment is a statement
-  ([Bindings and assignment](./language.md#bindings-and-assignment))
+- **Trigger**: `=` or a compound assignment operator after an operand, where a binary operator can stand, inside an
+  expression: a chain `a = b = 7;`, a condition `if x = 1 { }`, an argument `f(x = 1)`; an assignment is a statement
+  ([Bindings and assignment](./language.md#bindings-and-assignment)). A `=` where an operand must stand, as in
+  `x > = 1`, is `E1101`
 - **Required context**: the operator and its location; in a condition, the hint `==`
 - **Example**: ``E1107: an assignment is a statement, not an expression; to compare, write `==` at line 2, column 10``
 
@@ -558,6 +562,8 @@ exclusivity analysis; those guarantees remain future work.
 
 - **Trigger**: a match arm that no value can reach, because an earlier arm matches every value it matches; this
   includes every arm after an unguarded bare binding arm, and a bare unguarded binding arm that is not the last arm
+  and whose name is not the name of an enum variant or of a `const` item in scope (that arm is
+  [`E2301`](#e2301-non-final-enum-variant-binding-collision))
 - **Required context**: the arm, its location and the earlier arm
 - **History**: the draft [RFC 0025](../../design/rfcs/0025-patterns.md) named this fault the warning `W2312`; DN-36
   makes it this error.
@@ -580,11 +586,11 @@ exclusivity analysis; those guarantees remain future work.
 
 ### E2401: Loop exit outside a loop
 
-- **Trigger**: a `break` or a `continue` that is not inside the body of a `while` or a `for`
+- **Trigger**: a `break` or a `continue` that is not inside the body of a `while`, a `for` or a `loop`
   ([Loop exits](./language.md#loop-exits)).
 - **Required context**: the word and its source location, with the fix: move the statement into the body of a
   loop, or remove it.
-- **Example**: `E2401: 'break' is not inside a while or a for loop at line 2, column 5`
+- **Example**: `E2401: 'break' is not inside a loop at line 2, column 5`
 - **Check/build contract**: checking and artifact-producing builds MUST refuse the same source with `E2401`.
 
 ### E2402: Invalid target of a change
