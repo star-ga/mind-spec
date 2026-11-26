@@ -34,8 +34,8 @@ status of each form.
 (* Module structure. Module level holds items only. Attributes come    *)
 (* first, then "pub", then the word that starts the item: one order    *)
 (* for every item kind, so `#[a] pub fn f() { }` has one derivation.   *)
-(* "pub" makes the item visible outside its module; an item without    *)
-(* "pub" is visible only in its module. There is no export list.       *)
+(* "pub" makes the item visible outside its module. There is no export *)
+(* list: "export" is a reserved word that no rule spells.               *)
 Module = { ModuleItem } ;
 
 ModuleItem = { Attribute } , ( [ "pub" ] , NamedItem
@@ -109,16 +109,18 @@ FunctionSignature = "fn" , Identifier , "(" , [ ParameterList ] , ")" , [ "->" ,
 ImportDeclaration = "import" , ImportPath , ";" ;
 (* Normative correction targeted for specification 1.7.0, decided  *)
 (* by the specification owner on 2026-10-07: path segments are      *)
-(* separated by ".". "." follows a value or a module, and "::"      *)
-(* follows a type; the other separator is refused with the fix.     *)
-(* Qualifier semantics: language.md, "Module-qualified references". *)
+(* separated by ".". Earlier text of this grammar                   *)
+(* wrote "::", which no released reference compiler accepted for    *)
+(* `import`. "." follows a value or a module, and "::" follows a    *)
+(* type; the other separator is refused with the fix. Qualifier     *)
+(* semantics: language.md, "Module-qualified references".           *)
 ImportPath = Identifier , { "." , Identifier } ;
 
 (* ============================================================ *)
 (* v1.1 candidate additions (Phase 10.5 — Systems Programming   *)
-(* Foundation). Status: evolving — implementations claiming     *)
-(* v1.0 conformance MAY parse these, implementations claiming   *)
-(* v1.1 MUST.                                                   *)
+(* Foundation). Implemented in mindc 0.2.5+. Status: evolving — *)
+(* implementations claiming v1.0 conformance MAY parse these,   *)
+(* implementations claiming v1.1 MUST.                          *)
 (* ============================================================ *)
 
 (* Compile-time constant declaration. Its initializer is a constant  *)
@@ -352,6 +354,8 @@ AdditiveOperator = "+" | "-" | ".+" | ".-" ;
 MultiplicativeExpression = CastExpression , { MultiplicativeOperator , CastExpression } ;
 MultiplicativeOperator = "*" | "/" | "%" | ".*" | "./" | ".%" ;
 
+(* Bit operators: see the precedence comment above. Operand types and *)
+(* values: language.md, "Bitwise and shift operators".                 *)
 BitwiseTail = "&" , CastExpression , { "&" , CastExpression }
             | "|" , CastExpression , { "|" , CastExpression }
             | "^" , CastExpression , { "^" , CastExpression }
@@ -439,8 +443,8 @@ NamePath = Identifier , [ "::" , Identifier ] , [ CallOperator | RecordBody ] ;
 RecordBody = "{" , [ FieldInit , { "," , FieldInit } , [ "," ] ] , "}" ;
 FieldInit = Identifier , ":" , Expression ;
 
-(* `()` is the unit value, `(e)` a parenthesized expression, `(e,)`    *)
-(* and `(a, b)` tuples.                                                *)
+(* `()` is the unit value; its type is unit. `(e)` is a parenthesized *)
+(* expression, and `(e,)` and `(a, b)` are tuples.                    *)
 ParenExpression = "(" , [ Expression , [ "," , [ ExpressionList ] ] ] , ")" ;
 ExpressionList = Expression , { "," , Expression } , [ "," ] ;
 
@@ -485,6 +489,8 @@ LoopExpression = "loop" , Block ;
 
 (* NOT IN CORE v1: FunctionExpression (closures, function values).     *)
 FunctionExpression = "fn" , "(" , [ ParameterList ] , ")" , [ "->" , Type ] , Block ;
+
+(* The postfix cast `e as T` is CastExpression above.          *)
 
 (* Tensor operations (Core v1 intrinsics) *)
 (* These are typically called as functions: sum(x, axes, keepdims) *)
