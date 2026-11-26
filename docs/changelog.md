@@ -9,6 +9,41 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed: the grammar decisions DN-22 to DN-88 (2026-11-26)
+
+- **Decisions.** [Decision Notes, Part 3](../design/rfcs/decision-notes-3.md) states 67 decisions of the specification
+  owner on the grammar; each older note that a decision replaces keeps its text and names the new decision. The three
+  grammar files are left-factored, and the chapters state the rules.
+- **Lexical structure.** `true`, `false`, `mut`, `loop`, `assert` and `pub` are keywords, and `where` and `export` are
+  reserved; a lone `_` is not a name; identifiers are ASCII, and bidirectional controls and other forbidden code
+  points are refused everywhere (`E1008`); a literal has no sign and no type suffix; `~` is the complement; `..` and
+  `..=` stand in a `for` header and `..=` in a range pattern; there is no block comment (`E1010`); line strings,
+  doc comments and a shebang line are defined ([Lexical Structure](../spec/v1.0/lexical.md)).
+- **Expressions and statements.** One evaluation order; a comparison is not associative; a bit operator does not mix
+  with another operator without parentheses (`E1106`); an assignment is a statement (`E1107`); a call follows a
+  name; `loop` is a form of the language; every match arm ends with `,`; `assert c, "m";` is a keyword statement;
+  a nesting depth of at least 256 is accepted ([Surface Language](../spec/v1.0/language.md)).
+- **Items and types.** One attribute table keyed by name, item kind and argument form; tool attributes `#[tool.name]`
+  change no byte of the artifact; `pub` on the item, and the `export` list is refused; the growable sequence is
+  `Vec<T>`, the map `Map<K, V>` and the string `String`; `usize` and `isize` are not types; `(T,)` is the one-tuple
+  type and `(T)` is not a type.
+- **Tensors and gradients.** `Tensor<D, S>` writes both arguments, and a dimension is an integer literal or a `const`
+  name; an array literal with an expected tensor type is a tensor literal; `t[i, j]` indexes several axes; a plain
+  operator on two tensors needs one shape, and the dotted operators broadcast, so every expansion of a shape is
+  written in the source; `@` is reserved; `==` on tensors gives one `bool`; a gradient is written with the attribute
+  `#[grad(g, p1, ..., pk)]`, and `diff T` is not in Core v1 ([Shapes](../spec/v1.0/shapes.md),
+  [Source form: the gradient attribute](../spec/v1.0/autodiff.md#source-form-the-gradient-attribute)).
+- **Diagnostics.** The error catalog has one [code table](../spec/v1.0/errors.md#code-table); `E1001` is ill-formed
+  UTF-8 only, the syntax faults have the codes `E1101` to `E1108`, and a file with a lexical or a syntax fault gets
+  one diagnostic. `E1104` and `E1105` follow fixed rules and a fixed table. `E1006`, `E2405` and `E2406` are
+  withdrawn and keep their entries with their history.
+- **Status, rows and checks.** [Core v1 Forms](../spec/v1.0/core-v1-forms.md) has a row for each decided form with the
+  measured verdict of the reference compiler v0.10.4, which does not enforce most of the decisions yet; a decided
+  form that needs a rewrite is enforced only in a release that ships the migration tool. The conformance rows hold an
+  accept and a reject row for the decisions, with the code and the position of the fault. The checks of the
+  repository run the grammar lint, whose budget is the three named undecided choices, and assert that the reserved
+  word list equals the `Keyword` rule and that the code table equals the entries of the error catalog.
+
 ### Changed: check-time index bounds, empty axes, integer arithmetic, loops and the defined stop (2026-11-25)
 
 - **Index bounds known at check time.** An index or a slice bound outside its axis is refused at check time with `E3011`
