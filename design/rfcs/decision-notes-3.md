@@ -940,8 +940,8 @@ attribute name gives its meaning; an integer value is a `Number`. The names that
 
 **Refused forms.** None; the encoded bytes do not change.
 
-**Reference.** The grammar lint on the IR grammar of this line finds no undecided choice (0 rows "none up to k=3");
-the IR text that the release writes was not compared in this line.
+**Reference.** The grammar lint on the IR grammar of this revision finds no undecided choice (0 rows "none up to
+k=3"); the IR text that the release writes was not compared with this grammar.
 
 ## DN-75. Faults of the grammar text
 
@@ -958,8 +958,8 @@ are equal.
 
 **Refused forms.** None.
 
-**Reference.** The grammar lint of this line reports no `reserved-list-mismatch` row on the files of this line; on the
-files with the `Keyword` rule of this line and the reserved list before it, it reported `assert`, `false`, `loop`,
+**Reference.** The grammar lint reports no `reserved-list-mismatch` row on the grammar files of this revision; on the
+files with this `Keyword` rule and the earlier reserved list, it reported `assert`, `false`, `loop`,
 `mut`, `pub` and `true`.
 
 ## DN-76. Rules for the text of a diagnostic
@@ -1170,7 +1170,7 @@ block tail, so that the measured count is 0.
 
 **Refused forms.** A grammar change that adds a fourth undecided choice.
 
-**Reference.** The lint on the grammar files of this line (k up to 3) finds three choices that no k up to 3 decides,
+**Reference.** The lint on the grammar files of this revision (k up to 3) finds three choices that no k up to 3 decides,
 exactly the three named ones (`Block`, `NamePath`, `Statement`); every other choice is decided with at most 3 tokens.
 It also lists rows that come from its model, in which every contextual word and `_` is an identifier.
 
