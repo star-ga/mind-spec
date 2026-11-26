@@ -470,7 +470,9 @@ an implementation that provides the form; the module line is not derived by the 
 **Tool attributes.** An attribute whose name has two segments, `#[tool.name]` or `#[tool.name(arg, ...)]`, is a tool
 attribute. Its first segment MUST be listed in the project file; otherwise the attribute MUST be refused at check time.
 The compiler checks its form and gives it no meaning. A tool attribute MUST NOT change a byte of the artifact: the IR
-bytes and the native image of a program are the same with and without it. A name of
+bytes and the native image of a program are the same with and without it. This proof is a gate of the reference
+compiler repository: it compares the IR bytes and the native image with and without the attribute, and a mutant that
+changes one byte turns it red. A name of
 three or more segments, such as `#[a.b.c]`, has no derivation.
 
 ## Raw memory

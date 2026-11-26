@@ -200,8 +200,9 @@ in the folder of its category: the tensor forms in [`shapes`](../shapes), the gr
 [`type_checker`](../type_checker), and the rest in this folder. The rows `dn63_fault_*`, `dn64_fault_*` and
 `dn76_fault_*` are a set of 40 syntax faults; each has one fault, and its row gives the code and the position of the one
 diagnostic. DN-74 changes only names of the IR grammar and has no row; DN-25 has no refused form; DN-69 has no reject
-row, because the nesting limit of an implementation has no upper bound; and DN-84 has no accept row and no row for its
-byte rule, because the format has no project file that lists a tool.
+row, because the nesting limit of an implementation has no upper bound. The accept row of DN-84 names the tools that
+its project file lists (`input.project_tools`); the byte rule of DN-84 is a gate of the reference compiler repository,
+not a row.
 
 | Decision | Row | Result | Rule |
 |----------|-----|--------|------|
@@ -440,6 +441,7 @@ byte rule, because the format has no project file that lists a tool.
 | DN-83 | [`dn83_pub_item_accept`](dn83_pub_item_accept.yaml) | accept, returns 5 | [Visibility](../../../spec/v1.0/language.md#visibility) |
 | DN-83 | [`dn83_export_list_reject`](dn83_export_list_reject.yaml) | reject | as above: `export` is reserved with no production |
 | DN-83 | [`dn83_pub_as_name_reject`](dn83_pub_as_name_reject.yaml) | reject, `E1007` at 2:9 | as above |
+| DN-84 | [`dn84_tool_attribute_listed_accept`](dn84_tool_attribute_listed_accept.yaml) | accept, returns 1 | [Attributes](../../../spec/v1.0/language.md#attributes): tool attributes; a gap of the reference |
 | DN-84 | [`dn84_three_segment_name_reject`](dn84_three_segment_name_reject.yaml) | reject, `E1101` at 1:6 | [Attributes](../../../spec/v1.0/language.md#attributes): tool attributes |
 | DN-84 | [`dn84_tool_attribute_not_listed_reject`](dn84_tool_attribute_not_listed_reject.yaml) | reject | as above |
 | DN-84 | [`dn84_unknown_one_segment_name_reject`](dn84_unknown_one_segment_name_reject.yaml) | reject, `E2502` | as above |

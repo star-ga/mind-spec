@@ -1,0 +1,29 @@
+# MIND Conformance Test: a tool attribute whose first segment the project file lists is accepted
+# Specification reference: spec/v1.0/language.md#attributes
+# Decision: DN-84 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "a tool attribute on an item is accepted when the project file lists its first segment; it has no meaning"
+category: syntax
+profile: cpu
+
+input:
+  project_tools: [fmt]
+  source: |
+    #[fmt.skip]
+    fn f() -> i64 {
+        return 1;
+    }
+
+    fn main() -> i64 {
+        return f();
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 1

@@ -1085,7 +1085,8 @@ image exits with 1 (probe `a4_export_brace`).
 
 **Decision.** A tool attribute has the name `tool.name`, two segments. The first segment MUST be listed in the project
 file; the compiler checks the form and gives it no meaning. A tool attribute MUST NOT change a byte of the artifact,
-and a gate row proves it: the IR bytes and the native image are equal with and without the attribute. A one-segment
+and a gate of the reference compiler repository proves it: the IR bytes and the native image are equal with and
+without the attribute, and a mutant that changes one byte turns the gate red. A one-segment
 name that is not in the attribute table is refused.
 
 **Options.** (A) A closed list of attributes only. (B) Two-segment tool names, listed and byte-neutral.
@@ -1097,7 +1098,8 @@ the build the same.
 file does not list.
 
 **Reference.** `mindc check` accepts `#[fast]` before a function (probe `attr_unknown_fn`) and before a struct (probe
-`attr_unknown_struct`); a two-segment name was not measured.
+`attr_unknown_struct`); it refuses the two-segment name `#[fmt.skip]` before a function with `E1001`, "unexpected
+`#`" (probe `e3_dn84_tool_attr`, also `e4_a_tool_attr`), and `#[a.b.c]` the same way (probe `e3_dn84_three_seg`).
 
 **Replaces.** Amends DN-31 and rule 7 of the draft [RFC 0026](./0026-module-items.md) (the closed list of attributes).
 

@@ -285,6 +285,7 @@ category: "lexical" | "syntax" | "type_checker" | "shapes" | "ir_verification" |
 profile: "cpu" | "gpu"  # Minimum profile required
 
 input:
+  project_tools: [fmt]  # Optional: the first segments of tool attributes that the project file lists (DN-84)
   source: |
     # MIND source code or IR text
   # OR
