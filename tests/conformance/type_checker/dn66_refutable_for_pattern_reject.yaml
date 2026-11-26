@@ -1,0 +1,26 @@
+# MIND Conformance Test: a refutable pattern in a for header is refused with E2310
+# Specification reference: spec/v1.0/language.md#patterns-and-match
+# Decision: DN-66 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "the pattern of a for MUST be irrefutable; for 0 in xs is refused with E2310 at the pattern"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let xs: [i64; 2] = [1, 2];
+        for 0 in xs {
+        }
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2310
+    location:
+      line: 3
+      column: 9

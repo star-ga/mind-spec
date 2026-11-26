@@ -241,6 +241,8 @@ LetStatement = "let" , [ "mut" ] , Pattern , [ ":" , Type ] , "=" , Expression ,
 (* no leading "|". A bare identifier always binds a name. A range      *)
 (* pattern has the closed form only: `a..=b` takes every integer v      *)
 (* with a <= v <= b; its bounds are integer literals or const names.    *)
+(* The pattern of a let and of a for is irrefutable (language.md,      *)
+(* "Patterns and match"): a refutable pattern there is E2310.           *)
 Pattern = PatternAtom , { "|" , PatternAtom } ;
 
 PatternAtom = IdentifierPattern

@@ -78,6 +78,7 @@ names, and that a code that a chapter or a conformance row names is a code of th
 | [`E2042`](#e2042-predeclared-name-taken-by-a-declaration-or-a-binding) | Predeclared name taken by a declaration or a binding | in force |
 | [`E2300`](#e2300-collection-mutation-in-expression-position) | Collection mutation in expression position | in force |
 | [`E2301`](#e2301-non-final-enum-variant-binding-collision) | Non-final enum-variant binding collision | in force |
+| [`E2310`](#e2310-refutable-pattern-in-a-binding) | Refutable pattern in a binding | in force |
 | [`E2311`](#e2311-match-not-exhaustive) | Match not exhaustive | in force |
 | [`E2312`](#e2312-arm-that-no-value-can-reach) | Arm that no value can reach | in force |
 | [`E2313`](#e2313-alternatives-that-bind-different-names) | Alternatives that bind different names | in force |
@@ -550,6 +551,16 @@ exclusivity analysis; those guarantees remain future work.
 - **Check/build contract**: checking and artifact-producing builds MUST refuse
   the same source with `E2301`; a refused build MUST terminate as a user error
   and leave no artifact.
+
+### E2310: Refutable pattern in a binding
+
+- **Trigger**: the pattern of a `let` or of a `for` is refutable: it is not a name, `_`, or a tuple or a record
+  pattern whose parts are all irrefutable ([Patterns and match](./language.md#patterns-and-match)), as in
+  `let Some(x) = o;` and `for 0 in xs { }`. A predeclared variant name taken by a binding (`let None = 1;`) is
+  [`E2042`](#e2042-predeclared-name-taken-by-a-declaration-or-a-binding)
+- **Required context**: the pattern and its location, and help text that names `match`
+- **History**: the draft [RFC 0025](../../design/rfcs/0025-patterns.md) gives this code to the same fault (rule 3)
+- **Example**: ``E2310: the pattern of a `let` must match every value; to test one case, write `match` at line 3, column 9``
 
 ### E2311: Match not exhaustive
 
