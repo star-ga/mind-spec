@@ -1,3 +1,4 @@
+import re
 import unittest
 from pathlib import Path
 
@@ -59,6 +60,44 @@ class TestErrorCodes(unittest.TestCase):
     def test_status_mismatch_is_found(self) -> None:
         bad = SAMPLE.replace("- **Status**: withdrawn by DN-1.", "- **Trigger**: b")
         self.assertIn("errors.md: E1002 status in the table and in its entry differ", check_table(bad))
+
+
+def distance(a: str, b: str) -> int:
+    """Damerau-Levenshtein distance (adjacent transpositions), as E1104 uses it."""
+    d = [[i + j if i * j == 0 else 0 for j in range(len(b) + 1)] for i in range(len(a) + 1)]
+    for i in range(1, len(a) + 1):
+        for j in range(1, len(b) + 1):
+            d[i][j] = min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] != b[j - 1]))
+            if i > 1 and j > 1 and a[i - 1] == b[j - 2] and a[i - 2] == b[j - 1]:
+                d[i][j] = min(d[i][j], d[i - 2][j - 2] + 1)
+    return d[len(a)][len(b)]
+
+
+def e1104_overlaps(errors_md: str, lexical_md: str) -> list[str]:
+    """Words of the E1105 table that E1104 would also take: 3 or more letters at distance 1 from a keyword."""
+    block = lexical_md.split("### Keywords", 1)[1].split("```", 2)[1]
+    keywords = block.split()
+    entry = errors_md.split("### E1105:", 1)[1].split("\n### ", 1)[0]
+    rows = [line.split("|")[1] for line in entry.splitlines() if line.startswith("| `")]
+    words = [w for row in rows for w in re.findall(r"`([A-Za-z]+)`", row)]
+    return [f"{w} ~ {k}" for w in words if len(w) >= 3 for k in keywords if distance(w, k) == 1]
+
+
+class TestE1104AndE1105(unittest.TestCase):
+    def test_no_table_word_is_a_misspelled_keyword(self) -> None:
+        errors = (ROOT / "spec" / "v1.0" / "errors.md").read_text(encoding="utf-8")
+        lexical = (ROOT / "spec" / "v1.0" / "lexical.md").read_text(encoding="utf-8")
+        self.assertEqual(e1104_overlaps(errors, lexical), [])
+
+    def test_overlap_is_found(self) -> None:
+        errors = (ROOT / "spec" / "v1.0" / "errors.md").read_text(encoding="utf-8")
+        lexical = (ROOT / "spec" / "v1.0" / "lexical.md").read_text(encoding="utf-8")
+        bad = errors.replace("| `def`, `func`,", "| `def`, `fun`, `func`,")
+        self.assertNotEqual(bad, errors)  # positive control: the table row was found
+        self.assertIn("fun ~ fn", e1104_overlaps(bad, lexical))
+        self.assertEqual(distance("lett", "let"), 1)
+        self.assertEqual(distance("whlie", "while"), 1)
+        self.assertEqual(distance("func", "fn"), 2)
 
 
 if __name__ == "__main__":
