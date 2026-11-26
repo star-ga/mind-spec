@@ -293,6 +293,8 @@ blocks, and not in the body of a function whose attribute `raw_memory` `E2502` r
 - What a map keeps of a `String` key when the key is inserted. The normative text says nothing about it until it holds a
   function that inserts a `String` key.
 
+**Replaced in part by.** DN-85 ([Decision Notes, Part 3](./decision-notes-3.md)) renames the container types `Vec<T>`, `Map<K, V>` and `String`; the container model of this note does not change.
+
 ## DN-16. The string type
 
 **Text before the decision.** [Standard Library](../../spec/v1.0/stdlib.md) wrote the type of the message of `panic` as
@@ -322,6 +324,8 @@ accepts it; the native backend refuses a `String` result with `lane.string.resul
 refuses; reference gap (`mindc check` accepts it).
 
 **Codes.** [`E2001`](../../spec/v1.0/errors.md#e2001-type-mismatch) (type mismatch) exists.
+
+**Replaced in part by.** DN-85 ([Decision Notes, Part 3](./decision-notes-3.md)): the string type is named `String`.
 
 ## DN-17. Elementwise operators
 
@@ -354,6 +358,8 @@ operand: Core v1 refuses; reference gap (`mindc check` accepts it).
 
 **Codes.** [`E2004`](../../spec/v1.0/errors.md#e2004-dtype-mismatch-in-binary-operation) (dtype mismatch in binary
 operation) exists.
+
+**Replaced by.** DN-81 ([Decision Notes, Part 3](./decision-notes-3.md)): a plain operator on two tensors needs one dtype and one shape, and the dotted operators `.+`, `.-`, `.*`, `./` and `.%` broadcast; option A of this note is replaced.
 
 ## DN-18. The tensor constructor
 
@@ -486,6 +492,8 @@ and its image exits with the status 0).
 **Codes.** [`E2408`](../../spec/v1.0/errors.md#e2408-literal-out-of-range) (literal out of range) is new; the
 published catalog defines no code for a literal outside the range of its type.
 [`E2001`](../../spec/v1.0/errors.md#e2001-type-mismatch) (type mismatch) exists.
+
+**Replaced in part by.** DN-48 ([Decision Notes, Part 3](./decision-notes-3.md)): a literal has no sign and `-` is always an operator; the checker reads a unary `-` applied to a literal as one negative value. The mechanism of rule 3 is replaced; its values stay.
 
 ## DN-21. No undefined value, index bounds and size-0 dimensions
 

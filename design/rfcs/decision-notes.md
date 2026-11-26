@@ -210,6 +210,8 @@ Core v1 refuses; reference gap (`mindc check` accepts `true as f64` and `x as Op
 `bool` with `E2016`). `x as i64 < y`: Core v1; reference conforms (`mindc check` accepts it).
 `let b = x as Option < y;`: Core v1 refuses; reference gap (`mindc check` accepts it).
 
+**Replaced in part by.** DN-53 ([Decision Notes, Part 3](./decision-notes-3.md)): the type after `as` takes no type-argument list, so a `<` after a cast is always a comparison; the reading rule of this note for a cast to a name is replaced.
+
 ## DN-7. Loop exits outside a loop, `loop`, labels and values
 
 **Text before the decision.** [Language](../../spec/v1.0/language.md#loop-exits) defined `break` and `continue`
@@ -259,6 +261,8 @@ the native build also builds it, and the image runs on past it: `loop { } return
 `let loop = false; while loop { } return 3;`: Core v1; reference gap (`mindc check` refuses it with `E1001`,
 "expected '{', found Some('r')"). The missing `;` of a loop exit (`while c { break }`) is in the status of
 [DN-10](#dn-10-separators-that-the-grammar-requires-and-the-reference-does-not).
+
+**Replaced in part by.** DN-54 ([Decision Notes, Part 3](./decision-notes-3.md)): `loop B` is a form of the language and `loop` is a keyword; the refusal of `loop` with `E2405` is withdrawn.
 
 ## DN-8. `let mut` and assignment to a binding
 
@@ -367,6 +371,8 @@ whose type is not `unit` (`if c { 1 } else { 2 } return 0;`): Core v1 refuses; r
 `;` after a `let`, a `return`, a loop exit (`while c { break }`) or an expression statement, and a missing `,` after an
 expression arm of a `match`: Core v1 refuses; reference gap (`mindc check` accepts a missing `;` after a `let`, an
 expression statement, a `return` and a loop exit, and a missing `,`; it reads `while c { break }` as the loop exit).
+
+**Replaced in part by.** DN-46 ([Decision Notes, Part 3](./decision-notes-3.md)) replaces the arm sentence: every arm ends with `,`, a block arm too; DN-54 adds `loop` as a sixth block-like form.
 
 ## DN-11. Tuple index and range index
 

@@ -67,6 +67,7 @@ const rootFiles = [
   'design/rfcs/0027-function-generics.md',
   'design/rfcs/decision-notes.md',
   'design/rfcs/decision-notes-2.md',
+  'design/rfcs/decision-notes-3.md',
   'std/tensor.md',
 ];
 for (const rel of rootFiles) {
