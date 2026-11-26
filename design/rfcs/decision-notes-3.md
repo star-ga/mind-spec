@@ -792,7 +792,7 @@ the help text names `match`.
 
 **Reason.** Option B: one form at every site, and a guard with effects runs at most once.
 
-**Refused forms.** `(x, 0) | (0, y) => ...` (`E2313`); `| 1 => ...`; `let Some(x) = o;` and `for 0 in xs { }`
+**Refused forms.** `(x, 0) | (0, y) => ...` (`E2313`); `| 1 => ...` (no derivation, `E1101`); `let Some(x) = o;` and `for 0 in xs { }`
 (`E2310`); `fn f((a, b): (i64, i64))` (a pattern in a parameter position has no derivation).
 
 **Reference.** `mindc check` refuses `let ((a, b), c) = ...` with `E1001`, "expected variable name in tuple binding"

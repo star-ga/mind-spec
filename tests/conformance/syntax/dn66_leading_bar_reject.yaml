@@ -1,0 +1,28 @@
+# MIND Conformance Test: a pattern has no leading bar
+# Specification reference: spec/v1.0/language.md#patterns-and-match
+# Decision: DN-66 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "a pattern has no leading |; the arm | 1 => 2 has no derivation and is refused with E1101 at the bar"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let x = 1;
+        return match x {
+            | 1 => 2,
+            _ => 0,
+        };
+    }
+
+expected:
+  status: error
+  error:
+    code: E1101
+    location:
+      line: 4
+      column: 9
+    count: 1

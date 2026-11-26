@@ -391,6 +391,7 @@ byte rule, because the format has no project file that lists a tool.
 | DN-66 | [`dn66_refutable_let_pattern_reject`](../type_checker/dn66_refutable_let_pattern_reject.yaml) | reject, `E2310` at 3:9 | as above: the pattern of a `let` is irrefutable |
 | DN-66 | [`dn66_refutable_for_pattern_reject`](../type_checker/dn66_refutable_for_pattern_reject.yaml) | reject, `E2310` at 3:9 | as above: the pattern of a `for` is irrefutable |
 | DN-66 | [`dn66_pattern_parameter_reject`](dn66_pattern_parameter_reject.yaml) | reject, `E1101` at 1:6 | as above: a parameter is a name or `_` |
+| DN-66 | [`dn66_leading_bar_reject`](dn66_leading_bar_reject.yaml) | reject, `E1101` at 4:9 | as above: a pattern has no leading `\|` |
 | DN-67 | [`dn67_predeclared_variants_accept`](../type_checker/dn67_predeclared_variants_accept.yaml) | accept, returns 1 | [Patterns and match](../../../spec/v1.0/language.md#patterns-and-match) |
 | DN-67 | [`dn67_binding_named_none_reject`](../type_checker/dn67_binding_named_none_reject.yaml) | reject, `E2042` | as above |
 | DN-67 | [`dn67_qualified_variant_reject`](../type_checker/dn67_qualified_variant_reject.yaml) | reject, `E2002` | as above |

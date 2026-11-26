@@ -668,7 +668,7 @@ with [`E2310`](./errors.md#e2310-refutable-pattern-in-a-binding), and the help t
   pattern has no derivation and MUST be refused.
 - **Alternatives** `p | q`: the alternatives are tried from left to right, and each alternative MUST bind the same
   names with the same types; otherwise the source MUST be refused with `E2313`: `(x, 0) | (0, y) => 1,` is refused. A
-  pattern has no leading `|`.
+  pattern has no leading `|`: `| 1 => 2,` has no derivation and MUST be refused with `E1101`.
 
 A pattern that does not fit the type of its value MUST be refused with [`E2001`](./errors.md#e2001-type-mismatch) at
 every site: `let (a, b, c) = (1, 2);` is refused. `Some`, `None`, `Ok` and `Err` are the only spellings of those
