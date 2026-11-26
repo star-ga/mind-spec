@@ -192,6 +192,8 @@ MAY offer linting or formatting guidance, but layout is not part of the normativ
 ## Diagnostics
 
 When encountering an invalid token the implementation MUST emit a diagnostic that includes the
-source range of the offending sequence. A file with a lexical or a syntax fault gets one diagnostic, at the first
-fault, and no further diagnostic follows from it. A message shows source text in backticks, writes "end of file" at
+source range of the offending sequence. Each top-level item gets at most one lexical or syntax diagnostic, at its first fault. After
+a fault the parser continues at the next token in column 1 that can start an item (`ModuleItem`). An item with a
+lexical or a syntax fault gets no type diagnostic, and no other item gets a diagnostic whose cause is a name of that
+item. A message shows source text in backticks, writes "end of file" at
 the end of the input, and names a character that does not print as `U+XXXX` with its Unicode name.

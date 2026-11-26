@@ -28,7 +28,8 @@ A row exists only where a normative sentence decides the result.
 - A **reject** row has a source that a normative sentence forbids. Every implementation of Core v1 MUST refuse it.
   A row gives an error code where the [error catalog](../../../spec/v1.0/errors.md) has the code for the
   fault, also when the grammar does not derive the source (`a[1..3]` gives `E1101`). A reject row whose fault
-  has no code in the catalog gives the status only. A reject row holds one fault.
+  has no code in the catalog gives the status only. A reject row holds one fault; a row of the rule "one diagnostic
+  for each top-level item" holds one fault in each of several items, and gives the first diagnostic and the count.
 
 No row's verdict depends on a form that is marked NOT IN CORE v1, an extension or an open form: an
 implementation MAY accept or refuse those.
@@ -382,6 +383,7 @@ not a row.
 | DN-63 | [`dn63_fault_d40_tensor_missing_comma_reject`](dn63_fault_d40_tensor_missing_comma_reject.yaml) | reject, `E1103` at 1:19 | [E1xxx](../../../spec/v1.0/errors.md#e1xxx-lexical-and-syntax-errors): one diagnostic at the first fault |
 | DN-47 | [`dn47_fault_d23_range_for_accept`](dn47_fault_d23_range_for_accept.yaml) | accept, returns 1 | [Loops](../../../spec/v1.0/language.md#loops): counting loops |
 | DN-64 | [`dn64_name_near_keyword_accept`](dn64_name_near_keyword_accept.yaml) | accept, returns 1 | [`E1104`](../../../spec/v1.0/errors.md#e1104-misspelled-keyword) |
+| DN-63 | [`dn63_one_diagnostic_for_each_item_reject`](dn63_one_diagnostic_for_each_item_reject.yaml) | reject, `E1101` at 2:18, count 3 | [Diagnostics](../../../spec/v1.0/lexical.md#diagnostics): one diagnostic for each top-level item |
 | DN-63 | [`dn63_valid_program_accept`](dn63_valid_program_accept.yaml) | accept, returns 2 | [E1xxx](../../../spec/v1.0/errors.md#e1xxx-lexical-and-syntax-errors) |
 | DN-76 | [`dn76_head_identifier_then_parentheses_accept`](dn76_head_identifier_then_parentheses_accept.yaml) | accept, returns 4 | [Diagnostic requirements](../../../spec/v1.0/errors.md#diagnostic-requirements) |
 | DN-65 | [`dn65_const_expression_accept`](dn65_const_expression_accept.yaml) | accept, returns 5 | [Module level](../../../spec/v1.0/language.md#module-level) |

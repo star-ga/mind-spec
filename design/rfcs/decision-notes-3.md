@@ -734,8 +734,9 @@ of line strings, each `\\` up to the end of its line, joined by LF. ([Literals](
 `E1103` missing separator (at the insertion point), `E1104` misspelled keyword, `E1105` a form that MIND writes another
 way, `E1106` operators that need parentheses, `E1107` assignment where an expression stands, `E1108` nesting too deep;
 `E1007` reserved word as a name, `E1008` forbidden character, `E1009` reserved literal prefix or suffix, `E1010` `/*`;
-`E2409` callee is not a function, `E2410` no such method. A file with a syntax fault gets one diagnostic, with no
-cascade.
+`E2409` callee is not a function, `E2410` no such method. Each top-level item gets at most one syntax diagnostic:
+after a fault the parser continues at the next token in column 1 that can start an item. An item with a syntax fault
+gets no type diagnostic, and no other item gets a diagnostic whose cause is a name of that item.
 
 **Options.** (A) One code for every syntax fault. (B) One code per class of fault.
 
@@ -746,7 +747,9 @@ right place.
 
 **Reference.** `mindc check` gives `E1001` for every syntax fault of the measured set, for example "expected '}', found
 None" for a missing brace (probe `d01_missing_close_brace_eof`), and it gives 3 diagnostics for `lett x = 1;` with
-`--no-fmt` and 4 without it, the fourth the format drift (probe `d32_misspelled_let`).
+`--no-fmt` and 4 without it, the fourth the format drift (probe `d32_misspelled_let`). For a file with three faults in
+three functions it gives one diagnostic, `E1001` at the first fault (probe `e4_s_three_faults`), so a writer needs three
+runs to see the three faults.
 
 ## DN-64. Diagnostic tables
 

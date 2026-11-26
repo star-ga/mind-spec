@@ -148,9 +148,9 @@ names, and that a code that a chapter or a conformance row names is a code of th
 ## E1xxx: Lexical and syntax errors
 
 Lexical errors (E10xx) occur during tokenization, before syntactic or semantic analysis. Syntax errors (E11xx) occur
-when the token sequence has no derivation in [`grammar-syntax.ebnf`](./grammar-syntax.ebnf). A file with a lexical or
-a syntax fault gets one diagnostic, at the first fault, and no further diagnostic follows from it
-([Diagnostics](./lexical.md#diagnostics)). A syntax fault never has the code `E1001`.
+when the token sequence has no derivation in [`grammar-syntax.ebnf`](./grammar-syntax.ebnf). Each top-level item gets
+at most one lexical or syntax diagnostic, at its first fault; the parser continues at the next token in column 1 that
+can start an item, and no type diagnostic follows from the fault ([Diagnostics](./lexical.md#diagnostics)). A syntax fault never has the code `E1001`.
 
 ### E1001: Invalid UTF-8 sequence
 - **Trigger**: Source file contains ill-formed UTF-8 byte sequences. This is the only trigger of `E1001`: a fault
@@ -1090,8 +1090,10 @@ pub struct CompilerError {
 
 ## Error recovery
 
-A file with a lexical or a syntax fault gets one diagnostic, at the first fault. Implementations MAY attempt error
-recovery to report multiple type errors, but MUST NOT:
+Each top-level item gets at most one lexical or syntax diagnostic, at its first fault, and the parser continues at the
+next token in column 1 that can start an item ([Diagnostics](./lexical.md#diagnostics)). An item with such a fault
+gets no type diagnostic, and no other item gets a diagnostic whose cause is a name of that item. Implementations MAY
+attempt error recovery to report multiple type errors, but MUST NOT:
 
 - Execute IR after verification failure
 - Continue execution after runtime error
