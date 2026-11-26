@@ -323,8 +323,9 @@ an identifier followed by `{` starts the block, and a record literal there is wr
 token `if`, `match`, `{`, `while`, `for` or `loop` starts a block-like statement
 ([Block-like statements](#block-like-statements)). With the tail expression of a block, which the token after the
 common form decides (a `;` or an assignment operator makes a statement, the closing `}` makes the tail), these are the
-three choices that a check of the grammar names as not decided by three tokens alone. The grammar check of the
-specification repository holds this bound: a fourth such choice fails it.
+three choices that a check of the grammar names as not decided by three tokens alone. This bound is a rule of the
+specification: a change of the grammar that adds a fourth such choice is not accepted, and the grammar check of the
+specification repository is the gate that holds it.
 
 ## Evaluation order
 
