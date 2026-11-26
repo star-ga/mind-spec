@@ -381,14 +381,14 @@ not a row.
 | DN-63 | [`dn63_fault_d36_stray_dollar_reject`](dn63_fault_d36_stray_dollar_reject.yaml) | reject, `E1002` at 2:15 | [E1xxx](../../../spec/v1.0/errors.md#e1xxx-lexical-and-syntax-errors): one diagnostic at the first fault |
 | DN-63 | [`dn63_fault_d37_stray_backtick_reject`](dn63_fault_d37_stray_backtick_reject.yaml) | reject, `E1002` at 2:13 | [E1xxx](../../../spec/v1.0/errors.md#e1xxx-lexical-and-syntax-errors): one diagnostic at the first fault |
 | DN-63 | [`dn63_fault_d38_stray_unicode_quote_reject`](dn63_fault_d38_stray_unicode_quote_reject.yaml) | reject, `E1002` at 2:13 | [E1xxx](../../../spec/v1.0/errors.md#e1xxx-lexical-and-syntax-errors): one diagnostic at the first fault |
-| DN-63 | [`dn63_fault_d39_stray_question_reject`](dn63_fault_d39_stray_question_reject.yaml) | reject, `E1101` at 2:14 | [E1xxx](../../../spec/v1.0/errors.md#e1xxx-lexical-and-syntax-errors): one diagnostic at the first fault |
+| DN-63 | [`dn63_fault_d39_stray_question_reject`](dn63_fault_d39_stray_question_reject.yaml) | reject, `E1105` at 2:14 | [E1xxx](../../../spec/v1.0/errors.md#e1xxx-lexical-and-syntax-errors): one diagnostic at the first fault |
 | DN-63 | [`dn63_fault_d40_tensor_missing_comma_reject`](dn63_fault_d40_tensor_missing_comma_reject.yaml) | reject, `E1103` at 1:19 | [E1xxx](../../../spec/v1.0/errors.md#e1xxx-lexical-and-syntax-errors): one diagnostic at the first fault |
 | DN-47 | [`dn47_fault_d23_range_for_accept`](dn47_fault_d23_range_for_accept.yaml) | accept, returns 1 | [Loops](../../../spec/v1.0/language.md#loops): counting loops |
 | DN-64 | [`dn64_habit_macro_call_reject`](dn64_habit_macro_call_reject.yaml) | reject, `E1105` at 2:13 | [E1105](../../../spec/v1.0/errors.md#e1105-form-that-mind-writes-another-way): the table of habit forms |
 | DN-64 | [`dn64_habit_reference_type_reject`](dn64_habit_reference_type_reject.yaml) | reject, `E1105` at 1:9 | as above |
 | DN-64 | [`dn64_habit_closure_bar_reject`](dn64_habit_closure_bar_reject.yaml) | reject, `E1105` at 2:13 | as above |
 | DN-64 | [`dn64_habit_if_let_reject`](dn64_habit_if_let_reject.yaml) | reject, `E1105` at 3:5 | as above |
-| DN-64 | [`dn64_habit_postfix_question_reject`](dn64_habit_postfix_question_reject.yaml) | reject, `E1105` at 6:13 | as above |
+| DN-64 | [`dn64_habit_postfix_question_reject`](dn64_habit_postfix_question_reject.yaml) | reject, `E1105` at 6:16 | as above |
 | DN-64 | [`dn64_name_near_keyword_accept`](dn64_name_near_keyword_accept.yaml) | accept, returns 1 | [`E1104`](../../../spec/v1.0/errors.md#e1104-misspelled-keyword) |
 | DN-63 | [`dn63_one_diagnostic_for_each_item_reject`](dn63_one_diagnostic_for_each_item_reject.yaml) | reject, `E1101` at 2:18, count 3 | [Diagnostics](../../../spec/v1.0/lexical.md#diagnostics): one diagnostic for each top-level item |
 | DN-63 | [`dn63_valid_program_accept`](dn63_valid_program_accept.yaml) | accept, returns 2 | [E1xxx](../../../spec/v1.0/errors.md#e1xxx-lexical-and-syntax-errors) |

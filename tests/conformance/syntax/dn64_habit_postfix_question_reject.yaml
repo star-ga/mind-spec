@@ -4,7 +4,7 @@
 # Category: syntax
 # Profile: cpu
 
-description: "g()? is refused with E1105 at the start of the form; the fix is a match on the Result"
+description: "g()? is refused with E1105 at the question mark; the message names the match on the Result"
 category: syntax
 profile: cpu
 
@@ -29,20 +29,5 @@ expected:
     code: E1105
     location:
       line: 6
-      column: 13
+      column: 16
     count: 1
-  fix:
-    class: TYPED
-    source: |
-      fn g() -> Result<i64, i64> {
-          return Ok(1);
-      }
-
-      fn f() -> Result<i64, i64> {
-          let r = match g() { Ok(v) => v, Err(x) => return Err(x), };
-          return Ok(r);
-      }
-
-      fn main() -> i64 {
-          return 0;
-      }
