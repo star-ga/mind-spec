@@ -39,8 +39,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   withdrawn and keep their entries with their history.
 - **Status, rows and checks.** [Core v1 Forms](../spec/v1.0/core-v1-forms.md) has a row for each decided form with the
   measured verdict of the reference compiler v0.10.4, which does not enforce most of the decisions yet; a decided
-  form that needs a rewrite is enforced only in a release that ships the migration tool. The conformance rows hold an
-  accept and a reject row for the decisions, with the code and the position of the fault. The checks of the
+  form that needs a rewrite is enforced only in a release that ships the migration tool. The conformance rows hold
+  rows for the decisions, with the code of the fault where the catalog gives one and its position where a rule fixes
+  it; the README of the syntax rows names the decisions DN-22 to DN-85 that have no accept or no reject row. The
+  checks of the
   repository run the grammar lint, whose budget is the three named undecided choices, and assert that the reserved
   word list equals the `Keyword` rule and that the code table equals the entries of the error catalog.
 

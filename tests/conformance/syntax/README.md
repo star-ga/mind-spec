@@ -78,7 +78,7 @@ a syntax fault gets one diagnostic ([Diagnostics](../../../spec/v1.0/lexical.md#
 | [`let_mut_reject_not_a_place`](./let_mut_reject_not_a_place.yaml) | reject, `E2402` | as above: the left operand MUST be a place |
 | [`colon_assign_reject`](./colon_assign_reject.yaml) | reject | [Tokens](../../../spec/v1.0/lexical.md#tokens): MIND has no operator `:=`; the accept side is `let_mut_accept_assignment` |
 | [`compound_assign_accept_six_operators`](./compound_assign_accept_six_operators.yaml) | accept, returns 59 | `AssignmentOperator` and [Bindings and assignment](../../../spec/v1.0/language.md#bindings-and-assignment): `x op= e` is `x = x op e` |
-| [`compound_assign_accept_longest_match`](./compound_assign_accept_longest_match.yaml) | accept, returns 4 | [Tokens](../../../spec/v1.0/lexical.md#tokens): longest match makes `<<=` one token |
+| [`compound_assign_accept_longest_match`](./compound_assign_accept_longest_match.yaml) | accept, returns 4 | [Tokens](../../../spec/v1.0/lexical.md#tokens): the joined tokens `<`, `<` and `=` are the operator `<<=` |
 | [`compound_assign_reject_mixed_types`](./compound_assign_reject_mixed_types.yaml) | reject, `E2004` | as above: `x %= y` is `x = x % y`, and the operands of `%` share a type |
 | [`bitwise_accept_and_or_xor`](./bitwise_accept_and_or_xor.yaml) | accept, returns 28 | `BitwiseExpression` and [Bitwise and shift operators](../../../spec/v1.0/language.md#bitwise-and-shift-operators), row 1 |
 | [`bitwise_accept_parentheses`](./bitwise_accept_parentheses.yaml) | accept, returns 23 | [Precedence rules](../../../spec/v1.0/language.md#precedence-rules): a bit operator beside `+` or `-` is written with parentheses (DN-50) |
@@ -199,8 +199,9 @@ in the folder of its category: the tensor forms in [`shapes`](../shapes), the gr
 [`autodiff`](../autodiff), the lexical forms in [`lexical`](../lexical), the type and pattern rules in
 [`type_checker`](../type_checker), and the rest in this folder. The rows `dn63_fault_*`, `dn64_fault_*` and
 `dn76_fault_*` are a set of 40 syntax faults; each has one fault, and its row gives the code and the position of the one
-diagnostic. DN-74 changes only names of the IR grammar and has no row; DN-25 and DN-69 have no refused form, and DN-84
-has no accept row, because the format has no project file that lists a tool.
+diagnostic. DN-74 changes only names of the IR grammar and has no row; DN-25 has no refused form; DN-69 has no reject
+row, because the nesting limit of an implementation has no upper bound; and DN-84 has no accept row and no row for its
+byte rule, because the format has no project file that lists a tool.
 
 | Decision | Row | Result | Rule |
 |----------|-----|--------|------|

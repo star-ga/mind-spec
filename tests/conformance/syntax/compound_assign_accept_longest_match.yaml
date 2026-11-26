@@ -1,9 +1,9 @@
-# MIND Conformance Test: x<<=1 with no spaces is the one token <<=; the program returns 4
+# MIND Conformance Test: x<<=1 with no spaces is the operator <<= of joined tokens; the program returns 4
 # Specification reference: spec/v1.0/lexical.md#tokens
 # Category: syntax
 # Profile: cpu
 
-description: "x<<=1 is x <<= 1 by the longest match rule; the program returns 4"
+description: "x<<=1 is x <<= 1: the joined tokens <, < and = form the operator; the program returns 4"
 category: syntax
 profile: cpu
 

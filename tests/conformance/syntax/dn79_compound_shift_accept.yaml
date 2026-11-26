@@ -1,10 +1,10 @@
-# MIND Conformance Test: <<= is one token
+# MIND Conformance Test: <<= written with no space is one operator
 # Specification reference: spec/v1.0/language.md#bindings-and-assignment
 # Decision: DN-79 (design/rfcs/decision-notes-3.md)
 # Category: syntax
 # Profile: cpu
 
-description: "<<= is one token; the program returns 4"
+description: "<<= written with no space is one operator; the program returns 4"
 category: syntax
 profile: cpu
 
