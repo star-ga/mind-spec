@@ -871,7 +871,7 @@ Shape errors occur during shape inference, broadcasting, or shape validation.
 - **Example**: `E3010: Tensor literal shape mismatch: declared [2, 3], inferred [2, 2] at line 8, column 10`
 
 ### E3011: Index outside its axis
-- **Trigger**: an index, or a slice bound, outside its axis that is an integer literal with its sign, with or
+- **Trigger**: an index, or a slice bound, outside its axis that is an integer literal alone or after a unary `-`, with or
   without parentheses around it (one pair or more), where the type gives the extent of the axis
   ([Index bounds](./ir.md#index-bounds)); no other index or bound
 - **Required context**: the index or the bound, the extent of the axis, source location

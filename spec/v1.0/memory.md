@@ -41,7 +41,7 @@ On a value `xs` of type `Vec<T>`, `xs[i]` is the element `i`, counted from 0, an
 of type `T` to the record and has the value `xs`. `xs.set(i, v)` replaces the element `i` with the value `v` of type
 `T`. An index outside the container is the case of
 [Index bounds](./ir.md#index-bounds). An index or a slice bound that is outside its axis MUST be refused at check time
-with [`E3011`](./errors.md#e3011-index-outside-its-axis) exactly when it is an integer literal with its sign
+with [`E3011`](./errors.md#e3011-index-outside-its-axis) exactly when it is an integer literal alone or after a unary `-`
 ([Literals](./lexical.md#literals)), with or without parentheses around it (one pair or more), and the type gives the
 extent of the axis; every other index or slice bound that is outside its axis makes the
 [defined stop](#the-defined-stop) at run time with [`E6001`](./errors.md#e6001-out-of-bounds-index), and an

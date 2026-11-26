@@ -74,7 +74,7 @@ Tensor operations introduce additional safety considerations:
 
 No operation of the language gives an undefined value. An index or a slice bound that is outside its axis MUST be
 refused at check time with [`E3011`](./errors.md#e3011-index-outside-its-axis) exactly when it is an integer literal
-with its sign ([Literals](./lexical.md#literals)), with or without parentheses around it (one pair or more), and the
+alone or after a unary `-` ([Literals](./lexical.md#literals)), with or without parentheses around it (one pair or more), and the
 type gives the extent of the axis; every other index or slice bound that is outside its axis makes the
 [defined stop](./memory.md#the-defined-stop) at run time with [`E6001`](./errors.md#e6001-out-of-bounds-index), and an
 implementation refuses no other index or slice bound at check time. On `a: [i64; 4]`, `a[4]`, `a[-1]` and `a[(4)]` are
