@@ -412,6 +412,7 @@ not a row.
 | DN-67 | [`dn67_qualified_variant_reject`](../type_checker/dn67_qualified_variant_reject.yaml) | reject, `E2002` | as above |
 | DN-68 | [`dn68_name_that_starts_with_where_accept`](../lexical/dn68_name_that_starts_with_where_accept.yaml) | accept, returns 2 | [Keywords](../../../spec/v1.0/lexical.md#keywords): `where` is reserved |
 | DN-68 | [`dn68_where_as_name_reject`](../lexical/dn68_where_as_name_reject.yaml) | reject, `E1007` at 2:9 | as above |
+| DN-68 | [`dn68_call_type_arguments_reject`](dn68_call_type_arguments_reject.yaml) | reject, `E1101` at 6:16 | [Field access and method calls](../../../spec/v1.0/language.md#field-access-and-method-calls): a call has no type-argument list |
 | DN-69 | [`dn69_parentheses_254_accept`](dn69_parentheses_254_accept.yaml) | accept, returns 1 | [Nesting depth](../../../spec/v1.0/language.md#nesting-depth): at least 256 |
 | DN-69 | [`dn69_long_chain_accept`](dn69_long_chain_accept.yaml) | accept, returns 1000 | as above |
 | DN-70 | [`dn70_index_with_cast_accept`](../type_checker/dn70_index_with_cast_accept.yaml) | accept, returns 2 | [Tuple index](../../../spec/v1.0/language.md#tuple-index) |

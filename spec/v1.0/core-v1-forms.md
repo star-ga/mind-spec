@@ -241,6 +241,7 @@ The repair table is permanent, and each code has one fix class ([Code table](./e
 | DN-67 | `Option::Some(1)`; `let None = 1;` | Core v1 refuses; the codes are `E2002` and `E2042` | Reference pending: `let None = 1;` is accepted and the image exits with 0 (`e3_dn67_bind_none`) |
 | DN-68 | `where` clause; `where` as a name | Core v1 refuses; `where` as a name is `E1007` | Reference pending: a `where` clause is refused with `E1001` (`g03_where`); `struct where` is accepted with a naming warning (`kw_struct_name`) |
 | DN-68 | `e.m::<A>(x)`: type arguments of a method | Not in Core v1 | `id::<i64>(5)` is refused with `E1001` (`g04_turbofish`) |
+| DN-68 | `id::<i64>(5)`: explicit type arguments at a call of a function | Core v1 refuses; the grammar has no derivation, and the code is `E1101` | Reference pending for the code: `mindc check` refuses it with `E1001`, "unexpected `:`" (`g04_turbofish`, `e4_h_call_type_args`) |
 | DN-69 | 256 nested parentheses; a chain of any length | Core v1 | Reference pending: a chain of 6000 terms stops the check with the status 134, "stack overflow" (`e80_long_chain`); 3000 nested parentheses are accepted (`e79_deep_parens`) |
 | DN-69 | Nesting deeper than the limit of the implementation | Core v1 refuses; the code is `E1108` | Reference pending: 20000 nested parentheses stop the check with the status 134 (`f05_parens_20000`) |
 | DN-70 | `a[1.5]` | Core v1 refuses; the code is `E2005` | Reference pending: `mindc check` accepts it, and the native build refuses it with `lane.type.mismatch` (`e3_dn70_float_index`) |

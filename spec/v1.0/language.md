@@ -635,7 +635,9 @@ resolves to a member of a module when `a` is an import qualifier, else to a meth
 A method call whose `m` is not a method of the type of `x` MUST be refused at check time with `E2410` ("no such
 method"): `5.nosuchmethod()` is refused. A field access `x.f` whose `f` is not a field of the type of `x` MUST be
 refused at check time, unless `x` is an import qualifier. A generic method takes its type arguments as
-`e.m::<A>(x)` (`MemberOperator`); this form is not in Core v1 ([Core v1 scope](#core-v1-scope)).
+`e.m::<A>(x)` (`MemberOperator`); this form is not in Core v1 ([Core v1 scope](#core-v1-scope)). A call of a function
+has no type-argument list: `id::<i64>(5)` has no derivation and MUST be refused with `E1101`; a later decision on
+generics can give it a form.
 
 A call follows only a function name, a variant path (`E::A(x)`) or a method name (`NamePath` and `MemberOperator` of
 the grammar). Core v1 has no function values, so a call of any other value has no derivation and MUST be refused with

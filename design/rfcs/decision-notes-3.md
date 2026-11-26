@@ -839,7 +839,8 @@ program can take it as a name.
 
 **Reason.** Option B: one place for a bound; and a reserved word keeps the choice open for a later decision.
 
-**Refused forms.** `fn f<T>(x: T) -> T where T: Numeric`; `where` as a name.
+**Refused forms.** `fn f<T>(x: T) -> T where T: Numeric`; `where` as a name; explicit type arguments at a call,
+`id::<i64>(5)` (no derivation).
 
 **Reference.** `mindc check` refuses a `where` clause with `E1001`, "expected '{', found Some('w')" (probe `g03_where`),
 and `id::<i64>(5)` with `E1001` (probe `g04_turbofish`); it accepts `struct where` with a naming warning (probe

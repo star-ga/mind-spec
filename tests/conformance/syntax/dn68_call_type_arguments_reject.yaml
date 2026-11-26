@@ -1,0 +1,28 @@
+# MIND Conformance Test: explicit type arguments at a call have no derivation
+# Specification reference: spec/v1.0/language.md#field-access-and-method-calls
+# Decision: DN-68 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "a call of a function has no type-argument list; id::<i64>(5) is refused with E1101 at the <"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn id(x: i64) -> i64 {
+        return x;
+    }
+
+    fn main() -> i64 {
+        return id::<i64>(5);
+    }
+
+expected:
+  status: error
+  error:
+    code: E1101
+    location:
+      line: 6
+      column: 16
+    count: 1
