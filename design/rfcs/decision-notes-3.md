@@ -970,8 +970,10 @@ comment.
 
 **Refused forms.** `///` before a statement; `//!` after the first item.
 
-**Reference.** `mindc check` refuses a source with `///`, `//!` and block forms with `E1001`, "unexpected '/'", at
-3:1 (probe `p29_cmt_doc_forms`), and a shebang line with `E1001`, "unexpected '#'" (probe `p36_ws_shebang`).
+**Reference.** `mindc check` accepts `///` before `fn main` and `//!` before the first item as comments, and the
+native images exit with 0 (probes `e4_cl_doc_line`, `e4_cl_doc_inner`, `e4_cl_doc_both`). It refuses the block form
+`/** */` with `E1001`, "unexpected '/'" (probe `e4_cl_doc_block`; probe `p29_cmt_doc_forms` holds it on line 3 and is
+refused at 3:1), and a shebang line with `E1001`, "unexpected '#'" (probe `p36_ws_shebang`).
 
 ## DN-78. The spelling of a tuple index
 
