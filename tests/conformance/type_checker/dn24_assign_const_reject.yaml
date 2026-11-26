@@ -1,0 +1,23 @@
+# MIND Conformance Test: a const is never the root of a place
+# Specification reference: spec/v1.0/language.md#bindings-and-assignment
+# Decision: DN-24 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "a const is never the root of a place; K = 5 is refused with E2402"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    const K: i64 = 4;
+
+    fn main() -> i64 {
+        K = 5;
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2402

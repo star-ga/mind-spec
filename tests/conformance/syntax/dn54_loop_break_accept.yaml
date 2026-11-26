@@ -1,0 +1,30 @@
+# MIND Conformance Test: loop runs its block until a break ends it
+# Specification reference: spec/v1.0/language.md#loops
+# Decision: DN-54 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "loop runs its block until a break ends it; the program returns 7"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let mut i = 0;
+        loop {
+            i += 1;
+            if i == 7 {
+                break;
+            }
+        }
+        return i;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 7

@@ -1,0 +1,21 @@
+# MIND Conformance Test: a tuple pattern of three names for a pair is refused with E2001
+# Specification reference: spec/v1.0/language.md#patterns-and-match
+# Decision: DN-36 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "a tuple pattern of three names for a pair is refused with E2001"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let (a, b, c) = (1, 2);
+        return a;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2001

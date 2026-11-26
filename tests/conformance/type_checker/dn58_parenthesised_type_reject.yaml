@@ -1,0 +1,21 @@
+# MIND Conformance Test: (i64) is not a type and is refused with E1101
+# Specification reference: spec/v1.0/types.md#type-formation
+# Decision: DN-58 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "(i64) is not a type and is refused with E1101"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let t: (i64) = (5,);
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1101

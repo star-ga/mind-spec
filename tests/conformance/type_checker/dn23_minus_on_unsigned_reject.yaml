@@ -1,0 +1,20 @@
+# MIND Conformance Test: a prefix minus on an unsigned operand is refused
+# Specification reference: spec/v1.0/language.md#operand-and-condition-types
+# Decision: DN-23 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "a prefix minus on an unsigned operand is refused"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let x: u8 = 3;
+        let y = -x;
+        return 0;
+    }
+
+expected:
+  status: error

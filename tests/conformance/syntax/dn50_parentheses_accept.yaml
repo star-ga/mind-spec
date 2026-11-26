@@ -1,0 +1,23 @@
+# MIND Conformance Test: (1 | 2) << 1 is 6
+# Specification reference: spec/v1.0/language.md#precedence-rules
+# Decision: DN-50 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "(1 | 2) << 1 is 6; the program returns 6"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        return (1 | 2) << 1;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 6

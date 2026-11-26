@@ -1,0 +1,27 @@
+# MIND Conformance Test: #[test] before a module-level function with no parameter and the result unit
+# Specification reference: spec/v1.0/language.md#attributes
+# Decision: DN-31 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "#[test] before a module-level function with no parameter and the result unit; the program returns 0"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    #[test]
+    fn t() {
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0

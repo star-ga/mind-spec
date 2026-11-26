@@ -1,0 +1,26 @@
+# MIND Conformance Test: (1 < 2) == true compares a bool
+# Specification reference: spec/v1.0/language.md#precedence-rules
+# Decision: DN-32 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "(1 < 2) == true compares a bool; the program returns 1"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        if (1 < 2) == true {
+            return 1;
+        }
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 1

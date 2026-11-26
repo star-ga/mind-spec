@@ -1,0 +1,24 @@
+# MIND Conformance Test: < on tensors is refused with E2008
+# Specification reference: spec/v1.0/shapes.md#comparison-of-tensors
+# Decision: DN-71 (design/rfcs/decision-notes-3.md)
+# Category: shapes
+# Profile: cpu
+
+description: "< on tensors is refused with E2008"
+category: shapes
+profile: cpu
+
+input:
+  source: |
+    fn f(a: Tensor<f32, [2]>, b: Tensor<f32, [2]>) -> bool {
+        return a < b;
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2008

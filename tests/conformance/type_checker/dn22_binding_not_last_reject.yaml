@@ -1,0 +1,27 @@
+# MIND Conformance Test: a bare binding arm before another arm is refused with E2312
+# Specification reference: spec/v1.0/language.md#patterns-and-match
+# Decision: DN-22 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "a bare binding arm before another arm is refused with E2312"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    fn k(x: i64) -> i64 {
+        return match x {
+            n => n,
+            0 => 1,
+        };
+    }
+
+    fn main() -> i64 {
+        return k(0);
+    }
+
+expected:
+  status: error
+  error:
+    code: E2312

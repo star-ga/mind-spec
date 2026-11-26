@@ -1,0 +1,30 @@
+# MIND Conformance Test: the range pattern 0..=5 takes 3
+# Specification reference: spec/v1.0/language.md#patterns-and-match
+# Decision: DN-80 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "the range pattern 0..=5 takes 3; the program returns 1"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn f(x: i64) -> i64 {
+        return match x {
+            0..=5 => 1,
+            _ => 2,
+        };
+    }
+
+    fn main() -> i64 {
+        return f(3);
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 1

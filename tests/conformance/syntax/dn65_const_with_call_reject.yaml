@@ -1,0 +1,26 @@
+# MIND Conformance Test: a const initializer with a call is refused with E2001
+# Specification reference: spec/v1.0/language.md#module-level
+# Decision: DN-65 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "a const initializer with a call is refused with E2001"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn f() -> i64 {
+        return 1;
+    }
+
+    const K: i64 = f();
+
+    fn main() -> i64 {
+        return K;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2001

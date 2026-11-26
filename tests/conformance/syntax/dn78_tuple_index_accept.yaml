@@ -1,0 +1,24 @@
+# MIND Conformance Test: t.1 is the second element
+# Specification reference: spec/v1.0/language.md#tuple-index
+# Decision: DN-78 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "t.1 is the second element; the program returns 5"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let t = (4, 5);
+        return t.1;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 5

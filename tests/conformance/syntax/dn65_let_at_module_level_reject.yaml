@@ -1,0 +1,26 @@
+# MIND Conformance Test: module level holds items only
+# Specification reference: spec/v1.0/language.md#module-level
+# Decision: DN-65 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "module level holds items only; a let there is refused with E1101 (expected an item)"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    let x = 1;
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1101
+    message_contains: "expected an item"
+    location:
+      line: 1
+      column: 1

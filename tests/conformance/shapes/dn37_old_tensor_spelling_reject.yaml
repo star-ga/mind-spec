@@ -1,0 +1,28 @@
+# MIND Conformance Test: tensor<f32[2]> is refused with E1105, which gives Tensor<f32, [2]>
+# Specification reference: spec/v1.0/shapes.md#the-tensor-type
+# Decision: DN-37 (design/rfcs/decision-notes-3.md)
+# Category: shapes
+# Profile: cpu
+
+description: "tensor<f32[2]> is refused with E1105, which gives Tensor<f32, [2]>"
+category: shapes
+profile: cpu
+
+input:
+  source: |
+    fn f(x: tensor<f32[2]>) -> i64 {
+        return 0;
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1105
+    message_contains: "Tensor<f32, [2]>"
+    location:
+      line: 1
+      column: 9

@@ -1,0 +1,29 @@
+# MIND Conformance Test: a loop that no break ends diverges, so it can end a body of the type i64
+# Specification reference: spec/v1.0/language.md#bindings-and-assignment
+# Decision: DN-24 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "a loop that no break ends diverges, so it can end a body of the type i64; the program returns 4"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    fn f() -> i64 {
+        loop {
+            return 4;
+        }
+    }
+
+    fn main() -> i64 {
+        return f();
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 4

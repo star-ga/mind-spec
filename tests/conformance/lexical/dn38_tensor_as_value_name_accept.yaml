@@ -1,0 +1,24 @@
+# MIND Conformance Test: tensor stays a valid name of a value
+# Specification reference: spec/v1.0/lexical.md#keywords
+# Decision: DN-38 (design/rfcs/decision-notes-3.md)
+# Category: lexical
+# Profile: cpu
+
+description: "tensor stays a valid name of a value; the program returns 3"
+category: lexical
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let tensor = 3;
+        return tensor;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 3

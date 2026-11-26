@@ -1,0 +1,22 @@
+# MIND Conformance Test: a 
+# Specification reference: spec/v1.0/language.md#statement-separators
+# Decision: DN-45 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "a ; after the block of a function is refused"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn f() -> i64 {
+        return 1;
+    };
+
+    fn main() -> i64 {
+        return f();
+    }
+
+expected:
+  status: error

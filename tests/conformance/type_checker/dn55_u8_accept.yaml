@@ -1,0 +1,24 @@
+# MIND Conformance Test: u8 holds 255
+# Specification reference: spec/v1.0/types.md#type-formation
+# Decision: DN-55 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "u8 holds 255; the program returns 255"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let x: u8 = 255;
+        return x as i64;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 255

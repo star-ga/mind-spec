@@ -1,0 +1,24 @@
+# MIND Conformance Test: the bare name Vec is refused
+# Specification reference: spec/v1.0/types.md#type-formation
+# Decision: DN-85 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "the bare name Vec is refused; the message gives Vec<T>"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    fn f(xs: Vec) -> i64 {
+        return 0;
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    message_contains: "Vec<"

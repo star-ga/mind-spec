@@ -1,0 +1,26 @@
+# MIND Conformance Test: syntax fault d12 (missing semi break): refused with E1103 at 3:14, one diagnostic
+# Specification reference: spec/v1.0/errors.md#e1xxx-lexical-and-syntax-errors
+# Decision: DN-63 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "syntax fault d12 (missing semi break): refused with E1103 at 3:14, one diagnostic"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        while true {
+            break
+        }
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1103
+    location:
+      line: 3
+      column: 14

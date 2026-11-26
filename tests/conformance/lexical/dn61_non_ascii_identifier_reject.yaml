@@ -1,0 +1,24 @@
+# MIND Conformance Test: identifiers are ASCII
+# Specification reference: spec/v1.0/lexical.md#identifiers
+# Decision: DN-61 (design/rfcs/decision-notes-3.md)
+# Category: lexical
+# Profile: cpu
+
+description: "identifiers are ASCII; let \u03b1 = 1; is refused with E1002"
+category: lexical
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let α = 1;
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1002
+    location:
+      line: 2
+      column: 9

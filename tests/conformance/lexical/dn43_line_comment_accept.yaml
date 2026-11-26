@@ -1,0 +1,24 @@
+# MIND Conformance Test: a line comment
+# Specification reference: spec/v1.0/lexical.md#comments-and-whitespace
+# Decision: DN-43 (design/rfcs/decision-notes-3.md)
+# Category: lexical
+# Profile: cpu
+
+description: "a line comment; the program returns 0"
+category: lexical
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        // a note
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0

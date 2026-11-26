@@ -1,0 +1,24 @@
+# MIND Conformance Test: an if of the type i64 at a statement start is a statement, so if c { 1 } else { 2 } - 3 is refused with E2001
+# Specification reference: spec/v1.0/language.md#block-like-statements
+# Decision: DN-41 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "an if of the type i64 at a statement start is a statement, so if c { 1 } else { 2 } - 3 is refused with E2001"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn f(c: bool) -> i64 {
+        if c { 1 } else { 2 } - 3
+    }
+
+    fn main() -> i64 {
+        return f(true);
+    }
+
+expected:
+  status: error
+  error:
+    code: E2001

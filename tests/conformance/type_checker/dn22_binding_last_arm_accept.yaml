@@ -1,0 +1,30 @@
+# MIND Conformance Test: a bare binding arm as the last arm takes every other value
+# Specification reference: spec/v1.0/language.md#patterns-and-match
+# Decision: DN-22 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "a bare binding arm as the last arm takes every other value; k(4) is 5"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    fn k(x: i64) -> i64 {
+        return match x {
+            0 => 1,
+            n => n + 1,
+        };
+    }
+
+    fn main() -> i64 {
+        return k(4);
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 5

@@ -1,0 +1,28 @@
+# MIND Conformance Test: syntax fault d17 (missing comma match arm): refused with E1103 at 4:15, one diagnostic
+# Specification reference: spec/v1.0/errors.md#e1xxx-lexical-and-syntax-errors
+# Decision: DN-63 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "syntax fault d17 (missing comma match arm): refused with E1103 at 4:15, one diagnostic"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let x = 1;
+        let y = match x {
+            1 => 5
+            _ => 6,
+        };
+        return y;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1103
+    location:
+      line: 4
+      column: 15

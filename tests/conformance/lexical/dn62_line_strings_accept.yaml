@@ -1,0 +1,27 @@
+# MIND Conformance Test: two line strings form one string literal
+# Specification reference: spec/v1.0/lexical.md#literals
+# Decision: DN-62 (design/rfcs/decision-notes-3.md)
+# Category: lexical
+# Profile: cpu
+
+description: "two line strings form one string literal; the program returns 0"
+category: lexical
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let s =
+            \\first
+            \\second
+        ;
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0

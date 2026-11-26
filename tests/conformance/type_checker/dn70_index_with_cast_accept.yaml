@@ -1,0 +1,25 @@
+# MIND Conformance Test: an index of an integer type
+# Specification reference: spec/v1.0/language.md#tuple-index
+# Decision: DN-70 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "an index of an integer type; a float is cast with as i64; the program returns 2"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let a: [i64; 3] = [1, 2, 3];
+        let f = 1.0;
+        return a[f as i64];
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 2

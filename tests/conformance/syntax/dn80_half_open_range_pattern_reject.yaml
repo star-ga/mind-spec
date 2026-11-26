@@ -1,0 +1,30 @@
+# MIND Conformance Test: a pattern takes only the closed form
+# Specification reference: spec/v1.0/language.md#patterns-and-match
+# Decision: DN-80 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "a pattern takes only the closed form; 0..5 is refused with E1101"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn f(x: i64) -> i64 {
+        return match x {
+            0..5 => 1,
+            _ => 2,
+        };
+    }
+
+    fn main() -> i64 {
+        return f(3);
+    }
+
+expected:
+  status: error
+  error:
+    code: E1101
+    location:
+      line: 3
+      column: 10

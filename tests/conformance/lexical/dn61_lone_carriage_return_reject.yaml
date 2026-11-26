@@ -1,0 +1,15 @@
+# MIND Conformance Test: a CR that LF does not follow is refused
+# Specification reference: spec/v1.0/lexical.md#source-text
+# Decision: DN-61 (design/rfcs/decision-notes-3.md)
+# Category: lexical
+# Profile: cpu
+
+description: "a CR that LF does not follow is refused"
+category: lexical
+profile: cpu
+
+input:
+  source: "fn main() -> i64 {\r    return 0;\n}\n"
+
+expected:
+  status: error

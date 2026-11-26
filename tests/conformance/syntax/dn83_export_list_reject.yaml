@@ -1,0 +1,24 @@
+# MIND Conformance Test: the list form export { f } is refused
+# Specification reference: spec/v1.0/language.md#visibility
+# Decision: DN-83 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "the list form export { f } is refused"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn f() -> i64 {
+        return 1;
+    }
+
+    export { f }
+
+    fn main() -> i64 {
+        return f();
+    }
+
+expected:
+  status: error

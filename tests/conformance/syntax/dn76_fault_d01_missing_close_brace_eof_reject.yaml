@@ -1,0 +1,24 @@
+# MIND Conformance Test: syntax fault d01 (missing close brace eof): refused with E1102 at 4:1, one diagnostic
+# Specification reference: spec/v1.0/errors.md#e1xxx-lexical-and-syntax-errors
+# Decision: DN-76 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "syntax fault d01 (missing close brace eof): refused with E1102 at 4:1, one diagnostic"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let x = 1;
+        return x;
+
+expected:
+  status: error
+  error:
+    code: E1102
+    message_contains: "end of file"
+    location:
+      line: 4
+      column: 1

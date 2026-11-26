@@ -1,5 +1,6 @@
 # MIND Conformance Test: Sum Gradient
 # Specification reference: spec/v1.0/autodiff.md#reduction-gradients
+# Specification reference: spec/v1.0/autodiff.md#source-form-the-gradient-attribute
 # Category: autodiff
 # Profile: cpu
 
@@ -9,16 +10,15 @@ profile: cpu
 
 input:
   source: |
-    import diff::grad;
-
+    #[grad(dsum, x)]
     fn sum_fn(x: Tensor<f32, [2, 3]>) -> f32 {
-        sum(x, axes=[], keepdims=false)
+        return sum(x, [], false);
     }
 
     fn test_sum_grad() -> Tensor<f32, [2, 3]> {
         let x: Tensor<f32, [2, 3]> = [[1.0, 2.0, 3.0],
                                        [4.0, 5.0, 6.0]];
-        grad(sum_fn)(x)
+        return dsum(x);
     }
 
 expected:

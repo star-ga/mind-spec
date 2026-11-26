@@ -1,0 +1,25 @@
+# MIND Conformance Test: inside an index :: is two slice colons
+# Specification reference: spec/v1.0/language.md#tuple-index
+# Decision: DN-42 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "inside an index :: is two slice colons; a[1::2] takes the elements 1 and 3; the program returns 6"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let a: [i64; 4] = [1, 2, 3, 4];
+        let b = a[1::2];
+        return b[0] + b[1];
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 6

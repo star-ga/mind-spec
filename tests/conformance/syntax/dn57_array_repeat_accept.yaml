@@ -1,0 +1,24 @@
+# MIND Conformance Test: [7
+# Specification reference: spec/v1.0/language.md#tuple-index
+# Decision: DN-57 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "[7; 3] builds three copies of 7; the program returns 7"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let a = [7; 3];
+        return a[2];
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 7

@@ -1,0 +1,23 @@
+# MIND Conformance Test: #[grad(dsq, y)] names no parameter of sq and is refused
+# Specification reference: spec/v1.0/autodiff.md#source-form-the-gradient-attribute
+# Decision: DN-82 (design/rfcs/decision-notes-3.md)
+# Category: autodiff
+# Profile: cpu
+
+description: "#[grad(dsq, y)] names no parameter of sq and is refused"
+category: autodiff
+profile: cpu
+
+input:
+  source: |
+    #[grad(dsq, y)]
+    fn sq(x: f64) -> f64 {
+        return x * x;
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: error

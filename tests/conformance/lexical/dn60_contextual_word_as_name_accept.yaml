@@ -1,0 +1,24 @@
+# MIND Conformance Test: diff is not a keyword
+# Specification reference: spec/v1.0/lexical.md#keywords
+# Decision: DN-60 (design/rfcs/decision-notes-3.md)
+# Category: lexical
+# Profile: cpu
+
+description: "diff is not a keyword; the program returns 1"
+category: lexical
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let diff = 1;
+        return diff;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 1

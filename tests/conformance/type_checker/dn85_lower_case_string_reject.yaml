@@ -1,0 +1,24 @@
+# MIND Conformance Test: string is refused
+# Specification reference: spec/v1.0/types.md#type-formation
+# Decision: DN-85 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "string is refused; the message gives String"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    fn f(s: string) -> i64 {
+        return 0;
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    message_contains: "String"

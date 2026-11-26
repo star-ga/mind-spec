@@ -1,0 +1,24 @@
+# MIND Conformance Test: syntax fault d30 (misspelled fn): refused with E1104 at 1:1, one diagnostic
+# Specification reference: spec/v1.0/errors.md#e1xxx-lexical-and-syntax-errors
+# Decision: DN-64 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "syntax fault d30 (misspelled fn): refused with E1104 at 1:1, one diagnostic"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fnn main() -> i64 {
+        return 1;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1104
+    message_contains: "`fn`"
+    location:
+      line: 1
+      column: 1

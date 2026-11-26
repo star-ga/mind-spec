@@ -1,0 +1,25 @@
+# MIND Conformance Test: x + = 2 is refused with E1101
+# Specification reference: spec/v1.0/language.md#bindings-and-assignment
+# Decision: DN-79 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "x + = 2 is refused with E1101"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let mut x = 1;
+        x + = 2;
+        return x;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1101
+    location:
+      line: 3
+      column: 9

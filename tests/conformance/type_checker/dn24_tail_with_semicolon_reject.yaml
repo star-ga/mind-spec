@@ -1,0 +1,22 @@
+# MIND Conformance Test: e
+# Specification reference: spec/v1.0/language.md#bindings-and-assignment
+# Decision: DN-24 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "e; discards its value, so a body that ends with 2; has no value of the type i64"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    fn f() -> i64 {
+        2;
+    }
+
+    fn main() -> i64 {
+        return f();
+    }
+
+expected:
+  status: error

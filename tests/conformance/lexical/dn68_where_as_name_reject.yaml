@@ -1,0 +1,24 @@
+# MIND Conformance Test: where is a reserved word
+# Specification reference: spec/v1.0/lexical.md#keywords
+# Decision: DN-68 (design/rfcs/decision-notes-3.md)
+# Category: lexical
+# Profile: cpu
+
+description: "where is a reserved word; let where = 1; is refused with E1007"
+category: lexical
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let where = 1;
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1007
+    location:
+      line: 2
+      column: 9

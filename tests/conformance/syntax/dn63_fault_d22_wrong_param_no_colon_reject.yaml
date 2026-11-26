@@ -1,0 +1,27 @@
+# MIND Conformance Test: syntax fault d22 (wrong param no colon): refused with E1101 at 1:7, one diagnostic
+# Specification reference: spec/v1.0/errors.md#e1xxx-lexical-and-syntax-errors
+# Decision: DN-63 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "syntax fault d22 (wrong param no colon): refused with E1101 at 1:7, one diagnostic"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn f(a i64) -> i64 {
+        return 1;
+    }
+
+    fn main() -> i64 {
+        return 1;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1101
+    location:
+      line: 1
+      column: 7

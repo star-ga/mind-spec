@@ -1,0 +1,22 @@
+# MIND Conformance Test: the right side of = has the type of the place
+# Specification reference: spec/v1.0/language.md#bindings-and-assignment
+# Decision: DN-24 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "the right side of = has the type of the place; x = true on an i64 place is refused with E2001"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let mut x = 1;
+        x = true;
+        return x;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2001

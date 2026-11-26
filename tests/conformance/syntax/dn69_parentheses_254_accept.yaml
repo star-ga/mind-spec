@@ -1,0 +1,23 @@
+# MIND Conformance Test: 254 nested parentheses in the body of main (255 levels with the block) are accepted
+# Specification reference: spec/v1.0/language.md#nesting-depth
+# Decision: DN-69 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "254 nested parentheses in the body of main (255 levels with the block) are accepted; the program returns 1"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        return ((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((1))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))));
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 1

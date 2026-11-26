@@ -1,0 +1,27 @@
+# MIND Conformance Test: for i in 3..3 is empty
+# Specification reference: spec/v1.0/language.md#loops
+# Decision: DN-47 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "for i in 3..3 is empty; the program returns 0"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let mut s = 0;
+        for i in 3..3 {
+            s += 1;
+        }
+        return s;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0

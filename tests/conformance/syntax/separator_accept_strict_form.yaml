@@ -16,7 +16,7 @@ input:
             y => y,
         };
         let w = match 4 {
-            z => { z }
+            z => { z },
         };
         return v + w;
     }

@@ -1,0 +1,24 @@
+# MIND Conformance Test: a cast to a tensor type (here through a type alias) is refused with E2016
+# Specification reference: spec/v1.0/shapes.md#tensor-literals
+# Decision: DN-40 (design/rfcs/decision-notes-3.md)
+# Category: shapes
+# Profile: cpu
+
+description: "a cast to a tensor type (here through a type alias) is refused with E2016"
+category: shapes
+profile: cpu
+
+input:
+  source: |
+    type V = Tensor<f32, [2]>;
+
+    fn main() -> i64 {
+        let x: f32 = 1.0;
+        let t = x as V;
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2016

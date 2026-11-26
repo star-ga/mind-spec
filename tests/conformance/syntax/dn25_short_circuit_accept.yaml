@@ -1,0 +1,28 @@
+# MIND Conformance Test: the right operand of && is not evaluated when the left one is false
+# Specification reference: spec/v1.0/language.md#evaluation-order
+# Decision: DN-25 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "the right operand of && is not evaluated when the left one is false; the program returns 7 and makes no stop"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let a: [i64; 2] = [1, 2];
+        let i = 5;
+        if false && a[i] == 1 {
+            return 1;
+        }
+        return 7;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 7

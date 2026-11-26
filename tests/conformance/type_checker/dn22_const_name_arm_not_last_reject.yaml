@@ -1,0 +1,29 @@
+# MIND Conformance Test: an unguarded arm named like a const item, not the last arm, is refused with E2301
+# Specification reference: spec/v1.0/language.md#patterns-and-match
+# Decision: DN-22 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "an unguarded arm named like a const item, not the last arm, is refused with E2301"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    const K: i64 = 1;
+
+    fn main() -> i64 {
+        let x = 1;
+        return match x {
+            K => 10,
+            _ => 20,
+        };
+    }
+
+expected:
+  status: error
+  error:
+    code: E2301
+    location:
+      line: 6
+      column: 9

@@ -1,0 +1,27 @@
+# MIND Conformance Test: (x, 0) | (0, y) binds different names and is refused with E2313
+# Specification reference: spec/v1.0/language.md#patterns-and-match
+# Decision: DN-66 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "(x, 0) | (0, y) binds different names and is refused with E2313"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    fn f(t: (i64, i64)) -> i64 {
+        return match t {
+            (x, 0) | (0, y) => 1,
+            _ => 0,
+        };
+    }
+
+    fn main() -> i64 {
+        return f((1, 0));
+    }
+
+expected:
+  status: error
+  error:
+    code: E2313

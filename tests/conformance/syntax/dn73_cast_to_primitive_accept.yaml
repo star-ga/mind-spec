@@ -1,0 +1,24 @@
+# MIND Conformance Test: 3 as i64
+# Specification reference: spec/v1.0/language.md#casts
+# Decision: DN-73 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "3 as i64; the program returns 3"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let y = 3 as i64;
+        return y;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 3

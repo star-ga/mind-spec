@@ -1,0 +1,24 @@
+# MIND Conformance Test: a comma builds a tuple, it is not an operator
+# Specification reference: spec/v1.0/language.md#operator-precedence-and-associativity
+# Decision: DN-75 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "a comma builds a tuple, it is not an operator; the program returns 2"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let t = (1, 2);
+        return t.1;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 2

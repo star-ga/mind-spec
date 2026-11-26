@@ -1,0 +1,26 @@
+# MIND Conformance Test: assert c, "m"
+# Specification reference: spec/v1.0/language.md#statement-separators
+# Decision: DN-45 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "assert c, \"m\"; is a keyword statement; the program returns 2"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    const K: i64 = 2;
+
+    fn main() -> i64 {
+        assert K == 2, "K is 2";
+        return K;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 2

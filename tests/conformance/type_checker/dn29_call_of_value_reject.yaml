@@ -1,0 +1,21 @@
+# MIND Conformance Test: a call of a name that is a value is refused with E2409
+# Specification reference: spec/v1.0/errors.md#e2409-callee-is-not-a-function
+# Decision: DN-29 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "a call of a name that is a value is refused with E2409"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let f = 1;
+        return f(2);
+    }
+
+expected:
+  status: error
+  error:
+    code: E2409

@@ -1,0 +1,27 @@
+# MIND Conformance Test: x > = 1: a space breaks the operator >=, and the source is refused with E1101
+# Specification reference: spec/v1.0/lexical.md#tokens
+# Decision: DN-52 (design/rfcs/decision-notes-3.md)
+# Category: lexical
+# Profile: cpu
+
+description: "x > = 1: a space breaks the operator >=, and the source is refused with E1101"
+category: lexical
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let x = 2;
+        if x > = 1 {
+            return 1;
+        }
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1101
+    location:
+      line: 3
+      column: 12

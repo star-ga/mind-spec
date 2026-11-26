@@ -1,0 +1,23 @@
+# MIND Conformance Test: an integer condition is refused with E2001
+# Specification reference: spec/v1.0/language.md#operand-and-condition-types
+# Decision: DN-23 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "an integer condition is refused with E2001"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        if 5 {
+            return 7;
+        }
+        return 3;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2001

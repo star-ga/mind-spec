@@ -1,0 +1,24 @@
+# MIND Conformance Test: _ where an expression stands has no derivation and is refused with E1101
+# Specification reference: spec/v1.0/lexical.md#identifiers
+# Decision: DN-27 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "_ where an expression stands has no derivation and is refused with E1101"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let _ = 7;
+        return _;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1101
+    location:
+      line: 3
+      column: 12

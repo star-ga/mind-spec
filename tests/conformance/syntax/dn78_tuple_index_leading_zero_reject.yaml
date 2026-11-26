@@ -1,0 +1,21 @@
+# MIND Conformance Test: t.01 is refused with E2404
+# Specification reference: spec/v1.0/language.md#tuple-index
+# Decision: DN-78 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "t.01 is refused with E2404"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let t = (4, 5);
+        return t.01;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2404

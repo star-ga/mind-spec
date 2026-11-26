@@ -1,0 +1,21 @@
+# MIND Conformance Test: let true = 5
+# Specification reference: spec/v1.0/lexical.md#keywords
+# Decision: DN-33 (design/rfcs/decision-notes-3.md)
+# Category: lexical
+# Profile: cpu
+
+description: "let true = 5; is refused with E1007 at the word"
+category: lexical
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 { let true = 5; return 1; }
+
+expected:
+  status: error
+  error:
+    code: E1007
+    location:
+      line: 1
+      column: 24

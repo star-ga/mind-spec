@@ -1,0 +1,24 @@
+# MIND Conformance Test: t.0 - 1 on a tuple
+# Specification reference: spec/v1.0/language.md#tensor-operators-and-broadcasting
+# Decision: DN-51 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "t.0 - 1 on a tuple; the program returns 0"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let t = (1, 2);
+        return t.0 - 1;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0

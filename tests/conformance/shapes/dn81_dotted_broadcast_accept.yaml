@@ -1,0 +1,27 @@
+# MIND Conformance Test: col .+ row broadcasts [3, 1] and [1, 4] to [3, 4]
+# Specification reference: spec/v1.0/shapes.md#elementwise-binary
+# Decision: DN-81 (design/rfcs/decision-notes-3.md)
+# Category: shapes
+# Profile: cpu
+
+description: "col .+ row broadcasts [3, 1] and [1, 4] to [3, 4]; the program returns 0"
+category: shapes
+profile: cpu
+
+input:
+  source: |
+    fn f(col: Tensor<f32, [3, 1]>, row: Tensor<f32, [1, 4]>) -> Tensor<f32, [3, 4]> {
+        return col .+ row;
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0

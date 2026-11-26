@@ -1,0 +1,26 @@
+# MIND Conformance Test: an array type length is an integer literal or a const name
+# Specification reference: spec/v1.0/language.md#tuple-index
+# Decision: DN-57 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "an array type length is an integer literal or a const name; the program returns 3"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    const N: i64 = 3;
+
+    fn main() -> i64 {
+        let a: [i64; N] = [1, 2, 3];
+        return a[2];
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 3

@@ -1,0 +1,30 @@
+# MIND Conformance Test: a block body of an arm is a block expression, so { 1 } - 1 is 0
+# Specification reference: spec/v1.0/language.md#patterns-and-match
+# Decision: DN-46 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "a block body of an arm is a block expression, so { 1 } - 1 is 0; the program returns 0"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn f(x: i64) -> i64 {
+        return match x {
+            0 => { 1 } - 1,
+            _ => 2,
+        };
+    }
+
+    fn main() -> i64 {
+        return f(0);
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0

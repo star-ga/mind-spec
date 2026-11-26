@@ -1,0 +1,27 @@
+# MIND Conformance Test: a plain operator on two tensors of one shape, and a scalar that extends
+# Specification reference: spec/v1.0/shapes.md#elementwise-binary
+# Decision: DN-81 (design/rfcs/decision-notes-3.md)
+# Category: shapes
+# Profile: cpu
+
+description: "a plain operator on two tensors of one shape, and a scalar that extends; the program returns 0"
+category: shapes
+profile: cpu
+
+input:
+  source: |
+    fn f(a: Tensor<f32, [3, 4]>, b: Tensor<f32, [3, 4]>, k: f32) -> Tensor<f32, [3, 4]> {
+        return a + b * k;
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0

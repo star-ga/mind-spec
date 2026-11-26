@@ -1,0 +1,30 @@
+# MIND Conformance Test: 1 | 2 matches 2
+# Specification reference: spec/v1.0/language.md#patterns-and-match
+# Decision: DN-66 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "1 | 2 matches 2; the program returns 10"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    fn f(x: i64) -> i64 {
+        return match x {
+            1 | 2 => 10,
+            _ => 0,
+        };
+    }
+
+    fn main() -> i64 {
+        return f(2);
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 10

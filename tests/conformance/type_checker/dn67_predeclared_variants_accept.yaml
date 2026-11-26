@@ -1,0 +1,30 @@
+# MIND Conformance Test: Some and None are the spellings of the variants of Option
+# Specification reference: spec/v1.0/language.md#patterns-and-match
+# Decision: DN-67 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "Some and None are the spellings of the variants of Option; the program returns 1"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    fn f(o: Option<i64>) -> i64 {
+        return match o {
+            Some(v) => v,
+            None => 0,
+        };
+    }
+
+    fn main() -> i64 {
+        return f(Some(1));
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 1

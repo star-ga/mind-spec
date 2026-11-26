@@ -1,0 +1,24 @@
+# MIND Conformance Test: /* is refused with E1010
+# Specification reference: spec/v1.0/lexical.md#comments-and-whitespace
+# Decision: DN-43 (design/rfcs/decision-notes-3.md)
+# Category: lexical
+# Profile: cpu
+
+description: "/* is refused with E1010"
+category: lexical
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        /* a note */
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1010
+    location:
+      line: 2
+      column: 5

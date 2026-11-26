@@ -1,0 +1,27 @@
+# MIND Conformance Test: syntax fault d21 (wrong do keyword): refused with E1105 at 3:17, one diagnostic
+# Specification reference: spec/v1.0/errors.md#e1xxx-lexical-and-syntax-errors
+# Decision: DN-64 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "syntax fault d21 (wrong do keyword): refused with E1105 at 3:17, one diagnostic"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let x = 1;
+        while x < 3 do {
+            return 2;
+        }
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1105
+    location:
+      line: 3
+      column: 17

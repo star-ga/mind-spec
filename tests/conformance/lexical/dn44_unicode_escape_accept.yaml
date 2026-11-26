@@ -1,0 +1,24 @@
+# MIND Conformance Test: "\u{41}" is the string A
+# Specification reference: spec/v1.0/lexical.md#literals
+# Decision: DN-44 (design/rfcs/decision-notes-3.md)
+# Category: lexical
+# Profile: cpu
+
+description: "\"\\u{41}\" is the string A; the program returns 0"
+category: lexical
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let s = "\u{41}";
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0

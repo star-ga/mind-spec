@@ -1,0 +1,21 @@
+# MIND Conformance Test: "\u{D800}" is in D800 to DFFF and is refused with E1004
+# Specification reference: spec/v1.0/lexical.md#literals
+# Decision: DN-44 (design/rfcs/decision-notes-3.md)
+# Category: lexical
+# Profile: cpu
+
+description: "\"\\u{D800}\" is in D800 to DFFF and is refused with E1004"
+category: lexical
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let s = "\u{D800}";
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1004

@@ -1,0 +1,25 @@
+# MIND Conformance Test: in a head an identifier followed by { starts the block
+# Specification reference: spec/v1.0/language.md#record-literals
+# Decision: DN-28 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "in a head an identifier followed by { starts the block; the program returns 4"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let c = true;
+        if c { } (3);
+        return 4;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 4

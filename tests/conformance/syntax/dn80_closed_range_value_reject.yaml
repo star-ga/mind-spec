@@ -1,0 +1,24 @@
+# MIND Conformance Test: let r = 0..=3
+# Specification reference: spec/v1.0/language.md#loops
+# Decision: DN-80 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "let r = 0..=3; has no derivation and is refused with E1101"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let r = 0..=3;
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1101
+    location:
+      line: 2
+      column: 14

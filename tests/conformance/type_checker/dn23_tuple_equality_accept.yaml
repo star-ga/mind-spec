@@ -1,0 +1,27 @@
+# MIND Conformance Test: two tuples compare element by element
+# Specification reference: spec/v1.0/language.md#operand-and-condition-types
+# Decision: DN-23 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "two tuples compare element by element; the program returns 1"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let t = (1, 2) == (1, 2);
+        if t {
+            return 1;
+        }
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 1

@@ -1,0 +1,28 @@
+# MIND Conformance Test: an attribute name of three segments has no derivation and is refused with E1101
+# Specification reference: spec/v1.0/language.md#attributes
+# Decision: DN-84 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "an attribute name of three segments has no derivation and is refused with E1101"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    #[a.b.c]
+    fn f() -> i64 {
+        return 1;
+    }
+
+    fn main() -> i64 {
+        return f();
+    }
+
+expected:
+  status: error
+  error:
+    code: E1101
+    location:
+      line: 1
+      column: 6

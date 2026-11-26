@@ -1,0 +1,28 @@
+# MIND Conformance Test: the left operand is evaluated first: the left || operand is true, so the stop of the right one never happens
+# Specification reference: spec/v1.0/language.md#evaluation-order
+# Decision: DN-25 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "the left operand is evaluated first: the left || operand is true, so the stop of the right one never happens; the program returns 3"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let a: [i64; 2] = [1, 2];
+        let i = 9;
+        if true || a[i] == 1 {
+            return 3;
+        }
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 3

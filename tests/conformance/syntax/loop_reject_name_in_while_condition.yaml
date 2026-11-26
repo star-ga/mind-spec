@@ -1,0 +1,25 @@
+# MIND Conformance Test: loop is a keyword, also before a while condition
+# Specification reference: spec/v1.0/lexical.md#keywords
+# Decision: DN-54 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "let loop = false; is refused with E1007 at the word"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let loop = false;
+        while loop { }
+        return 3;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1007
+    location:
+      line: 2
+      column: 9

@@ -1,0 +1,27 @@
+# MIND Conformance Test: x & 3 == 2 is (x & 3) == 2
+# Specification reference: spec/v1.0/language.md#precedence-rules
+# Decision: DN-50 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "x & 3 == 2 is (x & 3) == 2; with x = 6 the program returns 1"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let x = 6;
+        if x & 3 == 2 {
+            return 1;
+        }
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 1

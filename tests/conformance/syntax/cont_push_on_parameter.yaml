@@ -9,13 +9,13 @@ profile: cpu
 
 input:
   source: |
-    fn grow(p: array<i64>) -> i64 {
+    fn grow(p: Vec<i64>) -> i64 {
         p.push(3);
         return 0;
     }
 
     fn main() -> i64 {
-        let xs: array<i64> = [1];
+        let xs: Vec<i64> = [1];
         return grow(xs);
     }
 

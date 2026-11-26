@@ -1,0 +1,29 @@
+# MIND Conformance Test: P { x: 1, y: 2 } builds a struct value
+# Specification reference: spec/v1.0/language.md#record-literals
+# Decision: DN-28 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "P { x: 1, y: 2 } builds a struct value; the program returns 2"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    struct P {
+        x: i64,
+        y: i64,
+    }
+
+    fn main() -> i64 {
+        let p = P { x: 1, y: 2 };
+        return p.y;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 2

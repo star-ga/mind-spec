@@ -1,0 +1,27 @@
+# MIND Conformance Test: true is a keyword and a value
+# Specification reference: spec/v1.0/lexical.md#keywords
+# Decision: DN-33 (design/rfcs/decision-notes-3.md)
+# Category: lexical
+# Profile: cpu
+
+description: "true is a keyword and a value; the program returns 3"
+category: lexical
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let t = true;
+        if t {
+            return 3;
+        }
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 3

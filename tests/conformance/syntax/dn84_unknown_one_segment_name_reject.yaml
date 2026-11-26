@@ -1,0 +1,25 @@
+# MIND Conformance Test: a one-segment name that the table does not list is refused with E2502
+# Specification reference: spec/v1.0/language.md#attributes
+# Decision: DN-84 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "a one-segment name that the table does not list is refused with E2502"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    #[fast]
+    fn f() -> i64 {
+        return 1;
+    }
+
+    fn main() -> i64 {
+        return f();
+    }
+
+expected:
+  status: error
+  error:
+    code: E2502

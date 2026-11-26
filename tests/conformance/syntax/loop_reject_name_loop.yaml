@@ -1,0 +1,24 @@
+# MIND Conformance Test: loop is a keyword and cannot be a name
+# Specification reference: spec/v1.0/lexical.md#keywords
+# Decision: DN-54 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "let loop = 1; is refused with E1007 at the word"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let loop = 1;
+        return loop;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1007
+    location:
+      line: 2
+      column: 9

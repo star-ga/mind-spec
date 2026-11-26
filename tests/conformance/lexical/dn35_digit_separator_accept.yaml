@@ -1,0 +1,24 @@
+# MIND Conformance Test: 1_000 is one thousand
+# Specification reference: spec/v1.0/lexical.md#literals
+# Decision: DN-35 (design/rfcs/decision-notes-3.md)
+# Category: lexical
+# Profile: cpu
+
+description: "1_000 is one thousand; the program returns 1"
+category: lexical
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let x = 1_000;
+        return x - 999;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 1

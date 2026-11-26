@@ -1,0 +1,20 @@
+# MIND Conformance Test: NUL in a comment is refused with E1008
+# Specification reference: spec/v1.0/lexical.md#source-text
+# Decision: DN-61 (design/rfcs/decision-notes-3.md)
+# Category: lexical
+# Profile: cpu
+
+description: "NUL in a comment is refused with E1008"
+category: lexical
+profile: cpu
+
+input:
+  source: "fn main() -> i64 {\n    // a \u0000 b\n    return 0;\n}\n"
+
+expected:
+  status: error
+  error:
+    code: E1008
+    location:
+      line: 2
+      column: 10

@@ -1,0 +1,28 @@
+# MIND Conformance Test: syntax fault d08 (missing close brace match): refused with E1102 at 6:5, one diagnostic
+# Specification reference: spec/v1.0/errors.md#e1xxx-lexical-and-syntax-errors
+# Decision: DN-63 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "syntax fault d08 (missing close brace match): refused with E1102 at 6:5, one diagnostic"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let x = 1;
+        let y = match x {
+            1 => 5,
+            _ => 6,
+        ;
+        return y;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1102
+    location:
+      line: 6
+      column: 5

@@ -1,0 +1,24 @@
+# MIND Conformance Test: an array literal with an expected tensor type is a tensor literal
+# Specification reference: spec/v1.0/shapes.md#tensor-literals
+# Decision: DN-40 (design/rfcs/decision-notes-3.md)
+# Category: shapes
+# Profile: cpu
+
+description: "an array literal with an expected tensor type is a tensor literal; the program returns 0"
+category: shapes
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let m: Tensor<f32, [2, 3]> = [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]];
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0

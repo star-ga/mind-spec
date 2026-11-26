@@ -1,0 +1,24 @@
+# MIND Conformance Test: syntax fault d20 (wrong missing type after colon): refused with E1101 at 2:12, one diagnostic
+# Specification reference: spec/v1.0/errors.md#e1xxx-lexical-and-syntax-errors
+# Decision: DN-63 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "syntax fault d20 (wrong missing type after colon): refused with E1101 at 2:12, one diagnostic"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let x: = 5;
+        return x;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1101
+    location:
+      line: 2
+      column: 12

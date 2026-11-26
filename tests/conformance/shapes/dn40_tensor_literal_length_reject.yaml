@@ -1,0 +1,21 @@
+# MIND Conformance Test: three elements for the dimension 2 are refused with E3010
+# Specification reference: spec/v1.0/shapes.md#tensor-literals
+# Decision: DN-40 (design/rfcs/decision-notes-3.md)
+# Category: shapes
+# Profile: cpu
+
+description: "three elements for the dimension 2 are refused with E3010"
+category: shapes
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let t: Tensor<f32, [2]> = [1.0, 2.0, 3.0];
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E3010

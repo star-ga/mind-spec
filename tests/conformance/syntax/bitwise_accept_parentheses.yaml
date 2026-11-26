@@ -1,0 +1,25 @@
+# MIND Conformance Test: a bit operator beside + or - is written with parentheses
+# Specification reference: spec/v1.0/language.md#precedence-rules
+# Decision: DN-50 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "20 - (17 >> 2) is 16 and 6 + (5 & 3) is 7; the program returns 23"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let a: i64 = 20 - (17 >> 2);
+        let b: i64 = 6 + (5 & 3);
+        return a + b;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 23

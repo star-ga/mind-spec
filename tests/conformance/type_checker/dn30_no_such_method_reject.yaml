@@ -1,0 +1,21 @@
+# MIND Conformance Test: a method that the type does not have is refused with E2410
+# Specification reference: spec/v1.0/language.md#field-access-and-method-calls
+# Decision: DN-30 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "a method that the type does not have is refused with E2410"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        return 5.nosuchmethod();
+    }
+
+expected:
+  status: error
+  error:
+    code: E2410
+    message_contains: "no such method"

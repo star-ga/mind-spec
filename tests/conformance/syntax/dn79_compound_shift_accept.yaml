@@ -1,0 +1,25 @@
+# MIND Conformance Test: <<= is one token
+# Specification reference: spec/v1.0/language.md#bindings-and-assignment
+# Decision: DN-79 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "<<= is one token; the program returns 4"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let mut x = 1;
+        x <<= 2;
+        return x;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 4

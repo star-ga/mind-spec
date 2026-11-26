@@ -1,0 +1,21 @@
+# MIND Conformance Test: t.0.1e0 is refused with E1005
+# Specification reference: spec/v1.0/lexical.md#tokens
+# Decision: DN-52 (design/rfcs/decision-notes-3.md)
+# Category: lexical
+# Profile: cpu
+
+description: "t.0.1e0 is refused with E1005"
+category: lexical
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let t = ((1, 2), 3);
+        return t.0.1e0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1005

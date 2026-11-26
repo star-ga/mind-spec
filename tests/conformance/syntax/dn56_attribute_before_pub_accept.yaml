@@ -1,0 +1,27 @@
+# MIND Conformance Test: attributes stand first, then pub, then the item
+# Specification reference: spec/v1.0/language.md#attributes
+# Decision: DN-56 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "attributes stand first, then pub, then the item; the program returns 0"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    #[test]
+    pub fn t() {
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0

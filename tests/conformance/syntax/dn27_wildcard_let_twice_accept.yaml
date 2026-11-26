@@ -1,0 +1,25 @@
+# MIND Conformance Test: let _ = e
+# Specification reference: spec/v1.0/lexical.md#identifiers
+# Decision: DN-27 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "let _ = e; evaluates and drops, also twice; the program returns 0"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let _ = 7;
+        let _ = 8;
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0

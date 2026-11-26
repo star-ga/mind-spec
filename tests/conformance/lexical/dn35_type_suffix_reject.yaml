@@ -1,0 +1,24 @@
+# MIND Conformance Test: 1.5f32 is refused with E1005 at the first character that no form allows
+# Specification reference: spec/v1.0/lexical.md#literals
+# Decision: DN-35 (design/rfcs/decision-notes-3.md)
+# Category: lexical
+# Profile: cpu
+
+description: "1.5f32 is refused with E1005 at the first character that no form allows"
+category: lexical
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let x = 1.5f32;
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1005
+    location:
+      line: 2
+      column: 16

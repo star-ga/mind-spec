@@ -1,0 +1,24 @@
+# MIND Conformance Test: syntax fault d07 (missing close bracket): refused with E1102 at 3:15, one diagnostic
+# Specification reference: spec/v1.0/errors.md#e1xxx-lexical-and-syntax-errors
+# Decision: DN-63 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "syntax fault d07 (missing close bracket): refused with E1102 at 3:15, one diagnostic"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let a = [1, 2, 3];
+        return a[1;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1102
+    location:
+      line: 3
+      column: 15

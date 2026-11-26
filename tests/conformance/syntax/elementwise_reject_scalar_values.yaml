@@ -1,0 +1,20 @@
+# MIND Conformance Test: a dotted operator with no tensor operand is refused
+# Specification reference: spec/v1.0/language.md#tensor-operators-and-broadcasting
+# Decision: DN-81 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "a .* b on two i64 scalars is refused: the dotted operators broadcast tensors"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let a: i64 = 6;
+        let b: i64 = 3;
+        return a .* b;
+    }
+
+expected:
+  status: error

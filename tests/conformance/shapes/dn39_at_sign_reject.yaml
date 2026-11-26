@@ -1,0 +1,26 @@
+# MIND Conformance Test: a @ b is refused with E1105, which gives matmul(a, b)
+# Specification reference: spec/v1.0/shapes.md#matrix-multiplication
+# Decision: DN-39 (design/rfcs/decision-notes-3.md)
+# Category: shapes
+# Profile: cpu
+
+description: "a @ b is refused with E1105, which gives matmul(a, b)"
+category: shapes
+profile: cpu
+
+input:
+  source: |
+    fn f(a: i64, b: i64) -> i64 { return a @ b; }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1105
+    message_contains: "matmul(a, b)"
+    location:
+      line: 1
+      column: 40

@@ -10,7 +10,7 @@ profile: cpu
 input:
   source: |
     fn main() -> i64 {
-        let mut xs: array<i64> = [1];
+        let mut xs: Vec<i64> = [1];
         xs = xs.push(2);
         return xs[1];
     }

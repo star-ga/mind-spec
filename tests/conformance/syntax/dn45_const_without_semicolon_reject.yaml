@@ -1,0 +1,25 @@
+# MIND Conformance Test: a const item with no 
+# Specification reference: spec/v1.0/language.md#statement-separators
+# Decision: DN-45 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "a const item with no ; is refused with E1103 at the insertion point"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    const K: i64 = 1
+
+    fn main() -> i64 {
+        return K;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1103
+    location:
+      line: 1
+      column: 17

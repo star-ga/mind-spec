@@ -1,0 +1,27 @@
+# MIND Conformance Test: == on two tensors gives one bool
+# Specification reference: spec/v1.0/shapes.md#comparison-of-tensors
+# Decision: DN-71 (design/rfcs/decision-notes-3.md)
+# Category: shapes
+# Profile: cpu
+
+description: "== on two tensors gives one bool; the program returns 0"
+category: shapes
+profile: cpu
+
+input:
+  source: |
+    fn f(a: Tensor<f32, [2]>, b: Tensor<f32, [2]>) -> bool {
+        return a == b;
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0

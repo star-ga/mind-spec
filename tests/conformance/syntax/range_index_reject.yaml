@@ -1,9 +1,10 @@
-# MIND Conformance Test: a range index a[1..3] is refused with E2406
-# Specification reference: spec/v1.0/language.md#tuple-index
+# MIND Conformance Test: a range index a[1..3] has no derivation and is refused with E1101
+# Specification reference: spec/v1.0/language.md#loops
+# Decision: DN-47 (design/rfcs/decision-notes-3.md)
 # Category: syntax
 # Profile: cpu
 
-description: "a[1..3] is refused with E2406; the slice form is a[1:3]"
+description: "a[1..3] is refused with E1101; the message names the slice form a[1:3]"
 category: syntax
 profile: cpu
 
@@ -18,4 +19,7 @@ input:
 expected:
   status: error
   error:
-    code: E2406
+    code: E1101
+    location:
+      line: 3
+      column: 16

@@ -10,7 +10,7 @@ profile: cpu
 input:
   source: |
     fn main() -> i64 {
-        let xs: array<i64> = [1, 2];
+        let xs: Vec<i64> = [1, 2];
         let u: unit = while false { };
         let w: unit = for v in xs { };
         return 7;

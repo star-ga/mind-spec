@@ -1,0 +1,26 @@
+# MIND Conformance Test: a block-like statement takes no 
+# Specification reference: spec/v1.0/language.md#statement-separators
+# Decision: DN-26 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "a block-like statement takes no ;; the program returns 1"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let c = true;
+        if c {
+        }
+        return 1;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 1

@@ -1,0 +1,25 @@
+# MIND Conformance Test: a unit if as a statement, then the tail -1
+# Specification reference: spec/v1.0/language.md#block-like-statements
+# Decision: DN-41 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "a unit if as a statement, then the tail -1; the program returns -1"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let c = true;
+        if c { } else { }
+        -1
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: -1

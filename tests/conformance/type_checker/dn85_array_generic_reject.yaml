@@ -1,0 +1,21 @@
+# MIND Conformance Test: array<i64> is refused
+# Specification reference: spec/v1.0/types.md#type-formation
+# Decision: DN-85 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "array<i64> is refused; the message gives Vec<i64>"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let xs: array<i64> = [1, 2];
+        return xs[1];
+    }
+
+expected:
+  status: error
+  error:
+    message_contains: "Vec<"

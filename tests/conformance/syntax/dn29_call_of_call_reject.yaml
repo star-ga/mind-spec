@@ -1,0 +1,24 @@
+# MIND Conformance Test: f(1)(2) has no derivation and is refused with E1101
+# Specification reference: spec/v1.0/language.md#field-access-and-method-calls
+# Decision: DN-29 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "f(1)(2) has no derivation and is refused with E1101"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn f(x: i64) -> i64 {
+        return x;
+    }
+
+    fn main() -> i64 {
+        return f(1)(2);
+    }
+
+expected:
+  status: error
+  error:
+    code: E1101

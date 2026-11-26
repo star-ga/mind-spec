@@ -1,0 +1,26 @@
+# MIND Conformance Test: an attribute after pub is refused with E1101
+# Specification reference: spec/v1.0/language.md#attributes
+# Decision: DN-56 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "an attribute after pub is refused with E1101"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    pub #[test] fn t() {
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1101
+    location:
+      line: 1
+      column: 5

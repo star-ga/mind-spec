@@ -1,0 +1,24 @@
+# MIND Conformance Test: t[0, 1, 0] on a rank-2 tensor is refused with E3014
+# Specification reference: spec/v1.0/shapes.md#indexing-a-tensor
+# Decision: DN-57 (design/rfcs/decision-notes-3.md)
+# Category: shapes
+# Profile: cpu
+
+description: "t[0, 1, 0] on a rank-2 tensor is refused with E3014"
+category: shapes
+profile: cpu
+
+input:
+  source: |
+    fn f(t: Tensor<f32, [2, 2]>) -> f32 {
+        return t[0, 1, 0];
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E3014

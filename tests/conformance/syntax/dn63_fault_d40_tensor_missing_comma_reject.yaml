@@ -1,0 +1,27 @@
+# MIND Conformance Test: syntax fault d40 (tensor missing comma): refused with E1103 at 1:19, one diagnostic
+# Specification reference: spec/v1.0/errors.md#e1xxx-lexical-and-syntax-errors
+# Decision: DN-63 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "syntax fault d40 (tensor missing comma): refused with E1103 at 1:19, one diagnostic"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn f(a: Tensor<f32 [2]>) -> i64 {
+        return 0;
+    }
+
+    fn main() -> i64 {
+        return 1;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1103
+    location:
+      line: 1
+      column: 19

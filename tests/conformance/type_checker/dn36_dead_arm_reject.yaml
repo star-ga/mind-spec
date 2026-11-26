@@ -1,0 +1,27 @@
+# MIND Conformance Test: an arm after the wildcard arm is refused with E2312
+# Specification reference: spec/v1.0/language.md#patterns-and-match
+# Decision: DN-36 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "an arm after the wildcard arm is refused with E2312"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    fn f(x: i64) -> i64 {
+        return match x {
+            _ => 1,
+            0 => 2,
+        };
+    }
+
+    fn main() -> i64 {
+        return f(0);
+    }
+
+expected:
+  status: error
+  error:
+    code: E2312

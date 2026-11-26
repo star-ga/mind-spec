@@ -1,0 +1,26 @@
+# MIND Conformance Test: a function named assert is refused with E1007 at the word
+# Specification reference: spec/v1.0/lexical.md#keywords
+# Decision: DN-60 (design/rfcs/decision-notes-3.md)
+# Category: lexical
+# Profile: cpu
+
+description: "a function named assert is refused with E1007 at the word"
+category: lexical
+profile: cpu
+
+input:
+  source: |
+    fn assert() {
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1007
+    location:
+      line: 1
+      column: 4

@@ -1,0 +1,26 @@
+# MIND Conformance Test: syntax fault set d23: for i in 0..3 is a counting loop since DN-47
+# Specification reference: spec/v1.0/language.md#loops
+# Decision: DN-47 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "syntax fault set d23: for i in 0..3 is a counting loop since DN-47; the program returns 1"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        for i in 0..3 {
+            return 1;
+        }
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 1

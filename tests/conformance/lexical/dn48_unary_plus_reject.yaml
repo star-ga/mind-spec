@@ -1,0 +1,24 @@
+# MIND Conformance Test: there is no unary +
+# Specification reference: spec/v1.0/lexical.md#literals
+# Decision: DN-48 (design/rfcs/decision-notes-3.md)
+# Category: lexical
+# Profile: cpu
+
+description: "there is no unary +; let x = +1; is refused with E1101"
+category: lexical
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let x = +1;
+        return x;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1101
+    location:
+      line: 2
+      column: 13

@@ -1,0 +1,24 @@
+# MIND Conformance Test: an unknown type name is refused with E2002
+# Specification reference: spec/v1.0/language.md#module-level
+# Decision: DN-30 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "an unknown type name is refused with E2002"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    fn f(x: Nope) -> i64 {
+        return 0;
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2002

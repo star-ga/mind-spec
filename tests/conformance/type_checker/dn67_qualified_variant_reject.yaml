@@ -1,0 +1,21 @@
+# MIND Conformance Test: Option::Some(1) is refused with E2002
+# Specification reference: spec/v1.0/language.md#patterns-and-match
+# Decision: DN-67 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "Option::Some(1) is refused with E2002; the spelling is Some(1)"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let o: Option<i64> = Option::Some(1);
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2002

@@ -1,0 +1,27 @@
+# MIND Conformance Test: Tensor<f32, []> is the type f32
+# Specification reference: spec/v1.0/shapes.md#the-tensor-type
+# Decision: DN-71 (design/rfcs/decision-notes-3.md)
+# Category: shapes
+# Profile: cpu
+
+description: "Tensor<f32, []> is the type f32; the program returns 0"
+category: shapes
+profile: cpu
+
+input:
+  source: |
+    fn f(t: Tensor<f32, []>) -> f32 {
+        return t;
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0

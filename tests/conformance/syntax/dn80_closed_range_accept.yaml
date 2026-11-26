@@ -1,0 +1,27 @@
+# MIND Conformance Test: for i in 0..=3 counts 0 to 3
+# Specification reference: spec/v1.0/language.md#loops
+# Decision: DN-80 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "for i in 0..=3 counts 0 to 3; the program returns 6"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let mut s = 0;
+        for i in 0..=3 {
+            s += i;
+        }
+        return s;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 6

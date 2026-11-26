@@ -1,0 +1,27 @@
+# MIND Conformance Test: a type that starts with ( is a tuple type
+# Specification reference: spec/v1.0/types.md#type-formation
+# Decision: DN-59 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "a type that starts with ( is a tuple type; the program returns 1"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    fn f(t: (i64, i64)) -> i64 {
+        return t.0;
+    }
+
+    fn main() -> i64 {
+        return f((1, 2));
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 1

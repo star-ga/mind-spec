@@ -1,0 +1,24 @@
+# MIND Conformance Test: fn(i64) -> i64 is not in Core v1 and is refused with E2037
+# Specification reference: spec/v1.0/types.md#type-formation
+# Decision: DN-59 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "fn(i64) -> i64 is not in Core v1 and is refused with E2037"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    fn f(g: fn(i64) -> i64) -> i64 {
+        return 0;
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2037

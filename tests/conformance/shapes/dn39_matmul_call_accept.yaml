@@ -1,0 +1,27 @@
+# MIND Conformance Test: the matrix product is the call matmul(a, b)
+# Specification reference: spec/v1.0/shapes.md#matrix-multiplication
+# Decision: DN-39 (design/rfcs/decision-notes-3.md)
+# Category: shapes
+# Profile: cpu
+
+description: "the matrix product is the call matmul(a, b); the program returns 0"
+category: shapes
+profile: cpu
+
+input:
+  source: |
+    fn f(a: Tensor<f32, [2, 2]>, b: Tensor<f32, [2, 2]>) -> Tensor<f32, [2, 2]> {
+        return matmul(a, b);
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0

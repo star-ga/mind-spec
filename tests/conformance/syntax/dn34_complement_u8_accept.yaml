@@ -1,0 +1,25 @@
+# MIND Conformance Test: ~0 is 255 in u8
+# Specification reference: spec/v1.0/language.md#operand-and-condition-types
+# Decision: DN-34 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "~0 is 255 in u8; the program returns 255"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let x: u8 = 0;
+        let y: u8 = ~x;
+        return y as i64;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 255

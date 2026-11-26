@@ -1,0 +1,24 @@
+# MIND Conformance Test: a let with no 
+# Specification reference: spec/v1.0/language.md#statement-separators
+# Decision: DN-26 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "a let with no ; is refused with E1103 at the insertion point"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let x = 1
+        return x;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1103
+    location:
+      line: 2
+      column: 14

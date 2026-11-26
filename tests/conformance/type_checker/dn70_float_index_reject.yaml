@@ -1,0 +1,22 @@
+# MIND Conformance Test: a[1.5] is refused with E2005, whose message names as i64
+# Specification reference: spec/v1.0/language.md#tuple-index
+# Decision: DN-70 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "a[1.5] is refused with E2005, whose message names as i64"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let a: [i64; 3] = [1, 2, 3];
+        return a[1.5];
+    }
+
+expected:
+  status: error
+  error:
+    code: E2005
+    message_contains: "as i64"

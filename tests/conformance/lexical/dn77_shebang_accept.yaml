@@ -1,0 +1,24 @@
+# MIND Conformance Test: a first line #! not followed by [ is skipped
+# Specification reference: spec/v1.0/lexical.md#source-text
+# Decision: DN-77 (design/rfcs/decision-notes-3.md)
+# Category: lexical
+# Profile: cpu
+
+description: "a first line #! not followed by [ is skipped; the program returns 0"
+category: lexical
+profile: cpu
+
+input:
+  source: |
+    #!/usr/bin/env mindc
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0

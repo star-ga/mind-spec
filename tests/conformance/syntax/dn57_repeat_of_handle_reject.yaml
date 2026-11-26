@@ -1,0 +1,22 @@
+# MIND Conformance Test: [v
+# Specification reference: spec/v1.0/language.md#tuple-index
+# Decision: DN-57 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "[v; 3] where v is a container handle is refused with E2001"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let v: Vec<i64> = [1];
+        let a = [v; 3];
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2001

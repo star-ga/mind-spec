@@ -1,0 +1,23 @@
+# MIND Conformance Test: there is no comma operator
+# Specification reference: spec/v1.0/language.md#operator-precedence-and-associativity
+# Decision: DN-75 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "there is no comma operator; return 1, 2; is refused with E1101"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        return 1, 2;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1101
+    location:
+      line: 2
+      column: 13

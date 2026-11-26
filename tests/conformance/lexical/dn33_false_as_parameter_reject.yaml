@@ -1,0 +1,27 @@
+# MIND Conformance Test: a parameter named false is refused with E1007 at the word
+# Specification reference: spec/v1.0/lexical.md#keywords
+# Decision: DN-33 (design/rfcs/decision-notes-3.md)
+# Category: lexical
+# Profile: cpu
+
+description: "a parameter named false is refused with E1007 at the word"
+category: lexical
+profile: cpu
+
+input:
+  source: |
+    fn f(false: i64) -> i64 {
+        return 0;
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1007
+    location:
+      line: 1
+      column: 6

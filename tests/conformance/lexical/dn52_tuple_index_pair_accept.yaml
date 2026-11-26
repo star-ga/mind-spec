@@ -1,0 +1,24 @@
+# MIND Conformance Test: t.0.1 is two tuple indices
+# Specification reference: spec/v1.0/lexical.md#tokens
+# Decision: DN-52 (design/rfcs/decision-notes-3.md)
+# Category: lexical
+# Profile: cpu
+
+description: "t.0.1 is two tuple indices; the program returns 2"
+category: lexical
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let t = ((1, 2), 3);
+        return t.0.1;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 2

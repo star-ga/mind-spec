@@ -1,0 +1,27 @@
+# MIND Conformance Test: a == b == c has no derivation and is refused with E1101
+# Specification reference: spec/v1.0/language.md#precedence-rules
+# Decision: DN-32 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "a == b == c has no derivation and is refused with E1101"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let a = 1;
+        if a == 1 == true {
+            return 1;
+        }
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1101
+    location:
+      line: 3
+      column: 15

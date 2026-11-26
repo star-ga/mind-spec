@@ -1,0 +1,30 @@
+# MIND Conformance Test: x as T < y: a name ends the type of a cast and < compares
+# Specification reference: spec/v1.0/language.md#casts
+# Decision: DN-53 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "x as T < y: a name ends the type of a cast and < compares; the program returns 1"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    type T = i64;
+
+    fn main() -> i64 {
+        let x: i64 = 1;
+        let y: i64 = 2;
+        if x as T < y {
+            return 1;
+        }
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 1

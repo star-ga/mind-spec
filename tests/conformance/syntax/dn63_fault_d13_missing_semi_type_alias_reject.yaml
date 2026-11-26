@@ -1,0 +1,25 @@
+# MIND Conformance Test: syntax fault d13 (missing semi type alias): refused with E1103 at 1:13, one diagnostic
+# Specification reference: spec/v1.0/errors.md#e1xxx-lexical-and-syntax-errors
+# Decision: DN-63 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "syntax fault d13 (missing semi type alias): refused with E1103 at 1:13, one diagnostic"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    type X = i64
+
+    fn main() -> i64 {
+        return 1;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1103
+    location:
+      line: 1
+      column: 13

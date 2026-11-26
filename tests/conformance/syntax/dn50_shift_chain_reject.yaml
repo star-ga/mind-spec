@@ -1,0 +1,21 @@
+# MIND Conformance Test: a << 1 << 2 is refused with E1106
+# Specification reference: spec/v1.0/language.md#precedence-rules
+# Decision: DN-50 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "a << 1 << 2 is refused with E1106"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let a = 1;
+        return a << 1 << 2;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1106

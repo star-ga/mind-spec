@@ -1,0 +1,25 @@
+# MIND Conformance Test: a literal takes its type from a cast and the exponent is e with an optional minus
+# Specification reference: spec/v1.0/lexical.md#literals
+# Decision: DN-35 (design/rfcs/decision-notes-3.md)
+# Category: lexical
+# Profile: cpu
+
+description: "a literal takes its type from a cast and the exponent is e with an optional minus; the program returns 0"
+category: lexical
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let f = 1.5 as f32;
+        let g = 1.5e-3;
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0

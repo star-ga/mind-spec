@@ -1,0 +1,25 @@
+# MIND Conformance Test: an assignment is a statement
+# Specification reference: spec/v1.0/language.md#bindings-and-assignment
+# Decision: DN-49 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "an assignment is a statement; the program returns 5"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let mut a = 1;
+        a = 5;
+        return a;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 5

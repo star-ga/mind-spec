@@ -1,0 +1,27 @@
+# MIND Conformance Test: Tensor takes each dtype of Core v1 and a shape
+# Specification reference: spec/v1.0/shapes.md#the-tensor-type
+# Decision: DN-37 (design/rfcs/decision-notes-3.md)
+# Category: shapes
+# Profile: cpu
+
+description: "Tensor takes each dtype of Core v1 and a shape; the program returns 0"
+category: shapes
+profile: cpu
+
+input:
+  source: |
+    fn f(a: Tensor<i32, [2]>, b: Tensor<i64, [2]>, c: Tensor<f32, [2]>, d: Tensor<f64, [2]>) -> i64 {
+        return 0;
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: success
+  output:
+    result:
+      dtype: i64
+      shape: []
+      values: 0

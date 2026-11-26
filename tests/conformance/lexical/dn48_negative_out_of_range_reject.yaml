@@ -1,0 +1,21 @@
+# MIND Conformance Test: -2147483649 is outside the range of i32 and is refused with E2408
+# Specification reference: spec/v1.0/lexical.md#literals
+# Decision: DN-48 (design/rfcs/decision-notes-3.md)
+# Category: lexical
+# Profile: cpu
+
+description: "-2147483649 is outside the range of i32 and is refused with E2408"
+category: lexical
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let m: i32 = -2147483649;
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2408

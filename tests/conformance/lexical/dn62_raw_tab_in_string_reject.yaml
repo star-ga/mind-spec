@@ -1,0 +1,20 @@
+# MIND Conformance Test: a raw TAB inside a quoted string is refused with E1008
+# Specification reference: spec/v1.0/lexical.md#literals
+# Decision: DN-62 (design/rfcs/decision-notes-3.md)
+# Category: lexical
+# Profile: cpu
+
+description: "a raw TAB inside a quoted string is refused with E1008"
+category: lexical
+profile: cpu
+
+input:
+  source: "fn main() -> i64 {\n    let s = \"a\tb\";\n    return 1;\n}\n"
+
+expected:
+  status: error
+  error:
+    code: E1008
+    location:
+      line: 2
+      column: 15

@@ -1,0 +1,28 @@
+# MIND Conformance Test: syntax fault d05 (missing close paren call): refused with E1102 at 7:20, one diagnostic
+# Specification reference: spec/v1.0/errors.md#e1xxx-lexical-and-syntax-errors
+# Decision: DN-63 (design/rfcs/decision-notes-3.md)
+# Category: syntax
+# Profile: cpu
+
+description: "syntax fault d05 (missing close paren call): refused with E1102 at 7:20, one diagnostic"
+category: syntax
+profile: cpu
+
+input:
+  source: |
+    fn add(a: i64, b: i64) -> i64 {
+        let s = a + b;
+        return s;
+    }
+
+    fn main() -> i64 {
+        return add(2, 3;
+    }
+
+expected:
+  status: error
+  error:
+    code: E1102
+    location:
+      line: 7
+      column: 20

@@ -1,0 +1,21 @@
+# MIND Conformance Test: true + 1 is refused with E2005
+# Specification reference: spec/v1.0/language.md#operand-and-condition-types
+# Decision: DN-23 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "true + 1 is refused with E2005"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let b = true + 1;
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2005

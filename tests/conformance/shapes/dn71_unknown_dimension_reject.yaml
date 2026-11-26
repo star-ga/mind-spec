@@ -1,0 +1,24 @@
+# MIND Conformance Test: a dimension name that is no const is refused with E3013
+# Specification reference: spec/v1.0/shapes.md#the-tensor-type
+# Decision: DN-71 (design/rfcs/decision-notes-3.md)
+# Category: shapes
+# Profile: cpu
+
+description: "a dimension name that is no const is refused with E3013"
+category: shapes
+profile: cpu
+
+input:
+  source: |
+    fn f(x: Tensor<f32, [N]>) -> i64 {
+        return 0;
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E3013

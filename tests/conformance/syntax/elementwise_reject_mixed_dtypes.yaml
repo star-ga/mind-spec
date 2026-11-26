@@ -1,17 +1,18 @@
-# MIND Conformance Test: the operands of an elementwise operator share a dtype
+# MIND Conformance Test: the operands of a dotted operator share a dtype
 # Specification reference: spec/v1.0/language.md#tensor-operations
+# Decision: DN-81 (design/rfcs/decision-notes-3.md)
 # Category: syntax
 # Profile: cpu
 
-description: "a .* b with an f64 and an i64 operand"
+description: "a .* b with an f64 tensor and an i64 tensor is refused with E2004"
 category: syntax
 profile: cpu
 
 input:
   source: |
     fn main() -> i64 {
-        let a: f64 = 1.5;
-        let b: i64 = 2;
+        let a = tensor([1.5, 2.5]);
+        let b = tensor([1, 2]);
         let c = a .* b;
         return 0;
     }
