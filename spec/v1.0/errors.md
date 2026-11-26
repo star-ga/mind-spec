@@ -116,6 +116,8 @@ names, and that a code that a chapter or a conformance row names is a code of th
 | [`E3012`](#e3012-shape-too-large) | Shape too large | in force |
 | [`E3013`](#e3013-unknown-dimension-name) | Unknown dimension name | in force |
 | [`E3014`](#e3014-too-many-index-items) | Too many index items | in force |
+| [`E3015`](#e3015-plain-operator-on-two-shapes) | Plain operator on two shapes | in force |
+| [`E3016`](#e3016-dotted-operator-with-no-expansion) | Dotted operator with no expansion | in force |
 | [`E4001`](#e4001-ssa-violation-use-before-definition) | SSA violation (use before definition) | in force |
 | [`E4002`](#e4002-ssa-violation-multiple-definitions) | SSA violation (multiple definitions) | in force |
 | [`E4003`](#e4003-undefined-output) | Undefined output | in force |
@@ -866,6 +868,19 @@ Shape errors occur during shape inference, broadcasting, or shape validation.
   than one item ([Indexing a tensor](./shapes.md#indexing-a-tensor))
 - **Required context**: the index, the rank and the location
 - **Example**: `E3014: 3 index items for a tensor of rank 2 at line 1, column 45`
+
+### E3015: Plain operator on two shapes
+- **Trigger**: a plain operator `+`, `-`, `*`, `/` or `%` on two tensors of different shapes
+  ([Tensor operators and broadcasting](./language.md#tensor-operators-and-broadcasting), DN-81)
+- **Required context**: the operator and its location, the two shapes, and the edit to the dotted operator
+- **Example**: ``E3015: `*` on the shapes [3, 1] and [1, 4] does not broadcast; write `col .* row` at line 2, column 16``
+
+### E3016: Dotted operator with no expansion
+- **Trigger**: a dotted operator `.+`, `.-`, `.*`, `./` or `.%` that expands no operand: its operands are two tensors
+  of one shape, or one operand is a scalar, or no operand is a tensor
+  ([Tensor operators and broadcasting](./language.md#tensor-operators-and-broadcasting), DN-81)
+- **Required context**: the operator and its location, and the edit to the plain operator
+- **Example**: ``E3016: `.+` expands no operand here; write `a + b` at line 2, column 14``
 
 ## E4xxx: Verification errors
 

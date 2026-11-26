@@ -292,7 +292,8 @@ A binary elementwise operation has two source forms, and the form says whether t
 
 - **Plain operators** `+`, `-`, `*`, `/` and `%` on two tensors need one dtype and one shape; the output has that
   shape. A scalar operand extends to the shape of the tensor operand. A plain operator on two tensors of different
-  shapes MUST be refused at check time, and the message gives the dotted form as the fix.
+  shapes MUST be refused at check time with [`E3015`](./errors.md#e3015-plain-operator-on-two-shapes), and the fix
+  is the dotted operator.
 - **Dotted operators** `.+`, `.-`, `.*`, `./` and `.%` broadcast. The operands share a dtype, and the output shape is
   the broadcasted shape of the two inputs:
 
@@ -301,8 +302,10 @@ A binary elementwise operation has two source forms, and the form says whether t
   ```
 
   If broadcasting fails (as defined above), the source MUST be refused with
-  [`E3001`](./errors.md#e3001-broadcasting-failure). A dotted operator with no tensor operand MUST be refused at
-  check time. A dotted operator has the precedence of its plain operator.
+  [`E3001`](./errors.md#e3001-broadcasting-failure). A dotted operator that expands no operand (two tensors of one
+  shape, a scalar operand, or no tensor operand) MUST be refused at check time with
+  [`E3016`](./errors.md#e3016-dotted-operator-with-no-expansion), and the fix is the plain operator. A dotted operator
+  has the precedence of its plain operator.
 
 Two operands of different dtypes MUST be refused with
 [`E2004`](./errors.md#e2004-dtype-mismatch-in-binary-operation) in both forms. So every expansion of a shape is
@@ -318,8 +321,9 @@ fn add(a: Tensor<f32, [3, 4]>, b: Tensor<f32, [3, 4]>) -> Tensor<f32, [3, 4]> {
 }
 ```
 
-`col + row` (a plain operator on the shapes `[3, 1]` and `[1, 4]`) is refused, and the message gives `col .+ row`.
-`a .+ b` on two `i64` scalars is refused. The IR operations of both forms are the operations of
+`col + row` (a plain operator on the shapes `[3, 1]` and `[1, 4]`) is refused with `E3015`, and the fix is
+`col .+ row`. `a .+ b` on two tensors of the shape `[3, 4]`, `t .* 2.0` and `a .+ b` on two `i64` scalars are refused
+with `E3016`, and the fix is the plain operator. The IR operations of both forms are the operations of
 [Core IR](./ir.md#binary-operations); the Core v1 conformance suite holds rows for both forms and for a failing
 broadcast.
 

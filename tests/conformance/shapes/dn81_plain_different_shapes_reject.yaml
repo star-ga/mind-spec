@@ -21,4 +21,7 @@ input:
 expected:
   status: error
   error:
-    message_contains: ".*"
+    code: E3015
+    location:
+      line: 2
+      column: 16

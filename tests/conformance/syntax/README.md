@@ -145,7 +145,7 @@ position where a rule of the specification fixes the point; where no rule fixes 
 | [`attribute_reject_unknown_name_before_struct`](./attribute_reject_unknown_name_before_struct.yaml) | reject, `E2502` | as above, before another item |
 | [`string_type_accept_named`](./string_type_accept_named.yaml) | accept | [Type formation](../../../spec/v1.0/types.md#type-formation): the string type `String` |
 | [`string_type_reject_literal_as_integer`](./string_type_reject_literal_as_integer.yaml) | reject, `E2001` | as above: a string literal has the type `String` |
-| [`elementwise_reject_scalar_values`](./elementwise_reject_scalar_values.yaml) | reject | [Tensor operators and broadcasting](../../../spec/v1.0/language.md#tensor-operators-and-broadcasting): a dotted operator with no tensor operand MUST be refused (DN-81) |
+| [`elementwise_reject_scalar_values`](./elementwise_reject_scalar_values.yaml) | reject | [Tensor operators and broadcasting](../../../spec/v1.0/language.md#tensor-operators-and-broadcasting): a dotted operator that expands no operand MUST be refused with `E3016` (DN-81) |
 | [`elementwise_accept_tensor_scalar`](./elementwise_accept_tensor_scalar.yaml) | accept | as above |
 | [`elementwise_reject_mixed_dtypes`](./elementwise_reject_mixed_dtypes.yaml) | reject, `E2004` | [Tensor operations](../../../spec/v1.0/language.md#tensor-operations): tensor operands of two different dtypes MUST be refused |
 | [`tensor_ctor_accept_shape_and_dtype`](./tensor_ctor_accept_shape_and_dtype.yaml) | accept | [Tensor operations](../../../spec/v1.0/language.md#tensor-operations): tensor constructor |
@@ -435,8 +435,10 @@ not a row.
 | DN-80 | [`dn80_closed_range_value_reject`](dn80_closed_range_value_reject.yaml) | reject, `E1101` at 2:14 | [Loops](../../../spec/v1.0/language.md#loops) |
 | DN-81 | [`dn81_dotted_broadcast_accept`](../shapes/dn81_dotted_broadcast_accept.yaml) | accept, returns 0 | [Elementwise binary](../../../spec/v1.0/shapes.md#elementwise-binary) |
 | DN-81 | [`dn81_plain_same_shape_accept`](../shapes/dn81_plain_same_shape_accept.yaml) | accept, returns 0 | as above |
-| DN-81 | [`dn81_plain_different_shapes_reject`](../shapes/dn81_plain_different_shapes_reject.yaml) | reject | as above |
-| DN-81 | [`dn81_dotted_on_scalars_reject`](../shapes/dn81_dotted_on_scalars_reject.yaml) | reject | as above |
+| DN-81 | [`dn81_plain_different_shapes_reject`](../shapes/dn81_plain_different_shapes_reject.yaml) | reject, `E3015` at 2:16 | as above |
+| DN-81 | [`dn81_dotted_on_scalars_reject`](../shapes/dn81_dotted_on_scalars_reject.yaml) | reject, `E3016` at 4:14 | as above |
+| DN-81 | [`dn81_dotted_same_shape_reject`](../shapes/dn81_dotted_same_shape_reject.yaml) | reject, `E3016` at 2:14 | as above: a dotted operator expands an operand |
+| DN-81 | [`dn81_dotted_scalar_operand_reject`](../shapes/dn81_dotted_scalar_operand_reject.yaml) | reject, `E3016` at 2:14 | as above: a scalar extends with the plain operator |
 | DN-82 | [`dn82_gradient_attribute_accept`](../autodiff/dn82_gradient_attribute_accept.yaml) | accept, returns 0 | [Source form: the gradient attribute](../../../spec/v1.0/autodiff.md#source-form-the-gradient-attribute) |
 | DN-82 | [`dn82_diff_type_reject`](../autodiff/dn82_diff_type_reject.yaml) | reject, `E1105` at 1:9 | as above: `diff T` is not in Core v1 |
 | DN-82 | [`dn82_gradient_of_unknown_parameter_reject`](../autodiff/dn82_gradient_of_unknown_parameter_reject.yaml) | reject | as above |

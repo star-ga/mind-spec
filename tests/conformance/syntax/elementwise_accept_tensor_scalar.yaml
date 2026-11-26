@@ -3,7 +3,7 @@
 # Category: syntax
 # Profile: cpu
 
-description: "t .* s with an f64 tensor and an f64 scalar"
+description: "t * s with an f64 tensor and an f64 scalar: the plain operator extends the scalar"
 category: syntax
 profile: cpu
 
@@ -12,7 +12,7 @@ input:
     fn main() -> i64 {
         let t = tensor([1.0, 2.0]);
         let s = 2.0;
-        let u = t .* s;
+        let u = t * s;
         return 0;
     }
 

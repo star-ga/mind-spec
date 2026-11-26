@@ -1040,8 +1040,10 @@ pattern.
 ## DN-81. Visible broadcast
 
 **Decision.** A plain operator on two tensors needs one dtype and one shape; a scalar operand extends. The dotted
-operators `.+`, `.-`, `.*`, `./` and `.%` broadcast by the rules of [Shapes](../../spec/v1.0/shapes.md), and a dotted
-operator with no tensor operand is refused. The dotted operators have the precedence of their plain operators. The
+operators `.+`, `.-`, `.*`, `./` and `.%` broadcast by the rules of [Shapes](../../spec/v1.0/shapes.md). A dotted
+operator MUST be refused when no operand is expanded (two tensors of one shape, or a scalar operand), and the fix is
+the plain operator: `E3016`. A plain operator on two tensors of different shapes is `E3015`, and the fix is the dotted
+operator. The dotted operators have the precedence of their plain operators. The
 matrix product stays `matmul(a, b)`; `@` stays reserved with no production (DN-39).
 
 **Options.** (C) Remove the dotted operators; plain operators broadcast. (D) Plain operators need one shape; dotted
@@ -1050,14 +1052,16 @@ operators broadcast.
 **Reason.** Option D: every expansion of a shape is visible in the text and one search finds it; a silent expansion
 of `[3, 1] * [1, 4]` cannot happen.
 
-**Refused forms.** A plain operator on two tensors of different shapes (the message gives the dotted form as the fix);
-`a .+ b` on two scalars; `t.-1` on a tuple.
+**Refused forms.** A plain operator on two tensors of different shapes (`E3015`); `a .+ b` on two tensors of one
+shape, `t .* 2.0`, `a .+ b` on two scalars and `t.-1` on a tuple (`E3016`).
 
 **Reference.** `mindc check` accepts `return a .+ b;` on two `i64` operands (probe `a6_dot_plus_scalar`) and `a.*b` on
 integers, which the native build refuses with `lane.source.tensor` (probe `p49_mun_dotstar_ints`). It accepts
 `col .+ row` and `col * row` on `Tensor<f32, [3, 1]>` and `Tensor<f32, [1, 4]>`, and the native build refuses both
 with `binop.array_operand` (probes `e3_dn81_dotted_shapes`, `e3_dn81_plain_shapes`); it accepts `t.-1` on a tuple, and
-the native build refuses it with `lane.source.tuple` (probe `a6_tuple_dot_minus`). The count of plain operators on two
+the native build refuses it with `lane.source.tuple` (probe `a6_tuple_dot_minus`). It accepts `a .+ b` on two
+`Tensor<f32, [3]>` and `a .* 2.0` on one, and the native build refuses both with `binop.array_operand` (probes
+`e4_t_dot_equal`, `e4_t_dot_scalar`). The count of plain operators on two
 non-scalar shapes in existing sources needs types and was not measured.
 
 **Replaces.** DN-51 and option A of DN-17 (the dotted operators stay, with one meaning).

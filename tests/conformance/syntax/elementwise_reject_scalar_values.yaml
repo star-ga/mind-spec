@@ -18,3 +18,8 @@ input:
 
 expected:
   status: error
+  error:
+    code: E3016
+    location:
+      line: 4
+      column: 14

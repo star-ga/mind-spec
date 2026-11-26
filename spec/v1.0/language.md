@@ -144,10 +144,12 @@ let low_set = x & 3 == 2;
 
 A plain arithmetic operator (`+`, `-`, `*`, `/`, `%`) on two tensors needs one dtype and one shape; a scalar operand
 extends to the shape of the tensor operand. A plain operator on two tensors of different shapes MUST be refused at
-check time, and the message gives the dotted form as the fix. The dotted operators `.+`, `.-`, `.*`, `./` and `.%`
-broadcast the shapes of their operands by the [broadcasting rules](./shapes.md#broadcasting); they have the precedence
-of their plain operators. A dotted operator with no tensor operand MUST be refused at check time. So every expansion of
-a shape is written in the text.
+check time with [`E3015`](./errors.md#e3015-plain-operator-on-two-shapes), and the fix is the dotted operator. The
+dotted operators `.+`, `.-`, `.*`, `./` and `.%` broadcast the shapes of their operands by the
+[broadcasting rules](./shapes.md#broadcasting); they have the precedence of their plain operators. A dotted operator
+MUST be refused at check time with [`E3016`](./errors.md#e3016-dotted-operator-with-no-expansion) when it expands no
+operand: on two tensors of one shape, with a scalar operand, or with no tensor operand; the fix is the plain operator.
+So every expansion of a shape is written in the text, and a text with no expansion has one spelling.
 
 The matrix product is the function `matmul(a, b)` ([Tensor operations](#tensor-operations)); as a call it binds
 tighter than every operator: `matmul(A, B) + C` performs the product first. `@` is a reserved token with no production
@@ -378,8 +380,8 @@ Surface syntax maps to the Core IR instruction set:
   ([Tensor operators and broadcasting](#tensor-operators-and-broadcasting)).
 - **Dotted operators**: `.+`, `.-`, `.*`, `./` and `.%` broadcast: the operands share a dtype, and the shapes follow
   the [broadcasting rules](./shapes.md#broadcasting). Operands of two different dtypes MUST be refused at check time
-  with [`E2004`](./errors.md#e2004-dtype-mismatch-in-binary-operation). A dotted operator with no tensor operand MUST
-  be refused at check time.
+  with [`E2004`](./errors.md#e2004-dtype-mismatch-in-binary-operation). A dotted operator that expands no operand
+  MUST be refused at check time with [`E3016`](./errors.md#e3016-dotted-operator-with-no-expansion).
 - **Tensor constructor**: `tensor(e)` and `tensor(e, dtype: D)` (`TensorConstructor`) make a tensor from the
   value of `e`. Its shape is the shape of `e`: a scalar `e` gives rank 0, and an array literal gives its
   dimensions (`tensor([[1, 2], [3, 4]])` has the shape `[2, 2]`), and a tensor `e` gives its shape. With a dtype

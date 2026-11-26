@@ -1,0 +1,27 @@
+# MIND Conformance Test: a dotted operator with a scalar operand is refused with E3016
+# Specification reference: spec/v1.0/language.md#tensor-operators-and-broadcasting
+# Decision: DN-81 (design/rfcs/decision-notes-3.md)
+# Category: shapes
+# Profile: cpu
+
+description: "a .* 2.0 expands no operand: a scalar extends with the plain operator; it is refused with E3016 and the fix is a * 2.0"
+category: shapes
+profile: cpu
+
+input:
+  source: |
+    fn f(a: Tensor<f32, [3]>) -> Tensor<f32, [3]> {
+        return a .* 2.0;
+    }
+
+    fn main() -> i64 {
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E3016
+    location:
+      line: 2
+      column: 14
