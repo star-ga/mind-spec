@@ -25,41 +25,67 @@ refuses it or documents it as an extension. The file core-v1-forms.md lists the
 status of each form.
 *)
 
-(* Module structure *)
+(* Lookahead. Every choice of this grammar is decided by at most three  *)
+(* tokens, with three stated exceptions, each decided by one token and  *)
+(* a rule of the text: the tail Expression of a Block (Block), a        *)
+(* RecordBody in the head of if, while, for and match (NamePath), and   *)
+(* the reading of a statement start (Statement).                        *)
+
+(* Module structure. Module level holds items only. Attributes come    *)
+(* first, then "pub", then the word that starts the item: one order    *)
+(* for every item kind, so `#[a] pub fn f() { }` has one derivation.   *)
+(* "pub" makes the item visible outside its module; an item without    *)
+(* "pub" is visible only in its module. There is no export list.       *)
 Module = { ModuleItem } ;
 
-ModuleItem = FunctionDeclaration
-           | TypeDeclaration
-           | StructDeclaration
-           | TraitDeclaration          (* NOT IN CORE v1 *)
-           | ImportDeclaration
-           | ExportDeclaration
-           ;
+ModuleItem = { Attribute } , ( [ "pub" ] , NamedItem
+                             | ImportDeclaration
+                             | UseDeclaration
+                             | ExternDeclaration ) ;
 
-(* Function declarations. An attribute may stand directly before a   *)
-(* function declaration. Only the attributes that the specification *)
+NamedItem = FunctionDeclaration
+          | TypeDeclaration
+          | StructDeclaration
+          | EnumDeclaration
+          | ConstDeclaration
+          | TraitDeclaration          (* NOT IN CORE v1 *)
+          | ModuleBlock
+          ;
+
+(* Function declarations. Only the attributes that the specification *)
 (* defines by name for this position are part of Core v1 (language.md,*)
-(* "Attributes"); any other attribute name is refused.               *)
-FunctionDeclaration = { Attribute } , "fn" , Identifier , "(" , [ ParameterList ] , ")" , [ "->" , Type ] , Block ;
+(* "Attributes").                                                     *)
+FunctionDeclaration = "fn" , Identifier , "(" , [ ParameterList ] , ")" , [ "->" , Type ] , Block ;
 
-(* Attribute (`#[name]`, `#[name(arg, ...)]`). The spelling starts    *)
-(* with "#". The form `[name]` without the "#" is not an attribute.   *)
-(* An argument is an identifier, a literal, or a name bound to a      *)
-(* literal (`#[requires(mind_spec = "1.2")]`).                        *)
-Attribute       = "#" , "[" , Identifier , [ "(" , [ AttributeArgList ] , ")" ] , "]" ;
+(* Attribute (`#[name]`, `#[name(arg, ...)]`, `#[tool.name]`). The      *)
+(* spelling starts with "#". The form `[name]` without the "#" is not   *)
+(* an attribute. A name of one segment MUST be a name of the attribute  *)
+(* table of the specification, keyed by the name, the item kind and the *)
+(* argument form. A name of two segments is a tool attribute: its first *)
+(* segment MUST be listed in the project file, the compiler checks its  *)
+(* form and gives it no meaning, and it MUST NOT change a byte of the   *)
+(* artifact. `#[grad(g, p)]` before a function declares the gradient    *)
+(* function g. An argument is an identifier, a literal, or a name and   *)
+(* a literal joined by ":" (`#[requires(mind_spec: "1.2")]`); the form  *)
+(* `name = literal` is refused.                                         *)
+Attribute        = "#" , "[" , AttributeName , [ "(" , [ AttributeArgList ] , ")" ] , "]" ;
+AttributeName    = Identifier , [ "." , Identifier ] ;
 AttributeArgList = AttributeArg , { "," , AttributeArg } ;
-AttributeArg    = Identifier | Literal | Identifier , "=" , Literal ;
+AttributeArg     = Identifier | Literal | Identifier , ":" , Literal ;
 
+(* A parameter named "_" binds nothing; "_" may name several parameters. *)
 ParameterList = Parameter , { "," , Parameter } , [ "," ] ;
-Parameter = Identifier , ":" , Type ;
+Parameter = ( Identifier | "_" ) , ":" , Type ;
 
 (* Type declarations *)
 (* NOT IN CORE v1: the [ TypeParameters ] part of TypeDeclaration,      *)
 (* StructDeclaration, TraitDeclaration and EnumDeclaration, with        *)
 (* TypeParameters, TypeParameter, TraitBounds and TraitBound below.     *)
+(* A bound is written in the type-parameter list only. "where" is a     *)
+(* reserved word that no rule spells.                                   *)
 TypeDeclaration = "type" , Identifier , [ TypeParameters ] , "=" , Type , ";" ;
 
-TypeParameters = "<" , TypeParameter , { "," , TypeParameter } , [ "," ] , ">" ;
+TypeParameters = "<" , TypeParameter , { "," , TypeParameter } , [ "," ] , CloseAngle ;
 TypeParameter = Identifier , [ ":" , TraitBounds ] ;
 
 TraitBounds = TraitBound , { "+" , TraitBound } ;
@@ -72,100 +98,179 @@ FieldList = Field , { "," , Field } , [ "," ] ;
 Field = Identifier , ":" , Type ;
 
 (* Trait declarations *)
-(* NOT IN CORE v1: TraitDeclaration, TraitItem and FunctionSignature.   *)
+(* NOT IN CORE v1: TraitDeclaration, TraitItem and FunctionSignature    *)
+(* as a TraitItem.                                                      *)
 TraitDeclaration = "trait" , Identifier , [ TypeParameters ] , [ ":" , TraitBounds ] , "{" , { TraitItem } , "}" ;
 
 TraitItem = FunctionSignature ;
 FunctionSignature = "fn" , Identifier , "(" , [ ParameterList ] , ")" , [ "->" , Type ] , ";" ;
 
-(* Import/Export *)
+(* Import *)
 ImportDeclaration = "import" , ImportPath , ";" ;
-ExportDeclaration = "export" , Identifier , ";" ;
 (* Normative correction targeted for specification 1.7.0, decided  *)
 (* by the specification owner on 2026-10-07: path segments are      *)
-(* separated by ".". Earlier text of this grammar                   *)
-(* wrote "::", which no released reference compiler accepted for    *)
-(* `import`; the reference `use` additionally accepts "::" as an    *)
-(* extension. Qualifier semantics: language.md, "Module-qualified   *)
-(* references".                                                     *)
+(* separated by ".". "." follows a value or a module, and "::"      *)
+(* follows a type; the other separator is refused with the fix.     *)
+(* Qualifier semantics: language.md, "Module-qualified references". *)
 ImportPath = Identifier , { "." , Identifier } ;
+
+(* ============================================================ *)
+(* v1.1 candidate additions (Phase 10.5 — Systems Programming   *)
+(* Foundation). Status: evolving — implementations claiming     *)
+(* v1.0 conformance MAY parse these, implementations claiming   *)
+(* v1.1 MUST.                                                   *)
+(* ============================================================ *)
+
+(* Compile-time constant declaration. Its initializer is a constant  *)
+(* expression, with no call.                                         *)
+ConstDeclaration = "const" , Identifier , [ ":" , Type ] , "=" , Expression , ";" ;
+
+(* Algebraic enums.                                                  *)
+(* NOT IN CORE v1: the [ TypeParameters ] part of EnumDeclaration.   *)
+EnumDeclaration = "enum" , Identifier , [ TypeParameters ] , "{" , [ EnumVariantList ] , "}" ;
+EnumVariantList = EnumVariant , { "," , EnumVariant } , [ "," ] ;
+EnumVariant     = Identifier , [ "(" , [ EnumPayloadList ] , ")" ] ;
+EnumPayloadList = Type , { "," , Type } , [ "," ] ;
+
+(* Module block (compile-time grouping).                        *)
+ModuleBlock     = "module" , Identifier , "{" , { ModuleItem } , "}" ;
+
+(* Use-clause (lightweight import).                             *)
+UseDeclaration  = "use" , ImportPath , ";" ;
+
+(* External functions: one form, the block. *)
+ExternDeclaration = "extern" , StringLiteral , "{" , { FunctionSignature } , "}" ;
+
+(* ============================================================ *)
+(* End of the v1.1 candidate items.                             *)
+(* ============================================================ *)
 
 (* Types *)
 Type = PrimitiveType
-     | TensorType
      | TupleType
      | ArrayType
      | FunctionType            (* NOT IN CORE v1 *)
-     | DifferentiableType
+     | DifferentiableType      (* NOT IN CORE v1 *)
      | TraitObjectType         (* NOT IN CORE v1 *)
      | IdentifierType
      ;
 
-PrimitiveType = "i32" | "i64" | "f32" | "f64" | "bool" | "unit" ;
+(* Scalar primitive type names are lower case; every other type name   *)
+(* is UpperCamel. "usize" and "isize" are not type names.              *)
+PrimitiveType = "i8" | "i16" | "i32" | "i64" | "u8" | "u16" | "u32" | "u64"
+              | "f32" | "f64" | "bool" | "unit" ;
 
 (* Closing angle. CloseAngle is the ">" that closes a type-argument    *)
-(* list (TensorType, IdentifierType). The ">" that closes the type     *)
-(* parameters of a declaration (TypeParameters) is not a CloseAngle.   *)
-(* Where the parser expects a CloseAngle and the next token starts     *)
-(* with ">" (">>", ">=", ">>="), the first ">" is the CloseAngle and   *)
-(* the rest of the token is read again as a token: ">>" gives ">" and  *)
-(* ">", ">=" gives ">" and "=", ">>=" gives ">" and ">=" (lexical.md,  *)
-(* "Tokens"). So `Option<Option<i64>>= p` closes both lists before    *)
-(* the "=".                                                            *)
+(* list (TypeArguments) or the type parameters of a declaration         *)
+(* (TypeParameters). Where a list is open, each ">" closes one list,    *)
+(* also the first ">" of the joined characters ">>", ">=" and ">>="     *)
+(* (lexical.md, "Tokens"). So `Option<Option<i64>>= p` closes both      *)
+(* lists before the "=", and `type X<T>= T;` is derived.                *)
 CloseAngle = ">" ;
 
-TensorType = "Tensor" , "<" , DType , "," , Shape , CloseAngle ;
-DType = "i32" | "i64" | "f32" | "f64" ;
+(* Type arguments. A generic type always writes all its arguments: the  *)
+(* bare names `Vec` and `Map` are refused. In Core v1 the type          *)
+(* arguments belong to the predeclared generic types Option<T>,         *)
+(* Result<T, E>, Vec<T>, Map<K, V> and Tensor<D, S>; a user-declared    *)
+(* type has no type parameters in Core v1. The arguments of Tensor are  *)
+(* a dtype (a PrimitiveType of the profile; Core v1: i32, i64, f32,    *)
+(* f64) and a Shape, both required: `Tensor<f32>` is refused. A         *)
+(* TypeArgument that starts with "[" is decided by the third token: a   *)
+(* Shape `[N]` or `[N, M]` against an ArrayType `[N; 3]`.               *)
+(* NOT IN CORE v1: the TypeArguments of IdentifierType when the         *)
+(* identifier names a user-declared type.                               *)
+TypeArguments = "<" , TypeArgument , { "," , TypeArgument } , [ "," ] , CloseAngle ;
+TypeArgument = Type | Shape ;
+
+(* A Dimension is an integer literal or the name of a const of type    *)
+(* i64 in scope. `Tensor<D, []>` is the type D.                        *)
 Shape = "[" , [ DimensionList ] , "]" ;
 DimensionList = Dimension , { "," , Dimension } , [ "," ] ;
-Dimension = IntegerLiteral | Identifier ;
+Dimension = [ "-" ] , IntegerLiteral | Identifier ;
 
-TupleType = "(" , [ TypeList ] , ")" ;
+(* `(T,)` is the tuple type of one element; `(T)` is not a type, and  *)
+(* the unit type is written `unit` only.                              *)
+TupleType = "(" , Type , "," , [ TypeList ] , ")" ;
 TypeList = Type , { "," , Type } , [ "," ] ;
 
-ArrayType = "[" , Type , ";" , IntegerLiteral , "]" ;
+(* The length of an array is an integer literal or a const name. *)
+ArrayType = "[" , Type , ";" , ArrayLength , "]" ;
+ArrayLength = IntegerLiteral | Identifier ;
 
 (* NOT IN CORE v1: FunctionType. *)
-FunctionType = "(" , [ TypeList ] , ")" , "->" , Type ;
+FunctionType = "fn" , "(" , [ TypeList ] , ")" , [ "->" , Type ] ;
 
+(* NOT IN CORE v1: DifferentiableType. Core v1 refuses `diff T` and      *)
+(* writes a gradient with the attribute `#[grad(g, p)]`.               *)
 DifferentiableType = "diff" , Type ;
 
 (* NOT IN CORE v1: TraitObjectType. *)
 TraitObjectType = "dyn" , Identifier ;
 
-(* In Core v1 the type arguments belong to the built-in generic types   *)
-(* Option and Result. A user-declared type has no type parameters in    *)
-(* Core v1.                                                             *)
-(* NOT IN CORE v1: the [ "<" , TypeList , CloseAngle ] part of          *)
-(* IdentifierType when the identifier names a user-declared type.       *)
-IdentifierType = Identifier , [ "<" , TypeList , CloseAngle ] ;
+IdentifierType = Identifier , [ TypeArguments ] ;
 
-(* Statements and blocks *)
+(* Statements and blocks. Block tail: where a Statement and the tail    *)
+(* Expression of the Block can both start, the parser reads the common  *)
+(* form and one token after it decides: a ";" (or an assignment         *)
+(* operator) makes it a statement, the closing "}" of the Block makes   *)
+(* it the tail.                                                         *)
 Block = "{" , { Statement } , [ Expression ] , "}" ;
 
+(* Statement reading rule. Where a statement can start and the next     *)
+(* token is "if", "match", "{", "while", "for" or "loop", the form is   *)
+(* read as a BlockLikeStatement (language.md, "Block-like statements"). *)
+(* This is a one-token rule of the text, not an alternative that the    *)
+(* grammar alone decides.                                               *)
 Statement = LetStatement
           | ExpressionStatement
           | ReturnStatement
           | DeferStatement
           | BlockLikeStatement
           | LoopExitStatement
+          | AssertStatement
           ;
 
 (* "mut" makes every name of the pattern a mutable binding         *)
 (* (language.md, "Bindings and assignment").                       *)
 LetStatement = "let" , [ "mut" ] , Pattern , [ ":" , Type ] , "=" , Expression , ";" ;
 
-Pattern = IdentifierPattern
-        | TuplePattern
-        | WildcardPattern
-        ;
+(* Patterns. `p | q` tries the alternatives from left to right, and    *)
+(* each alternative binds the same names with the same types; there is *)
+(* no leading "|". A bare identifier always binds a name. A range      *)
+(* pattern has the closed form only: `a..=b` takes every integer v      *)
+(* with a <= v <= b; its bounds are integer literals or const names.    *)
+Pattern = PatternAtom , { "|" , PatternAtom } ;
+
+PatternAtom = IdentifierPattern
+            | TuplePattern
+            | WildcardPattern
+            | LiteralPattern
+            | RangePattern
+            | VariantPattern
+            | RecordPattern
+            ;
 
 IdentifierPattern = Identifier ;
 TuplePattern = "(" , [ PatternList ] , ")" ;
 PatternList = Pattern , { "," , Pattern } , [ "," ] ;
 WildcardPattern = "_" ;
+LiteralPattern = [ "-" ] , IntegerLiteral | BooleanLiteral | StringLiteral ;
+RangePattern = RangeBound , "..=" , RangeBound ;
+RangeBound = [ "-" ] , IntegerLiteral | Identifier ;
+VariantPattern = Identifier , "::" , Identifier , [ "(" , [ PatternList ] , ")" ]
+               | Identifier , "(" , [ PatternList ] , ")"
+               ;
+RecordPattern = Identifier , "{" , [ FieldPattern , { "," , FieldPattern } , [ "," ] ] , "}" ;
+FieldPattern = Identifier , [ ":" , Pattern ] ;
 
-ExpressionStatement = Expression , ";" ;
+(* Assignment is a statement and has no value: `p = e;` and `p op= e;`. *)
+(* With an AssignmentOperator the left Expression MUST be a place. A    *)
+(* chain `a = b = c` and an assignment inside an expression are not     *)
+(* derived. `x op= e` means `x = x op e`, with the place x evaluated    *)
+(* once (language.md, "Bindings and assignment").                      *)
+ExpressionStatement = Expression , [ AssignmentOperator , Expression ] , ";" ;
+AssignmentOperator = "=" | "+=" | "-=" | "*=" | "/=" | "%="
+                   | "<<=" | ">>=" | "&=" | "|=" | "^=" ;
 
 ReturnStatement = "return" , [ Expression ] , ";" ;
 
@@ -174,143 +279,146 @@ ReturnStatement = "return" , [ Expression ] , ";" ;
 (* statements").                                                       *)
 DeferStatement = "defer" , Block ;
 
-(* A block-like statement is one of the five forms if, match, block,  *)
-(* while and for, standing as a statement with no ";" after it. Where *)
-(* a statement can start and the next token starts one of the five    *)
-(* forms, the form is read as a BlockLikeStatement and ends at its    *)
-(* closing brace; what follows starts a new statement. A ";" directly *)
-(* after that brace makes the form an ExpressionStatement, and a form *)
-(* that only the closing brace of the enclosing block follows is the  *)
-(* tail Expression of that block. A BlockLikeStatement that is not    *)
-(* the tail has the type unit. language.md, "Block-like statements",  *)
-(* states these rules.                                                *)
+(* A block-like statement is one of the six forms if, match, block,   *)
+(* while, for and loop, standing as a statement with no ";" after it. *)
+(* It ends at its closing brace; what follows starts a new statement.  *)
+(* A ";" directly after that brace makes the form an                  *)
+(* ExpressionStatement, and a form that only the closing brace of the *)
+(* enclosing block follows is the tail Expression of that block. A    *)
+(* BlockLikeStatement that is not the tail has the type unit.         *)
+(* language.md, "Block-like statements", states these rules.          *)
 BlockLikeStatement = IfExpression
                    | MatchExpression
                    | BlockExpression
                    | WhileExpression
                    | ForExpression
+                   | LoopExpression
                    ;
 
-(* A loop exit is valid inside the body of a WhileExpression or a     *)
-(* ForExpression; elsewhere it is refused (language.md, "Loop exits").*)
-(* It ends the innermost loop (break) or starts its next iteration    *)
-(* (continue). It takes no value and no label, and its ";" is         *)
-(* required. "break" and "continue" are keywords (Keyword in          *)
-(* grammar-lexical.ebnf), so no rule reads them as a name:            *)
-(* `let break = 4;`, `break - 1;`, `break = 5;` and                   *)
-(* `while c { break }` are not derived.                               *)
+(* A loop exit is valid inside the body of a WhileExpression, a        *)
+(* ForExpression or a LoopExpression; elsewhere it is refused          *)
+(* (language.md, "Loop exits"). It ends the innermost loop (break) or *)
+(* starts its next iteration (continue). It takes no value and no      *)
+(* label, and its ";" is required. "break" and "continue" are keywords *)
+(* (Keyword in grammar-lexical.ebnf), so no rule reads them as a name: *)
+(* `let break = 4;`, `break - 1;`, `break = 5;` and                    *)
+(* `while c { break }` are not derived.                                *)
 LoopExitStatement = ( "break" | "continue" ) , ";" ;
 
-(* Expressions *)
-Expression = AssignmentExpression ;
+(* Runtime assertion (no return value). One form: `assert c;` or       *)
+(* `assert c, "message";`. "assert" is a keyword.                      *)
+AssertStatement = "assert" , Expression , [ "," , StringLiteral ] , ";" ;
 
-AssignmentExpression = LogicalOrExpression , [ AssignmentOperator , AssignmentExpression ] ;
-(* `x op= e` means `x = x op e`, with the place x evaluated once      *)
-(* (language.md, "Bindings and assignment").                         *)
-AssignmentOperator = "=" | "+=" | "-=" | "*=" | "/=" | "%="
-                   | "<<=" | ">>=" | "&=" | "|=" | "^=" ;
+(* Expressions. Operator precedence of the binary operators and the     *)
+(* cast (highest binds tightest); the full table is in language.md,    *)
+(* "Operator precedence and associativity":                            *)
+(*   1. as       (postfix cast, below the unary operators - ! ~)        *)
+(*   2. *  /  %  .*  ./  .%                                             *)
+(*   3. +  -  .+  .-                                                    *)
+(*      &  |  ^  <<  >>   (bit operators, beside levels 2 and 3)        *)
+(*   4. ==  !=  <  <=  >  >=   (no chain)                               *)
+(*   5. &&                                                              *)
+(*   6. ||                                                              *)
+(* Levels 2 and 3 are left-associative. A bit operator never stands     *)
+(* beside another bit operator or an arithmetic operator without        *)
+(* parentheses: "&", "|" and "^" chain only with themselves, and "<<"   *)
+(* and ">>" take two operands and do not chain. A bit expression is a   *)
+(* comparison operand: `x & 3 == 2` is `(x & 3) == 2`. A comparison     *)
+(* never has a comparison as its direct operand: `a < b < c` is not     *)
+(* derived.                                                             *)
+Expression = LogicalOrExpression ;
 
 LogicalOrExpression = LogicalAndExpression , { "||" , LogicalAndExpression } ;
 
 LogicalAndExpression = ComparisonExpression , { "&&" , ComparisonExpression } ;
 
-ComparisonExpression = AdditiveExpression , { ComparisonOperator , AdditiveExpression } ;
+ComparisonExpression = OperatorExpression , [ ComparisonOperator , OperatorExpression ] ;
 ComparisonOperator = "==" | "!=" | "<" | ">" | "<=" | ">=" ;
 
-AdditiveExpression = BitwiseExpression , { AdditiveOperator , BitwiseExpression } ;
+OperatorExpression = CastExpression , [ ArithmeticTail | BitwiseTail ] ;
+
+ArithmeticTail = MultiplicativeOperator , CastExpression , { MultiplicativeOperator , CastExpression } ,
+                 { AdditiveOperator , MultiplicativeExpression }
+               | AdditiveOperator , MultiplicativeExpression , { AdditiveOperator , MultiplicativeExpression }
+               ;
+
+(* A plain operator on two tensors needs one dtype and one shape; a    *)
+(* scalar operand extends. A dotted operator broadcasts by the rules   *)
+(* of shapes.md, and a dotted operator with no tensor operand is       *)
+(* refused. The dotted operators have the precedence of their plain    *)
+(* operators. The matrix product is `matmul(a, b)`.                    *)
 AdditiveOperator = "+" | "-" | ".+" | ".-" ;
 
-(* The shift and bitwise operators are one level, tighter than "+"    *)
-(* and "-" and looser than "*": `0 - 17 >> 2` is `0 - (17 >> 2)`.     *)
-(* Operand types and values: language.md, "Bitwise and shift          *)
-(* operators".                                                         *)
-BitwiseExpression = MultiplicativeExpression , { BitwiseOperator , MultiplicativeExpression } ;
-BitwiseOperator = "&" | "|" | "^" | "<<" | ">>" ;
-
-(* ".*" and "./" are on the level of "*", and ".+" and ".-" on the    *)
-(* level of "+" (the elementwise operators of the precedence table).  *)
 MultiplicativeExpression = CastExpression , { MultiplicativeOperator , CastExpression } ;
-MultiplicativeOperator = "*" | "/" | "%" | ".*" | "./" ;
+MultiplicativeOperator = "*" | "/" | "%" | ".*" | "./" | ".%" ;
+
+BitwiseTail = "&" , CastExpression , { "&" , CastExpression }
+            | "|" , CastExpression , { "|" , CastExpression }
+            | "^" , CastExpression , { "^" , CastExpression }
+            | ( "<<" | ">>" ) , CastExpression
+            ;
 
 (* A cast binds tighter than "*", "/" and "%" and looser than a unary *)
 (* operator: `a * b as f64` is `a * (b as f64)`, and `-x as f64` is   *)
 (* `(-x) as f64`. Casts are left-associative. The casts that are      *)
-(* allowed and their values: language.md, "Casts".                    *)
-(* Reading rule for the type of a cast: a primitive type name ends    *)
-(* the type, so `x as i64 < y` compares the cast with y. After any    *)
-(* other type name (an Identifier of IdentifierType, also after       *)
-(* "diff"), a "<" opens the type-argument list of IdentifierType and  *)
-(* is never a ComparisonOperator; CloseAngle closes the list. So      *)
-(* `x as Option<y>> z` is `(x as Option<y>) > z`, and the statement   *)
-(* `x as Option < y;` has no reading: the list is not closed. To      *)
-(* compare a cast to such a type by "<", write parentheses:           *)
-(* `(x as T) < y`.                                                    *)
-CastExpression = UnaryExpression , { "as" , Type } ;
+(* allowed and their values: language.md, "Casts". The type after     *)
+(* "as" is a primitive type name or a name with no type-argument list, *)
+(* so a "<" after a cast is always a ComparisonOperator: `x as T < y`  *)
+(* compares the cast with y.                                           *)
+CastExpression = UnaryExpression , { "as" , CastType } ;
+CastType = PrimitiveType | Identifier ;
 
-(* Unary operators are right-to-left: `- -x` is `-(-x)`.            *)
+(* Unary operators are right-to-left: `- -x` is `-(-x)`. "~" is the    *)
+(* bitwise complement of an integer; "!" takes a bool. There is no     *)
+(* unary "+". A "-" before a literal is this operator; the checker     *)
+(* reads a "-" applied to a literal as one negative value.             *)
 UnaryExpression = { UnaryOperator } , PostfixExpression ;
-UnaryOperator = "-" | "!" ;
+UnaryOperator = "-" | "!" | "~" ;
 
-(* A CallOperator never directly follows a FieldAccessOperator, so   *)
-(* `x.m(a)` has one derivation: the method call (MethodCallOperator). *)
-(* A call of a function value that a field holds is written           *)
-(* `(x.m)(a)`. FieldAccessChain is one or more field accesses and the *)
-(* index, tuple index or method call that follows them; field         *)
-(* accesses at the end of the expression are the last part of         *)
-(* PostfixExpression.                                                 *)
-PostfixExpression = PrimaryExpression , { PostfixOperator } , { FieldAccessOperator } ;
+(* Postfix operators. A call follows only a name (NamePath) or a        *)
+(* method name (MemberOperator): `5(3)`, `f(1)(2)` and `(f)(2)` are     *)
+(* not derived. `x.m(a)` is a method call, decided by one token after  *)
+(* the name.                                                            *)
+PostfixExpression = PrimaryExpression , { PostfixOperator } ;
 
-PostfixOperator = CallOperator
-                | IndexOperator
+PostfixOperator = IndexOperator
                 | TupleIndexOperator
-                | MethodCallOperator
-                | FieldAccessChain
+                | MemberOperator
                 ;
 
-FieldAccessChain = FieldAccessOperator , { FieldAccessOperator } ,
-                   ( IndexOperator | TupleIndexOperator | MethodCallOperator ) ;
+(* NOT IN CORE v1: the [ "::" , TypeArguments ] part of MemberOperator  *)
+(* (the type arguments of a generic method, `e.m::<A>(x)`).             *)
+MemberOperator = "." , Identifier , [ [ "::" , TypeArguments ] , CallOperator ] ;
 
 CallOperator = "(" , [ ArgumentList ] , ")" ;
 ArgumentList = Expression , { "," , Expression } , [ "," ] ;
 
-IndexOperator = "[" , IndexExpression , "]" ;
-IndexExpression = Expression
-                | SliceExpression
-                ;
+(* Index. `t[i, j]` indexes a tensor by several axes; an array takes   *)
+(* one item. `a[s:e:k]` is a slice. An omitted s is 0, an omitted e is *)
+(* the length of the axis, and an omitted k is 1 (language.md, "Tuple  *)
+(* index"). The grammar has no range index: `a[1..3]` is not derived.  *)
+IndexOperator = "[" , IndexItem , { "," , IndexItem } , [ "," ] , "]" ;
+IndexItem = Expression , [ SliceTail ]
+          | SliceTail
+          ;
+SliceTail = SliceColon , [ Expression ] , [ SliceColon , [ Expression ] ] ;
 
-(* `a[s:e:k]` is a slice. An omitted s is 0, an omitted e is the    *)
-(* length of the axis, and an omitted k is 1 (language.md, "Tuple   *)
-(* index"). The grammar has no range index: `a[1..3]` is not        *)
-(* derived.                                                         *)
-SliceExpression = [ Expression ] , SliceColon , [ Expression ] , [ SliceColon , [ Expression ] ] ;
-
-(* Colon of a slice. Where the parser expects a SliceColon and the   *)
-(* next token is "::", the first ":" is the SliceColon and the rest *)
-(* ":" is read again as a token (lexical.md, "Tokens"). So `a[::2]` *)
-(* is the slice with the step 2.                                    *)
+(* Colon of a slice. Inside the brackets of an index and outside any   *)
+(* nested bracket, the text "::" is two SliceColon tokens: `a[::2]` is *)
+(* the slice with the step 2, and `a[s::k]` is the slice from s with   *)
+(* the step k. A path there is written in parentheses: `a[(E::B)]`     *)
+(* (lexical.md, "Tokens").                                             *)
 SliceColon = ":" ;
 
-FieldAccessOperator = "." , Identifier ;
-
-(* Tuple index `t.0`: the index is an IntegerLiteral token in the     *)
-(* DecimalInteger form, with no sign and no prefix. Where the parser  *)
-(* expects the DecimalInteger of a tuple index and the next token is  *)
-(* a float literal of the form digits "." digits (no exponent, no     *)
-(* suffix), the token is read as two tuple indices: `t.0.1` means     *)
-(* `(t.0).1`. The second alternative derives that token               *)
-(* (TupleIndexPair in grammar-lexical.ebnf).                          *)
-TupleIndexOperator = "." , DecimalInteger
-                   | "." , TupleIndexPair
-                   ;
-
-MethodCallOperator = "." , Identifier , "(" , [ ArgumentList ] , ")" ;
+(* Tuple index `t.0`: the index is a DecimalInteger token, with no      *)
+(* sign, no prefix and no "_". Directly after "." the lexer reads a     *)
+(* digit run as a DecimalInteger, so `t.0.1` means `(t.0).1`.           *)
+TupleIndexOperator = "." , DecimalInteger ;
 
 (* Primary expressions *)
 PrimaryExpression = Literal
-                  | Identifier
-                  | UnitExpression
-                  | ParenthesizedExpression
-                  | TupleExpression
+                  | NamePath
+                  | ParenExpression
                   | ArrayExpression
                   | TensorConstructor
                   | BlockExpression
@@ -318,36 +426,62 @@ PrimaryExpression = Literal
                   | MatchExpression
                   | WhileExpression
                   | ForExpression
+                  | LoopExpression
                   | FunctionExpression      (* NOT IN CORE v1 *)
                   ;
 
-(* The unit value. Its type is unit. *)
-UnitExpression = "(" , ")" ;
+(* A name, a variant path `E::A`, a call `f(x)` or `E::A(x)`, or a      *)
+(* record literal `Name { f: e }`, which names each field once. In the  *)
+(* head of if, while, for and match, an identifier followed by "{"      *)
+(* starts the Block, and a record literal there is written in           *)
+(* parentheses.                                                         *)
+NamePath = Identifier , [ "::" , Identifier ] , [ CallOperator | RecordBody ] ;
+RecordBody = "{" , [ FieldInit , { "," , FieldInit } , [ "," ] ] , "}" ;
+FieldInit = Identifier , ":" , Expression ;
 
-ParenthesizedExpression = "(" , Expression , ")" ;
-
-TupleExpression = "(" , Expression , "," , [ ExpressionList ] , ")" ;
+(* `()` is the unit value, `(e)` a parenthesized expression, `(e,)`    *)
+(* and `(a, b)` tuples.                                                *)
+ParenExpression = "(" , [ Expression , [ "," , [ ExpressionList ] ] ] , ")" ;
 ExpressionList = Expression , { "," , Expression } , [ "," ] ;
 
-ArrayExpression = "[" , [ ArrayElements ] , "]" ;
-ArrayElements = Expression , { "," , Expression } , [ "," ] ;
+(* `[a, b]` lists the elements; `[v; n]` holds n copies of one         *)
+(* evaluation of v, with n an integer literal or a const name.          *)
+ArrayExpression = "[" , [ Expression , ( ";" , ArrayLength | { "," , Expression } , [ "," ] ) ] , "]" ;
 
-TensorConstructor = "tensor" , "(" , Expression , [ "," , "dtype" , ":" , DType ] , ")" ;
+(* "tensor" directly followed by "(" is always the constructor. *)
+TensorConstructor = "tensor" , "(" , Expression , [ "," , "dtype" , ":" , PrimitiveType ] , ")" ;
 
 BlockExpression = Block ;
 
 IfExpression = "if" , Expression , Block , [ "else" , ( IfExpression | Block ) ] ;
 
+(* Every arm ends with ",", the last one too. An arm body is a         *)
+(* `return`, a `break`, a `continue`, or an Expression, optionally     *)
+(* followed by an assignment (an arm statement of the type unit). A    *)
+(* body that starts with "{" is a block expression: `0 => { 1 } - 1,`  *)
+(* is valid. The guard runs at most once per match.                    *)
 MatchExpression = "match" , Expression , "{" , { MatchArm } , "}" ;
-MatchArm = Pattern , "=>" , ( Expression , "," | Block ) ;
+MatchArm = Pattern , [ "if" , Expression ] , "=>" , ArmBody , "," ;
+ArmBody = "return" , [ Expression ]
+        | "break"
+        | "continue"
+        | Expression , [ AssignmentOperator , Expression ]
+        ;
 
 (* A loop is an expression of the type unit; its value is ().          *)
 WhileExpression = "while" , Expression , Block ;
 
-(* The expression after "in" is an ordinary Expression. This grammar has *)
-(* no range expression: `for i in a..b` is not defined here; a range is  *)
-(* an extension.                                                          *)
-ForExpression = "for" , Pattern , "in" , Expression , Block ;
+(* `for p in a..b` counts from a up to b, b not included; `for p in     *)
+(* a..=b` counts from a up to b, b included. a and b have one integer   *)
+(* type and are evaluated once, a first, before the first iteration;    *)
+(* the loop never overflows. ".." and "..=" stand nowhere else: a range *)
+(* is not a value. Without ".." or "..=", the expression after "in" is  *)
+(* an ordinary Expression.                                              *)
+ForExpression = "for" , Pattern , "in" , Expression , [ ( ".." | "..=" ) , Expression ] , Block ;
+
+(* `loop B` runs B until a break. A loop that no break ends diverges;  *)
+(* else its type is unit.                                              *)
+LoopExpression = "loop" , Block ;
 
 (* NOT IN CORE v1: FunctionExpression (closures, function values).     *)
 FunctionExpression = "fn" , "(" , [ ParameterList ] , ")" , [ "->" , Type ] , Block ;
@@ -355,65 +489,3 @@ FunctionExpression = "fn" , "(" , [ ParameterList ] , ")" , [ "->" , Type ] , Bl
 (* Tensor operations (Core v1 intrinsics) *)
 (* These are typically called as functions: sum(x, axes, keepdims) *)
 (* The function call syntax is covered by CallOperator above *)
-
-(* ============================================================ *)
-(* v1.1 candidate additions (Phase 10.5 — Systems Programming   *)
-(* Foundation). Implemented in mindc 0.2.5+. Status: evolving — *)
-(* implementations claiming v1.0 conformance MAY parse these,   *)
-(* implementations claiming v1.1 MUST.                          *)
-(* ============================================================ *)
-
-(* Compile-time constant declaration.                           *)
-ConstDeclaration = "const" , Identifier , [ ":" , Type ] , "=" , Expression , [ ";" ] ;
-
-(* Algebraic enums.                                                  *)
-(* NOT IN CORE v1: the [ TypeParameters ] part of EnumDeclaration.   *)
-EnumDeclaration = "enum" , Identifier , [ TypeParameters ] , "{" , [ EnumVariantList ] , "}" ;
-EnumVariantList = EnumVariant , { "," , EnumVariant } , [ "," ] ;
-EnumVariant     = Identifier , [ "(" , [ EnumPayloadList ] , ")" ] ;
-EnumPayloadList = Type , { "," , Type } ;
-
-(* Module block (compile-time grouping).                        *)
-ModuleBlock     = "module" , Identifier , "{" , { ModuleItem } , "}" ;
-
-(* Use-clause (lightweight import).                             *)
-UseDeclaration  = "use" , ImportPath , [ ";" ] ;
-
-(* Attributes before an item other than a function declaration     *)
-(* (Attribute: FunctionDeclaration above).                           *)
-(* FunctionDeclaration is not an alternative here: it takes its own    *)
-(* attributes, so #[a] fn f() { } has one derivation.                 *)
-AttributedItem  = Attribute , { Attribute } ,
-                  ( TypeDeclaration | StructDeclaration | TraitDeclaration
-                  | ImportDeclaration | ExportDeclaration ) ;
-
-(* Runtime assertion (no return value).                         *)
-(* Additive, targeted for specification 1.7.0. In the            *)
-(* parenthesised alternative a pair whose second element is a    *)
-(* string literal is the condition and the message, not a tuple. *)
-(* Any other tuple written as the condition is ill-typed,        *)
-(* because an assert condition is `bool` (stdlib.md, core        *)
-(* module); the reference compiler rejects such a parenthesised  *)
-(* tuple at parse time (487dd5c7, v0.10.3) and does not          *)
-(* otherwise check the condition's type.                         *)
-AssertStatement = "assert" , Expression , [ "," , StringLiteral ] , [ ";" ]
-                | "assert" , "(" , Expression , "," , StringLiteral , ")" , [ ";" ]
-                ;
-
-(* The postfix cast `e as T` is CastExpression above.          *)
-
-(* The logical operators "||" and "&&" are LogicalOrExpression  *)
-(* and LogicalAndExpression above, and the bitwise and shift    *)
-(* operators "|", "&", "^", "<<" and ">>" are BitwiseExpression *)
-(* above.                                                       *)
-
-(* Operator precedence of the binary operators and the cast       *)
-(* (highest binds tightest, all left-assoc); the full table is in *)
-(* language.md, "Operator precedence and associativity":          *)
-(*   1. as       (postfix cast, below the unary operators)        *)
-(*   2. *  /  %  .*  ./                                           *)
-(*   3. |  &  ^  <<  >>                                           *)
-(*   4. +  -  .+  .-                                              *)
-(*   5. == != < <= > >=                                           *)
-(*   6. &&                                                        *)
-(*   7. ||                                                        *)

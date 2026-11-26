@@ -17,8 +17,21 @@ limitations under the License.
 This grammar corresponds to the normative lexical rules in lexical.md.
 *)
 
-(* Source text structure *)
-SourceFile = [ ByteOrderMark ] , { Token | Whitespace | Comment } ;
+(* Source text structure. A ByteOrderMark stands only at offset 0.    *)
+(* A Shebang line stands only at offset 0 (after a ByteOrderMark if     *)
+(* there is one); the lexer skips it (lexical.md, "Source text").       *)
+SourceFile = [ ByteOrderMark ] , [ Shebang ] , { Token | Whitespace | Comment } ;
+Shebang = "#!" , [ ShebangStart , { ? any character except LF, CR and a ForbiddenCodePoint ? } ] ;
+ShebangStart = ? any character except "[", LF, CR and a ForbiddenCodePoint ? ;
+
+(* Forbidden code points. None of them may appear anywhere in a source  *)
+(* file, comments and strings included: U+0000 to U+0008, U+000B,       *)
+(* U+000C, U+000E to U+001F, U+007F, U+0080 to U+009F, U+200E, U+200F,  *)
+(* U+202A to U+202E, U+2066 to U+2069, U+2028, U+2029, and U+FEFF other *)
+(* than at offset 0. A lone CR (one not followed by LF) is refused too: *)
+(* LineTerminator has no alternative for it (lexical.md, "Source        *)
+(* text").                                                              *)
+ForbiddenCodePoint = ? a code point of the list above ? ;
 
 (* Tokens *)
 Token = Identifier
@@ -28,114 +41,154 @@ Token = Identifier
       | Punctuation
       ;
 
-(* Identifiers *)
-Identifier = IdentifierStart , { IdentifierContinue } ;
-IdentifierStart = Letter | "_" ;
+(* Identifiers. Names are ASCII in Core v1. A lone "_" is not an       *)
+(* Identifier: it is the wildcard token of Punctuation, and it never   *)
+(* names a value (lexical.md, "Identifiers").                          *)
+Identifier = Letter , { IdentifierContinue }
+           | "_" , IdentifierContinue , { IdentifierContinue }
+           ;
 IdentifierContinue = Letter | Digit | "_" ;
 
-(* Unicode character classes *)
-Letter = ? Unicode XID_Start ? ;
-Digit = ? Unicode XID_Continue & Nd ? | "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+Letter = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M"
+       | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
+       | "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m"
+       | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
+       ;
+Digit = DecimalDigit ;
 
-(* Keywords *)
+(* Keywords. These words are reserved: no rule reads one of them as a  *)
+(* name, and a keyword where a name stands is refused at the word. The *)
+(* list is the list of lexical.md, "Keywords"; the two lists are equal. *)
+(* "where" and "export" are reserved and no rule of the syntactic       *)
+(* grammar spells them.                                                 *)
 Keyword = "fn" | "let" | "type" | "struct" | "trait"
         | "if" | "else" | "match" | "while" | "for"
         | "return" | "defer" | "import" | "export" | "where"
-        | "break" | "continue"
+        | "break" | "continue" | "true" | "false" | "mut"
+        | "loop" | "assert" | "pub"
         ;
 
-(* Contextual words. The syntactic grammar spells these words out. The   *)
-(* lexer produces each of them as an Identifier. The Keyword list above   *)
-(* does not include them, so they are not reserved. A source is read by   *)
-(* the derivation in which a rule of the syntactic grammar spells the     *)
-(* word out, when such a derivation exists. A source with no such         *)
-(* derivation reads the word as an Identifier (`let in = 4;` binds a      *)
-(* name).                                                                  *)
-ContextualWord = "i32" | "i64" | "f32" | "f64" | "bool" | "unit"
-               | "Tensor" | "tensor" | "dtype" | "diff" | "dyn"
-               | "in" | "as" | "_"
-               | "const" | "enum" | "module" | "use" | "assert"
-               | "mut"
+(* Contextual words (documentation). The syntactic grammar spells these *)
+(* words out. The lexer produces each of them as an Identifier, and the *)
+(* Keyword list above does not include them, so they are not reserved.  *)
+(* Each word has its own positions in the syntactic grammar, and at     *)
+(* each of them at most two tokens decide whether the word is the       *)
+(* spelled word or a name: `let in = 4;` binds a name. "tensor"         *)
+(* directly followed by "(" is always the tensor constructor, so no     *)
+(* function, parameter or import may take the name `tensor`.            *)
+ContextualWord = "i8" | "i16" | "i32" | "i64" | "u8" | "u16" | "u32" | "u64"
+               | "f32" | "f64" | "bool" | "unit"
+               | "tensor" | "dtype" | "diff" | "dyn"
+               | "in" | "as"
+               | "const" | "enum" | "module" | "use" | "extern"
                ;
 
 (* Literals *)
 Literal = IntegerLiteral
         | FloatingPointLiteral
         | StringLiteral
+        | LineStringLiteral
         | BooleanLiteral
         ;
 
-(* Integer literals. Sign: a "-" or "+" directly before the digits  *)
-(* is part of the literal only where an operand can start: at the    *)
-(* start of an expression, after an operator, after "(", "[", "{",   *)
-(* ",", ";", "=", ":", a keyword, or the "}" that ends a         *)
-(* block-like statement. After an identifier, a literal, ")", "]"  *)
-(* or any other "}" it is an operator (lexical.md, "Literals").     *)
-IntegerLiteral = [ Sign ] , ( DecimalInteger | BinaryInteger | OctalInteger | HexInteger ) ;
-Sign = "+" | "-" ;
-DecimalInteger = DecimalDigit , { DecimalDigit | "_" } ;
-BinaryInteger = "0b" , BinaryDigit , { BinaryDigit | "_" } ;
-OctalInteger = "0o" , OctalDigit , { OctalDigit | "_" } ;
-HexInteger = "0x" , HexDigit , { HexDigit | "_" } ;
+(* Numeric literals. A literal has no sign: "-" before a literal is    *)
+(* always the operator. A literal has no type suffix. A numeric        *)
+(* literal is the longest run of letters, digits, "_" and "." that     *)
+(* starts with a digit (a "." only between two digits and never in a   *)
+(* run directly after the token ".", a "-" only directly after the "e" *)
+(* of an Exponent), and the whole run MUST match one form below:       *)
+(* `1.5f32`, `0x_FF`, `1__0` and `017` are refused at the first        *)
+(* character that no form allows. One "_" stands only between two      *)
+(* digits of one digit sequence, and a DecimalInteger of more than one *)
+(* digit does not start with "0" (lexical.md, "Literals").             *)
+IntegerLiteral = DecimalInteger | BinaryInteger | OctalInteger | HexInteger ;
+DecimalInteger = "0" | NonZeroDigit , { [ "_" ] , DecimalDigit } ;
+BinaryInteger = "0b" , BinaryDigit , { [ "_" ] , BinaryDigit } ;
+OctalInteger = "0o" , OctalDigit , { [ "_" ] , OctalDigit } ;
+HexInteger = "0x" , HexDigit , { [ "_" ] , HexDigit } ;
 
+NonZeroDigit = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
 DecimalDigit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
 BinaryDigit = "0" | "1" ;
 OctalDigit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" ;
 HexDigit = DecimalDigit | "a" | "b" | "c" | "d" | "e" | "f" | "A" | "B" | "C" | "D" | "E" | "F" ;
 
-(* Floating-point literals *)
-FloatingPointLiteral = [ Sign ] , DecimalDigits , "." , DecimalDigits , [ Exponent ] ;
-DecimalDigits = DecimalDigit , { DecimalDigit | "_" } ;
-Exponent = ( "e" | "E" ) , [ Sign ] , DecimalDigits ;
+(* Floating-point literals. Directly after the token "." a digit run   *)
+(* is a DecimalInteger, never a FloatingPointLiteral, so `t.0.1` is     *)
+(* the tokens `t`, ".", `0`, "." and `1` (TupleIndexOperator of        *)
+(* grammar-syntax.ebnf).                                               *)
+FloatingPointLiteral = DecimalInteger , "." , DecimalDigits , [ Exponent ] ;
+DecimalDigits = DecimalDigit , { [ "_" ] , DecimalDigit } ;
+Exponent = "e" , [ "-" ] , DecimalDigits ;
 
-(* A FloatingPointLiteral token with no Sign and no Exponent. The      *)
-(* syntactic grammar reads it as two tuple indices where it expects    *)
-(* the DecimalInteger of a tuple index (TupleIndexOperator).           *)
-TupleIndexPair = DecimalDigits , "." , DecimalDigits ;
-
-(* String literals *)
+(* String literals. A quoted string ends on the line where it starts.  *)
+(* A raw text, also one of several lines, is a LineStringLiteral: a    *)
+(* run of LineString lines that follow each other, with only spaces    *)
+(* and tabs before each "\\"; the lines are joined with LF and the     *)
+(* value has no LF after the last line. A LineString has no escape.    *)
 StringLiteral = '"' , { StringCharacter | EscapeSequence } , '"' ;
-StringCharacter = ? any Unicode scalar value except '"', '\', newline ? ;
+StringCharacter = ? any Unicode scalar value except '"', '\', LF, CR, TAB and a ForbiddenCodePoint ? ;
 EscapeSequence = "\" , ( "n" | "r" | "t" | "\" | "'" | '"' | "0" | UnicodeEscape ) ;
-UnicodeEscape = "u" , "{" , HexDigit , { HexDigit } , "}" ;
+(* One to six hex digits; the value is at most 10FFFF and is not in    *)
+(* D800 to DFFF.                                                       *)
+UnicodeEscape = "u" , "{" , HexDigit , [ HexDigit ] , [ HexDigit ] , [ HexDigit ] , [ HexDigit ] , [ HexDigit ] , "}" ;
+LineStringLiteral = LineString , { { Space | Tab } , LineString } ;
+LineString = "\\" , { ? any character except LF, CR and a ForbiddenCodePoint ? } , LineTerminator ;
 
-(* Boolean literals *)
+(* Boolean literals. "true" and "false" are keywords too. *)
 BooleanLiteral = "true" | "false" ;
 
 (* Operators. The lexer reads the longest operator that the text      *)
 (* spells: `<<=` is one token (not "<<" and "=", not "<" and "<="),   *)
-(* `>>=` is one token (not ">>" and "="), and `.*` is one token (not  *)
-(* "." and "*"). Closing angle: where the syntactic grammar expects   *)
-(* the ">" of CloseAngle and the next token starts with ">" (">>",    *)
-(* ">=", ">>="), the first ">" is that token and the rest of the      *)
-(* token is read again as a token (lexical.md, "Tokens").             *)
+(* `>>=` is one token (not ">>" and "="), `..=` is one token (not     *)
+(* ".." and "="), and each dotted operator is one token (not "." and  *)
+(* the plain operator). Every compound assignment operator is one     *)
+(* token: `x + = 2` is not derived. Joined angles: the lexer marks a   *)
+(* ">" or "<" as joined when the next character follows it with no    *)
+(* space. In an expression the two- and three-character operators     *)
+(* that start with ">" or "<" are spelled only by joined characters;  *)
+(* where a type-argument list or a type-parameter list is open, each  *)
+(* ">" closes one list, also the first ">" of ">>", ">=" and ">>="    *)
+(* (CloseAngle of grammar-syntax.ebnf; lexical.md, "Tokens").          *)
+(* ".." and "..=" stand only in the header of a for loop, and "..="   *)
+(* also in a range pattern. The dotted operators ".+", ".-", ".*",    *)
+(* "./" and ".%" are the broadcast operators. "@" is reserved: no      *)
+(* rule of the syntactic grammar spells it, and a source that holds    *)
+(* it is refused.                                                     *)
 Operator = "+" | "-" | "*" | "/" | "%"
          | "==" | "!=" | "<" | ">" | "<=" | ">="
-         | "&&" | "||" | "!"
+         | "&&" | "||" | "!" | "~"
          | "=" | "+=" | "-=" | "*=" | "/=" | "%="
          | "<<=" | ">>=" | "&=" | "|=" | "^="
          | "->" | "=>"
-         | "." | "::" | "@"
+         | "." | ".." | "..=" | "::" | "@"
          | "^" | "|" | "&" | "<<" | ">>"
-         | ".*" | "./" | ".+" | ".-"
+         | ".+" | ".-" | ".*" | "./" | ".%"
          ;
 
-(* Punctuation *)
+(* Punctuation. A lone "_" is the wildcard token. *)
 Punctuation = "(" | ")" | "{" | "}" | "[" | "]"
             | "," | ";" | ":"
-            | "#"
+            | "#" | "_"
             ;
 
-(* Comments *)
-Comment = LineComment | BlockComment ;
-LineComment = "//" , { ? any character except newline ? } , LineTerminator ;
-BlockComment = "/*" , { ? any character ? | BlockComment } , "*/" ;
+(* Comments. There is no block comment: `/*` is refused. A comment     *)
+(* that starts with "///" is a DocComment: it documents the item or    *)
+(* the field that follows it, and in any other place it is refused. A  *)
+(* comment that starts with "//!" is a ModuleDocComment: it stands      *)
+(* only before the first item of a file. The lexer reads "///" and     *)
+(* "//!" before "//".                                                   *)
+Comment = DocComment | ModuleDocComment | LineComment ;
+DocComment = "///" , CommentText ;
+ModuleDocComment = "//!" , CommentText ;
+LineComment = "//" , CommentText ;
+CommentText = { ? any character except LF, CR and a ForbiddenCodePoint ? } ;
 
-(* Whitespace *)
+(* Whitespace. A line terminator is LF or CR LF; a lone CR is refused. *)
 Whitespace = Space | Tab | LineTerminator ;
 Space = " " ;
 Tab = ? U+0009 ? ;
-LineTerminator = LineFeed | CarriageReturn | CarriageReturnLineFeed ;
+LineTerminator = LineFeed | CarriageReturnLineFeed ;
 LineFeed = ? U+000A ? ;
 CarriageReturn = ? U+000D ? ;
 CarriageReturnLineFeed = CarriageReturn , LineFeed ;

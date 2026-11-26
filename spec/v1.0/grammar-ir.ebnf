@@ -21,7 +21,7 @@ This grammar describes the textual encoding of Core IR modules as defined in ir.
 IRModule = { Instruction } , OutputDeclaration ;
 
 (* Instructions *)
-Instruction = ValueId , "=" , Operation , [ AttributeList ] , ":" , TensorType ;
+Instruction = ValueId , "=" , Operation , [ AttributeList ] , ":" , IrTensorType ;
 
 ValueId = "%" , Identifier | Integer ;
 
@@ -78,7 +78,7 @@ ShapeOperation = ReshapeOperation
                | SqueezeOperation
                ;
 
-ReshapeOperation = "Reshape" , "(" , Operand , "," , Shape , ")" ;
+ReshapeOperation = "Reshape" , "(" , Operand , "," , IrShape , ")" ;
 
 TransposeOperation = "Transpose" , "(" , Operand , "," , Permutation , ")" ;
 Permutation = "[" , [ Integers ] , "]" ;
@@ -126,29 +126,34 @@ ActivationOperation = ReluOperation ;
 
 ReluOperation = "Relu" , "(" , Operand , ")" ;
 
-(* Attributes *)
+(* Attributes. The names of this file that the syntactic grammar also *)
+(* uses for its own forms carry the prefix "Ir" here (IrAttribute,     *)
+(* IrTensorType, IrDType, IrShape, IrDimension): the two grammars do  *)
+(* not share a rule. An attribute value that is a list of integers is *)
+(* one IntList; the attribute name gives its meaning (axes, a shape,  *)
+(* a permutation). An integer value is a Number.                      *)
 AttributeList = "{" , [ Attributes ] , "}" ;
-Attributes = Attribute , { "," , Attribute } , [ "," ] ;
-Attribute = Identifier , ":" , AttributeValue ;
+Attributes = IrAttribute , { "," , IrAttribute } , [ "," ] ;
+IrAttribute = Identifier , ":" , AttributeValue ;
 
 AttributeValue = String
-               | Integer
                | Number
                | Boolean
-               | AxisList
-               | Shape
+               | IntList
                ;
+
+IntList = "[" , [ Integers ] , "]" ;
 
 Boolean = "true" | "false" ;
 
 (* Types *)
-TensorType = "Tensor" , "<" , DType , "," , Shape , ">" ;
+IrTensorType = "Tensor" , "<" , IrDType , "," , IrShape , ">" ;
 
-DType = "i32" | "i64" | "f32" | "f64" ;
+IrDType = "i32" | "i64" | "f32" | "f64" ;
 
-Shape = "[" , [ Dimensions ] , "]" ;
-Dimensions = Dimension , { "," , Dimension } , [ "," ] ;
-Dimension = Integer | "?" ;
+IrShape = "[" , [ Dimensions ] , "]" ;
+Dimensions = IrDimension , { "," , IrDimension } , [ "," ] ;
+IrDimension = Integer | "?" ;
 
 (* Output declaration *)
 OutputDeclaration = "outputs" , ":" , OutputList ;
