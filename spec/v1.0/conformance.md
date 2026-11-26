@@ -316,6 +316,9 @@ expected:
     location:
       line: 10
       column: 15
+    # OR, where no rule of the specification fixes the point of the diagnostic:
+    # location: "not fixed by the text"
+    count: 1  # The number of diagnostics: required for a lexical or a syntax code (E1xxx)
 ```
 
 Implementations MAY use alternative test formats internally but MUST be able to demonstrate

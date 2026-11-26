@@ -33,10 +33,13 @@ A row exists only where a normative sentence decides the result.
 No row's verdict depends on a form that is marked NOT IN CORE v1, an extension or an open form: an
 implementation MAY accept or refuse those.
 
-A reject row gives the position of the fault (`location`, line and column) where a rule of the specification fixes
-the point of its diagnostic: the token, the word or the character of the fault, the insertion point of a missing
-separator, the opening quote of a string. The format has no field for the count of errors; a file with a lexical or
-a syntax fault gets one diagnostic ([Diagnostics](../../../spec/v1.0/lexical.md#diagnostics)).
+**Position and count.** A reject row whose code is a lexical or a syntax code (E1xxx) carries the position of its
+diagnostic (`location`, line and column): the first token that cannot continue, or the point that the entry of the
+code fixes (the insertion point of a missing separator, the opening quote of a string, the first character that no
+form of a literal allows). It also carries the count of diagnostics (`count`)
+([Diagnostics](../../../spec/v1.0/lexical.md#diagnostics)). A reject row whose code is given at check time carries the
+position where a rule of the specification fixes the point; where no rule fixes it, the field says so:
+`location: "not fixed by the text"`. A lint of these two fields is later work, and older rows may lack `count`.
 
 ## Rows
 
