@@ -509,8 +509,8 @@ functions of the standard library are in [Memory model](./memory.md#raw-memory).
 
 The compiler MUST ship `std/vec.mind`, `std/string.mind`, `std/map.mind`, and
 `std/io.mind` as part of its own distribution (bundled into the binary, or
-discoverable on the canonical module path) and resolve `use std.<name>`
-imports to them automatically when the `std-surface` feature is enabled. As of
+discoverable on the canonical module path) and resolve `import std.<name>;`
+to them automatically when the `std-surface` feature is enabled. As of
 the reference implementation's v0.7.1 release `std-surface` is on by default,
 so this resolution is the default behaviour of a shipped `mindc`; building with
 `--no-default-features` opts back out to the low-level-only subset.
@@ -582,9 +582,9 @@ so this resolution is the default behaviour of a shipped `mindc`; building with
   Path-level file operations (open/close/stat/read-to-string/directory walk)
   live in the separate **`std.fs`** module, not `std.io`.
 
-### `use std.<name>` resolution
+### `import std.<name>` resolution
 
-When the `cross-module-imports` feature is enabled, a `use std.<name>`
+When the `cross-module-imports` feature is enabled, an `import std.<name>;`
 declaration MUST resolve through the project module table. The resolver
 rules:
 
@@ -593,7 +593,7 @@ rules:
    the module table.
 2. **Last-write-wins shadowing.** A user crate MAY define its own module at
    path `std.<name>`; the user definition MUST win (Rust-style shadowing).
-3. **Per-arg signature matching (Phase B).** When a `use`-imported function
+3. **Per-arg signature matching (Phase B).** When an imported function
    is invoked, the compiler matches arguments against the declared parameter
    types of the imported `fn`, with `i32 ↔ i64` widening permitted for
    integer literals.
