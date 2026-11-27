@@ -1218,7 +1218,9 @@ diagnostics remaining.", and the check of the result passes (probe `e4_b_fix_sem
 
 **Decision.** A glob import is refused for good: an import names one module (`import a.b;`), and a member of it is
 reached through the import qualifier (`b.f()`). `import a.*;` has no derivation. So a new export of a dependency
-changes no IR byte of the importer.
+changes no IR byte of the importer, and a gate of the reference compiler repository proves it: the IR bytes of an
+importer are equal before and after a new export of its dependency, and a mutant that changes one byte turns the gate
+red.
 ([Module level](../../spec/v1.0/language.md#module-level).)
 
 **Options.** (A) A glob import that brings every export of a module into scope. (B) No glob import.

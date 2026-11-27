@@ -11,7 +11,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed: the grammar decisions DN-22 to DN-89 (2026-11-26)
 
-- **Decisions.** [Decision Notes, Part 3](../design/rfcs/decision-notes-3.md) states 67 decisions of the specification
+- **Decisions.** [Decision Notes, Part 3](../design/rfcs/decision-notes-3.md) states 68 decisions of the specification
   owner on the grammar; each older note that a decision replaces keeps its text and names the new decision. The three
   grammar files are left-factored, and the chapters state the rules.
 - **Lexical structure.** `true`, `false`, `mut`, `loop`, `assert` and `pub` are keywords, and `where` and `export` are
@@ -34,8 +34,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `#[grad(g, p1, ..., pk)]`, and `diff T` is not in Core v1 ([Shapes](../spec/v1.0/shapes.md),
   [Source form: the gradient attribute](../spec/v1.0/autodiff.md#source-form-the-gradient-attribute)).
 - **Diagnostics.** The error catalog has one [code table](../spec/v1.0/errors.md#code-table); `E1001` is ill-formed
-  UTF-8 only, the syntax faults have the codes `E1101` to `E1108`, and a file with a lexical or a syntax fault gets
-  one diagnostic. `E1104` and `E1105` follow fixed rules and a fixed table. `E1006`, `E2405` and `E2406` are
+  UTF-8 only, the syntax faults have the codes `E1101` to `E1108`, and each top-level item gets at most one lexical
+  or syntax diagnostic. `E1104` and `E1105` follow fixed rules and a fixed table. `E1006`, `E2405` and `E2406` are
   withdrawn and keep their entries with their history.
 - **Status, rows and checks.** [Core v1 Forms](../spec/v1.0/core-v1-forms.md) has a row for each decided form with the
   measured verdict of the reference compiler v0.10.4, which does not enforce most of the decisions yet; a decided
@@ -45,15 +45,19 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   checks of the
   repository run the grammar lint, whose budget is the three named undecided choices, and assert that the reserved
   word list equals the `Keyword` rule and that the code table equals the entries of the error catalog.
-- **Amendments.** A dotted operator that expands no operand is `E3016`, and a plain operator on two shapes is `E3015`.
-  Each top-level item gets at most one syntax diagnostic. Each error code has one fix class (EXACT, TYPED, CHOICE,
-  NONE), and a row of the class EXACT or TYPED carries the text after the fix. The table of `E1105` is the table of
+- **Amendments.** A dotted operator on numbers or tensors that expands no operand is `E3016`, and a plain operator on
+  two different shapes that broadcast together is `E3015`; when more than one code fits an operator expression, one
+  order holds (`E2005`, `E2004`, `E3001`, `E3015`, `E3016`), so `t.-1` on a tuple is `E2005`. Each top-level item gets
+  at most one lexical or syntax diagnostic. Each error code has one fix class (EXACT, TYPED, CHOICE, NONE), and a row
+  of the class EXACT or TYPED carries the text after the fix; the one exception is `E1105`, whose class stands in each
+  row of its table. The table of `E1105` is the table of
   habit forms, with the status, the fix class and the measured verdict of each row. Outside a string `//` always
   starts a comment. DN-89: a glob import is refused for good. `const`, `enum` and the `extern` block are Core v1
   items; `use` is a repair row to `import`; `pub import` and type arguments at a call have no derivation. A float
   literal cast to a float type takes that type, and every other literal cast uses the default type of the literal.
-  `a[E::B]` is a slice. The pattern of a `let` and of a `for` is irrefutable (`E2310`), and a parameter is a name or
-  `_`. Two colons after a module name are `E2731`. A lint asserts that the attribute table equals the names of its
+  `a[E::B]` is a slice. The pattern of a `let` and of a `for` is irrefutable (`E2310`), a bare variant name as the
+  whole pattern of a `let` keeps `E2042`, and a parameter is a name or `_`. `?` is a reserved token with no
+  production, as `@` is. The library chapter writes the import form `import std.<name>;`. Two colons after a module name are `E2731`. A lint asserts that the attribute table equals the names of its
   accept rows.
 
 ### Changed: check-time index bounds, empty axes, integer arithmetic, loops and the defined stop (2026-11-25)

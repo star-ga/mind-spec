@@ -805,7 +805,8 @@ module block `m` is refused, and the fix is `m.f()`. `.` after a type MUST be re
 
 There is no glob import (DN-89): an import names one module, and its members are reached through the import qualifier.
 `import a.*;` has no derivation and MUST be refused with `E1101`. So a new export of a dependency changes no IR byte of
-the importer. A binding MUST NOT take the name of an import qualifier or of a module block in
+the importer. This property is a gate of the reference compiler repository: the IR bytes of an importer are equal
+before and after a new export of its dependency, and a mutant that changes one byte turns the gate red. A binding MUST NOT take the name of an import qualifier or of a module block in
 scope; such a binding MUST be refused with `E2730`.
 
 ### Visibility
