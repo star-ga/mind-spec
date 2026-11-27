@@ -25,6 +25,12 @@ SAMPLE = """# Errors
 """
 
 
+SAMPLE_BY_ROW = SAMPLE.replace(
+    "the entry keeps its history | NONE |\n",
+    "the entry keeps its history | NONE |\n| [`E1003`](#e1003-c) | C | in force | TYPED |\n| [`E1105`](#e1105-d) | D | in force | by row |\n",
+) + "\n### E1003: C\n- **Trigger**: c\n\n### E1105: D\n- **Trigger**: d\n"
+
+
 class TestErrorCodes(unittest.TestCase):
     def test_repository_is_clean(self) -> None:
         self.assertEqual(check(ROOT), [])
@@ -48,6 +54,26 @@ class TestErrorCodes(unittest.TestCase):
                          ["r.yaml: E1001 has the fix class EXACT, and the row has no fix block"])
         fixed = row + "  fix:\n    class: EXACT\n    source: |\n      fn main() { }\n"
         self.assertEqual(check_fix_rows({"r.yaml": fixed}, SAMPLE), [])
+
+    def test_typed_row_without_fix_block_is_found(self) -> None:
+        row = "expected:\n  status: error\n  error:\n    code: E1003\n"
+        self.assertEqual(check_fix_rows({"r.yaml": row}, SAMPLE_BY_ROW),
+                         ["r.yaml: E1003 has the fix class TYPED, and the row has no fix block"])
+        fixed = row + "  fix:\n    class: TYPED\n    source: |\n      fn main() { }\n"
+        self.assertEqual(check_fix_rows({"r.yaml": fixed}, SAMPLE_BY_ROW), [])
+
+    def test_by_row_is_allowed_for_the_habit_table_code_only(self) -> None:
+        self.assertEqual(check_table(SAMPLE_BY_ROW), [])  # positive control: E1105 may say "by row"
+        bad = SAMPLE_BY_ROW.replace("| in force | EXACT |", "| in force | by row |")
+        self.assertNotEqual(bad, SAMPLE_BY_ROW)
+        self.assertIn("errors.md: E1001 has the fix class 'by row', not one of EXACT, TYPED, CHOICE, NONE",
+                      check_table(bad))
+
+    def test_habit_row_fix_block_names_exact_or_typed(self) -> None:
+        row = "expected:\n  status: error\n  error:\n    code: E1105\n  fix:\n    class: {}\n    source: |\n      x\n"
+        self.assertEqual(check_fix_rows({"r.yaml": row.format("EXACT")}, SAMPLE_BY_ROW), [])
+        self.assertEqual(check_fix_rows({"r.yaml": row.format("NONE")}, SAMPLE_BY_ROW),
+                         ["r.yaml: the fix block says NONE; a fix block of E1105 is EXACT or TYPED"])
 
     def test_fix_block_with_another_class_is_found(self) -> None:
         row = "expected:\n  status: error\n  error:\n    code: E1001\n  fix:\n    class: TYPED\n    source: |\n      x\n"

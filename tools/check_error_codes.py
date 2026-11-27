@@ -4,9 +4,10 @@
 The table under "## Code table" and the entries "### Ennnn: Name" of the chapter MUST hold the same codes, each once,
 with the same names. Every code that a chapter of spec/v1.0, a decision note or a conformance row names MUST be a code
 of the table, or a code of the informative reference list whose "Catalog" column starts with "No entry" (a code
-that only the reference compiler gives). Each row of the table has one fix class (DN-88): EXACT, TYPED, CHOICE or NONE
-(E1105 has one class for each row of its own table). A reject row whose code has the class EXACT or TYPED MUST carry
-the text after the fix: a block `fix:` with `class:` (the class of the code) and `source: |`.
+that only the reference compiler gives). Each row of the table has one fix class (DN-88): EXACT, TYPED, CHOICE or NONE.
+The one exception is E1105, the table code of habit forms: its cell says "by row", and no other code may say it. A
+reject row whose code has the class EXACT or TYPED MUST carry the text after the fix: a block `fix:` with `class:` (the
+class of the code) and `source: |`. A fix block of an E1105 row MUST name EXACT or TYPED (the class of its table row).
 
 Usage: python3 -I tools/check_error_codes.py [ROOT]   (exit 0 when there is no finding)
 """
@@ -116,6 +117,8 @@ def check_fix_rows(rows: dict[str, str], errors_md: str) -> list[str]:
         fix = re.search(r"^  fix:\n    class: (\w+)\n    source: \|\n((?:      .*\n|\n)+)", text + "\n", re.M)
         if want in ("EXACT", "TYPED") and not fix:
             findings.append(f"{path}: {code.group(1)} has the fix class {want}, and the row has no fix block")
+        elif fix and want == "by row" and fix.group(1) not in ("EXACT", "TYPED"):
+            findings.append(f"{path}: the fix block says {fix.group(1)}; a fix block of {code.group(1)} is EXACT or TYPED")
         elif fix and want not in (fix.group(1), "by row"):
             findings.append(f"{path}: the fix block says {fix.group(1)}, and {code.group(1)} has the fix class {want}")
         elif fix and not fix.group(2).strip():
