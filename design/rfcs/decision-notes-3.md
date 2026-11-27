@@ -1199,7 +1199,8 @@ its rows; the error code table and the errors chapter.
 commas, precedence parentheses, module separators): the formatter with a migration mode. A decided form that needs a
 rewrite is enforced by the reference only in a release that ships this tool. The repair table is permanent: each
 diagnostic code has one fix class in the catalog, EXACT (one rewrite from the tokens alone), TYPED (one rewrite; the
-checker must know a type or the kind of a name), CHOICE (two candidates in a fixed order) or NONE. The record of a
+checker must know a type or the kind of a name), CHOICE (two candidates in a fixed order) or NONE. The one exception
+is the table code of habit forms, `E1105`: its class stands in each row of its table. The record of a
 diagnostic carries the edit (start, end, text). A conformance row of the class EXACT or TYPED carries the text after
 the fix, and the gate applies the edit and checks it. `mindc check --fix` is the named entry for agents.
 

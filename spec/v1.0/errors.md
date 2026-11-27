@@ -42,17 +42,18 @@ specification repository asserts that this table and the entries of this chapter
 names, and that a code that a chapter or a conformance row names is a code of this table.
 
 **Fix classes (DN-88).** The repair table is permanent: a refused form keeps its repair in every later edition. Each
-code has one fix class, in the column "Fix class":
+code has one fix class, in the column "Fix class", with the one exception below:
 
 - **EXACT**: one rewrite, found from the tokens alone.
 - **TYPED**: one rewrite, and the checker must know a type or the kind of a name to find it.
 - **CHOICE**: two candidates, in a fixed order.
 - **NONE**: no rewrite; the message names the form to write.
 
-The class holds for every trigger of the code. `E1105` has one class for each row of its table. The record of a
-diagnostic whose class is EXACT or TYPED carries the edit (the start and the end of the replaced text, and the new
-text); a CHOICE diagnostic carries its two edits in the fixed order. A conformance row whose code has the class EXACT
-or TYPED carries the text after the fix (`fix`), and the gate applies the edit and checks the result against it. The
+The class holds for every trigger of the code. The one exception is the table code of habit forms, `E1105`: its class
+stands in each row of [its table](#e1105-form-that-mind-writes-another-way), and its cell in the column says "by row".
+The record of a diagnostic whose class is EXACT or TYPED carries the edit (the start and the end of the replaced text,
+and the new text); a CHOICE diagnostic carries its two edits in the fixed order. A conformance row whose class is EXACT
+or TYPED (the class of its code, or for `E1105` the class of its table row) carries the text after the fix (`fix`), and the gate applies the edit and checks the result against it. The
 check command with the fix mode is the entry for tools and agents: release 0.10.4 has it as `mindc check --fix`, and on
 a `let` with no `;` it inserts the `;` (probe `e4_b_fix_semi`).
 
