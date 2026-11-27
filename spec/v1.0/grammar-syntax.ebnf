@@ -348,10 +348,13 @@ ArithmeticTail = MultiplicativeOperator , CastExpression , { MultiplicativeOpera
 
 (* A plain operator on two tensors needs one dtype and one shape; a    *)
 (* scalar operand extends. A dotted operator broadcasts by the rules   *)
-(* of shapes.md; a dotted operator that expands no operand (one shape, *)
-(* a scalar operand, no tensor) is E3016, and a plain operator on two  *)
-(* shapes is E3015. The dotted operators have the precedence of their  *)
-(* plain operators. The matrix product is `matmul(a, b)`.              *)
+(* of shapes.md; a dotted operator on numbers or tensors that expands  *)
+(* no operand (one shape, a scalar operand, two scalars) is E3016, and *)
+(* a plain operator on two different shapes that broadcast together    *)
+(* is E3015. When more codes fit, the order of errors.md holds (E2005, *)
+(* E2004, E3001, E3015, E3016). The dotted operators have the          *)
+(* precedence of their plain operators. The matrix product is          *)
+(* `matmul(a, b)`.                                                     *)
 AdditiveOperator = "+" | "-" | ".+" | ".-" ;
 
 MultiplicativeExpression = CastExpression , { MultiplicativeOperator , CastExpression } ;
