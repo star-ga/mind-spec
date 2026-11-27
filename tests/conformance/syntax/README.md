@@ -42,7 +42,9 @@ form of a literal allows). It also carries the count of diagnostics (`count`)
 position where a rule of the specification fixes the point; where no rule fixes it, the field says so:
 `location: "not fixed by the text"`. A lint of these two fields is later work, and older rows may lack `count`. A
 reject row whose fix class is EXACT or TYPED (the class of its code, or for `E1105` the class of its table row)
-carries the text after the fix (`fix`); a check of the specification repository asserts it ([Code table](../../../spec/v1.0/errors.md#code-table)).
+carries the text after the fix (`fix`). A check of the specification repository asserts it for a code with one class
+([Code table](../../../spec/v1.0/errors.md#code-table)); for a row of `E1105` the class stands in the table of that
+code, and a check that reads the table is later work.
 
 ## Rows
 
