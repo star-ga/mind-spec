@@ -1,10 +1,10 @@
-# MIND Conformance Test: t.-1 is the dotted operator .- with no tensor operand and is refused
+# MIND Conformance Test: t.-1 is the dotted operator .- on a tuple operand and is refused with E2005
 # Specification reference: spec/v1.0/language.md#tensor-operators-and-broadcasting
 # Decision: DN-51 (design/rfcs/decision-notes-3.md)
 # Category: syntax
 # Profile: cpu
 
-description: "t.-1 is the dotted operator .- with no tensor operand and is refused"
+description: "t.-1 is the dotted operator .- on a tuple operand and is refused with E2005: the operand kind comes first"
 category: syntax
 profile: cpu
 
@@ -18,3 +18,6 @@ input:
 
 expected:
   status: error
+  error:
+    code: E2005
+    location: "not fixed by the text"

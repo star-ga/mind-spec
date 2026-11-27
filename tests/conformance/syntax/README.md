@@ -310,7 +310,7 @@ not a row.
 | DN-50 | [`dn50_minus_beside_shift_reject`](dn50_minus_beside_shift_reject.yaml) | reject, `E1106` | as above |
 | DN-50 | [`dn50_shift_chain_reject`](dn50_shift_chain_reject.yaml) | reject, `E1106` | as above: shifts do not chain |
 | DN-51 | [`dn51_tuple_element_minus_accept`](dn51_tuple_element_minus_accept.yaml) | accept, returns 0 | [Tensor operators and broadcasting](../../../spec/v1.0/language.md#tensor-operators-and-broadcasting) (DN-81 replaces DN-51) |
-| DN-51 | [`dn51_dotted_minus_on_tuple_reject`](dn51_dotted_minus_on_tuple_reject.yaml) | reject | as above |
+| DN-51 | [`dn51_dotted_minus_on_tuple_reject`](dn51_dotted_minus_on_tuple_reject.yaml) | reject, `E2005` | as above, and [Order of codes in an operator expression](../../../spec/v1.0/errors.md#order-of-codes-in-an-operator-expression): the operand kind comes first |
 | DN-52 | [`dn52_tuple_index_pair_accept`](../lexical/dn52_tuple_index_pair_accept.yaml) | accept, returns 2 | [Tokens](../../../spec/v1.0/lexical.md#tokens) |
 | DN-52 | [`dn52_tuple_index_float_reject`](../lexical/dn52_tuple_index_float_reject.yaml) | reject, `E1005` | as above: after the token `.` a digit run is an integer token |
 | DN-52 | [`dn52_spaced_operator_reject`](../lexical/dn52_spaced_operator_reject.yaml) | reject, `E1101` at 3:12 | as above |

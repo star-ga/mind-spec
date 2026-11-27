@@ -1053,9 +1053,12 @@ pattern.
 
 **Decision.** A plain operator on two tensors needs one dtype and one shape; a scalar operand extends. The dotted
 operators `.+`, `.-`, `.*`, `./` and `.%` broadcast by the rules of [Shapes](../../spec/v1.0/shapes.md). A dotted
-operator MUST be refused when no operand is expanded (two tensors of one shape, or a scalar operand), and the fix is
-the plain operator: `E3016`. A plain operator on two tensors of different shapes is `E3015`, and the fix is the dotted
-operator. The dotted operators have the precedence of their plain operators. The
+operator on two numbers or tensors MUST be refused when no operand is expanded (two tensors of one shape, a scalar
+operand, or two scalars), and the fix is the plain operator: `E3016`. A plain operator on two tensors of different
+shapes that broadcast together is `E3015`, and the fix is the dotted operator. Two shapes that do not broadcast
+together are `E3001` in both forms, and when more than one code fits, the order of the catalog holds: the operand kind
+(`E2005`), the dtype (`E2004`), then the shape codes
+([Order of codes in an operator expression](../../spec/v1.0/errors.md#order-of-codes-in-an-operator-expression)). The dotted operators have the precedence of their plain operators. The
 matrix product stays `matmul(a, b)`; `@` stays reserved with no production (DN-39).
 
 **Options.** (C) Remove the dotted operators; plain operators broadcast. (D) Plain operators need one shape; dotted
@@ -1064,8 +1067,9 @@ operators broadcast.
 **Reason.** Option D: every expansion of a shape is visible in the text and one search finds it; a silent expansion
 of `[3, 1] * [1, 4]` cannot happen.
 
-**Refused forms.** A plain operator on two tensors of different shapes (`E3015`); `a .+ b` on two tensors of one
-shape, `t .* 2.0`, `a .+ b` on two scalars and `t.-1` on a tuple (`E3016`).
+**Refused forms.** A plain operator on two tensors of different shapes that broadcast together (`E3015`); `a .+ b` on
+two tensors of one shape, `t .* 2.0` and `a .+ b` on two scalars (`E3016`); `t.-1` on a tuple (`E2005`: the operand
+kind comes first).
 
 **Reference.** `mindc check` accepts `return a .+ b;` on two `i64` operands (probe `a6_dot_plus_scalar`) and `a.*b` on
 integers, which the native build refuses with `lane.source.tensor` (probe `p49_mun_dotstar_ints`). It accepts

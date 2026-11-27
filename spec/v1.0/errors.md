@@ -159,6 +159,22 @@ a `let` with no `;` it inserts the `;` (probe `e4_b_fix_semi`).
 | [`E6008`](#e6008-device-error) | Device error | in force | NONE |
 | [`E6009`](#e6009-compiler-materialization-refusal) | Compiler materialization refusal | in force | NONE |
 | [`E6010`](#e6010-invalid-manifest-export) | Invalid manifest export | in force | NONE |
+## Order of codes in an operator expression
+
+When more than one of these codes fits one arithmetic operator expression, plain (`+`, `-`, `*`, `/`, `%`) or dotted
+(`.+`, `.-`, `.*`, `./`, `.%`), the first code of this order holds:
+
+1. [`E2005`](#e2005-invalid-dtype-for-operation), the operand kind: an operand of the type `bool`, `unit`, a tuple
+   type or a struct type;
+2. [`E2004`](#e2004-dtype-mismatch-in-binary-operation), the element type: two operands of different dtypes;
+3. [`E3001`](#e3001-broadcasting-failure), two shapes that do not broadcast together, in both operator forms;
+4. [`E3015`](#e3015-plain-operator-on-two-shapes), a plain operator on two different shapes that broadcast together;
+   its fix is the dotted operator;
+5. [`E3016`](#e3016-dotted-operator-with-no-expansion), a dotted operator where no operand is expanded; its fix is the
+   plain operator.
+
+So `E3015` never fires on shapes for which its own fix would be refused, and `t.-1` on a tuple is `E2005`.
+
 ## E1xxx: Lexical and syntax errors
 
 Lexical errors (E10xx) occur during tokenization, before syntactic or semantic analysis. Syntax errors (E11xx) occur
@@ -403,8 +419,9 @@ Type errors occur during type checking and type inference.
   constructor `tensor(e)` without a dtype argument when the type of `e` gives no dtype
   ([Tensor operations](./language.md#tensor-operations))
 - **Required context**: operation name, actual dtype, supported dtypes
-- **Also**: an operand of `!`, `+`, `-`, `*`, `/`, `%` of a type that the operator does not take (`!5`, `true + 1`,
-  `~true`); a dtype of a tensor type outside the set of the profile (`Tensor<bool, [2]>`,
+- **Also**: an operand of `!`, `+`, `-`, `*`, `/`, `%` or of a dotted operator of a type that the operator does not
+  take (`!5`, `true + 1`, `~true`, `t.-1` on a tuple; [Order of codes in an operator
+  expression](#order-of-codes-in-an-operator-expression)); a dtype of a tensor type outside the set of the profile (`Tensor<bool, [2]>`,
   [The tensor type](./shapes.md#the-tensor-type)); an index or a slice bound that is not of an integer type
   (`a[1.5]`, hint `as i64`)
 - **Example**: `E2005: Log requires floating-point dtype, found i32 at line 20, column 10`
@@ -814,8 +831,9 @@ exclusivity analysis; those guarantees remain future work.
 Shape errors occur during shape inference, broadcasting, or shape validation.
 
 ### E3001: Broadcasting failure
-- **Trigger**: Shapes incompatible for broadcasting: the operands of a dotted operator (`.+`, `.-`, `.*`, `./`, `.%`)
-  or the batch dimensions of `matmul` ([Elementwise binary](./shapes.md#elementwise-binary))
+- **Trigger**: Shapes incompatible for broadcasting: the operands of an arithmetic operator, plain (`+`, `-`, `*`,
+  `/`, `%`) or dotted (`.+`, `.-`, `.*`, `./`, `.%`), or the batch dimensions of `matmul`
+  ([Elementwise binary](./shapes.md#elementwise-binary))
 - **Required context**: operand shapes, failing dimension index, extents at failing dimension
 - **Example**: `E3001: Broadcasting failed at dimension 1: shape [3, 4] incompatible with [3, 5]`
 
@@ -897,15 +915,19 @@ Shape errors occur during shape inference, broadcasting, or shape validation.
 - **Example**: `E3014: 3 index items for a tensor of rank 2 at line 1, column 45`
 
 ### E3015: Plain operator on two shapes
-- **Trigger**: a plain operator `+`, `-`, `*`, `/` or `%` on two tensors of different shapes
-  ([Tensor operators and broadcasting](./language.md#tensor-operators-and-broadcasting), DN-81)
+- **Trigger**: a plain operator `+`, `-`, `*`, `/` or `%` on two tensors of different shapes that broadcast together
+  ([Tensor operators and broadcasting](./language.md#tensor-operators-and-broadcasting), DN-81). Two shapes that do
+  not broadcast together are [`E3001`](#e3001-broadcasting-failure)
+  ([Order of codes in an operator expression](#order-of-codes-in-an-operator-expression))
 - **Required context**: the operator and its location, the two shapes, and the edit to the dotted operator
-- **Example**: ``E3015: `*` on the shapes [3, 1] and [1, 4] does not broadcast; write `col .* row` at line 2, column 16``
+- **Example**: ``E3015: the plain `*` needs one shape, and [3, 1] and [1, 4] differ; write `col .* row` at line 2, column 16``
 
 ### E3016: Dotted operator with no expansion
-- **Trigger**: a dotted operator `.+`, `.-`, `.*`, `./` or `.%` that expands no operand: its operands are two tensors
-  of one shape, or one operand is a scalar, or no operand is a tensor
-  ([Tensor operators and broadcasting](./language.md#tensor-operators-and-broadcasting), DN-81)
+- **Trigger**: a dotted operator `.+`, `.-`, `.*`, `./` or `.%` whose two operands are numbers or tensors and that
+  expands no operand: its operands are two tensors of one shape, or one operand is a scalar, or both are scalars
+  ([Tensor operators and broadcasting](./language.md#tensor-operators-and-broadcasting), DN-81). An operand of
+  another type is [`E2005`](#e2005-invalid-dtype-for-operation)
+  ([Order of codes in an operator expression](#order-of-codes-in-an-operator-expression))
 - **Required context**: the operator and its location, and the edit to the plain operator
 - **Example**: ``E3016: `.+` expands no operand here; write `a + b` at line 2, column 14``
 

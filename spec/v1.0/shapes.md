@@ -292,8 +292,8 @@ A binary elementwise operation has two source forms, and the form says whether t
 
 - **Plain operators** `+`, `-`, `*`, `/` and `%` on two tensors need one dtype and one shape; the output has that
   shape. A scalar operand extends to the shape of the tensor operand. A plain operator on two tensors of different
-  shapes MUST be refused at check time with [`E3015`](./errors.md#e3015-plain-operator-on-two-shapes), and the fix
-  is the dotted operator.
+  shapes that broadcast together MUST be refused at check time with
+  [`E3015`](./errors.md#e3015-plain-operator-on-two-shapes), and the fix is the dotted operator.
 - **Dotted operators** `.+`, `.-`, `.*`, `./` and `.%` broadcast. The operands share a dtype, and the output shape is
   the broadcasted shape of the two inputs:
 
@@ -302,13 +302,15 @@ A binary elementwise operation has two source forms, and the form says whether t
   ```
 
   If broadcasting fails (as defined above), the source MUST be refused with
-  [`E3001`](./errors.md#e3001-broadcasting-failure). A dotted operator that expands no operand (two tensors of one
-  shape, a scalar operand, or no tensor operand) MUST be refused at check time with
+  [`E3001`](./errors.md#e3001-broadcasting-failure). A dotted operator on two numbers or tensors that expands no
+  operand (two tensors of one shape, a scalar operand, or two scalars) MUST be refused at check time with
   [`E3016`](./errors.md#e3016-dotted-operator-with-no-expansion), and the fix is the plain operator. A dotted operator
   has the precedence of its plain operator.
 
 Two operands of different dtypes MUST be refused with
-[`E2004`](./errors.md#e2004-dtype-mismatch-in-binary-operation) in both forms. So every expansion of a shape is
+[`E2004`](./errors.md#e2004-dtype-mismatch-in-binary-operation) in both forms, and two shapes that do not broadcast
+together with `E3001` in both forms. When more than one code fits one operator expression, the
+[order of the catalog](./errors.md#order-of-codes-in-an-operator-expression) holds. So every expansion of a shape is
 written in the source, and one search for the dotted operators finds every one.
 
 ```mind

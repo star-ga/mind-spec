@@ -1,10 +1,10 @@
-# MIND Conformance Test: the operands of a dotted operator share a dtype
+# MIND Conformance Test: the operands of an arithmetic operator share a dtype
 # Specification reference: spec/v1.0/language.md#tensor-operations
 # Decision: DN-81 (design/rfcs/decision-notes-3.md)
 # Category: syntax
 # Profile: cpu
 
-description: "a .* b with an f64 tensor and an i64 tensor is refused with E2004"
+description: "a * b with an f64 tensor and an i64 tensor is refused with E2004"
 category: syntax
 profile: cpu
 
