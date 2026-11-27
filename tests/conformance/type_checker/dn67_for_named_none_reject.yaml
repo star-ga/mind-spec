@@ -1,0 +1,23 @@
+# MIND Conformance Test: for None in xs
+# Specification reference: spec/v1.0/language.md#patterns-and-match
+# Decision: DN-67 (design/rfcs/decision-notes-3.md)
+# Category: type_checker
+# Profile: cpu
+
+description: "for None in xs is refused with E2042: the name rule comes before the pattern rule of a for"
+category: type_checker
+profile: cpu
+
+input:
+  source: |
+    fn main() -> i64 {
+        let xs: [Option<i64>; 2] = [None, None];
+        for None in xs {
+        }
+        return 0;
+    }
+
+expected:
+  status: error
+  error:
+    code: E2042

@@ -409,6 +409,7 @@ not a row, and so is the byte property of DN-89 (a new export of a dependency ch
 | DN-66 | [`dn66_leading_bar_reject`](dn66_leading_bar_reject.yaml) | reject, `E1101` at 4:9 | as above: a pattern has no leading `\|` |
 | DN-67 | [`dn67_predeclared_variants_accept`](../type_checker/dn67_predeclared_variants_accept.yaml) | accept, returns 1 | [Patterns and match](../../../spec/v1.0/language.md#patterns-and-match) |
 | DN-67 | [`dn67_binding_named_none_reject`](../type_checker/dn67_binding_named_none_reject.yaml) | reject, `E2042` | as above |
+| DN-67 | [`dn67_for_named_none_reject`](../type_checker/dn67_for_named_none_reject.yaml) | reject, `E2042` | as above: the name rule comes before the pattern rule of a `for` |
 | DN-67 | [`dn67_qualified_variant_reject`](../type_checker/dn67_qualified_variant_reject.yaml) | reject, `E2002` | as above |
 | DN-68 | [`dn68_name_that_starts_with_where_accept`](../lexical/dn68_name_that_starts_with_where_accept.yaml) | accept, returns 2 | [Keywords](../../../spec/v1.0/lexical.md#keywords): `where` is reserved |
 | DN-68 | [`dn68_where_as_name_reject`](../lexical/dn68_where_as_name_reject.yaml) | reject, `E1007` at 2:9 | as above |

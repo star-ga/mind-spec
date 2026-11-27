@@ -666,7 +666,9 @@ parameter of a function is a name or `_` (`Parameter`); `_` may name several par
 of a `let` and of a `for` MUST be irrefutable: a name, `_`, or a tuple or a record pattern whose parts are all
 irrefutable. A refutable pattern there, such as `let Some(x) = o;` or `for 0 in xs { }`, MUST be refused at check time
 with [`E2310`](./errors.md#e2310-refutable-pattern-in-a-binding), and the help text names `match`. The one exception
-is a bare variant name as the whole pattern of a `let`, such as `let None = o;`: the name rule below refuses it with
+is a bare predeclared variant name (`Some`, `None`, `Ok` or `Err`, with no argument list) as the whole pattern or as
+a part of the pattern of a `let` or of a `for`, such as `let None = o;`, `for None in xs { }` or `let (None, x) = p;`:
+the name rule below comes first and refuses it with
 [`E2042`](./errors.md#e2042-predeclared-name-taken-by-a-declaration-or-a-binding). The forms are:
 
 - **A name** (`IdentifierPattern`): a bare identifier always binds a new name, in every scope. The predeclared

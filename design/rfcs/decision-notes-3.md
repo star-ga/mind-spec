@@ -801,8 +801,9 @@ it refuses the dot form `m.f()` with `E2002`, "unknown identifier `m`" (probe `e
 same types (`E2313`). The guard runs at most once per `match`. `let`, `for` and arms use one `Pattern`; a parameter is a
 name or `_`. So nested tuple patterns are valid at every pattern site; `mut` stays one per `let` (DN-8). The pattern of a `let` and of a `for` MUST be
 irrefutable (a name, `_`, or a tuple or record pattern of irrefutable parts); a refutable pattern there is `E2310`, and
-the help text names `match`. A bare variant name as the whole pattern of a `let` (`let None = 1;`) keeps `E2042`, the
-code of the name rule (DN-67).
+the help text names `match`. A bare predeclared variant name with no argument list, as the whole pattern or as a part of
+the pattern of a `let` or of a `for` (`let None = 1;`, `for None in xs { }`), keeps `E2042`: the name rule comes first
+(DN-67).
 
 **Options.** (A) Patterns only in `match`. (B) One pattern grammar for every binding site.
 

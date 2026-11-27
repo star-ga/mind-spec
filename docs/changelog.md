@@ -55,8 +55,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   starts a comment. DN-89: a glob import is refused for good. `const`, `enum` and the `extern` block are Core v1
   items; `use` is a repair row to `import`; `pub import` and type arguments at a call have no derivation. A float
   literal cast to a float type takes that type, and every other literal cast uses the default type of the literal.
-  `a[E::B]` is a slice. The pattern of a `let` and of a `for` is irrefutable (`E2310`), a bare variant name as the
-  whole pattern of a `let` keeps `E2042`, and a parameter is a name or `_`. `?` is a reserved token with no
+  `a[E::B]` is a slice. The pattern of a `let` and of a `for` is irrefutable (`E2310`), a bare predeclared variant
+  name in the pattern of a `let` or of a `for` keeps `E2042`, and a parameter is a name or `_`. `?` is a reserved token with no
   production, as `@` is. The library chapter writes the import form `import std.<name>;`. Two colons after a module name are `E2731`. A lint asserts that the attribute table equals the names of its
   accept rows.
 
