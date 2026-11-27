@@ -160,16 +160,16 @@ BooleanLiteral = "true" | "false" ;
 (* "Tokens").                                                         *)
 (* ".." and "..=" stand only in the header of a for loop, and "..="   *)
 (* also in a range pattern. The dotted operators ".+", ".-", ".*",    *)
-(* "./" and ".%" are the broadcast operators. "@" is reserved: no      *)
-(* rule of the syntactic grammar spells it, and a source that holds    *)
-(* it is refused.                                                     *)
+(* "./" and ".%" are the broadcast operators. "@" and "?" are         *)
+(* reserved tokens: no rule of the syntactic grammar spells them, and *)
+(* a source that holds one is refused.                                *)
 Operator = "+" | "-" | "*" | "/" | "%"
          | "==" | "!=" | "<" | ">" | "<=" | ">="
          | "&&" | "||" | "!" | "~"
          | "=" | "+=" | "-=" | "*=" | "/=" | "%="
          | "<<=" | ">>=" | "&=" | "|=" | "^="
          | "->" | "=>"
-         | "." | ".." | "..=" | "::" | "@"
+         | "." | ".." | "..=" | "::" | "@" | "?"
          | "^" | "|" | "&" | "<<" | ">>"
          | ".+" | ".-" | ".*" | "./" | ".%"
          ;

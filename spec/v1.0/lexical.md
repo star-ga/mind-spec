@@ -67,8 +67,11 @@ reads as the operator `<<=`. Every compound assignment operator is written with 
   not a field access, and `t.-1` holds `.-`. They are the broadcast operators, with the precedence of `+`, `-`,
   `*`, `/` and `%` ([Operator precedence](./language.md#operator-precedence-and-associativity)).
 - **Complement.** `~` is one token, the bitwise complement of an integer; `!` takes a `bool`.
-- **Reserved token `@`.** `@` is a token, and no rule of the syntactic grammar spells it: a source that holds it
-  MUST be refused. The matrix product is written `matmul(a, b)`, and an attribute `#[name]`.
+- **Reserved tokens `@` and `?`.** `@` and `?` are tokens, and no rule of the syntactic grammar spells them: a source
+  that holds one MUST be refused. The matrix product is written `matmul(a, b)`, and an attribute `#[name]`. The
+  postfix question mark and `?` as a dimension are rows of
+  [`E1105`](./errors.md#e1105-form-that-mind-writes-another-way), and `?` is never
+  [`E1002`](./errors.md#e1002-invalid-character-in-identifier), the code of a character that starts no token.
 
 **Joined angles.** The lexer produces each `<` and `>` as a token of its own and marks it *joined* when the next
 character follows it with no space. Where an operator stands, a `>` joined to a `>` is the operator `>>`, a `>` joined
