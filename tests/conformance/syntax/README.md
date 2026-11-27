@@ -208,7 +208,7 @@ in the folder of its category: the tensor forms in [`shapes`](../shapes), the gr
 diagnostic. DN-74 changes only names of the IR grammar and has no row; DN-25 has no refused form; DN-69 has no reject
 row, because the nesting limit of an implementation has no upper bound. The accept row of DN-84 names the tools that
 its project file lists (`input.project_tools`); the byte rule of DN-84 is a gate of the reference compiler repository,
-not a row.
+not a row, and so is the byte property of DN-89 (a new export of a dependency changes no IR byte of the importer).
 
 | Decision | Row | Result | Rule |
 |----------|-----|--------|------|

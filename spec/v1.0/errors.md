@@ -1139,8 +1139,9 @@ pub struct CompilerError {
 }
 ```
 
-The record of a diagnostic whose code has the fix class EXACT or TYPED also carries its edit: the start and the end
-of the replaced text and the new text ([Code table](#code-table)). A CHOICE diagnostic carries its two edits in the
+The record of a diagnostic whose fix class is EXACT or TYPED (the class of its code, or for `E1105` the class of its
+table row) also carries its edit: the start and the end of the replaced text and the new text
+([Code table](#code-table)). A CHOICE diagnostic carries its two edits in the
 fixed order, and a NONE diagnostic carries none.
 
 ## Error recovery
