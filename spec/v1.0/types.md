@@ -347,8 +347,8 @@ For a manifest project, the defining source module owns each enum, struct, and t
 the current module or to exactly one imported module, and a type referenced from another module MUST be `pub` in that
 owner ([Visibility](./language.md#visibility)). A qualified type is an extension: the Core v1 grammar does not derive
 it (a type position takes one identifier). An enum variant path `E::A` is derived (`NamePath` and `VariantPattern`),
-and enums are among the v1.1 candidate additions of the grammar. The rules of this section hold for an implementation
-that provides these forms. A qualified type is written with its import qualifier, the last segment
+and `enum` is a Core v1 item ([Module level](./language.md#module-level), DN-56). The rules of this section for a
+qualified type hold for an implementation that provides that extension. A qualified type is written with its import qualifier, the last segment
 of the import path (`defs.Color` after `import nested.defs;`), as a qualified reference is
 ([Module-qualified references](./language.md#module-qualified-references)). The rule applies recursively in reference,
 fixed-array, tuple, generic-argument, raw-pointer, and external-function type positions. Same-named types in different
