@@ -592,7 +592,7 @@ rules:
    pure-MIND modules to the user's parsed module list before constructing
    the module table.
 2. **Last-write-wins shadowing.** A user crate MAY define its own module at
-   path `std.<name>`; the user definition MUST win (Rust-style shadowing).
+   path `std.<name>`; the user definition MUST win.
 3. **Per-arg signature matching (Phase B).** When an imported function
    is invoked, the compiler matches arguments against the declared parameter
    types of the imported `fn`, with `i32 ↔ i64` widening permitted for
