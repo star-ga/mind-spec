@@ -21,3 +21,6 @@ expected:
   status: error
   error:
     code: E2042
+    location:
+      line: 3
+      column: 9
