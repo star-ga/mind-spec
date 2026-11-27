@@ -665,7 +665,9 @@ and in a `match` arm; every site uses the one `Pattern` rule, so a nested tuple 
 parameter of a function is a name or `_` (`Parameter`); `_` may name several parameters of one function. The pattern
 of a `let` and of a `for` MUST be irrefutable: a name, `_`, or a tuple or a record pattern whose parts are all
 irrefutable. A refutable pattern there, such as `let Some(x) = o;` or `for 0 in xs { }`, MUST be refused at check time
-with [`E2310`](./errors.md#e2310-refutable-pattern-in-a-binding), and the help text names `match`. The forms are:
+with [`E2310`](./errors.md#e2310-refutable-pattern-in-a-binding), and the help text names `match`. The one exception
+is a bare variant name as the whole pattern of a `let`, such as `let None = o;`: the name rule below refuses it with
+[`E2042`](./errors.md#e2042-predeclared-name-taken-by-a-declaration-or-a-binding). The forms are:
 
 - **A name** (`IdentifierPattern`): a bare identifier always binds a new name, in every scope. The predeclared
   variant names `Some`, `None`, `Ok` and `Err` are never bound: a bare `None` is the variant `None`.

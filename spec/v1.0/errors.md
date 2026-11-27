@@ -604,8 +604,9 @@ exclusivity analysis; those guarantees remain future work.
 
 - **Trigger**: the pattern of a `let` or of a `for` is refutable: it is not a name, `_`, or a tuple or a record
   pattern whose parts are all irrefutable ([Patterns and match](./language.md#patterns-and-match)), as in
-  `let Some(x) = o;` and `for 0 in xs { }`. A predeclared variant name taken by a binding (`let None = 1;`) is
-  [`E2042`](#e2042-predeclared-name-taken-by-a-declaration-or-a-binding)
+  `let Some(x) = o;` and `for 0 in xs { }`. The one exception is a bare variant name as the whole pattern of a
+  `let` (`let None = 1;`): it is [`E2042`](#e2042-predeclared-name-taken-by-a-declaration-or-a-binding), the code of
+  the name rule
 - **Required context**: the pattern and its location, and help text that names `match`
 - **History**: the draft [RFC 0025](../../design/rfcs/0025-patterns.md) gives this code to the same fault (rule 3)
 - **Example**: ``E2310: the pattern of a `let` must match every value; to test one case, write `match` at line 3, column 9``
